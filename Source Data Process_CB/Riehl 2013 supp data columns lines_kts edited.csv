@@ -1,0 +1,216 @@
+Index,SpeciesName,Dispersal,Frequency,Data,O.F,Kin,Social_breeding_system_when_cooperative,Category
+3,Rhea_americana,C,majority,R,F,NK,cooperative polyandry by unrelated males; male-only parental care with subordinate male helper (kinship unknown),3
+4,Apteryx_australis,D,not_specified,B,F,K, pair nesting with (presumed) related male helpers,1
+6,Tetraophasis_szechenyii,D,not_specified,R,F,K, pair nesting with (presumed) related male helpers,1
+8,Anseranas_semipalmata,C,majority,G,F,NK,cooperative polygyny (joint nesting) by unrelated females,3
+10,Semnornis_ramphastinus,D,not_specified,R,F,K, pair nesting with related male and female helpers,1
+12,Melanerpes_formicovorus_pop_1,D,not_specified,R,F,K,cooperative polygynandry (joint nesting) by related breeders with related male and female helpers,4
+13,Melanerpes_formicovorus_pop_2,"D,C",25-50%,R,F,M, breeders with related male and female helpers,4
+18,Picoides_borealis,D,not_specified,G,F,K, pair nesting with related male helpers,1
+20,Bucorvus_abyssinicus,D,not_specified,B,F,K, pair nesting with (presumed) related male helpers,1
+22,Bucorvus_leadbeateri,D,not_specified,B,F,K, pair nesting with (presumed) related male helpers,1
+23,Anorrhinus_austeni,D,not_specified,B,F,K, pair nesting with (presumed) related male and female helpers,1
+24,Anorrhinus_tickelli,D,not_specified,B,F,K, pair nesting with (presumed) related male and female helpers,1
+25,Anorrhinus_galeritus,D,not_specified,B,F,K, pair nesting with (presumed) related male and female helpers,1
+28,Upupa_epops,I,majority,G,F,NK,pair nesting with unrelated male helpers; possible cooperative polyandry,2
+32,Phoeniculus_purpureus,"D,I",25-30%,R,F,M,pair nesting with related and unrelated male and female helpers,2
+33,Phoeniculus_damarensis,"D,I",25-30%,B,F,M,pair nesting with related and unrelated male and female helpers,2
+36,Merops_bulocki,D,not_specified,B,F,K, pair nesting with (presumed) related male helpers ; widespread conspecific brood parasitism,1
+38,Merops_bullockoides,D,not_specified,R,F,K, pair nesting with related male and female helpers; widespread conspecific brood parasitism,1
+39,Merops_ornatus,D,not_specified,B,F,K,pair nesting with (presumed) related male helpers,1
+40,Merops_apiaster,D,not_specified,G,F,K,pair nesting with related male helpers,1
+41,Merops_orientalis,D,not_specified,B,F,K,pair nesting with (presumed) related helper,1
+44,Ceryle_rudis,"D,I",50%,R,F,M,pair nesting with related and unrelated male helpers,2
+47,Dacelo_novaeguinea,D,not_specified,G,F,K,pair nesting with related male and female helpers,1
+48,Dacelo_leachii,D,not_specified,R,F,K,pair nesting with related male helpers,1
+50,Todiramphus_cinnamominus,D,not_specified,R,F,K,pair nesting with related male and female helpers,1
+51,Tanysiptera_sylvia,I,majority,R,F,NK, pair nesting with unrelated male helpers,2
+52,Todus_mexicanus,I,majority,R,F,NK, pair nesting with unrelated male helpers,2
+54,Colius_striatus,"D,I",frequent,R,O,M, cooperative polygyny (joint nesting) by unrelated females and related and unrelated male helpers,4
+55,Urocolius_indicus,"D,I",majority,R,F,NK, cooperative polygyny (joint nesting) by unrelated females,3
+61,Guira_guira,"D,C,I",frequent,G,O,M, cooperative polygynandry and joint nesting by related and unrelated adults; related male helpers,4
+63,Crotophaga_major,"D,C,I",majority,G,O,NK, joint nesting by unrelated pairs; related male helpers (uncommon); conspecific brood parasitism,3
+64,Crotophaga_ani,"D,C,I",majority,R,F,NK,joint nesting by unrelated pairs; related male helpers (uncommon),3
+66,Crotophaga_sulcirostris,"D,C,I",majority,R,F,NK,joint nesting by unrelated pairs; related male helpers (uncommon),3
+68,Opisthocomus_hoatzin,"D,I",15-20%,G,F,M, pair nesting with related male helpers ; joint nesting by unrelated pairs,4
+71,Eclectus_roratus,C,majority,G,F,NK,cooperative polyandry by unrelated males,3
+73,Guarouba_guarouba,D,not_specified,G,F,K, pair nesting with related helpers,1
+74,Caracopsis_vasa,I,majority,G,O,NK,cooperative polyandry by unrelated males,3
+75,Pyrrhura_orcesi,D,not_specified,G,F,K, pair nesting with related male and female helpers,1
+76,Myiopsitta_monachus,D,not_specified,B,F,K, pair nesting with (presumed) related male and female helpers,1
+77,Cyanoramphus_saisseti,I,majority,G,O,NK,cooperative polyandry by unrelated males,3
+80,Collocalia_terraereginae,D,not_specified,R,F,K, pair nesting with related male and female helpers,1
+81,Chaetura_pelagica,"D,I",30-60%,R,F,M, pair nesting with related and unrelated male and female helpers,2
+83,Corythaeola_cristata,D,not_specified,B,F,K, pair nesting with (presumed) related helpers,1
+84,Corythaixoides_concolor,D,not_specified,B,F,K, pair nesting with (presumed) related helpers,1
+86,Corythaixoides_leucogaster,D,not_specified,B,F,K, pair nesting with (presumed) related helpers,1
+88,Psophia_crepitans,"D,C,I",majority,B,O,M,  cooperative polyandry by unrelated males; related and unrelated male and female helpers,4
+94,Psophia_leucoptera,"D,C,I",majority,R,O,M, cooperative polyandry by unrelated males; related and unrelated male and female helpers,4
+95,Gallirallus_sylvestris,D,not_specified,B,F,K,pair nesting with related helpers,1
+96,Amaurornis_flavirostra,D,not_specified,B,F,K,pair nesting with related helpers,1
+97,Porzana_atra,D,not_specified,B,F,K,pair nesting with related helpers,1
+100,Porphyrio_porphyrio_pop1,D,not_specified,G,O,K,cooperative polygynandry by related males and females,4
+102,Porphyrio_porphyrio_pop2,"C,I",majority,G,F,NK, cooperative polygynandry by unrelated males and females,3
+103,Porphyrio_mantelli,D,not_specified,B,F,K,pair nesting with related helpers,1
+105,Porphyrio_martinicus,D,not_specified,R,F,K, pair nesting and cooperative polygyny by related females with related helpers,4
+106,Gallinula_nesiotis,D,not_specified,B,F,K,pair nesting with related helpers,1
+108,Gallinula_chloropus,D,not_specified,R,F,M, pair nesting and cooperative polygyny by related females with related helpers; conspecific brood parasitism,4
+110,Gallinula_tenebrosa,"D,C,I",majority,G,O,M, cooperative polygynandry by unrelated males and females with related helpers,4
+112,Gallinula_mortierii,"D,I",25-30%,R,F,M," cooperative polygynandry by related females and related and unrelated males, with related helpers",4
+113,Fulica_cristata,D,not_specified,B,F,K,pair nesting with related helpers (offspring from earlier brood of year),1
+115,Fulica_atra,D,not_specified,B,F,K,pair nesting with related helpers (offspring from earlier brood of year),1
+116,Fulica_ardesiaca,D,not_specified,B,F,K,pair nesting with related helpers (offspring from earlier brood of year),1
+117,Fulica_gigantea,D,not_specified,B,F,K,pair nesting with related helpers (offspring from earlier brood of year),1
+119,Rhynochetos_jubatus,D,not_specified,B,F,K,pair nesting with (presumed) related helpers,1
+123,Monias_benschi,"D,I",frequent,G,F,M, cooperative polygynandry with related and unrelated male and female helpers,4
+130,Catharacta_lonnbergi,C,majority,R,F,NK,cooperative polyandry by unrelated males,3
+132,Vanellus_chilensis,I,majority,G,F,NK, cooperative polyandry by unrelated males,3
+134,Haematopus_ostralegus,C,majority,G,F,NK,cooperative polygyny by unrelated females,3
+136,Phoebastria_immutabilis,C,majority,G,F,NK,cooperative polygyny by unrelated females,3
+138,Ictinia_mississippiensis,D,not_specified,B,F,K,pair nesting with (presumed) related male and female helpers,1
+139,Haliaeetus_vociferoides,"C,I",majority,G,F,NK,cooperative polyandry by unrelated males,3
+140,Gypaetus_barbatus,"C,I",majority,B,F,NK,cooperative polyandry by (presumed) unrelated males,3
+141,Melierax_canorus,"C,I",majority,R,F,NK,cooperative polyandry by (presumed) unrelated males,3
+143,Parabuteo_unicinctus,"D,C,I",0-68%,R,F,M, cooperative polyandry by unrelated males with related and unrelated male and female helpers,4
+145,Buteo_galapagoensis,C,majority,G,F,NK,cooperative polyandry by unrelated males,3
+148,Falco_columbarius,I,majority,R,F,NK,pair nesting with unrelated male helper,2
+151,Acanthisitta_chloris,"D,I",majority,R,F,M,pair nesting with related and unrelated male helpers,2
+153,Phacellodomus_rufifrons,D,not_specified,R,F,K,pair nesting with related male helpers,1
+154,Anumbius_annumbi,D,not_specified,R,F,K,pair nesting with related helpers,1
+155,Coryphistera_alaudina,D,not_specified,B,F,K,pair nesting with (presumed) related helpers,1
+156,Acrobatornis_fonsecai,D,not_specified,B,F,K,pair nesting with (presumed) related helpers,1
+157,Pseudoseisura_lophotes,D,not_specified,B,F,K,pair nesting with related helpers,1
+159,Climacteris_affinis,D,not_specified,R,F,K,pair nesting with related male helpers,1
+160,Climacteris_erythrops,D,not_specified,R,F,K,pair nesting with related male helpers,1
+162,Climacteris_picumnus,D,not_specified,R,F,K,pair nesting with related male helpers,1
+163,Climacteris_melanura,D,not_specified,B,F,K,pair nesting with (presumed) related helpers,1
+164,Climacteris_rufa,D,not_specified,R,F,K,pair nesting with related male and female helpers,1
+166,Malurus_alboscapulatus,D,not_specified,B,F,K,pair nesting with (presumed) related helpers,1
+168,Malurus_melanocephalus,D,frequent,G,F,M, pair nesting with related and unrelated male helpers; polyandrous mating with extra-group males,2
+170,Malurus_leucopterus,D,frequent,R,F,M,pair nesting with related and unrelated male helpers; polyandrous mating with extra-group males,2
+172,Malurus_cyaneus,D,39%,G,F,M,pair nesting with related and unrelated male helpers; polyandrous mating with extra-group males,2
+174,Malurus_splendens,D,frequent,G,F,M,mating with extra-group males,2
+175,Malurus_lamberti,D,not_specified,B,F,K,pair nesting with (presumed) related helpers,1
+176,Malurus_amabilis,D,not_specified,B,F,K,pair nesting with (presumed) related helpers,1
+178,Malurus_elegans,D,frequent,G,F,M,pair nesting with related and unrelated male and female helpers; polyandrous mating with extra-group males,2
+179,Malurus_pulcherrimus,D,not_specified,R,F,K,pair nesting with (presumed) related male and female helpers,1
+180,Malurus_coronatus,D,not_specified,R,F,K,pair nesting with (presumed) related male and female helpers,1
+181,Malurus_cyanocephalus,D,not_specified,B,F,K,pair nesting with (presumed) related helpers,1
+182,Stipiturus_malachurus,D,not_specified,R,F,K,pair nesting with (presumed) related male helpers,1
+185,Lichenostomus_melanops,D,not_specified,R,F,K,pair nesting with related male and female helpers,1
+187,Manorina_melanophrys,"D,I",50%,G,O,M,pair nesting with related and unrelated male and female helpers,2
+189,Manorina_melanocephala,D,not_specified,B,O,K,pair nesting with related male helpers,1
+190,Notiomystis_cincta,"C,I",majority,R,F,NK, cooperative polyandry by unrelated males; polygynandrous mating,3
+193,Sericornis_frontalis,"D,I",20%,G,F,M,pair nesting with related and unrelated male helpers; cooperative polyandry,2
+199,Acanthiza_reguloides,"D,I",frequent,R,F,M, pair nesting with related and unrelated male helpers,2
+200,Acanthiza_chrysorrhoa,D,not_specified,R,F,K, pair nesting with related helpers,1
+201,Acanthiza_lineata,"D,I",frequent,R,F,M, pair nesting with related and unrelated male helpers,2
+204,Pomatostomus_temporalis,"D,I",not_specified,G,F,M, pair nesting with related and unrelated male and female helpers,2
+206,Pomatostomus_superciliosus,D,not_specified,R,F,K, pair nesting with related male and female helpers; plural nesting,1
+208,Pomatostomus_ruficeps,"D,I",25-32%,G,O,M, pair nesting with related and unrelated male helpers,2
+211,Daphoenositta_chrysoptera,"D,I",frequent,R,F,M, pair nesting with related male and unrelated female helpers,2
+213,Pteropodocys_maxima,D,not_specified,B,F,K, pair nesting with (presumed) related helpers,1
+215,Cracticus_torquatus,D,not_specified,B,F,K, pair nesting with (presumed) related helper,1
+217,Cracticus_nigrogularis,"D,I",frequent,G,O,M,pair nesting with related and unrelated male and female helpers; polyandrous mating; conspecific brood parasitism,2
+219,Gymnorhina_tibicen,"D,I",frequent,G,O,M, pair nesting with related and unrelated male and female helpers; polygynandrous mating with extra-group males; plural nesting,2
+220,Artamus_cyanopterus,D,not_specified,B,F,K, pair nesting with (presumed) related helpers,1
+221,Artamus_cinereus,D,not_specified,R,F,K, pair nesting with related helpers,1
+223,Prionops_plumatus,D,not_specified,R,O,K, pair nesting with related (sibling) male and female helpers,1
+225,Schetba_rufa,"D,I",frequent,G,F,M, pair nesting with related and unrelated male helpers,2
+226,Falculea_palliata,C,majority,R,F,NK,cooperative polyandry by unrelated males,3
+227,Oriolia_bernieri,C,majority,B,F,NK,cooperative polyandry by unrelated males,3
+242,Corcorax_melanorhamphos,"D,C,I",frequent,G,O,M,pair nesting with related and unrelated male and female helpers; cooperative polyandry by related and unrelated males,2
+244,Struthidea_cinerea,D,not_specified,G,O,K,pair nesting with related male and female helpers,1
+246,Lanius_excubitoroides,D,not_specified,R,F,K,pair nesting with related male and female helpers,1
+247,Corvinella_corvina,"D,I",frequent,R,O,M,pair nesting with related and unrelated male and female helpers,2
+248,Corvinella_melanoleuca,D,not_specified,B,F,K,pair nesting with (presumed) related helpers,1
+250,Urocissa_caerulea,D,not_specified,B,F,K,pair nesting with (presumed) related helpers,1
+252,Gymnorhinus_cyanocephalus,D,not_specified,R,F,K,pair nesting with related male helpers,1
+253,Aphelocoma_californica,D,not_specified,R,F,K,pair nesting with (presumed) related male and female helpers,1
+255,Aphelocoma_coerulescens,D,not_specified,G,F,K,pair nesting with related male and female helpers,1
+257,Aphelocoma_ultramarina,"D,I",50%,G,O,M,pair nesting with related and unrelated male and female helpers; polyandrous mating,2
+259,Cyanocorax_beecheii,D,not_specified,R,F,K,pair nesting with related male and female helpers,1
+261,Cyanocorax_yncas,D,not_specified,B,F,K,pair nesting with (presumed) related helpers,1
+263,Psilorhinus_morio,"D,I",40%,G,O,M,cooperative polyandry with related female and unrelated male helpers,4
+265,Calocitta_formosa,"D,I",frequent,G,O,M,pair nesting with related and unrelated female helpers; polyandrous mating and occasional joint-nesting; conspecific brood parasitism,2
+266,Perisoreus_canadensis,"D,I",25%,R,F,M,pair nesting with related and unrelated helpers,2
+268,Cyanopica_cyana,"D,I",25-75%,R,F,M,pair nesting with related and unrelated male and female helpers,2
+269,Corvus_caurinus,D,not_specified,R,F,K,pair nesting with related helpers,1
+270,Corvus_brachyrhynchos,D,not_specified,G,F,K,pair nesting with related male helpers,1
+272,Corvus_corone,"D,I",50%,G,F,M,cooperative polyandry by unrelated males; related male helpers,4
+283,Mohoua_albicilla,D,not_specified,R,F,K,pair nesting with related male helpers,1
+285,Chaetops_frenatus,D,not_specified,B,F,K,pair nesting with related male and female helpers,1
+287,Melanodryas_cucullata,D,not_specified,B,F,K,pair nesting with (presumed) related male helpers,1
+288,Melanodryas_vittata,D,not_specified,B,F,K,pair nesting with (presumed) related helpers,1
+289,Eopsaltria_australis,D,not_specified,R,F,K,pair nesting with related male helpers,1
+290,Eopsaltria_georgiana,D,not_specified,R,F,K,pair nesting with related male helpers,1
+293,Pseudopodoces_humilis,"D,C,I",frequent,G,F,M,cooperative polyandry with related and unrelated males,4
+294,Parus_niger,D,frequent,R,F,M,pair nesting with related and unrelated male helpers,2
+295,Parus_fasciiventer,D,not_specified,R,F,K,pair nesting with related helpers,1
+296,Anthoscopus_minutus,D,not_specified,B,F,K,pair nesting with (presumed) related helpers,1
+299,Aegithalos_caudatus,D,not_specified,G,F,K,pair nesting with related male and female helpers,1
+301,Psaltriparus_minimus,"D,I",frequent,R,F,M,pair nesting with unrelated male and female helpers,2
+303,Alophoixus_pallidus,D,not_specified,R,F,K,pair nesting with related male helpers,1
+304,Phyllastrephus_cabanisi,D,not_specified,G,F,K,pair nesting with related male helpers,1
+306,Cisticola_chinianus,"D,C",43%,R,F,M,cooperative territory defense by related or unrelated pairs of males,4
+309,Yuhina_brunneiceps,"C,I",majority,G,O,NK, joint nesting by unrelated pairs,3
+311,Turdoides_caudatus,"D,I",33%,R,F,M,pair nesting with related male and unrelated female helpers; cooperative polygyny by unrelated females,4
+319,Turdoides_squamiceps,"D,I",20-35%,G,O,M, pair nesting with related helpers; cooperative polyandry by related and unrelated males,4
+320,Turdoides_fulvus,D,not_specified,B,F,K, pair nesting with (presumed) related helpers,1
+321,Turdoides_striatus,D,not_specified,R,F,K, pair nesting with related helpers,1
+323,Turdoides_bicolor,D,not_specified,G,O,K, pair nesting with related male and female helpers,1
+324,Turdoides_gymnogenys,D,not_specified,B,F,K, pair nesting with (presumed) related helpers,1
+325,Babax_waddelli,D,not_specified,B,F,K, pair nesting with (presumed) related helpers,1
+328,Acrocephalus_melanopogon,C,majority,G,F,NK,cooperative polyandry by unrelated males,3
+330,Acrocephalus_vaughani_taiti,C,majority,G,F,NK,cooperative polyandry by unrelated males,3
+331,Acrocephalus_baeticatus,C,majority,G,F,NK,cooperative polyandry by unrelated males,3
+333,Acrocephalus_sechellensis,"D,C,I",frequent,G,F,M, pair nesting and cooperative polygyny with related and unrelated male and female helpers; polygynandrous mating,4
+335,Erythrocercus_mccallii,D,not_specified,B,F,K, pair nesting with related helpers,1
+336,Donacobius_atricapillus,D,not_specified,R,F,K, pair nesting with related helpers,1
+339,Campylorhynchus_griseus,D,not_specified,G,F,K, pair nesting with related male and female helpers,1
+341,Campylorhynchus_nuchalis,"D,C,I",7.5-30%,G,F,M,pair nesting with related male and female helpers; cooperative polyandry by unrelated males,4
+343,Campylorhynchus_fasciatus,D,not_specified,R,F,K, pair nesting with related male and female helpers,1
+345,Campylorhynchus_yucatanicus,D,not_specified,R,F,K, pair nesting with related male helpers,1
+347,Campyloryhnchus_zonatus,"D,I",frequent,G,F,M,pair nesting with related and unrelated male and female helpers; conspecific brood parasitism,2
+350,Sitta_pygmaea,D,not_specified,R,F,K, pair nesting with related male helpers,1
+357,Sitta_pusilla,"D,I",38%,G,F,M,pair nesting with related and unrelated male helpers,2
+359,Lamprotornis_nitens,D,not_specified,B,F,K,pair nesting with related helpers,1
+361,Lamprotornis_superbus,"D,I",30-70%,G,O,M, pair nesting with related and unrelated male and female helpers; cooperative polyandry by unrelated males,2
+362,Lamprotornis_pulcher,"D,I",frequent,R,O,M,pair nesting with related and unrelated male and female helpers,2
+363,Spreo_bicolor,"D,I",frequent,R,O,M,pair nesting with related and unrelated male and female helpers,2
+364,Cosmopsarus_regius,D,not_specified,B,O,K,pair nesting with (presumed) related helpers,1
+365,Cosmopsarus_unicolor,D,not_specified,B,F,K,pair nesting with (presumed) related helpers,1
+366,Buphagus_africanus,D,not_specified,B,F,K,pair nesting with (presumed) related helpers,1
+369,Mimus_gilvus,D,not_specified,G,F,M, pair nesting or cooperative polygynandry by unrelated adults with related male and female helpers,4
+371,Nesomimus_parvulus,"D,I",27-42%,R,F,M, pair nesting or cooperative polygynandry with related and unrelated male and female helpers; plural nesting,4
+372,Nesomimus_trifasciatus,D,not_specified,B,F,K,pair nesting with (presumed) related male helpers,1
+374,Nesomimus_macdonaldi,"D,C,I",majority,G,F,M, cooperative polygynandry with related and unrelated male and female helpers; plural nesting; conspecific brood parasitism,4
+376,Ramphocinclus_brachyurus,D,not_specified,G,F,K,pair nesting with related male and female helpers,1
+379,Erythropygia_coryphaeus,D,not_specified,G,F,K,pair nesting with related male helpers,1
+380,Oenanthe_lugubris,D,not_specified,B,F,K,pair nesting with related male helpers,1
+382,Myrmecocichla_formicivora,D,not_specified,G,F,K,pair nesting with related male helpers,1
+384,Catharus_bicknelli,C,majority,G,F,NK, cooperative polyandry by unrelated males; polygynandrous mating,3
+386,Sialia_mexicana,D,not_specified,G,F,K,pair nesting with related male helpers,1
+388,Nectarinia_dussumieri,D,not_specified,B,F,K,pair nesting with (presumed) related helpers,1
+395,Prunella_collaris,C,majority,G,F,NK,cooperative polyandry by unrelated males,3
+396,Prunella_fulvescens,C,majority,R,F,NK,cooperative polyandry by unrelated males,3
+397,Prunella_modularis,C,majority,G,F,NK,cooperative polyandry by unrelated males,3
+398,Prunella_rubida,C,majority,B,F,NK,cooperative polyandry by (presumed) unrelated males,3
+400,Bubalornis_niger,C,90%,G,O,NK,cooperative polyandry by unrelated males; polygynandrous mating,3
+402,Plocepasser_mahali,D,not_specified,R,F,K,pair nesting with related male and female helpers,1
+404,Pseudonigrita_arnaudi,D,not_specified,R,F,K,pair nesting with related male helpers,1
+406,Philetairus_socius,D,not_specified,G,F,K,pair nesting with related male and female helpers,1
+408,Loxioides_bailleui,D,not_specified,G,F,K,pair nesting with related male helper,1
+409,Paroreomyza_montana,D,not_specified,G,F,K,pair nesting with related male and female helpers,1
+412,Calcarius_pictus,C,majority,G,O,NK,cooperative polyandry by unrelated males; polygynandrous mating,3
+414,Ammodramus_savannarum,I,majority,R,F,NK,pair nesting with unrelated helpers,2
+416,Neothraupis_fasciata,D,not_specified,B,F,K,pair nesting with (presumed) related male and female helpers,1
+417,Cypsnagra_hirundinacea,D,not_specified,B,F,K,pair nesting with (presumed) related helpers,1
+418,Tangara_cyanoventris,D,not_specified,B,F,K,pair nesting with (presumed) related helpers,1
+419,Tangara_larvata,D,not_specified,B,F,K,pair nesting with (presumed) related helpers,1
+420,Geospiza_scandens,I,majority,R,F,NK,pair nesting with unrelated male helpers,2
+422,Caryothraustes_poliogaster,D,not_specified,B,F,K,pair nesting with (presumed) related helpers,1
+425,Hypopyrrhus_pyrohypogaster,D,not_specified,R,O,K,pair nesting with related male and female helpers,1
+426,Pseudoleistes_virescens,D,not_specified,B,F,K,pair nesting with (presumed) related helpers,1
+427,Pseudoleistes_guirahuro,D,not_specified,B,F,K,pair nesting with (presumed) related helpers,1
+429,Agelaoides_badius,"D,I",25%,R,F,M, pair nesting with related and unrelated male and female helpers; cooperative polyandry and joint nesting rare,2

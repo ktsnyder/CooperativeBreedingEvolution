@@ -1,6 +1,6 @@
 #Coded by Kate Snyder
 #Started: 7/7/2020
-#Last Edited: 7/7/2020
+#Last Edited: 7/15/2021 - just to change name of pdf file
 
 #setwd("~/Documents/Creanza Lab/Comparative Evolution/Cooperative Breeding")  #you want to set your working directory to whichever folder has the pdf in it
 
@@ -8,7 +8,7 @@
 library(pdftools)
 library(tidyverse)
 
-cbtext0 <- pdf_text("Prevalence of different modes of parental care in birds.pdf") %>% readr::read_lines() #read the pdf. %>% is part of the tidyverse I think, and basically "pipes" something into something else, i.e. a function. This line is thus basically the same as "cbtext0 <- readr::read_lines(pdf_text("Prevalence of...")).
+cbtext0 <- pdf_text("Cockburn supp table.pdf") %>% readr::read_lines() #read the pdf. %>% is part of the tidyverse I think, and basically "pipes" something into something else, i.e. a function. This line is thus basically the same as "cbtext0 <- readr::read_lines(pdf_text("Prevalence of...")).
 
 
 #all of the functions that begin with "str_" are part of the "stringr" package (part of the tidyverse), which is for working with character objects using RegEx (Regular Expression) format
