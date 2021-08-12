@@ -1,6 +1,6 @@
 #Coded by Kate Snyder
 #Started: 7/7/2020
-#Last Edited: 7/15/2021 - just to change name of pdf file
+#Last Edited: 8/12/2021 - make "Brood parasite" "Brood_parasite"
 
 #setwd("~/Documents/Creanza Lab/Comparative Evolution/Cooperative Breeding")  #you want to set your working directory to whichever folder has the pdf in it
 
@@ -8,7 +8,7 @@
 library(pdftools)
 library(tidyverse)
 
-cbtext0 <- pdf_text("Cockburn supp table.pdf") %>% readr::read_lines() #read the pdf. %>% is part of the tidyverse I think, and basically "pipes" something into something else, i.e. a function. This line is thus basically the same as "cbtext0 <- readr::read_lines(pdf_text("Prevalence of...")).
+cbtext0 <- pdf_text("Unaltered from publication/Cockburn supp table.pdf") %>% readr::read_lines() #read the pdf. %>% is part of the tidyverse I think, and basically "pipes" something into something else, i.e. a function. This line is thus basically the same as "cbtext0 <- readr::read_lines(pdf_text("Prevalence of...")).
 
 
 #all of the functions that begin with "str_" are part of the "stringr" package (part of the tidyverse), which is for working with character objects using RegEx (Regular Expression) format
@@ -21,6 +21,7 @@ cbtext2 <- cbtext1[keeplines] #subsets to just those lines
 ###getting rid of spaces where possible - need to do because I eventually split based on spaces
 cbtext2 <- str_replace_all(cbtext2, "Female only", "Female_only")
 cbtext2 <- str_replace_all(cbtext2, "Male only",  "Male_only")
+cbtext2 <- str_replace_all(cbtext2, "Brood parasite", "Brood_parasite")
 
 cbtext <- cbtext2[11:length(cbtext2)] # take out the first 10 rows (not data)
 cbtext <- str_replace(cbtext, "1. Species", "Genus Species")
@@ -55,5 +56,7 @@ rownames(completedmat) <- NULL
 
 completeddf <- as.data.frame(completedmat)
 completeddf$Source[which(completeddf$Source == "--")] <- NA #replace missing sources with NA
+
+completeddf <- completeddf[1:9638,] # remove reference lines
 
 write.csv(completeddf, file = "Cockburn2006_data.csv") # ta-da!
