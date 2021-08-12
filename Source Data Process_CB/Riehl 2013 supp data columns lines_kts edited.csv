@@ -4,8 +4,7 @@ Index,SpeciesName,Dispersal,Frequency,Data,O.F,Kin,Social_breeding_system_when_c
 6,Tetraophasis_szechenyii,D,not_specified,R,F,K, pair nesting with (presumed) related male helpers,1
 8,Anseranas_semipalmata,C,majority,G,F,NK,cooperative polygyny (joint nesting) by unrelated females,3
 10,Semnornis_ramphastinus,D,not_specified,R,F,K, pair nesting with related male and female helpers,1
-12,Melanerpes_formicovorus_pop_1,D,not_specified,R,F,K,cooperative polygynandry (joint nesting) by related breeders with related male and female helpers,4
-13,Melanerpes_formicovorus_pop_2,"D,C",25-50%,R,F,M, breeders with related male and female helpers,4
+12,Melanerpes_formicovorus,"D; D,C",not_specified; 25-50%,R,F,K; M,cooperative polygynandry (joint nesting) by related breeders with related male and female helpers;  breeders with related male and female helpers,4
 18,Picoides_borealis,D,not_specified,G,F,K, pair nesting with related male helpers,1
 20,Bucorvus_abyssinicus,D,not_specified,B,F,K, pair nesting with (presumed) related male helpers,1
 22,Bucorvus_leadbeateri,D,not_specified,B,F,K, pair nesting with (presumed) related male helpers,1
@@ -49,8 +48,7 @@ Index,SpeciesName,Dispersal,Frequency,Data,O.F,Kin,Social_breeding_system_when_c
 95,Gallirallus_sylvestris,D,not_specified,B,F,K,pair nesting with related helpers,1
 96,Amaurornis_flavirostra,D,not_specified,B,F,K,pair nesting with related helpers,1
 97,Porzana_atra,D,not_specified,B,F,K,pair nesting with related helpers,1
-100,Porphyrio_porphyrio_pop1,D,not_specified,G,O,K,cooperative polygynandry by related males and females,4
-102,Porphyrio_porphyrio_pop2,"C,I",majority,G,F,NK, cooperative polygynandry by unrelated males and females,3
+100,Porphyrio_porphyrio,"D; C,I",not_specified; majority,G,O; F,K; NK,cooperative polygynandry by related males and females; cooperative polygynandry by unrelated males and females,4; 3
 103,Porphyrio_mantelli,D,not_specified,B,F,K,pair nesting with related helpers,1
 105,Porphyrio_martinicus,D,not_specified,R,F,K, pair nesting and cooperative polygyny by related females with related helpers,4
 106,Gallinula_nesiotis,D,not_specified,B,F,K,pair nesting with related helpers,1
@@ -162,7 +160,7 @@ Index,SpeciesName,Dispersal,Frequency,Data,O.F,Kin,Social_breeding_system_when_c
 324,Turdoides_gymnogenys,D,not_specified,B,F,K, pair nesting with (presumed) related helpers,1
 325,Babax_waddelli,D,not_specified,B,F,K, pair nesting with (presumed) related helpers,1
 328,Acrocephalus_melanopogon,C,majority,G,F,NK,cooperative polyandry by unrelated males,3
-330,Acrocephalus_vaughani_taiti,C,majority,G,F,NK,cooperative polyandry by unrelated males,3
+330,Acrocephalus_vaughani,C,majority,G,F,NK,cooperative polyandry by unrelated males,3
 331,Acrocephalus_baeticatus,C,majority,G,F,NK,cooperative polyandry by unrelated males,3
 333,Acrocephalus_sechellensis,"D,C,I",frequent,G,F,M, pair nesting and cooperative polygyny with related and unrelated male and female helpers; polygynandrous mating,4
 335,Erythrocercus_mccallii,D,not_specified,B,F,K, pair nesting with related helpers,1
