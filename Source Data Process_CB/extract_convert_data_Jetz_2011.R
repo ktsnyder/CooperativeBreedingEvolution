@@ -1,6 +1,6 @@
 #Coded by Kate Snyder
 #Started: 7/7/2020
-#Last Edited: 7/6/2021
+#Last Edited: 8/12/2021 - combine Clade names that contain " & " (e.g. Titryidae & Tyrannidae)
 
 #setwd("~/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/Unaltered from publication")  #you want to set your working directory to whichever folder has the pdf in it
 
@@ -8,7 +8,7 @@
 library(pdftools)
 library(tidyverse)
 
-cbtext0 <- pdf_text("Jetz Supplemental Data.pdf") %>% readr::read_lines() #read the pdf. %>% is part of the tidyverse I think, and basically "pipes" something into something else, i.e. a function. This line is thus basically the same as "cbtext0 <- readr::read_lines(pdf_text("Prevalence of...")).
+cbtext0 <- pdf_text("Unaltered from publication/Jetz Supplemental Data.pdf") %>% readr::read_lines() #read the pdf. %>% is part of the tidyverse I think, and basically "pipes" something into something else, i.e. a function. This line is thus basically the same as "cbtext0 <- readr::read_lines(pdf_text("Prevalence of...")).
 
 
 #all of the functions that begin with "str_" are part of the "stringr" package (part of the tidyverse), which is for working with character objects using RegEx (Regular Expression) format
@@ -22,7 +22,7 @@ removelines2 <- str_detect(cbtext2, "Source") # logical vector of each page head
 cbtext3 <- cbtext2[!removelines2]
 
 ###getting rid of spaces where possible - need to do because I eventually split based on spaces
-# cbtext2 <- str_replace_all(cbtext2, "Female only", "Female_only")
+cbtext3 <- str_replace_all(cbtext3, " & ", "")
 # cbtext2 <- str_replace_all(cbtext2, "Male only",  "Male_only")
 
 cbtext <- cbtext3[12:length(cbtext3)] # take out the first 11 rows (not data)
