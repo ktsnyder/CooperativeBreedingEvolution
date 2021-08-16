@@ -144,3 +144,25 @@ GriesserDF$scientific.name[which(!GriesserDF$scientific.name %in% AllBirdtreeSpe
 #dfWithBTCol <- cbind(BirdtreeSpecies, df)
 #write.csv(dfWithBTCol, file = "Cockburn2006_data_BirdTreeNames.csv")
 #speciesNotInBirdtree <- df$SpeciesScientific[which(is.na(BirdtreeSpecies))]
+#
+
+
+df <- read.csv("RubensteinLovette_data_BirdTreeNames.csv")
+duplicatemisspellings <- df$BirdtreeSpecies[duplicated(df$BirdtreeSpecies)]
+
+df <- read.csv("Riehl_data_BirdTreeNames.csv")
+duplicatemisspellings <- df$BirdtreeSpecies[duplicated(df$BirdtreeSpecies)]
+
+df <- read.csv("Jetz_data_BirdTreeNames.csv")
+duplicatemisspellings <- df$BirdtreeSpecies[duplicated(df$BirdtreeSpecies)]
+unique(duplicatemisspellings)
+# a bunch of dups
+
+df <- read.csv("Cockburn2006_data_BirdTreeNames.csv")
+duplicatemisspellings <- df$BirdtreeSpecies[duplicated(df$BirdtreeSpecies)]
+# several dups
+
+df <- read.csv("Biagolini_data_BirdTreeNames.csv")
+duplicatemisspellings <- df$BirdtreeSpecies[duplicated(df$BirdtreeSpecies)]
+# just Delichon_urbicum and a couple NAs
+
