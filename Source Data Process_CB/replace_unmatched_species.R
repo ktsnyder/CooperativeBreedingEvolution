@@ -1,8 +1,9 @@
 # Replace misspelled species in each source / standardize species names across sources
 # Coded by Kate T Snyder
 # Started 8/11/2021
-# Last updated 8/12/2021 - updated misspelled species reference doc; ran all segments to give output files
+#  Updated 8/12/2021 - updated misspelled species reference doc; ran all segments to give output files
 #   Next: Check individual source files for duplicated species (or write code to reduce to just one entry per species)
+# Last Update: 8/17/2021 - added post-check to ensure all duplicates successfully removed for those sources that had 2+ entries for some species
 
 setwd("~/Desktop/CooperativeBreedingEvolution/Source Data Process_CB")
 
@@ -58,6 +59,7 @@ for (i in 1:length(df[,1])) {
 }
 dfWithBTCol <- cbind(BirdtreeSpecies, df)
 write.csv(dfWithBTCol, file = "Cockburn2006_data_BirdTreeNames.csv")
+
 
 ### Downing
 DowningDF <- read.csv("Downing supp table2_kts edited.csv")
@@ -157,12 +159,26 @@ df <- read.csv("Jetz_data_BirdTreeNames.csv")
 duplicatemisspellings <- df$BirdtreeSpecies[duplicated(df$BirdtreeSpecies)]
 unique(duplicatemisspellings)
 # a bunch of dups
+df <- read.csv("Jetz_data_BirdTreeNames_nodups.csv")
+df$BirdtreeSpecies[duplicated(df$BirdtreeSpecies)]
+sum(df$BirdtreeSpecies %in% AllBirdtreeSpecies)
+length(df$BirdtreeSpecies)
+
 
 df <- read.csv("Cockburn2006_data_BirdTreeNames.csv")
 duplicatemisspellings <- df$BirdtreeSpecies[duplicated(df$BirdtreeSpecies)]
 # several dups
+df <- read.csv("Cockburn2006_data_BirdTreeNames_nodups.csv")
+df$BirdtreeSpecies[duplicated(df$BirdtreeSpecies)]
+sum(df$BirdtreeSpecies %in% AllBirdtreeSpecies)
+length(df$BirdtreeSpecies)
+
 
 df <- read.csv("Biagolini_data_BirdTreeNames.csv")
 duplicatemisspellings <- df$BirdtreeSpecies[duplicated(df$BirdtreeSpecies)]
 # just Delichon_urbicum and a couple NAs
+df <- read.csv("Biagolini_data_BirdTreeNames_nodups.csv")
+df$BirdtreeSpecies[duplicated(df$BirdtreeSpecies)]
+sum(df$BirdtreeSpecies %in% AllBirdtreeSpecies)
+length(df$BirdtreeSpecies)
 
