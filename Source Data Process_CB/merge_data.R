@@ -4,15 +4,13 @@
 ## Last modified: 8/17/2021 by Kate Snyder
 
 ourdatabase <- read.csv("20200602_Cooperative Breeding Bird Database.csv", stringsAsFactors = FALSE)
-DowningData <- read.csv("Sex_longlife_coop_suppdata.csv", stringsAsFactors = FALSE)
-#JetzData <- read.csv("Jetz et al version no 1 - Jetz.csv", row.names = as.character(c(1:9311)))
-JetzData <- read.csv("Jetz et al fixed version no 2 - Jetz.csv", check.names = FALSE)
-#samplevec <- c(1,2,3,4,2,3,7)
-#which(samplevec != 3)
-RubensteinLovetteData <- read.csv("Rubenstein and Lovette suppdata.csv", stringsAsFactors = FALSE)
-GreisserData <- read.csv("Greisseretal.csv", stringsAsFactors = FALSE)
-RiehlData <- read.csv("Riehl 2013 supp data columns lines_kts edited.csv", stringsAsFactors = FALSE)
-CockburnData <- read.csv("Cockburn2006_data.csv", stringsAsFactors = FALSE)
+BiagoliniData <- read.csv("Biagolini_data_BirdTreeNames_nodups.csv", stringsAsFactors = FALSE)
+DowningData <- read.csv("Downing supp table2_kts edited.csv", stringsAsFactors = FALSE)
+JetzData <- read.csv("Jetz_data_BirdTreeNames_nodups.csv", check.names = FALSE)
+RubensteinLovetteData <- read.csv("RubensteinLovette_data_BirdTreeNames.csv", stringsAsFactors = FALSE)
+GreisserData <- read.csv("Griesser supp table1.csv", stringsAsFactors = FALSE)
+RiehlData <- read.csv("Riehl_data_BirdTreeNames.csv", stringsAsFactors = FALSE)
+CockburnData <- read.csv("Cockburn2006_data_BirdTreeNames_nodups.csv", stringsAsFactors = FALSE)
 
 DowningData[c(1,2,3,4,5,10),]
 removerows <- which(DowningData$species == "")
@@ -46,20 +44,6 @@ for (i in 1:length(RubensteinLovetteData$Genus)) {
 SpeciesNameRubenstein <- str_remove(SpeciesName, " ")
 SpeciesRubensteinLovetteData <- cbind(SpeciesNameRubenstein, RubensteinLovetteData)
 SpeciesRubensteinLovetteData <- SpeciesRubensteinLovetteData[, 1:8]
-
-SpeciesNameRubenstein[which(SpeciesNameRubenstein == "Hartlaubious_aurata")] <- "Saroglosa_aurata"
-SpeciesNameRubenstein[which(SpeciesNameRubenstein == "Hylopsar_purpureiceps")] <- "Lamprotornis_purpureiceps"
-SpeciesNameRubenstein[which(SpeciesNameRubenstein == "Hylopsar_cupreocauda")] <- "Lamprotornis_cupreocauda"
-SpeciesNameRubenstein[which(SpeciesNameRubenstein == "Lamprotornis_albicapillus")] <- "Lamprotornis_purpureiceps"
-SpeciesNameRubenstein[which(SpeciesNameRubenstein == "Lamprotornis_bicolor")] <- "Spreo_bicolor"
-SpeciesNameRubenstein[which(SpeciesNameRubenstein == "Lamprotornis_fischeri")] <- "Spreo_fischeri"
-SpeciesNameRubenstein[which(SpeciesNameRubenstein == "Lamprotornis_iris")] <- "Coccycolius_iris"
-SpeciesNameRubenstein[which(SpeciesNameRubenstein == "Lamprotornis_regius")] <- "Cosmopsarus_regius"
-SpeciesNameRubenstein[which(SpeciesNameRubenstein == "Lamprotornis_unicolor")] <- "Cosmopsarus_unicolor"
-SpeciesNameRubenstein[which(SpeciesNameRubenstein == "Notopholia_corruscus")] <- "Lamprotornis_corruscus"
-SpeciesNameRubenstein[which(SpeciesNameRubenstein == "Onychognathus_neumanni")] <- "Onychognathus_tenuirostris"
-SpeciesNameRubenstein[which(SpeciesNameRubenstein == "Poeoptera_femoralis")] <- "Cinnyricinclus_femoralis"
-SpeciesNameRubenstein[which(SpeciesNameRubenstein == "Poeoptera_sharpii")] <- "Cinnyricinclus_sharpii"
 
 newdf3 <- merge(newdf2, SpeciesRubensteinLovetteData, by.x = "SpeciesScientific", by.y = "SpeciesNameRubenstein", all = TRUE)
 

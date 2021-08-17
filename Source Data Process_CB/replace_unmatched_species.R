@@ -139,7 +139,7 @@ write.csv(dfWithBTCol, file = "RubensteinLovette_data_BirdTreeNames.csv")
 GriesserDF <- read.csv("Griesser supp table1.csv")
 GriesserDF$scientific.name[which(!GriesserDF$scientific.name %in% AllBirdtreeSpecies)]
 #All good
-
+GriesserDF$scientific.name[duplicated(GriesserDF$scientific.name)]
 
 # add new column to sources with species misspelled/missing from BirdTree species
 
