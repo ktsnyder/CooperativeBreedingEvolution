@@ -3,86 +3,55 @@
 ## Created 10/10/2020
 ## Last modified: 8/17/2021 by Kate Snyder
 
-ourdatabase <- read.csv("20200602_Cooperative Breeding Bird Database.csv", stringsAsFactors = FALSE)
+ourdatabase <- read.csv("SongData_R_Update.csv", stringsAsFactors = FALSE)
 BiagoliniData <- read.csv("Biagolini_data_BirdTreeNames_nodups.csv", stringsAsFactors = FALSE)
-DowningData <- read.csv("Downing supp table2_kts edited.csv", stringsAsFactors = FALSE)
-JetzData <- read.csv("Jetz_data_BirdTreeNames_nodups.csv", check.names = FALSE)
-RubensteinLovetteData <- read.csv("RubensteinLovette_data_BirdTreeNames.csv", stringsAsFactors = FALSE)
-GreisserData <- read.csv("Griesser supp table1.csv", stringsAsFactors = FALSE)
-RiehlData <- read.csv("Riehl_data_BirdTreeNames.csv", stringsAsFactors = FALSE)
 CockburnData <- read.csv("Cockburn2006_data_BirdTreeNames_nodups.csv", stringsAsFactors = FALSE)
+DowningData <- read.csv("Downing supp table2_kts edited.csv", stringsAsFactors = FALSE)
+DunnData <- read.csv("Dunn supp data 977sp.csv", stringsAsFactors = FALSE)
+GreisserData <- read.csv("Griesser supp table1.csv", stringsAsFactors = FALSE)
+JetzData <- read.csv("Jetz_data_BirdTreeNames_nodups.csv", check.names = FALSE)
+RiehlData <- read.csv("Riehl 2013 supp data columns lines_kts edited.csv", stringsAsFactors = FALSE)
+RubensteinLovetteData <- read.csv("RubensteinLovette_data_BirdTreeNames.csv", stringsAsFactors = FALSE)
 
-DowningData[c(1,2,3,4,5,10),]
-removerows <- which(DowningData$species == "")
-#removedrows <- DowningData[removerows,]
-keeprows <- which(DowningData$species != "")
-DowningSubset <- DowningData[keeprows,]
+# merge Jetz + Downing
+DowningSubset <- DowningData[,c(1,2,4,11,12,13,14)]
+JetzSubset <- JetzData[, c(1,2,3,4,7,8)]
+newdf <- merge(x = JetzSubset, y = DowningSubset, by = "BirdtreeSpecies", all = TRUE, suffixes = c("_Jetz", "_Downing"))
+colnames(newdf)[2] <- "Species_Jetz"
+colnames(newdf)[7] <- "Promiscuity_Downing"
 
-keeprows <- which(ourdatabase$Cooperative == "1")
-keeprows <- which(ourdatabase$Cooperative %in% c("0", "1"))
-OurdatabaseSubset <- ourdatabase[keeprows,]
+# merge newdf and Cockburn
+CockburnSubset <- CockburnData[, c(1,2,5,6,7)]
+newdf2 <- merge(newdf, CockburnSubset, by = "BirdtreeSpecies", all = TRUE, suffixes = c("", "_Cockburn"))
+colnames(newdf2)[which(colnames(newdf2) == "SpeciesScientific")] <- "SpeciesScientific_Cockburn"
 
+# merge newdf2 and Dunn
+DunnSubset <- DunnData[, c(1,2,10,11,12,13,14,15,16,17,18)]
+newdf3 <- merge(newdf2, DunnSubset, by = "BirdtreeSpecies", all = TRUE, suffixes = c("", "_Dunn"))
+colnames(newdf3)[which(colnames(newdf3) == "CommonNameBL")] <- "CommonName_Dunn"
 
-
-newdf <- merge(OurdatabaseSubset, DowningData, by.y = "species", by.x = "SpeciesScientific", all = TRUE)
-newdf <- merge(ourdatabase, DowningSubset, by.y = "species", by.x = "SpeciesScientific", all = TRUE)
-newdf <- newdf[, 1:34]
-
-SpeciesName <- set.seed(10) 
-for (i in 1:length(JetzData$Index)) {
-  SpeciesName[i] <- paste0(JetzData$Genus[i], "_", JetzData$Species[i])
-}
-SpeciesJetzData <- cbind(SpeciesName, JetzData)
-SpeciesJetzData<- SpeciesJetzData[, 1:9]
-
-newdf2 <- merge(newdf, SpeciesJetzData, by.x = "SpeciesScientific", by.y = "SpeciesName", all = TRUE)
-
-SpeciesName <- set.seed(10)
-for (i in 1:length(RubensteinLovetteData$Genus)) {
-  SpeciesName[i] <- paste(RubensteinLovetteData$Genus[i], RubensteinLovetteData$Species[i], sep = '_')
-}
-SpeciesNameRubenstein <- str_remove(SpeciesName, " ")
-SpeciesRubensteinLovetteData <- cbind(SpeciesNameRubenstein, RubensteinLovetteData)
-SpeciesRubensteinLovetteData <- SpeciesRubensteinLovetteData[, 1:8]
-
-newdf3 <- merge(newdf2, SpeciesRubensteinLovetteData, by.x = "SpeciesScientific", by.y = "SpeciesNameRubenstein", all = TRUE)
+# merge newdf3 and Biagolini
+BiagoliniSubset <- BiagoliniData[, c(1,2,4,5,6,7,9)]
+newdf4 <- merge(newdf3, BiagoliniSubset, by = "BirdtreeSpecies", all = TRUE, suffixes = c("", "_Biagolini"))
+colnames(newdf4)[which(colnames(newdf4) == "Species")] <- "Species_Biagolini"
 
 
-GreisserData$scientific.name[!(GreisserData$scientific.name %in% newdf3$SpeciesScientific)]
+# merge newdf4 and Riehl
+RiehlSubset <- RiehlData[, c(1,2,3,5,6,7,8)]
+newdf5 <- merge(newdf4, RiehlSubset, by = "BirdtreeSpecies", all = TRUE, suffixes = c("", "_Riehl"))
+colnames(newdf5)[which(colnames(newdf5) == "Dispersal")] <- "Dispersal_Riehl"
 
-newdf4 <- merge(newdf3, GreisserData, by.y = "scientific.name", by.x  = "SpeciesScientific", all = TRUE)
 
-CockburnDataAdditionalNames <- read.csv("cockburndatanewdf4missingnamesonbirdtree.csv", stringsAsFactors = FALSE)
-newdf5 <- merge(CockburnDataAdditionalNames, RiehlData, by.x = "SpeciesScientific", by.y = "SpeciesName", all = TRUE)
+# merge newdf5 and Rubenstein
+RubensteinSubset <- RubensteinLovetteData[, c(1,2,3,4)]
+newdf6 <- merge(newdf5, RubensteinSubset, by = "BirdtreeSpecies", all = TRUE, suffixes = c("", "_Rubenstein"))
+colnames(newdf6)[which(colnames(newdf6) == "Species")] <- "Species_Rubenstein"
 
-newdf6 <- merge(newdf4, newdf5, by.x = "SpeciesScientific", by.y = "SpeciesScientific", all = TRUE)
 
-write.csv(newdf6, file = "FinaldfCooperativeBreeding2020correct.csv")
+# merge newdf6 and Griesser
+GriesserSubset <- GreisserData[, c(1,2,3,4,5,6)]
+newdf7 <- merge(newdf6, GriesserSubset, by = "BirdtreeSpecies", all = TRUE, suffixes = c("", "_Griesser"))
+colnames(newdf7)[which(colnames(newdf7) == "common.name")] <- "common.name_Griesser"
 
-#read in the two .csv files
-
-#Replace misspelled birds in database
-#
-#
-
-#setwd("~/Documents/Creanza Lab/Comparative Evolution/Cooperative Breeding")  #this only applies to my (Kate's) computer
-
-misspelledbirds <- read.csv("misspelled_birds_to_check.csv")  # The version of this I sent you may not be the most updated version. if you have the most recent/correct version of this file, you can change this to whatever the name of that file is - a couple notes: I noticed that Phoenicurus_erythronota was mistakenly changed (I think by the code that I used to generate this file) to Phoenicurus_erythrogastrus, when it should be Phoenicurus_erythronotus. I did edit that in this file. Also, Apteryx_rowi, Ara_ambigua, Ara_manilata, and Ara_nobilis were I think also incorrectly corrected by my code, and I changed all of these to NA. You may very well have caught these already, and I def didn't go through the whole list, just wanted to make a note of what I actually manually changed.
-ourdb <- read.csv("2020-09-11_GoogleDrive_FinaldfCooperativeBreeding2020correct.csv")
-
-correctednamesdf <- merge(misspelledbirds,ourdb, by.x = "in_database", by.y = "SpeciesScientific", all = TRUE)
-correctednamesdf2 <- correctednamesdf[,which(colnames(correctednamesdf) != "X.x" & colnames(correctednamesdf) != "X.y")] 
-NAvector <- which(is.na(correctednamesdf2$species_in_birdtree))  # the rows where birds were spelled correctly (and now are NA in the corrected names column)
-correctednamesdf2$species_in_birdtree[NAvector] <- correctednamesdf2$in_database[NAvector] # putting the correctly spelled names from in_database into the "NA" spots in species_in_birdtree
-
-correctednamesdf3 <- correctednamesdf2[, 2:length(correctednamesdf2)]  # the next step doesn't work if the first column (w/ misspelled names) is there, this line gets rid of that column
-
-# combine any duplicate species rows
-require(dplyr)
-correctednamesdf4 <- correctednamesdf3 %>% group_by(species_in_birdtree) %>% summarize_all(.funs=function(x) {if(length(na.omit(x))==0){NA} else {na.omit(x)}})
-
-write.csv(correctednamesdf4, file = "v2020-09-11_GDrive_CoopBreeding_correctednames.csv")  # if you run this line, just make sure this .csv isn't open
-
-SnyderCreanza_song <- read.csv("SnyderCreanza_NatComms2019_SupplementalData_R.csv", stringsAsFactors = FALSE)
-CoopBreed_song <- merge(summaryNoDups, SnyderCreanza_song, by.x = "species_in_birdtree", by.y = "BirdtreeFormat", all = TRUE)
-write.csv(CoopBreed_song, file = "Coop_Breed_song1.csv")
+# write file
+write.csv(newdf7, file = "Aggregate_Source_Data.csv", row.names = FALSE)
