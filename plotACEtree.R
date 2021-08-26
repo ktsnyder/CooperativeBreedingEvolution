@@ -17,6 +17,7 @@
 ##10/8/2020 - removed setwd() to my comp evol folder
 ##10/10/2020 - added discretelabels to inputs for legend
 ##10/11/2020 - spit out ACE values; added ability to set model to something other than "ARD
+##8/25/2021 - add "otherlabel" arg
 
 #plot ancestral character estimation phylogenies ("heattrees")
 #
@@ -24,7 +25,7 @@
 # plotheattree(columns = c("PolygynyOrMonog"), passeriformesonly = FALSE, newdata = "20200108_Song Database Update 2019 - PostMerge.csv", newtree = "2019-10-22matezilla2treeHack_nondicho.nex")
 
 
-plotACEtree <- function(columns, cladesubsetcolumn = FALSE, cladesubsetvalue = NULL, newdata = FALSE, newtree = FALSE, islog = FALSE, discretelabels = NULL, discretemodel = "ARD") {
+plotACEtree <- function(columns, cladesubsetcolumn = FALSE, cladesubsetvalue = NULL, newdata = FALSE, newtree = FALSE, islog = FALSE, discretelabels = NULL, discretemodel = "ARD", otherlabel = NULL) {
   require(phytools)
 
   # tipsize = 0.65
@@ -49,7 +50,7 @@ if (islog != FALSE) {
   loglabel = "log"
 } else { loglabel = NULL }
 
-  pdf(file=paste(Sys.Date(),columns[1], loglabel, columns[2],cladesubsetvalue,"ACEtree.pdf", sep=""), height = fileheight, width = 15)
+  pdf(file=paste(Sys.Date(),columns[1], loglabel, columns[2],cladesubsetvalue,otherlabel, "_ACEtree.pdf", sep=""), height = fileheight, width = 15)
 
   if (length(columns) > 1) {  
     continuoustraitvec <- df[,columns[2]]

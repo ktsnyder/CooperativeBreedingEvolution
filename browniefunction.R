@@ -1,5 +1,5 @@
 #Coded by Kate T. Snyder
-#Last Modified 5-12-2020
+#Last Modified 8-18-2020
 #Built using RStudio Version 1.1.453
 #R Version 3.5.2?
 #
@@ -11,23 +11,24 @@
 # 
 # Jan2020 update: make compatible with findQratesNewTree2.0.R and subsetbirddata2.0.R
 # 5/12/2020: matensim--> nsim, remove plot arg, added args
+# 8/18/2021: add arg plotsimmaps (TRUE/FALSE) to go into findQrates; add to tryCatch ability to accommadate compute error; changed default arg "cladesubsetcolumn = FALSE" to "= NULL"
 # 
 # e.g.
 # brownieout <- browniefunction(c("Final.polygyny", "Syllable.rep.final"), islog = "Syllable.rep.final", nsim = 500)
 
-browniefunction <- function(columns, newtree = FALSE, newdata = FALSE, cladesubsetcolumn = FALSE, cladesubsetvalue = NULL, nsim = 500, islog = FALSE, phylanovaP = "not evaluated") {
+browniefunction <- function(columns, newtree = FALSE, newdata = FALSE, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, nsim = 500, islog = FALSE, phylanovaP = "not evaluated", plotsimmaps = FALSE) {
   require(R.utils)
   require(phytools)
-  require(ape)
-  require(base)
+ # require(ape)
+#  require(base)
   
-  source(file = "~/Desktop/PhyloBiology/findQrates.R")
+  source(file = "findQrates.R")
  # source(file = "~/Desktop/PhyloBiology/subsettreedata.R")
   print("Beginning simmaps for brownie") 
   starttimebrownie <- Sys.time()
   
   
-  subsetout <- subsettreedata(columns, newtree = newtree, newdata = newdata, cladesubsetcolumn = cladesubsetcolumn, cladesubsetvalue = cladesubsetvalue, islog = islog)
+  subsetout <- subsettreedata(columns=columns, newtree = newtree, newdata = newdata, cladesubsetcolumn = cladesubsetcolumn, cladesubsetvalue = cladesubsetvalue, islog = islog)
   tree <- subsetout$subsettree
   df <- subsetout$subsetdf
   discretetraitvec <- df[,columns[1]]
@@ -35,11 +36,19 @@ browniefunction <- function(columns, newtree = FALSE, newdata = FALSE, cladesubs
   continuoustraitvec <- df[,columns[2]]
   names(continuoustraitvec) <- df[,1]  #species names 
   
-  phylanova <- phylANOVA(tree,discretetraitvec,continuoustraitvec, nsim=nsim)
-  phylanovaP = phylanova[[2]] #pval 
+  #phylanova <- phylANOVA(tree,discretetraitvec,continuoustraitvec, nsim=nsim)
+  #phylanovaP = phylanova[[2]] #pval 
   
-  Qoutput <- findQrates(columns, plot=FALSE, newtree = newtree, newdata = newdata, cladesubsetcolumn = cladesubsetcolumn, cladesubsetvalue = cladesubsetvalue)
+  Qoutput <- findQrates(columns, plot=plotsimmaps, newtree = newtree, newdata = newdata, cladesubsetcolumn = cladesubsetcolumn, cladesubsetvalue = cladesubsetvalue)
   qrates <- Qoutput$qrates
+  print(qrates)
+  
+  # make OutputFiles folder if not present
+  mainDir <- getwd()
+  subDir <- "OutputFiles"
+  if (!dir.exists(file.path(mainDir,subDir))) {
+    dir.create(file.path(mainDir, subDir))
+  }
   
   simmappy <- make.simmap(tree,discretetraitvec,nsim=nsim,Q=qrates) 
   write.simmap(simmappy, file=paste(getwd(),"/OutputFiles/",Sys.Date(),columns[1], columns[2],nsim,"simmaps",".txt",sep=""))
@@ -75,6 +84,9 @@ browniefunction <- function(columns, newtree = FALSE, newdata = FALSE, cladesubs
       },
       TimeoutException = function(ex) {browniedata[i,2:13]<-c(NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,"timeout",i);
       print(paste("timeout",i));
+      },
+      error = function(e) {browniedata[i,2:13]<-c(NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,"error",i);
+      print(paste("compute error",i));
       })
     
     browniedata[i,1] <- columns[1] #column name of Discrete trait

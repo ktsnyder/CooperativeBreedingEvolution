@@ -1,6 +1,6 @@
 ########
 #Coded by Kate T. Snyder
-#Last Modified 6-4-2021 
+#Last Modified 8-18-2021  - added   print(subsettree) in columns loop
 #Built using R Version 4.0.2
 #
 #ape_5.3  phytools_0.5-38   maps_3.1.0  btw_V1.0
@@ -70,6 +70,9 @@ if (newdata == FALSE) {
 }
 ) #end suppressWarnings
 
+#print(head(alldatadfos))
+
+
 if (is.character(newtree)) {
   fulltree <- read.nexus(newtree)
 } else if (is.list(newtree)) {
@@ -109,15 +112,18 @@ if (is.null(cladesubsetcolumn)) {
 subsetdf <- alldatadf
 subsettree <- fulltree
 
+#print(subsettree)
+
 if (!is.null(columns)) {
-for (i in 1:length(columns)) {
-  whichcol <- columns[i]
-  subsetdf <- subsetdf[!is.na(subsetdf[,whichcol]),]
-  havedatavec <- subsettree$tip.label %in% as.character(subsetdf[,1])
-  matingtips <- which(havedatavec == TRUE)
-  dropfortree <- which(havedatavec == FALSE)
-  subsettree <- drop.tip(subsettree, tip = dropfortree)
-}  # end for (i in length(columns))
+  for (i in 1:length(columns)) {
+    whichcol <- columns[i]
+    subsetdf <- subsetdf[!is.na(subsetdf[,whichcol]),]
+    havedatavec <- subsettree$tip.label %in% as.character(subsetdf[,1])
+    matingtips <- which(havedatavec == TRUE)
+    dropfortree <- which(havedatavec == FALSE)
+    subsettree <- drop.tip(subsettree, tip = dropfortree)
+    print(subsettree)
+  }  # end for (i in length(columns))
 }  # end if !is.null(columns)
 
 if (islog != FALSE) {

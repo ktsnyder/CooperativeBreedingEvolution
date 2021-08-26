@@ -150,7 +150,7 @@
 "Aechmophorus_clarkii","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
 "Aechmophorus_occidentalis","0","1","0","0",NA,NA,NA,"0",NA,NA,NA
 "Aegithalos_caudatus","1","0","4","0",NA,"1",NA,"1",NA,"1","1"
-"Aegithalos_concinnus","1","2","1","1",NA,"1",NA,"0",NA,"0",NA
+"Aegithalos_concinnus","0","2","1","1",NA,"1",NA,"0",NA,"0",NA
 "Aegithalos_fuliginosus","0","1","0","0",NA,NA,NA,"0",NA,NA,NA
 "Aegithalos_iouschistos","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
 "Aegithalos_leucogenys","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
@@ -2109,7 +2109,7 @@
 "Colaptes_atricollis","0","1","0","0",NA,NA,NA,"0",NA,NA,NA
 "Colaptes_auratus","0","4","0","0",NA,"0","0","0",NA,"0",NA
 "Colaptes_auricularis","0","1","0","0",NA,NA,NA,"0",NA,NA,NA
-"Colaptes_campestris","1","2","1","1",NA,"0",NA,"1",NA,"0",NA
+"Colaptes_campestris","0","2","1","1",NA,"0",NA,"1",NA,"0",NA
 "Colaptes_chrysoides","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
 "Colaptes_fernandinae","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
 "Colaptes_melanochloros","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
@@ -3733,7 +3733,7 @@
 "Gerygone_igata","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
 "Gerygone_inornata","0","1","0","0",NA,NA,NA,"0",NA,NA,NA
 "Gerygone_levigaster","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
-"Gerygone_magnirostris","1","2","1","1","1",NA,NA,"0",NA,"0",NA
+"Gerygone_magnirostris","0","2","1","1","1",NA,NA,"0",NA,"0",NA
 "Gerygone_modesta",NA,"0","0","0",NA,NA,NA,NA,NA,NA,NA
 "Gerygone_mouki","1","0","3","0","1",NA,NA,"1",NA,"1",NA
 "Gerygone_olivacea","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
@@ -4415,7 +4415,7 @@
 "Lalage_nigra","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
 "Lalage_sharpei",NA,"0","0","0",NA,NA,NA,NA,NA,NA,NA
 "Lalage_sueurii","0","1","0","0",NA,NA,NA,"0",NA,NA,NA
-"Lalage_tricolor","1","2","1","1","1",NA,NA,"0",NA,"0",NA
+"Lalage_tricolor","0","2","1","1","1",NA,NA,"0",NA,"0",NA
 "Lampornis_amethystinus","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
 "Lampornis_castaneoventris","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
 "Lampornis_clemenciae","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
@@ -4474,7 +4474,7 @@
 "Lanioturdus_torquatus","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
 "Lanius_bucephalus","0","3","0","0",NA,"0",NA,"0",NA,"0",NA
 "Lanius_cabanisi","1","0","2","0",NA,NA,NA,"1",NA,"1",NA
-"Lanius_collaris","1","2","1","1","1",NA,NA,"0",NA,"0",NA
+"Lanius_collaris","0","2","1","1","1",NA,NA,"0",NA,"0",NA
 "Lanius_collurio","1","1","1","1",NA,"1",NA,"0",NA,NA,NA
 "Lanius_collurioides","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
 "Lanius_cristatus","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
@@ -4651,7 +4651,7 @@
 "Lichenostomus_chrysops","0","2","0","0",NA,"0",NA,"0",NA,NA,NA
 "Lichenostomus_cratitius","0","1","0","0",NA,NA,NA,"0",NA,NA,NA
 "Lichenostomus_fasciogularis","1","0","1","0",NA,NA,NA,"1",NA,NA,NA
-"Lichenostomus_flavescens","1","2","1","1","1",NA,NA,"0",NA,"0",NA
+"Lichenostomus_flavescens","0","2","1","1","1",NA,NA,"0",NA,"0",NA
 "Lichenostomus_flavicollis","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
 "Lichenostomus_flavus","1","0","2","0",NA,NA,NA,"1",NA,"1",NA
 "Lichenostomus_frenatus","0","1","0","0",NA,NA,NA,"0",NA,NA,NA
@@ -5495,7 +5495,7 @@
 "Myiagra_inquieta","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
 "Myiagra_oceanica",NA,"0","0","0",NA,NA,NA,NA,NA,NA,NA
 "Myiagra_pluto","0","1","0","0",NA,NA,NA,"0",NA,NA,NA
-"Myiagra_rubecula","1","2","1","1","1",NA,NA,"0",NA,"0",NA
+"Myiagra_rubecula","0","2","1","1","1",NA,NA,"0",NA,"0",NA
 "Myiagra_ruficollis","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
 "Myiagra_vanikorensis","0","1","0","0",NA,NA,NA,"0",NA,NA,NA
 "Myiarchus_antillarum","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
@@ -6140,7 +6140,7 @@
 "Ortalis_wagleri","0","1","0","0",NA,NA,NA,"0",NA,NA,NA
 "Orthogonys_chloricterus","0","1","0","0",NA,NA,NA,"0",NA,NA,NA
 "Orthonyx_spaldingii","0","1","0","0",NA,NA,NA,"0",NA,NA,NA
-"Orthonyx_temminckii","1","2","1","1","1",NA,NA,"0",NA,"0",NA
+"Orthonyx_temminckii","0","2","1","1","1",NA,NA,"0",NA,"0",NA
 "Orthopsittaca_manilata","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
 "Orthorhyncus_cristatus","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
 "Orthotomus_atrogularis","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
@@ -6517,7 +6517,7 @@
 "Pericrocotus_solaris","1","0","2","0",NA,NA,NA,"1",NA,"1",NA
 "Pericrocotus_tegimae","0","1","0","0",NA,NA,NA,"0",NA,NA,NA
 "Periporphyrus_erythromelas","0","1","0","0",NA,NA,NA,"0",NA,NA,NA
-"Perisoreus_canadensis","1","2","1","1",NA,NA,"0","0",NA,NA,"1"
+"Perisoreus_canadensis","0","2","1","1",NA,NA,"0","0",NA,NA,"1"
 "Perisoreus_infaustus","0","3","0","0",NA,"0","0","0",NA,NA,NA
 "Perisoreus_internigrans","1","0","2","0",NA,NA,NA,"1",NA,"1",NA
 "Perissocephalus_tricolor","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
@@ -6675,7 +6675,7 @@
 "Philemon_argenticeps","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
 "Philemon_brassi","0","1","0","0",NA,NA,NA,"0",NA,NA,NA
 "Philemon_buceroides","0","1","0","0",NA,NA,NA,"0",NA,NA,NA
-"Philemon_citreogularis","1","2","1","1","1",NA,NA,"0",NA,"0",NA
+"Philemon_citreogularis","0","2","1","1","1",NA,NA,"0",NA,"0",NA
 "Philemon_cockerelli","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
 "Philemon_corniculatus","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
 "Philemon_diemenensis","0","1","0","0",NA,NA,NA,"0",NA,NA,NA
@@ -6764,7 +6764,7 @@
 "Phyllanthus_atripennis","1","1","1","1",NA,NA,NA,"1",NA,"0",NA
 "Phyllastrephus_albigularis","0","1","0","0",NA,NA,NA,"0",NA,NA,NA
 "Phyllastrephus_baumanni","0","1","0","0",NA,NA,NA,"0",NA,NA,NA
-"Phyllastrephus_cabanisi","1","2","1","1",NA,NA,NA,"0",NA,"0","1"
+"Phyllastrephus_cabanisi","0","2","1","1",NA,NA,NA,"0",NA,"0","1"
 "Phyllastrephus_cerviniventris","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
 "Phyllastrephus_debilis","0","2","0","0",NA,NA,NA,"0",NA,"0",NA
 "Phyllastrephus_fischeri","0","1","0","0",NA,NA,NA,"0",NA,NA,NA

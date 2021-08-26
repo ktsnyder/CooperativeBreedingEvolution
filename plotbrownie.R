@@ -1,5 +1,5 @@
 #Coded by Kate T. Snyder
-#Last Modified 8-20-2020
+#Last Modified 8-18-2021
 #Built using RStudio Version 1.1.453
 #R Version 3.5.2?
 #
@@ -12,11 +12,13 @@
 #5/14/2020 - add mean log likelihood-based pval calculation, added to title. Next: fix axes
 #8/20/2020 - figured out
 #10/9/2020 - reordered loglabel 
+#8/18/2021 - commented out example, added otherlabel arg
+#8/25/2021 - add otherlabel to y axis
 
-plotbrownie(data = "2020-10-10CoopBreedSyllable.rep.finalbrownie500sim.csv", columns = c("Final.polygyny","Syllable.rep.final"), discreteCategoryLabels = c("Monogamy","Polygyny"), newpdf = FALSE)  #discrete category labels will be e.g. c("Monogamy","Polygyny") # default is to make a new PDF
+#plotbrownie(data = "2020-10-10CoopBreedSyllable.rep.finalbrownie500sim.csv", columns = c("Final.polygyny","Syllable.rep.final"), discreteCategoryLabels = c("Monogamy","Polygyny"), newpdf = FALSE)  #discrete category labels will be e.g. c("Monogamy","Polygyny") # default is to make a new PDF
 
 
-plotbrownie <- function(data, columns, discreteCategoryLabels = c("state0","state1"), cladesubsetvalue = NULL, nsim = 500, islog = FALSE, newpdf = TRUE) {
+plotbrownie <- function(data, columns, discreteCategoryLabels = c("state0","state1"), cladesubsetvalue = NULL, nsim = 500, islog = FALSE, newpdf = TRUE, otherlabel = NULL) {
   
 if (is.data.frame(data)) {
   brownied <- data
@@ -47,11 +49,11 @@ if (is.data.frame(data)) {
 ##### plot brownie distribution
   
   if (newpdf == TRUE) {
-    pdf(file = paste0(getwd(),"/OutputFiles/", Sys.Date(),columns[1], loglabel, columns[2], "brownie.pdf"), width = 10, height = 5)
+    pdf(file = paste0(getwd(),"/OutputFiles/", Sys.Date(),columns[1], loglabel, columns[2], otherlabel, "brownie.pdf"), width = 10, height = 5)
     par(mar = c(4,4,2,1))
     par(mfrow = c(1,2)) 
   } else {
-    par(mar = c(1,1,2,1))
+    par(mar = c(2,3,2,1))
   }
   
   
@@ -72,7 +74,7 @@ if (is.data.frame(data)) {
   lines(D1, col="red")
   abline(v=browniedf$ERRate[1], lty = 2)
   title(xlab=paste("Rate of", loglabel, columns[2],"evolution"),
-        ylab="Number of Observations", line = 2)
+        ylab= paste("Number of Observations", otherlabel), line = 2)
   
   state0 <- discreteCategoryLabels[1]
   state1 <- discreteCategoryLabels[2]
@@ -94,7 +96,7 @@ if (is.data.frame(data)) {
               max(D0$x)),
        ylim=c(min(D0$y),
               max(D0$y)),
-       main=paste(columns[1], columns[2], "Brownie pvals", ", # sims =", nsim, " \nMean =", round(meanphy,4), "/ StdDev =", round(sdev,4)), cex.main = 0.75, xlab="Pval" ,ylab="Frequency") 
+       main=paste(columns[1], columns[2], "Brownie pvals", ", # sims =", nsim, " \nMean =", round(meanphy,4), "/ StdDev =", round(sdev,4), otherlabel), cex.main = 0.75, xlab="Pval" ,ylab="Frequency") 
   abline(v=0.05, col = "gray")
   
   if (newpdf == TRUE) {
