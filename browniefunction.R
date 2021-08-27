@@ -12,11 +12,12 @@
 # Jan2020 update: make compatible with findQratesNewTree2.0.R and subsetbirddata2.0.R
 # 5/12/2020: matensim--> nsim, remove plot arg, added args
 # 8/18/2021: add arg plotsimmaps (TRUE/FALSE) to go into findQrates; add to tryCatch ability to accommadate compute error; changed default arg "cladesubsetcolumn = FALSE" to "= NULL"
+# 8/26/2021: added otherlabel arg
 # 
 # e.g.
 # brownieout <- browniefunction(c("Final.polygyny", "Syllable.rep.final"), islog = "Syllable.rep.final", nsim = 500)
 
-browniefunction <- function(columns, newtree = FALSE, newdata = FALSE, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, nsim = 500, islog = FALSE, phylanovaP = "not evaluated", plotsimmaps = FALSE) {
+browniefunction <- function(columns, newtree = FALSE, newdata = FALSE, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, nsim = 500, islog = FALSE, phylanovaP = "not evaluated", plotsimmaps = FALSE, otherlabel = NULL) {
   require(R.utils)
   require(phytools)
  # require(ape)
@@ -51,7 +52,7 @@ browniefunction <- function(columns, newtree = FALSE, newdata = FALSE, cladesubs
   }
   
   simmappy <- make.simmap(tree,discretetraitvec,nsim=nsim,Q=qrates) 
-  write.simmap(simmappy, file=paste(getwd(),"/OutputFiles/",Sys.Date(),columns[1], columns[2],nsim,"simmaps",".txt",sep=""))
+  write.simmap(simmappy, file=paste(getwd(),"/OutputFiles/",Sys.Date(),columns[1], columns[2], otherlabel, nsim,"simmaps",".txt",sep=""))
   simmapsdone <- Sys.time()
   simmaptime <- simmapsdone - starttimebrownie
   
@@ -94,7 +95,7 @@ browniefunction <- function(columns, newtree = FALSE, newdata = FALSE, cladesubs
     browniedata[i,14] <- phylanovaP
     
     if (i %in% c(20,100,160,200,400,600,800,1000,1200,1400)) {
-      write.csv(browniedata, file = paste(getwd(),"/OutputFiles/",Sys.Date(),columns[1], columns[2],"brownie",nsim,"sim", cladesubsetvalue,".csv",sep="")) #cumulative brownie data results, saved during long process
+      write.csv(browniedata, file = paste(getwd(),"/OutputFiles/",Sys.Date(),columns[1], columns[2],otherlabel, "_brownie",nsim,"sim", cladesubsetvalue,".csv",sep="")) #cumulative brownie data results, saved during long process
       print(paste("Saved data - Loop", i))
     }
     if (i %in% seq(0,2000,by=50)) {
@@ -105,7 +106,7 @@ browniefunction <- function(columns, newtree = FALSE, newdata = FALSE, cladesubs
   print("End brownie loop")
   endtimebrownie <- Sys.time()
   looptime = endtimebrownie-starttimebrownie
-  write.csv(browniedata, file = paste(getwd(),"/OutputFiles/",Sys.Date(),columns[1], columns[2],"brownie",nsim,"sim",cladesubsetvalue,".csv",sep=""))
+  write.csv(browniedata, file = paste(getwd(),"/OutputFiles/",Sys.Date(),columns[1], columns[2],otherlabel,"_brownie",nsim,"sim",cladesubsetvalue,".csv",sep=""))
   
   return(browniedf[,1:14])
 }
