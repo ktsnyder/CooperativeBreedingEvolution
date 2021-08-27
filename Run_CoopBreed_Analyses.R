@@ -70,3 +70,19 @@ for (coopbird in cooperativebirds) {
 }
 dev.off()
 
+
+# Do sylls/song brownie with fake CoopBreed data (randomly assign 16 species as Coop)
+source("plotbrownie.R")
+feature <- "Syll.song.final"
+subset <- subsettreedata(columns = c("CoopBreed", "Syll.song.final"), newtree = "birdzillatreeMaybeConsensus.nex", newdata = "2021-08-18CoopSong_AnyCoopEqualsCoop_NatCommsSubset.csv")
+pdf("Brownie_Syllsongfinal_fakeCoopData.pdf", width = 8, height = 12)
+par(mfrow = c(4,2))
+for (j in 1:20) {
+  df <- subset$subsetdf
+  fakecoops <- sample(1:length(df$species), 16)
+  df$CoopBreed <- rep(0, times = length(df$species))
+  df$CoopBreed[fakecoops] <- 1
+  browniefunction(columns = c("CoopBreed", feature), newdata = df, newtree = "birdzillatreeMaybeConsensus.nex", nsim = 100, islog = feature, plotsimmaps = FALSE, otherlabel = paste0("fakeCoopData", j, "_"))
+
+plotbrownie(data = paste0(Sys.Date(),columns[1], columns[2],"fakeCoopData",j, "_brownie",nsim,"sim.csv"), columns = c("CoopBreed",feature), discreteCategoryLabels = c("Non-cooperative","Cooperative"), otherlabel = "fakedata", newpdf = FALSE, nsim = 100, islog = TRUE)
+}
