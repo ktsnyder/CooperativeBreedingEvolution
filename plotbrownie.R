@@ -103,11 +103,11 @@ if (is.data.frame(data)) {
     dev.off()
   }
   
-  writeLines(paste0("OneRate=", round(ERloglikmean, digits = 4)))
-  writeLines(paste0("TwoRates=", round(ARDloglikmean, digits = 4)))
-  writeLines(paste0("pVal", ERARDPval))
-  writeLines(paste("",sep="\n\n"))
-  writeLines(paste("",sep="\n\n"))  
+  # writeLines(paste0("OneRate=", round(ERloglikmean, digits = 4)))
+  # writeLines(paste0("TwoRates=", round(ARDloglikmean, digits = 4)))
+  # writeLines(paste0("pVal", ERARDPval))
+  # writeLines(paste("",sep="\n\n"))
+  # writeLines(paste("",sep="\n\n"))  
 
   
 }  #end plotbrownie function

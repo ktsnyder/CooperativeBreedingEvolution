@@ -122,7 +122,7 @@ if (!is.null(columns)) {
     matingtips <- which(havedatavec == TRUE)
     dropfortree <- which(havedatavec == FALSE)
     subsettree <- drop.tip(subsettree, tip = dropfortree)
-    print(subsettree)
+ #   print(subsettree)
   }  # end for (i in length(columns))
 }  # end if !is.null(columns)
 

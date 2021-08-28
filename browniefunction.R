@@ -12,7 +12,7 @@
 # Jan2020 update: make compatible with findQratesNewTree2.0.R and subsetbirddata2.0.R
 # 5/12/2020: matensim--> nsim, remove plot arg, added args
 # 8/18/2021: add arg plotsimmaps (TRUE/FALSE) to go into findQrates; add to tryCatch ability to accommadate compute error; changed default arg "cladesubsetcolumn = FALSE" to "= NULL"
-# 8/26/2021: added otherlabel arg
+# 8/26/2021: added otherlabel arg - for csv output and to feed into findQrates
 # 
 # e.g.
 # brownieout <- browniefunction(c("Final.polygyny", "Syllable.rep.final"), islog = "Syllable.rep.final", nsim = 500)
@@ -40,7 +40,7 @@ browniefunction <- function(columns, newtree = FALSE, newdata = FALSE, cladesubs
   #phylanova <- phylANOVA(tree,discretetraitvec,continuoustraitvec, nsim=nsim)
   #phylanovaP = phylanova[[2]] #pval 
   
-  Qoutput <- findQrates(columns, plot=plotsimmaps, newtree = newtree, newdata = newdata, cladesubsetcolumn = cladesubsetcolumn, cladesubsetvalue = cladesubsetvalue)
+  Qoutput <- findQrates(columns, plot=plotsimmaps, newtree = newtree, newdata = newdata, cladesubsetcolumn = cladesubsetcolumn, cladesubsetvalue = cladesubsetvalue, otherlabel = otherlabel)
   qrates <- Qoutput$qrates
   print(qrates)
   
