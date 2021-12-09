@@ -150,3 +150,25 @@ Qout <- findQrates(columns = columns, plot = FALSE, newtree = "birdzillatreeMayb
 numrates <- Qout$qrates
 title(main=paste(" ","\nE.g. ARDmodel","Qrates (output for Brownie):",numrates[2],numrates[3]),cex.main = 0.5)
 }
+
+# 8/31/2021
+songfeatures <- c("Syllable.rep.final", "Syll.song.final", "Song.rep.final", "Duration.final", "Interval.final", "Syll.song.min", "Syll.song.max")
+newdata = "~/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2021-08-18CoopSong_MeanCoop_NatCommsSubset.csv"
+
+source("subsettreedata.R")
+source("browniefunction.R")
+#below run with "2020-10-11ConsensusPasserineTreeHack100.nex" 8/19/21
+#run with "birdzillatreeMaybeConsensus.nex" 8/24/21
+# songfeatures <- c("Syll.song.min", "Syll.song.max")
+for (k in 2) {
+  feature <- songfeatures[k]
+  print(feature)
+  browniefunction(columns = c("CoopBreed", feature), newdata = "2021-08-18CoopSong_AnyCoopEqualsCoop_NatCommsSubset.csv", newtree = "2021-08-31ConsensusPasserineTreeEricson10_1000.nex", nsim = 500, islog = feature, plotsimmaps = TRUE,otherlabel = "Ericson10Consensus" )
+} 
+
+source("plotbrownie.R")
+for (i in 2) {
+  print(i)
+  feature <- songfeatures[i]
+  plotbrownie(data = paste0(Sys.Date(),"CoopBreed",feature, "Ericson10Consensus_brownie500sim.csv"), columns = c("CoopBreed",feature), discreteCategoryLabels = c("Non-cooperative","Cooperative"), otherlabel = "Ericson10Consensus", newpdf = TRUE, nsim = 500, islog = TRUE)
+}
