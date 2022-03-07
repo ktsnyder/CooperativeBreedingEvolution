@@ -2,6 +2,7 @@
 ## Created by Aleyna Loughran-Pierce
 ## Created 10/10/2020
 ## Last modified: 12/09/2021 by Kate Snyder - include all columns from each source file
+## 3/7/2022 - add in Griesser 2017 data, female song (Odom 2014) data
 
 ourdatabase <- read.csv("SongData_R_Update.csv", stringsAsFactors = FALSE)
 ourdatabaserefs <- read.csv("SupplementDataRefs_Update.csv")
@@ -10,11 +11,12 @@ BiagoliniData <- read.csv("Biagolini_data_BirdTreeNames_nodups.csv", stringsAsFa
 CockburnData <- read.csv("Cockburn2006_data_BirdTreeNames_nodups.csv", stringsAsFactors = FALSE)
 DowningData <- read.csv("Downing supp table2_kts edited.csv", stringsAsFactors = FALSE)
 DunnData <- read.csv("Dunn supp data 977sp.csv", stringsAsFactors = FALSE)
-GreisserData <- read.csv("Griesser supp table1.csv", stringsAsFactors = FALSE)
+GriesserData <- read.csv("Griesser supp table1.csv", stringsAsFactors = FALSE)
 JetzData <- read.csv("Jetz_data_BirdTreeNames_nodups.csv", check.names = FALSE)
 RiehlData <- read.csv("Riehl 2013 supp data columns lines_kts edited.csv", stringsAsFactors = FALSE)
 RubensteinLovetteData <- read.csv("RubensteinLovette_data_BirdTreeNames.csv", stringsAsFactors = FALSE)
-
+OdomFSData <- read.csv()
+Griesser2017Data <- read.csv()
 
 # merge Jetz + Downing
 DowningSubset <- DowningData #[,c(1,2,4,11,12,13,14)]
@@ -57,7 +59,7 @@ colnames(newdf6)[which(colnames(newdf6) == "Species")] <- "Species_Rubenstein"
 
 
 # merge newdf6 and Griesser
-GriesserSubset <- GreisserData #[, c(1,2,3,4,5,6)]
+GriesserSubset <- GriesserData #[, c(1,2,3,4,5,6)]
 newdf7 <- merge(newdf6, GriesserSubset, by = "BirdtreeSpecies", all = TRUE, suffixes = c("", "_Griesser2016"))
 colnames(newdf7)[which(colnames(newdf7) == "common.name")] <- "common.name_Griesser2016"
 
