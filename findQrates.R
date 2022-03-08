@@ -15,6 +15,8 @@
 #6/4/2021 - if plotting, checks for or makes OutputFiles subdirectory; made all text in titles of subplots be on 2nd line because margin weirdness
 #8/27/2021 - add otherlabel arg to file name if plotting simmaps; added tip labels (points); added named colors for plotting simmap
 #8/27/2021 - findQrates seems to calculate Q for the data subsetted by both columns, rather than just the discrete column... it should be computing Q based on whole set of discrete data! Granted, this is the case if columns input is only the discrete column... but we still want to plot simmaps of double-subsetted trees probably. Solution: add another subset within the plotting statement, make original subset only subset based on columns[1]. Done.
+# 3/8/2022 - this version does not contain the setmodel parameter added in ~/Desktop/Phylobiology/findQrates.R
+
 
 #findQrates - to be used within matingfunction to set the rates of transition between states for the building of simmaps for brownie
 #Can also be used to generate simmaps with the computed rates with plot = TRUE

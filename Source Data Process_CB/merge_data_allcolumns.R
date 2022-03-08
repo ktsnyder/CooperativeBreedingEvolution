@@ -15,8 +15,8 @@ GriesserData <- read.csv("Griesser supp table1.csv", stringsAsFactors = FALSE)
 JetzData <- read.csv("Jetz_data_BirdTreeNames_nodups.csv", check.names = FALSE)
 RiehlData <- read.csv("Riehl 2013 supp data columns lines_kts edited.csv", stringsAsFactors = FALSE)
 RubensteinLovetteData <- read.csv("RubensteinLovette_data_BirdTreeNames.csv", stringsAsFactors = FALSE)
-OdomFSData <- read.csv()
-Griesser2017Data <- read.csv()
+OdomFSData <- read.csv("FemaleSongData_OdomEtal2014_PresentAbsentSubset_BirdTreeNames.csv")
+Griesser2017Data <- read.csv("Griesser2017 matched species names.csv")
 
 # merge Jetz + Downing
 DowningSubset <- DowningData #[,c(1,2,4,11,12,13,14)]
@@ -63,8 +63,15 @@ GriesserSubset <- GriesserData #[, c(1,2,3,4,5,6)]
 newdf7 <- merge(newdf6, GriesserSubset, by = "BirdtreeSpecies", all = TRUE, suffixes = c("", "_Griesser2016"))
 colnames(newdf7)[which(colnames(newdf7) == "common.name")] <- "common.name_Griesser2016"
 
+# merge new7 + Griesser2017
+newdf8 <- merge(newdf7, Griesser2017Data, by.x =  "BirdtreeSpecies", by.y = "BirdtreeFormat", all = TRUE, suffixes = c("", "_Griesser2017"))
+#colnames(newdf7)[which(colnames(newdf7) == "common.name")] <- "common.name_Griesser2017"
+
+# merge newdf8 + OdomFS
+newdf9 <- merge(newdf8, OdomFSData, by.x =  "BirdtreeSpecies", by.y = "Latin_binomial", all = TRUE, suffixes = c("","_Odom"))
+
 # write file
-write.csv(newdf7, file = "Aggregate_Source_Data_AllColumns.csv", row.names = FALSE)
+write.csv(newdf9, file = "Aggregate_Source_Data_AllColumns.csv", row.names = FALSE)
 
 
 # Additional (non-Cooperative Breeding) Sources

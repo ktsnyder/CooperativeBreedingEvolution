@@ -2,10 +2,11 @@
 ## Coded by Aleyna Loughran-Pierce and Kate Snyder
 ## Created 10/9/2020
 ## Last edited: 8/18/2021 by Kate Snyder
+## 3/7/2022 - add nonkin/kin etc
 
 setwd("~/Desktop/CooperativeBreedingEvolution/Source Data Process_CB")
 
-CoopBreed_species_summary(coopbreedfile = "Aggregate_Source_Data.csv", coopClassMethod = "AnyCoopEqualsCoop", allcoop = FALSE)
+CoopBreed_species_summary(coopbreedfile = "Aggregate_Source_Data_AllColumns.csv", coopClassMethod = "AnyCoopEqualsCoop", allcoop = TRUE)
 
 CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Update.csv", coopClassMethod = c("MeanCoop", "AnyCoopEqualsCoop"), allcoop = FALSE) {
   
@@ -40,13 +41,20 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
     
     
     if (is.na(tempRowIn$breeding.system)) { 
-      Downing <- NA
+      DowningCoop <- NA
+      DowningKinCoop <- NA
     } else if (tempRowIn$breeding.system == "noncooperative") {
-      Downing <- 0
-    } else if (tempRowIn$breeding.system %in% c("kinCooperator","nonkinCooperator")) {  
-      Downing <- 1
+      DowningCoop <- 0
+      DowningKinCoop <- NA
+    } else if (tempRowIn$breeding.system %in% c("kinCooperator")) {  
+      DowningCoop <- 1
+      DowningKinCoop <- "K"
+    } else if (tempRowIn$breeding.system %in% c("nonkinCooperator")) {  
+      DowningCoop <- 1
+      DowningKinCoop <- "NK"
     } else {
-      Downing <- NA  
+      DowningCoop <- NA  
+      DowningKinCoop <- NA
     }
     
     
@@ -83,23 +91,50 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
     }
     
     if (is.na(tempRowIn$Social_breeding_system_when_cooperative)) {
-      Reihl <- NA
+      ReihlCoop <- NA
     } else {
-      Reihl <- 1  # because all entries in this column are cooperative
+      ReihlCoop <- 1  # because all entries in this column are cooperative
     } 
     
-    # ## Extract mating system from Biagolini
-    # if (is.na(tempRowIn$OurDatabaseMateSys.Biagolini)) {
-    #   BiagoliniPolygyny <- NA
-    # } else if (tempRowIn$OurDatabaseMateSys.Biagolini %in% c("Social Monogamy", "Social Monogamy, Cooperative Breeder", "Social Monogamy,Cooperative Breeder")) {
-    #   BiagoliniPolygyny <- 0
-    # } else if (tempRowIn$OurDatabaseMateSys.Biagolini == "Polygyny") {
-    #   BiagoliniPolygyny <- 1
-    # } else {
-    #   BiagoliniPolygyny <- NA
-    # }
+    if (is.na(tempRowIn$Kin)) {
+      RiehlKin <- NA
+    } else if (tempRowIn$Kin %in% c("K", "NK", "M")) {
+      RiehlKin <- tempRowIn$Kin
+    } else if (tempRowIn$Kin %in% c("K; M", "K; NK")) {
+      RiehlKin <- "M"
+    } else {
+      RiehlKin <- NA
+    }
+ 
     
-    allsourcesvec <- c(Dunn, Biagolini, Downing, Jetz, Rubenstien, Cockburn, Reihl)
+    # Griesser 2017 - family living vs non family, and coop vs noncoop
+    if (is.na(tempRowIn$social_system_incl_nk_coop)) {
+      Griesser2017_Coop <- NA
+      Griesser2017_KinCoop <- NA
+    } else if (tempRowIn$social_system_incl_nk_coop %in% c("no_fam", "family")) {
+      Griesser2017_Coop <- 0
+      Griesser2017_KinCoop <- NA
+    } else if (tempRowIn$social_system_incl_nk_coop == "nk-coop") {
+      Griesser2017_Coop <- 1
+      Griesser2017_KinCoop <- "NK"
+    } else if (tempRowIn$social_system_incl_nk_coop == "coop_families") {
+      Griesser2017_Coop <- 1
+      Griesser2017_KinCoop <- "K"
+    } else {
+      Griesser2017_Coop <- NA
+      Griesser2017_KinCoop <- NA
+    }
+    
+    if (is.na(tempRowIn$social_system)) {
+      Griesser2017_Familial <- NA
+    } else if (tempRowIn$social_system %in% c("coop_fam", "fam")) {
+      Griesser2017_Familial <- 1
+    } else if (tempRowIn$social_system == "no_fam") {
+      Griesser2017_Familial <- 0 
+    }
+    
+    
+    allsourcesvec <- c(Dunn, Biagolini, DowningCoop, Jetz, Rubenstien, Cockburn, ReihlCoop, Griesser2017_Coop)
     allsourcesNoNA <- na.omit(allsourcesvec)
     meanclass <- sum(allsourcesNoNA)/length(allsourcesNoNA) 
     
@@ -129,10 +164,25 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
       } else {CoopBreed = NA}
     }
     
+    
+    allkinsources <- c(Griesser2017_KinCoop, RiehlKin, DowningKinCoop)
+    numKin <- sum(allkinsources == "K", na.rm = TRUE)
+    numNonKin <- sum(allkinsources == "NK", na.rm = TRUE)
+    numMixedKinNonKin <- sum(allkinsources == "M", na.rm = TRUE)
+    if (numKin + numNonKin + numMixedKinNonKin == 0) {
+      Kin_NK <- NA
+    } else if (numKin > numNonKin) {
+      Kin_NK <- "Kin"
+    } else if (numKin < numNonKin) {
+      Kin_NK <- "NonKin"
+    } else if (numMixedKinNonKin > numKin + numNonKin) {
+      Kin_NK <- "Mixed"
+    }
+    
     # this comes after all the if...else statements for each column - putting the whole thing together!
-    tempRowOut <- c(species, CoopBreed, numSourcesNonCoop, numSourcesCoop, SourceDiscrepancy, Dunn, Biagolini, Downing, Jetz, Rubenstien, Cockburn, Reihl)  
+    tempRowOut <- c(species, CoopBreed, numSourcesNonCoop, numSourcesCoop, SourceDiscrepancy, Dunn, Biagolini, DowningCoop, Jetz, Rubenstien, Cockburn, ReihlCoop, Griesser2017_Coop, RiehlKin, DowningKinCoop, Griesser2017_KinCoop, Griesser2017_Familial, numKin, numNonKin, numMixedKinNonKin, Kin_NK)  
     summarydf <- rbind(summarydf, tempRowOut)
-    colnames(summarydf) <- c("species","CoopBreed", "numSourcesNonCoop", "numSourcesCoop", "SourceDiscrepancy", "Dunn","Biagolini", "Downing", "Jetz", "Rubenstein", "Cockburn", "Reihl") # must have the same length as tempRowOut
+    colnames(summarydf) <- c("species","CoopBreed", "numSourcesNonCoop", "numSourcesCoop", "SourceDiscrepancy", "Dunn","Biagolini", "DowningCoop", "Jetz", "Rubenstein", "Cockburn", "ReihlCoop", "Griesser2017Coop", "RiehlKin", "DowningKinNKCoop", "Griesser2017KinCoop", "Griesser2017FamilialLiving", "numKin", "numNonKin", "numMixed", "Kin_NK") # must have the same length as tempRowOut
     
   }  # end for (i in 1:length(ourdf$species_in_birdtree))
   
