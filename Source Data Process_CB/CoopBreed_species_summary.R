@@ -207,9 +207,9 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
     }
     
     # this comes after all the if...else statements for each column - putting the whole thing together!
-    tempRowOut <- c(species, CoopBreed, Kin_NK, numSourcesNonCoop, numSourcesCoop, SourceDiscrepancy, Dunn, Biagolini, DowningCoop, Jetz, Rubenstien, Cockburn, ReihlCoop, Griesser2017_Coop, BOWCoop, RiehlKin, DowningKinCoop, Griesser2017_KinCoop, Griesser2017_Familial, numKin, numNonKin, numMixedKinNonKin, FemaleSong)  
+    tempRowOut <- c(species, MeanCoopOmitTies, MeanCoopTie2Noncoop, MeanCoopTie2Coop, AnyCoopEqualsCoop, Kin_NK, numSourcesNonCoop, numSourcesCoop, SourceDiscrepancy, Dunn, Biagolini, DowningCoop, Jetz, Rubenstien, Cockburn, ReihlCoop, Griesser2017_Coop, BOWCoop, RiehlKin, DowningKinCoop, Griesser2017_KinCoop, Griesser2017_Familial, numKin, numNonKin, numMixedKinNonKin, FemaleSong)  
     summarydf <- rbind(summarydf, tempRowOut)
-    colnames(summarydf) <- c("species","CoopBreed", "Kin_NK", "numSourcesNonCoop", "numSourcesCoop", "SourceDiscrepancy", "Dunn","Biagolini", "DowningCoop", "Jetz", "Rubenstein", "Cockburn", "ReihlCoop", "Griesser2017Coop", "BOWCoop", "RiehlKin", "DowningKinNKCoop", "Griesser2017KinCoop", "Griesser2017FamilialLiving", "numKin", "numNonKin", "numMixed", "FemaleSong") # must have the same length as tempRowOut
+    colnames(summarydf) <- c("species","MeanCoopOmitTies", "MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "AnyCoopEqualsCoop", "Kin_NK", "numSourcesNonCoop", "numSourcesCoop", "SourceDiscrepancy", "Dunn","Biagolini", "DowningCoop", "Jetz", "Rubenstein", "Cockburn", "ReihlCoop", "Griesser2017Coop", "BOWCoop", "RiehlKin", "DowningKinNKCoop", "Griesser2017KinCoop", "Griesser2017FamilialLiving", "numKin", "numNonKin", "numMixed", "FemaleSong") # must have the same length as tempRowOut
     
   }  # end for (i in 1:length(ourdf$species_in_birdtree))
   
