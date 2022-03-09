@@ -1,0 +1,9 @@
+3
+1
+res q12 q34
+res q21 q43
+res q13 q24
+res q31 q42
+mlt 10
+lf ./BTout.log.txt
+run

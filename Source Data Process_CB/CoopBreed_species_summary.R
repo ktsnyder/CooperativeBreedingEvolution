@@ -3,13 +3,14 @@
 ## Created 10/9/2020
 ## Last edited: 8/18/2021 by Kate Snyder
 ## 3/8/2022 - add nonkin/kin etc, added Odom Female Song to output, added BOW data, changed MeanCoop to be only > 0.5 (not >=)
+## 3/9/2022 - output all Classification methods as different columns in the same table, remove coopClassMethod arg
 
 
 setwd("~/Desktop/CooperativeBreedingEvolution/Source Data Process_CB")
 
-CoopBreed_species_summary(coopbreedfile = "Aggregate_Source_Data_AllColumns.csv", coopClassMethod = "MeanCoop", allcoop = TRUE)
+CoopBreed_species_summary(coopbreedfile = "Aggregate_Source_Data_AllColumns.csv", allcoop = TRUE)
 
-CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Update.csv", coopClassMethod = c("MeanCoop", "AnyCoopEqualsCoop"), allcoop = FALSE) {
+CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Update.csv", allcoop = FALSE) {
   
   ourdf <- read.csv(file = coopbreedfile)
   
@@ -152,24 +153,45 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
       SourceDiscrepancy <- 0
     }
     
-    if (coopClassMethod == "MeanCoop") {
+    #if (coopClassMethod == "MeanCoopOmitTies") {
       if (!is.na(meanclass)) {
         if (meanclass > 0.5) { # 3/8/2022 changed from >=
-          CoopBreed <- 1
+          MeanCoopOmitTies <- 1
         } else if (meanclass < 0.5) {
-          CoopBreed <- 0
-        } else {CoopBreed <- NA}
-      } else {CoopBreed <- NA}
+          MeanCoopOmitTies <- 0
+        } else {MeanCoopOmitTies <- NA}
+    #  } else {MeanCoopOmitTies <- NA}
       
-    } else if (coopClassMethod == "AnyCoopEqualsCoop") {
+    #} else if (coopClassMethod == "AnyCoopEqualsCoop") {
       if (1 %in% allsourcesvec) {
-        CoopBreed = 1
+        AnyCoopEqualsCoop = 1
       } else if (0 %in% allsourcesvec) {
-        CoopBreed = 0
-      } else {CoopBreed = NA}
-    }
+        AnyCoopEqualsCoop = 0
+      } else {AnyCoopEqualsCoop = NA}
+    #}
     
+    #if (coopClassMethod == "MeanCoopTie2NonCoop") {
+     # if (!is.na(meanclass)) {
+        if (meanclass > 0.5) { # 3/8/2022 changed from >=
+          MeanCoopTie2Noncoop <- 1
+        } else if (meanclass <= 0.5) {
+          MeanCoopTie2Noncoop <- 0
+        } else {MeanCoopTie2Noncoop <- NA}
+      #} else {MeanCoopTie2Noncoop <- NA}
     
+      #if (!is.na(meanclass)) {
+        if (meanclass >= 0.5) { # 3/8/2022 changed from >=
+          MeanCoopTie2Coop <- 1
+        } else if (meanclass < 0.5) {
+          MeanCoopTie2Coop <- 0
+        } else {MeanCoopTie2Coop <- NA}
+       } else {  # end if !is.na(meanclass)
+        MeanCoopOmitTies <- NA
+        AnyCoopEqualsCoop <- NA
+        MeanCoopTie2Noncoop <- NA
+        MeanCoopTie2Coop <- NA
+       }  # end else
+        
     allkinsources <- c(Griesser2017_KinCoop, RiehlKin, DowningKinCoop)
     numKin <- sum(allkinsources == "K", na.rm = TRUE)
     numNonKin <- sum(allkinsources == "NK", na.rm = TRUE)
@@ -211,6 +233,6 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
     subsetlabel <- "_All"
   }
   
-  write.csv(coopsongdf, file = paste0(Sys.Date(),"CoopSong_", coopClassMethod, subsetlabel, ".csv"), row.names = FALSE)
+  write.csv(coopsongdf, file = paste0(Sys.Date(),"CoopSong_", subsetlabel, ".csv"), row.names = FALSE)
   
 } # end function

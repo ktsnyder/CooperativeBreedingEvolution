@@ -101,8 +101,10 @@ for (k in 1:6) {
   colnames(BTdf)[16:18] <- c("LRstat", "LRpval", "songcontvec")
   transitionBinplots(MateParam = "CoopBreed",SongParam = feature, df = BTdf,newpdf = TRUE, nsim = nsim, binnum = 3)
 } 
+#Only got through Song.rep.final in above, and started Duration.final
 
 
+#Did not get to this
 newdata = "2022-03-08CoopSong_MeanCoop_All.csv"
 treefile <- "2021-08-31ConsensusPasserineTreeEricson10_1000.nex" # 3/8/2022
 currentlabel <- "PasserineTreeEricson-MeanCoop"
