@@ -3,6 +3,7 @@
 ## Created 10/10/2020
 ## Last modified: 12/09/2021 by Kate Snyder - include all columns from each source file
 ## 3/7/2022 - add in Griesser 2017 data, female song (Odom 2014) data
+## 3/8/2022 - add in BOW data
 
 ourdatabase <- read.csv("SongData_R_Update.csv", stringsAsFactors = FALSE)
 ourdatabaserefs <- read.csv("SupplementDataRefs_Update.csv")
@@ -17,6 +18,7 @@ RiehlData <- read.csv("Riehl 2013 supp data columns lines_kts edited.csv", strin
 RubensteinLovetteData <- read.csv("RubensteinLovette_data_BirdTreeNames.csv", stringsAsFactors = FALSE)
 OdomFSData <- read.csv("FemaleSongData_OdomEtal2014_PresentAbsentSubset_BirdTreeNames.csv")
 Griesser2017Data <- read.csv("Griesser2017 matched species names.csv")
+BOWData <- read.csv("BOW Cooperative Breeding Data.csv")
 
 # merge Jetz + Downing
 DowningSubset <- DowningData #[,c(1,2,4,11,12,13,14)]
@@ -70,8 +72,13 @@ newdf8 <- merge(newdf7, Griesser2017Data, by.x =  "BirdtreeSpecies", by.y = "Bir
 # merge newdf8 + OdomFS
 newdf9 <- merge(newdf8, OdomFSData, by.x =  "BirdtreeSpecies", by.y = "Latin_binomial", all = TRUE, suffixes = c("","_Odom"))
 
+# merge newdf9 and BOW data
+newdf10 <- merge(newdf9, BOWData, by.x =  "BirdtreeSpecies", by.y = "SpeciesScientific.BOW", all = TRUE, suffixes = c("","_BOW"))
+
+newdf11 <- newdf10[which(!newdf10$BirdtreeSpecies %in% c("(non-Oscine)","(non-Passerine)","NA")),]
+
 # write file
-write.csv(newdf9, file = "Aggregate_Source_Data_AllColumns.csv", row.names = FALSE)
+write.csv(newdf11, file = "Aggregate_Source_Data_AllColumns.csv", row.names = FALSE)
 
 
 # Additional (non-Cooperative Breeding) Sources

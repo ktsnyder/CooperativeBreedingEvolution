@@ -2,11 +2,12 @@
 ## Coded by Aleyna Loughran-Pierce and Kate Snyder
 ## Created 10/9/2020
 ## Last edited: 8/18/2021 by Kate Snyder
-## 3/7/2022 - add nonkin/kin etc
+## 3/8/2022 - add nonkin/kin etc, added Odom Female Song to output, added BOW data, changed MeanCoop to be only > 0.5 (not >=)
+
 
 setwd("~/Desktop/CooperativeBreedingEvolution/Source Data Process_CB")
 
-CoopBreed_species_summary(coopbreedfile = "Aggregate_Source_Data_AllColumns.csv", coopClassMethod = "AnyCoopEqualsCoop", allcoop = TRUE)
+CoopBreed_species_summary(coopbreedfile = "Aggregate_Source_Data_AllColumns.csv", coopClassMethod = "MeanCoop", allcoop = TRUE)
 
 CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Update.csv", coopClassMethod = c("MeanCoop", "AnyCoopEqualsCoop"), allcoop = FALSE) {
   
@@ -96,6 +97,9 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
       ReihlCoop <- 1  # because all entries in this column are cooperative
     } 
     
+    # Birds of the World
+    BOWCoop <- tempRowIn$Cooperative.BOW
+    
     if (is.na(tempRowIn$Kin)) {
       RiehlKin <- NA
     } else if (tempRowIn$Kin %in% c("K", "NK", "M")) {
@@ -133,8 +137,9 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
       Griesser2017_Familial <- 0 
     }
     
+    FemaleSong <- tempRowIn$Female.Song.Score
     
-    allsourcesvec <- c(Dunn, Biagolini, DowningCoop, Jetz, Rubenstien, Cockburn, ReihlCoop, Griesser2017_Coop)
+    allsourcesvec <- c(Dunn, Biagolini, DowningCoop, Jetz, Rubenstien, Cockburn, ReihlCoop, Griesser2017_Coop, BOWCoop)
     allsourcesNoNA <- na.omit(allsourcesvec)
     meanclass <- sum(allsourcesNoNA)/length(allsourcesNoNA) 
     
@@ -149,7 +154,7 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
     
     if (coopClassMethod == "MeanCoop") {
       if (!is.na(meanclass)) {
-        if (meanclass >= 0.5) {
+        if (meanclass > 0.5) { # 3/8/2022 changed from >=
           CoopBreed <- 1
         } else if (meanclass < 0.5) {
           CoopBreed <- 0
@@ -180,9 +185,9 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
     }
     
     # this comes after all the if...else statements for each column - putting the whole thing together!
-    tempRowOut <- c(species, CoopBreed, numSourcesNonCoop, numSourcesCoop, SourceDiscrepancy, Dunn, Biagolini, DowningCoop, Jetz, Rubenstien, Cockburn, ReihlCoop, Griesser2017_Coop, RiehlKin, DowningKinCoop, Griesser2017_KinCoop, Griesser2017_Familial, numKin, numNonKin, numMixedKinNonKin, Kin_NK)  
+    tempRowOut <- c(species, CoopBreed, Kin_NK, numSourcesNonCoop, numSourcesCoop, SourceDiscrepancy, Dunn, Biagolini, DowningCoop, Jetz, Rubenstien, Cockburn, ReihlCoop, Griesser2017_Coop, BOWCoop, RiehlKin, DowningKinCoop, Griesser2017_KinCoop, Griesser2017_Familial, numKin, numNonKin, numMixedKinNonKin, FemaleSong)  
     summarydf <- rbind(summarydf, tempRowOut)
-    colnames(summarydf) <- c("species","CoopBreed", "numSourcesNonCoop", "numSourcesCoop", "SourceDiscrepancy", "Dunn","Biagolini", "DowningCoop", "Jetz", "Rubenstein", "Cockburn", "ReihlCoop", "Griesser2017Coop", "RiehlKin", "DowningKinNKCoop", "Griesser2017KinCoop", "Griesser2017FamilialLiving", "numKin", "numNonKin", "numMixed", "Kin_NK") # must have the same length as tempRowOut
+    colnames(summarydf) <- c("species","CoopBreed", "Kin_NK", "numSourcesNonCoop", "numSourcesCoop", "SourceDiscrepancy", "Dunn","Biagolini", "DowningCoop", "Jetz", "Rubenstein", "Cockburn", "ReihlCoop", "Griesser2017Coop", "BOWCoop", "RiehlKin", "DowningKinNKCoop", "Griesser2017KinCoop", "Griesser2017FamilialLiving", "numKin", "numNonKin", "numMixed", "FemaleSong") # must have the same length as tempRowOut
     
   }  # end for (i in 1:length(ourdf$species_in_birdtree))
   
@@ -191,6 +196,8 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
   #                           summarydf[,2:length(colnames(summarydf))])
   
   summaryNoDups <- summarydf[which(!duplicated(summarydf$species)),] #not necessary anymore
+  
+  
   
   write.csv(summaryNoDups, file = paste0(Sys.Date(), "_working_coop_breed.csv"), row.names = FALSE)
   
