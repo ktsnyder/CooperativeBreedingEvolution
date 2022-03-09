@@ -1,6 +1,4 @@
 "species","MeanCoopOmitTies","MeanCoopTie2Noncoop","MeanCoopTie2Coop","AnyCoopEqualsCoop","Kin_NK","numSourcesNonCoop","numSourcesCoop","SourceDiscrepancy","Dunn","Biagolini","DowningCoop","Jetz","Rubenstein","Cockburn","ReihlCoop","Griesser2017Coop","BOWCoop","RiehlKin","DowningKinNKCoop","Griesser2017KinCoop","Griesser2017FamilialLiving","numKin","numNonKin","numMixed","FemaleSong"
-"(non-passerine)","1","1","1","1","Kin","0","1","0",NA,NA,NA,NA,NA,NA,NA,"1",NA,NA,NA,"K","1","1","0","0",NA
-"(not_checked)","0","0","0","0",NA,"1","0","0",NA,NA,NA,NA,NA,NA,NA,"0",NA,NA,NA,NA,"0","0","0","0",NA
 "Abeillia_abeillei","0","0","0","0",NA,"2","0","0",NA,NA,NA,"0",NA,NA,NA,"0",NA,NA,NA,NA,"0","0","0","0",NA
 "Abroscopus_albogularis","0","0","0","0",NA,"2","0","0",NA,NA,NA,"0",NA,"0",NA,NA,NA,NA,NA,NA,NA,"0","0","0",NA
 "Abroscopus_schisticeps","0","0","0","0",NA,"1","0","0",NA,NA,NA,"0",NA,NA,NA,NA,NA,NA,NA,NA,NA,"0","0","0",NA
@@ -9721,4 +9719,3 @@
 "Zosterops_vellalavella","0","0","0","0",NA,"1","0","0",NA,NA,NA,"0",NA,NA,NA,NA,NA,NA,NA,NA,NA,"0","0","0",NA
 "Zosterops_wallacei","0","0","0","0",NA,"1","0","0",NA,NA,NA,"0",NA,NA,NA,NA,NA,NA,NA,NA,NA,"0","0","0",NA
 "Zosterops_xanthochroa","0","0","0","0",NA,"2","0","0",NA,NA,NA,"0",NA,"0",NA,NA,NA,NA,NA,NA,NA,"0","0","0",NA
-NA,"0","0","0","0",NA,"1","0","0",NA,NA,NA,NA,NA,NA,NA,"0",NA,NA,NA,NA,"1","0","0","0",NA

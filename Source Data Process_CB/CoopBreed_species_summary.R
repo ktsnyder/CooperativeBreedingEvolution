@@ -3,7 +3,7 @@
 ## Created 10/9/2020
 ## Last edited: 8/18/2021 by Kate Snyder
 ## 3/8/2022 - add nonkin/kin etc, added Odom Female Song to output, added BOW data, changed MeanCoop to be only > 0.5 (not >=)
-## 3/9/2022 - output all Classification methods as different columns in the same table, remove coopClassMethod arg
+## 3/9/2022 - output all Classification methods as different columns in the same table, remove coopClassMethod arg, remove extra rows
 
 
 setwd("~/Desktop/CooperativeBreedingEvolution/Source Data Process_CB")
@@ -217,8 +217,9 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
   #summarydfexpanded <- cbind(ourdf[,"species_in_birdtree"], #,"OurDatabaseOrder","OurDatabaseFamily","OurDatabaseEPP")], 
   #                           summarydf[,2:length(colnames(summarydf))])
   
-  summaryNoDups <- summarydf[which(!duplicated(summarydf$species)),] #not necessary anymore
+  summaryNoDups <- summarydf[which(!duplicated(summarydf$species)),] 
   
+  summaryNoDups <- summaryNoDups[which(!summaryNoDups$species %in% c(NA, "(non-passerine)", "(not_checked)")),]
   
   
   write.csv(summaryNoDups, file = paste0(Sys.Date(), "_working_coop_breed.csv"), row.names = FALSE)
