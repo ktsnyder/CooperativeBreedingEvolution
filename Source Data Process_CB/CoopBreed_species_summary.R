@@ -4,7 +4,7 @@
 ## Last edited: 8/18/2021 by Kate Snyder
 ## 3/8/2022 - add nonkin/kin etc, added Odom Female Song to output, added BOW data, changed MeanCoop to be only > 0.5 (not >=)
 ## 3/9/2022 - output all Classification methods as different columns in the same table, remove coopClassMethod arg, remove extra rows
-
+## 3/10/2022 - correct Jetz et al classification to reflect more liberal use of Cockburn et al data
 
 setwd("~/Desktop/CooperativeBreedingEvolution/Source Data Process_CB")
 
@@ -60,17 +60,6 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
     }
     
     
-    if (is.na(tempRowIn$System)) {
-      Jetz <- NA
-    } else if (tempRowIn$System == "Non-cooperative") {
-      Jetz <- 0
-    } else if (tempRowIn$System == "Cooperative") {
-      Jetz <- 1
-    } else {
-      Jetz <- NA
-    }
-    
-    
     if (is.na(tempRowIn$Social_System)) {
       Rubenstien <- NA
     } else if (tempRowIn$Social_System == "Noncooperative") {
@@ -90,6 +79,27 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
       Cockburn <- 1
     } else {
       Cockburn<- NA  
+    }
+    
+    if (is.na(tempRowIn$System)) {
+      Jetz <- NA
+    } else if (tempRowIn$System == "Non-cooperative") {
+      Jetz <- 0
+    } else if (tempRowIn$System == "Cooperative") {
+      Jetz <- 1
+    } else {
+      Jetz <- NA
+    }
+    
+    JetzSource <- as.character(tempRowIn$Source)
+    JetzSources <- as.character(-17:-2)
+    
+    if (!is.na(Jetz) & !is.na(Cockburn)) {  
+      if  (JetzSource == "-1") {    # if both Jetz and Cockburn have a CoopBreed classification, and Jetz's source is Cockburn
+        Jetz <- NA
+      } else if (JetzSource %in% JetzSources) {
+        Jetz <- Jetz
+      }
     }
     
     if (is.na(tempRowIn$Social_breeding_system_when_cooperative)) {
