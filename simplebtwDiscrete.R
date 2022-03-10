@@ -121,6 +121,7 @@ simplebtwDiscrete <- function(columns, newdata, newtree, treelabel, nsim, clades
   subsetdf$FemaleSong[which(subsetdf$FemaleSong == "Absent")] <- "0"
   }
   subsetdf$CoopBreed <- as.character(subsetdf$CoopBreed)
+  subsetdf[,columns[2]] <- as.character(subsetdf[,columns[2]])
   # tipsToDrop <- thousandtrees[[1]]$tip.label[which(!thousandtrees[[1]]$tip.label %in% subsetdf$species)]
   # subsettree <- drop.tip.multiPhylo(phy = thousandtrees, tip=tipsToDrop)
   subsettree <- subsetbtw$subsettree

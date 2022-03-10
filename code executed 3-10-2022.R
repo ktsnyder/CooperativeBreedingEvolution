@@ -11,7 +11,7 @@ source("plotbrownie.R")
 
 songfeatures <- c("Syll.song.final", "Song.rep.final", "Syll.rep.final")
 classmethods = c("MeanCoopOmitTies", "MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "AnyCoopEqualsCoop")
-newdata = "2022-03-10CoopSong__All.csv"
+newdata = "2022-03-10CoopSong_All.csv"
 olddata = "2022-03-09CoopSong__All_preJetzCorrection.csv"
 treefile = "2021-08-31ConsensusPasserineTreeEricson10_1000.nex" 
 treelabel = "PasserineTreeEricson-"
@@ -32,12 +32,13 @@ dfnew %>% group_by(Jetz, Cockburn) %>% summarize(n=n())
 
 jetzview <- dfnew %>% group_by(Jetz, Cockburn, JetzSource) %>% summarize(n=n())
 
-dfnew$species[which(dfnew$numSourcesNonCoop == dfnew$numSourcesCoop)]
+dfnew$species[which(dfnew$numSourcesNonCoop == dfnew$numSourcesCoop & dfnew$numSourcesNonCoop != 0)]
 
+dfnew %>% group_by(MeanCoopTie2Noncoop ,Griesser2017FamilialLiving) %>% summarize(n = n())
 
 source("simplebtwDiscrete.R")
 classmethods <- c("MeanCoopOmitTies",  "MeanCoopTie2Noncoop", "MeanCoopTie2Coop",  "AnyCoopEqualsCoop" )
-nsim = 500
+nsim = 100
 for (i in classmethods) {
   currentclassmethod <- i
   columns <- c(currentclassmethod, "FemaleSong")
@@ -53,6 +54,38 @@ print(columns)
 print(Sys.time())
 simplebtwOutput <- simplebtwDiscrete(columns = columns, newdata = newdata, newtree = treefile, treelabel = treelabel, nsim = nsim)
 plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim, treelabel = treelabel, newpdf = TRUE, ylabel = " 'COOPERATIVE' ACTUALLY 'FAMILIAL LIVING' ")
+
+columns <- c("Kin_NK", "FemaleSong")
+print(columns)
+print(Sys.time())
+#simplebtwOutput <- simplebtwDiscrete(columns = columns, newdata = newdata, newtree = treefile, treelabel = treelabel, nsim = nsim)  - this seems to have broken BT, be careful
+plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim, treelabel = treelabel, newpdf = TRUE, ylabel = " 'COOPERATIVE' ACTUALLY 'KIN COOP v NONKIN COOP' ")
+
+columns <- c("MeanCoopTie2Noncoop", "O.C")
+print(columns)
+print(Sys.time())
+simplebtwOutput <- simplebtwDiscrete(columns = columns, newdata = newdata, newtree = treefile, treelabel = treelabel, nsim = nsim)
+plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim, treelabel = treelabel, newpdf = TRUE, ylabel = "")
+
+columns <- c("Final.polygyny", "FemaleSong")
+print(columns)
+print(Sys.time())
+simplebtwOutput <- simplebtwDiscrete(columns = columns, newdata = newdata, newtree = treefile, treelabel = treelabel, nsim = nsim)
+plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim, treelabel = treelabel, newpdf = TRUE, ylabel = " 'COOPERATIVE' ACTUALLY 'POLYGYNY v MONOGAMY' ")
+
+columns <- c("Final.EPP", "FemaleSong") 
+print(columns)
+print(Sys.time())
+simplebtwOutput <- simplebtwDiscrete(columns = columns, newdata = newdata, newtree = treefile, treelabel = treelabel, nsim = nsim)
+plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim, treelabel = treelabel, newpdf = TRUE, ylabel = " 'COOPERATIVE' ACTUALLY 'EPP' ")
+
+columns <- c("MeanCoopTie2Noncoop" ,"Griesser2017FamilialLiving")
+print(columns)
+print(Sys.time())
+simplebtwOutput <- simplebtwDiscrete(columns = columns, newdata = newdata, newtree = treefile, treelabel = treelabel, nsim = nsim)
+plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim, treelabel = treelabel, newpdf = TRUE, ylabel = "")
+
+
 
 
 # require("btw")
@@ -139,27 +172,27 @@ plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim
 # 
 # 
 # ## Brownie
-# nsim = 200
-# for (k in c(2,3,1)) {
-#   #newdata = "2022-03-08CoopSong_AnyCoopEqualsCoop_All.csv"
-#   currentclassmethod = classmethods[2]
-#   currentlabel <- paste0("PasserTreeEric-",currentclassmethod)
-#   feature <- songfeatures[k]
-#   print(feature)
-#   print(currentlabel)
-#   browniefunction(columns = c(currentclassmethod, feature), newdata = newdata, newtree = treefile, nsim = nsim, islog = feature, plotsimmaps = TRUE, otherlabel = currentlabel)
-#   
-#   plotbrownie(data = paste0(Sys.Date(),currentclassmethod,feature, currentlabel, "_brownie",nsim,"sim.csv"), columns = c(currentclassmethod,feature), discreteCategoryLabels = c("Non-cooperative","Cooperative"), otherlabel = currentlabel, newpdf = TRUE, nsim = nsim, islog = TRUE)
-#   
-#   
-#   currentclassmethod = classmethods[3]
-#   currentlabel <- paste0("PasserTreeEric-",currentclassmethod)
-#   print(currentlabel)
-#   browniefunction(columns = c(currentclassmethod, feature), newdata = newdata, newtree = treefile, nsim = nsim, islog = feature, plotsimmaps = TRUE, otherlabel = currentlabel)
-#   
-#   plotbrownie(data = paste0(Sys.Date(),currentclassmethod,feature, currentlabel, "_brownie",nsim,"sim.csv"), columns = c(currentclassmethod,feature), discreteCategoryLabels = c("Non-cooperative","Cooperative"), otherlabel = currentlabel, newpdf = TRUE, nsim = nsim, islog = TRUE)
-#   
-# }
+nsim = 100
+songfeatures <- c("Syllable.rep.final","Syll.song.final", "Song.rep.final")
+for (k in c(2,3,1)) {
+  currentclassmethod = classmethods[2]
+  currentlabel <- paste0("PasserTreeEric-",currentclassmethod)
+  feature <- songfeatures[k]
+  print(feature)
+  print(currentlabel)
+  browniefunction(columns = c(currentclassmethod, feature), newdata = newdata, newtree = treefile, nsim = nsim, islog = feature, plotsimmaps = TRUE, otherlabel = currentlabel)
+
+  plotbrownie(data = paste0(Sys.Date(),currentclassmethod,feature, currentlabel, "_brownie",nsim,"sim.csv"), columns = c(currentclassmethod,feature), discreteCategoryLabels = c("Non-cooperative","Cooperative"), otherlabel = currentlabel, newpdf = TRUE, nsim = nsim, islog = TRUE)
+
+
+  # currentclassmethod = classmethods[3]
+  # currentlabel <- paste0("PasserTreeEric-",currentclassmethod)
+  # print(currentlabel)
+  # browniefunction(columns = c(currentclassmethod, feature), newdata = newdata, newtree = treefile, nsim = nsim, islog = feature, plotsimmaps = TRUE, otherlabel = currentlabel)
+  # 
+  # plotbrownie(data = paste0(Sys.Date(),currentclassmethod,feature, currentlabel, "_brownie",nsim,"sim.csv"), columns = c(currentclassmethod,feature), discreteCategoryLabels = c("Non-cooperative","Cooperative"), otherlabel = currentlabel, newpdf = TRUE, nsim = nsim, islog = TRUE)
+}
+
 # 
 # ## ACE tree
 # newdata = "2022-03-09CoopSong__All.csv"
