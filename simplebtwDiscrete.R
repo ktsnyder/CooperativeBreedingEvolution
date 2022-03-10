@@ -8,7 +8,7 @@
 #   Use multitree input
 #   Put into other functions to e.g. jackknife
 
-setwd("~/Desktop/CooperativeBreedingEvolution")
+# setwd("~/Desktop/CooperativeBreedingEvolution")
 
 
 source("subsettreedata.R")
@@ -16,86 +16,96 @@ require(phytools)
 require(btw)
 require(dplyr)
 
-newdata = "2022-03-09CoopSong__All.csv"
-newtree = "2021-08-31ConsensusPasserineTreeEricson10_1000.nex"
+# newdata = "2022-03-09CoopSong__All.csv"
+# newtree = "2021-08-31ConsensusPasserineTreeEricson10_1000.nex"
 .BayesTraitsPath <- "~/Documents/BayesTraitsV2"
 
-# multitree
-startReadingTrees <- Sys.time()
-startReadingTrees
-#thousandtrees = read.tree(file="BirdzillaEricson10.tre")
-#thousandtrees = read.tree(file="BirdzillaHackett3_Stage2_1000trees.tre")
-thousandtrees = read.tree(file = "/Users/kate/Library/CloudStorage/Box-Box/Kate_Nicole/Birdsong - Life History Evolution/BirdzillaHackett4_Stage2_1000trees.tre")
-endReadingTrees <- Sys.time()
-endReadingTrees
-timeReadingTrees <- endReadingTrees-startReadingTrees
-timeReadingTrees #Now only 1 minute! Nice.
-
-drop.tip.multiPhylo<-function(phy, tip, ...){
-  if(!inherits(phy,"multiPhylo"))
-    stop("phy is not an object of class \"multiPhylo\".")
-  else {
-    trees<-lapply(phy,drop.tip,tip=tip,...)
-    class(trees)<-"multiPhylo"
-  }
-  trees
-}
-
-
-# running overnight 3/9/22-3/10/22
-newdata = "2022-03-09CoopSong__All.csv"
-currentclassmethod = classmethods[2]
-columns = c(currentclassmethod, "FemaleSong")
-nsim = 50
-
-
-pdf(file = paste0(Sys.Date(),"BayesTraitsDiscrete_", currentclassmethod, "_",columns[2], "_50trees.pdf"), width = 8, height = 11)
-par(mfrow = c(3,2))
-par(oma = c(2,3,2,1))
-for (i in 1:50) {
-  temptree <- thousandtrees[[i]]
-  treelabel = paste0("Hackett4-",i,"_")
-  subset <- subsettreedata(columns = columns, newdata = newdata, newtree = temptree)
-  subsetHack <- subset$subsettree
-  simplebtwOutput <- simplebtwDiscrete(columns = columns, newdata = newdata, newtree = temptree, treelabel = treelabel, nsim = nsim)
-  plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim, treelabel = treelabel, newpdf = FALSE, ylabel = NULL)
-}
-dev.off()
-
-treefile = "2021-08-31ConsensusPasserineTreeEricson10_1000.nex"
-nsim = 200
-treelabel = "PasserineTreeEricson-"
-currentclassmethod = classmethods[4]
-
-## Switch CoopBreed classifications of disputed birds
-datain <- read.csv(newdata)
-#switchspecies <- datain$species[which(is.na(datain$MeanCoopOmitTies) & !is.na(datain$FemaleSong) & !is.na(datain$AnyCoopEqualsCoop))]
-switchspecies <- datain$species[which(datain$SourceDiscrepancy == "1" & !is.na(datain$FemaleSong))]
-switchspeciesdf <- datain[which(datain$species %in% switchspecies),]
-orderedspecies <- switchspeciesdf[order(switchspeciesdf[,currentclassmethod]),]
-switchedClass <- set.seed(10)
-switchedClass[which(orderedspecies[,currentclassmethod] == 0)] <- 1
-switchedClass[which(orderedspecies[,currentclassmethod] == 1)] <- 0
-switchedClassesdf <- cbind(orderedspecies$species, orderedspecies[,currentclassmethod], switchedClass)
-colnames(switchedClassesdf) <- c("species", "originalClass","switchedClass")
-switchedClassesdf <- as.data.frame(switchedClassesdf)
-
-pdf(file = paste0(Sys.Date(),"BayesTraitsDiscrete", treelabel, columns[2], nsim, "sim_switchedTies.pdf"), width = 8, height = 11)
-par(mfrow = c(3,2))
-par(oma = c(2,3,2,1))
-for (i in 1:length(switchedClassesdf$species)) {
-  switchBird <- switchedClassesdf$species[i]
-  print(switchBird)
-  oldValue <- switchedClassesdf$originalClass[i]
-  switchedValue <- switchedClassesdf$switchedClass[i]
-  datain[which(datain$species == switchBird),currentclassmethod] <- switchedValue
-  tempY <- paste(switchBird,"CoopBreed was", oldValue, "now", switchedValue)
-  
-  simplebtwOutput <- simplebtwDiscrete(columns = columns, newdata = datain, newtree = treefile, treelabel = treelabel, nsim = nsim)
-  plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim, treelabel = treelabel, newpdf = FALSE, ylabel = tempY)
-}
-dev.off()
-
+# # multitree
+# startReadingTrees <- Sys.time()
+# startReadingTrees
+# #thousandtrees = read.tree(file="BirdzillaEricson10.tre")
+# #thousandtrees = read.tree(file="BirdzillaHackett3_Stage2_1000trees.tre")
+# thousandtrees = read.tree(file = "/Users/kate/Library/CloudStorage/Box-Box/Kate_Nicole/Birdsong - Life History Evolution/BirdzillaHackett4_Stage2_1000trees.tre")
+# endReadingTrees <- Sys.time()
+# endReadingTrees
+# timeReadingTrees <- endReadingTrees-startReadingTrees
+# timeReadingTrees #Now only 1 minute! Nice.
+# 
+# drop.tip.multiPhylo<-function(phy, tip, ...){
+#   if(!inherits(phy,"multiPhylo"))
+#     stop("phy is not an object of class \"multiPhylo\".")
+#   else {
+#     trees<-lapply(phy,drop.tip,tip=tip,...)
+#     class(trees)<-"multiPhylo"
+#   }
+#   trees
+# }
+# 
+# # running overnight 3/9/22-3/10/22
+# newdata = "2022-03-09CoopSong__All.csv"
+# currentclassmethod = classmethods[2]
+# columns = c(currentclassmethod, "FemaleSong")
+# nsim = 50
+# 
+# 
+# pdf(file = paste0(Sys.Date(),"BayesTraitsDiscrete_", currentclassmethod, "_",columns[2], "_50trees.pdf"), width = 8, height = 11)
+# par(mfrow = c(3,2))
+# par(oma = c(2,3,2,1))
+# for (i in 1:50) {
+#   temptree <- thousandtrees[[i]]
+#   treelabel = paste0("Hackett4-",i,"_")
+#   subset <- subsettreedata(columns = columns, newdata = newdata, newtree = temptree)
+#   subsetHack <- subset$subsettree
+#   simplebtwOutput <- simplebtwDiscrete(columns = columns, newdata = newdata, newtree = temptree, treelabel = treelabel, nsim = nsim)
+#   plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim, treelabel = treelabel, newpdf = FALSE, ylabel = NULL)
+# }
+# dev.off()
+# 
+# treefile = "2021-08-31ConsensusPasserineTreeEricson10_1000.nex"
+# nsim = 200
+# treelabel = "PasserineTreeEricson-"
+# currentclassmethod = classmethods[4]
+# 
+# ## Switch CoopBreed classifications of disputed birds
+# datain <- read.csv(newdata)
+# #switchspecies <- datain$species[which(is.na(datain$MeanCoopOmitTies) & !is.na(datain$FemaleSong) & !is.na(datain$AnyCoopEqualsCoop))]
+# switchspecies <- datain$species[which(datain$SourceDiscrepancy == "1" & !is.na(datain$FemaleSong))]
+# switchspeciesdf <- datain[which(datain$species %in% switchspecies),]
+# orderedspecies <- switchspeciesdf[order(switchspeciesdf[,currentclassmethod]),]
+# switchedClass <- set.seed(10)
+# switchedClass[which(orderedspecies[,currentclassmethod] == 0)] <- 1
+# switchedClass[which(orderedspecies[,currentclassmethod] == 1)] <- 0
+# switchedClassesdf <- cbind(orderedspecies$species, orderedspecies[,currentclassmethod], switchedClass)
+# colnames(switchedClassesdf) <- c("species", "originalClass","switchedClass")
+# switchedClassesdf <- as.data.frame(switchedClassesdf)
+# 
+# pdf(file = paste0(Sys.Date(),"BayesTraitsDiscrete", treelabel, columns[2], nsim, "sim_switchedTies.pdf"), width = 8, height = 11)
+# par(mfrow = c(3,2))
+# par(oma = c(2,3,2,1))
+# for (i in 1:length(switchedClassesdf$species)) {
+#   switchBird <- switchedClassesdf$species[i]
+#   print(switchBird)
+#   oldValue <- switchedClassesdf$originalClass[i]
+#   switchedValue <- switchedClassesdf$switchedClass[i]
+#   datain[which(datain$species == switchBird),currentclassmethod] <- switchedValue
+#   tempY <- paste(switchBird,"CoopBreed was", oldValue, "now", switchedValue)
+#   
+#   simplebtwOutput <- simplebtwDiscrete(columns = columns, newdata = datain, newtree = treefile, treelabel = treelabel, nsim = nsim)
+#   plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim, treelabel = treelabel, newpdf = FALSE, ylabel = tempY)
+# }
+# dev.off()
+# 
+# 
+# classmethods <- c("MeanCoopOmitTies",  "MeanCoopTie2Noncoop", "MeanCoopTie2Coop",  "AnyCoopEqualsCoop" )
+# nsim = 250
+# for (i in classmethods) {
+#   currentclassmethod <- i
+#   columns <- c(currentclassmethod, "FemaleSong")
+#   print(columns)
+#   print(Sys.time())
+#   simplebtwOutput <- simplebtwDiscrete(columns = columns, newdata = newdata, newtree = treefile, treelabel = treelabel, nsim = nsim)
+#   plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim, treelabel = treelabel, newpdf = TRUE, ylabel = NULL)
+# }
 
 
 simplebtwDiscrete <- function(columns, newdata, newtree, treelabel, nsim, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, savecsvs = FALSE) {
@@ -106,8 +116,10 @@ simplebtwDiscrete <- function(columns, newdata, newtree, treelabel, nsim, clades
   currentlabel <- paste0(treelabel,currentclassmethod)
   subsetdf <- subsetbtw$subsetdf
   colnames(subsetdf)[which(colnames(subsetdf) == currentclassmethod)] <- "CoopBreed"
+  if (columns[2] == "FemaleSong") {
   subsetdf$FemaleSong[which(subsetdf$FemaleSong == "Present")] <- "1"
   subsetdf$FemaleSong[which(subsetdf$FemaleSong == "Absent")] <- "0"
+  }
   subsetdf$CoopBreed <- as.character(subsetdf$CoopBreed)
   # tipsToDrop <- thousandtrees[[1]]$tip.label[which(!thousandtrees[[1]]$tip.label %in% subsetdf$species)]
   # subsettree <- drop.tip.multiPhylo(phy = thousandtrees, tip=tipsToDrop)
@@ -215,11 +227,11 @@ plotDiscreteBayes <- function(columns, simplebtwOut, nsim, treelabel, newpdf, cl
       par(mar = rep(2, 4))
       runsperthresh <- paste("/",nsim,sep="")
       arrowmod <- 1
-      yfamilylabel <- ""
+      yfamilylabel <- ylabel
     } else if (newpdf == FALSE) {
       par(mar = c(1.9,1.9,2.4,1.9))
       runsperthresh <- paste("/",nsim,sep="")
-      arrowmod <- 0.75
+      arrowmod <- 0.6
       yfamilylabel = paste(ylabel, cladesubsetvalue)
     }
     

@@ -4,13 +4,13 @@
 ## Last edited: 8/18/2021 by Kate Snyder
 ## 3/8/2022 - add nonkin/kin etc, added Odom Female Song to output, added BOW data, changed MeanCoop to be only > 0.5 (not >=)
 ## 3/9/2022 - output all Classification methods as different columns in the same table, remove coopClassMethod arg, remove extra rows
-## 3/10/2022 - correct Jetz et al classification to reflect more liberal use of Cockburn et al data
+## 3/10/2022 - correct Jetz et al classification to reflect more liberal use of Cockburn et al data; add OC data
 
 setwd("~/Desktop/CooperativeBreedingEvolution/Source Data Process_CB")
 
-CoopBreed_species_summary(coopbreedfile = "Aggregate_Source_Data_AllColumns.csv", allcoop = TRUE)
+CoopBreed_species_summary(coopbreedfile = "Aggregate_Source_Data_AllColumns.csv", allcoop = TRUE, OCdatafile = TRUE)
 
-CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Update.csv", allcoop = FALSE) {
+CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Update.csv", allcoop = FALSE, OCdatafile = FALSE) {
   
   ourdf <- read.csv(file = coopbreedfile)
   
@@ -217,9 +217,9 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
     }
     
     # this comes after all the if...else statements for each column - putting the whole thing together!
-    tempRowOut <- c(species, MeanCoopOmitTies, MeanCoopTie2Noncoop, MeanCoopTie2Coop, AnyCoopEqualsCoop, Kin_NK, numSourcesNonCoop, numSourcesCoop, SourceDiscrepancy, Dunn, Biagolini, DowningCoop, Jetz, Rubenstien, Cockburn, ReihlCoop, Griesser2017_Coop, BOWCoop, RiehlKin, DowningKinCoop, Griesser2017_KinCoop, Griesser2017_Familial, numKin, numNonKin, numMixedKinNonKin, FemaleSong)  
+    tempRowOut <- c(species, MeanCoopOmitTies, MeanCoopTie2Noncoop, MeanCoopTie2Coop, AnyCoopEqualsCoop, Kin_NK, numSourcesNonCoop, numSourcesCoop, SourceDiscrepancy, Dunn, Biagolini, DowningCoop, Jetz, Rubenstien, Cockburn, ReihlCoop, Griesser2017_Coop, BOWCoop, RiehlKin, DowningKinCoop, Griesser2017_KinCoop, Griesser2017_Familial, numKin, numNonKin, numMixedKinNonKin, FemaleSong, JetzSource)  
     summarydf <- rbind(summarydf, tempRowOut)
-    colnames(summarydf) <- c("species","MeanCoopOmitTies", "MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "AnyCoopEqualsCoop", "Kin_NK", "numSourcesNonCoop", "numSourcesCoop", "SourceDiscrepancy", "Dunn","Biagolini", "DowningCoop", "Jetz", "Rubenstein", "Cockburn", "ReihlCoop", "Griesser2017Coop", "BOWCoop", "RiehlKin", "DowningKinNKCoop", "Griesser2017KinCoop", "Griesser2017FamilialLiving", "numKin", "numNonKin", "numMixed", "FemaleSong") # must have the same length as tempRowOut
+    colnames(summarydf) <- c("species","MeanCoopOmitTies", "MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "AnyCoopEqualsCoop", "Kin_NK", "numSourcesNonCoop", "numSourcesCoop", "SourceDiscrepancy", "Dunn","Biagolini", "DowningCoop", "Jetz", "Rubenstein", "Cockburn", "ReihlCoop", "Griesser2017Coop", "BOWCoop", "RiehlKin", "DowningKinNKCoop", "Griesser2017KinCoop", "Griesser2017FamilialLiving", "numKin", "numNonKin", "numMixed", "FemaleSong", "JetzSource") # must have the same length as tempRowOut
     
   }  # end for (i in 1:length(ourdf$species_in_birdtree))
   
@@ -238,12 +238,18 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
   SnyderCreanzaData <- read.csv(file = songfile)
   coopsongdf <- merge(summaryNoDups, SnyderCreanzaData, by.x = "species", by.y = "BirdtreeFormat", all.x = allcoop, all.y = TRUE)
   
+  if (OCdatafile != FALSE) {
+  OCdata <- read.csv(file = "OCPaperData.csv")
+  coopsongdf <- merge(coopsongdf, OCdata, by.x = "species", by.y = "BirdtreeFormat", all.x = allcoop, all.y = TRUE)
+  }
+  
   if (allcoop == FALSE) {
     subsetlabel <- "_NatCommsSubset"
   } else if (allcoop == TRUE) {
     subsetlabel <- "_All"
   }
   
-  write.csv(coopsongdf, file = paste0(Sys.Date(),"CoopSong_", subsetlabel, ".csv"), row.names = FALSE)
+  
+  write.csv(coopsongdf, file = paste0(Sys.Date(),"CoopSong", subsetlabel, ".csv"), row.names = FALSE)
   
 } # end function
