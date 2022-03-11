@@ -1,5 +1,0 @@
-3
-1
-mlt 10
-lf ./BTout.log.txt
-run

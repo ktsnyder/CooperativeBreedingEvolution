@@ -54,7 +54,7 @@ transitionBinplots <- function(MateParam,SongParam,df = df, newpdf = TRUE, sigon
 
   
 if (newpdf == TRUE) {
-  pdf(file = paste0(Sys.Date(),MateParam,SongParam,"BayesTraits.pdf"), height = 10, width = 10)
+  pdf(file = paste(Sys.Date(),MateParam,SongParam,nsim,"BayesTraits.pdf"), height = 10, width = 10)
   par(mfrow = c(2,2))
 }
 
@@ -89,7 +89,7 @@ if (onetransplot == TRUE) {
   } else if (MateParam == "EPP") {#end if MateParam == "Polygyny"
     lab0x = "Low EPP"
     lab1x = "High EPP"
-  } else if (MateParam == "CoopBreed") { #end if MateParam == "EPP"
+  } else  { #if (MateParam == "CoopBreed") { #end if MateParam == "EPP"
     lab0x = "Noncooperative"
     lab1x = "Cooperative"
     } 
@@ -107,7 +107,7 @@ else if (MateParam == "Polygyny") {
 } else if (MateParam == "EPP") {#end if MateParam == "Polygyny"
   lab0x = "Low EPP"
   lab1x = "High EPP"
-} else if (MateParam == "CoopBreed") { #end if MateParam == "EPP"
+} else { #if (MateParam == "CoopBreed") { #end if MateParam == "EPP"
 lab0x = "Noncooperative"
 lab1x = "Cooperative"
 } 

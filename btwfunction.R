@@ -9,6 +9,7 @@
 #BayesTraitsV2 
 ########
 ########
+# Modified 3/10/2022 -  added res = c("q10 q00 1.2", "q11 q01 1.2") to corrD 
 
 #Must set .BayesTraitsPath to location of program BayesTraitsV2, which must be located in your working directory. E.g.:
 #.BayesTraitsPath <- "~/Documents/BayesTraits/BayesTraitsV2"
@@ -155,8 +156,8 @@ btwfunction <- function(MateParam=c("Polygyny","EPP","OC", "CoopBreed"),SongPara
         songdiscvec[songdiscvec > thresh] <- 1
         names(songdiscvec) <- songdf$species
         btwdf <- as.data.frame(cbind(as.character(songdf$species),matevec,as.character(songdiscvec)))
-        nocorrD <- Discrete(bothtree, btwdf)
-        corrD <- Discrete(bothtree, btwdf, dependent=TRUE)
+        nocorrD <- Discrete(bothtree, btwdf, res = c("q10 q00 1.2", "q11 q01 1.2", "q01 q00 1.2"))
+        corrD <- Discrete(bothtree, btwdf, dependent=TRUE, res = c("q10 q00 1.2", "q11 q01 1.2", "q01 q00 1.2"))
         lrtestresults <- lrtest(corrD, nocorrD)
         LRstat[i] <- lrtestresults$LRstat
         LRpval[i] <- lrtestresults$pval

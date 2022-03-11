@@ -32,7 +32,7 @@ dfnew %>% group_by(Jetz, Cockburn) %>% summarize(n=n())
 
 jetzview <- dfnew %>% group_by(Jetz, Cockburn, JetzSource) %>% summarize(n=n())
 
-dfnew$species[which(dfnew$numSourcesNonCoop == dfnew$numSourcesCoop & dfnew$numSourcesNonCoop != 0)]
+jackspecies <- dfnew$species[which(dfnew$numSourcesNonCoop == dfnew$numSourcesCoop & dfnew$numSourcesNonCoop != 0 & !is.na(dfnew$Song.rep.final))]
 
 dfnew %>% group_by(MeanCoopTie2Noncoop ,Griesser2017FamilialLiving) %>% summarize(n = n())
 
@@ -175,63 +175,85 @@ plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim
 nsim = 100
 songfeatures <- c("Syllable.rep.final","Syll.song.final", "Song.rep.final")
 for (k in c(2,3,1)) {
-  currentclassmethod = classmethods[2]
-  currentlabel <- paste0("PasserTreeEric-",currentclassmethod)
-  feature <- songfeatures[k]
-  print(feature)
-  print(currentlabel)
-  browniefunction(columns = c(currentclassmethod, feature), newdata = newdata, newtree = treefile, nsim = nsim, islog = feature, plotsimmaps = TRUE, otherlabel = currentlabel)
-
-  plotbrownie(data = paste0(Sys.Date(),currentclassmethod,feature, currentlabel, "_brownie",nsim,"sim.csv"), columns = c(currentclassmethod,feature), discreteCategoryLabels = c("Non-cooperative","Cooperative"), otherlabel = currentlabel, newpdf = TRUE, nsim = nsim, islog = TRUE)
-
-
-  # currentclassmethod = classmethods[3]
+  # currentclassmethod = classmethods[2]
   # currentlabel <- paste0("PasserTreeEric-",currentclassmethod)
+  # feature <- songfeatures[k]
+  # print(feature)
   # print(currentlabel)
   # browniefunction(columns = c(currentclassmethod, feature), newdata = newdata, newtree = treefile, nsim = nsim, islog = feature, plotsimmaps = TRUE, otherlabel = currentlabel)
   # 
   # plotbrownie(data = paste0(Sys.Date(),currentclassmethod,feature, currentlabel, "_brownie",nsim,"sim.csv"), columns = c(currentclassmethod,feature), discreteCategoryLabels = c("Non-cooperative","Cooperative"), otherlabel = currentlabel, newpdf = TRUE, nsim = nsim, islog = TRUE)
+
+
+  currentclassmethod = classmethods[3]
+  currentlabel <- paste0("PasserTreeEric-",currentclassmethod)
+  print(currentlabel)
+  browniefunction(columns = c(currentclassmethod, feature), newdata = newdata, newtree = treefile, nsim = nsim, islog = feature, plotsimmaps = TRUE, otherlabel = currentlabel)
+
+  plotbrownie(data = paste0(Sys.Date(),currentclassmethod,feature, currentlabel, "_brownie",nsim,"sim.csv"), columns = c(currentclassmethod,feature), discreteCategoryLabels = c("Non-cooperative","Cooperative"), otherlabel = currentlabel, newpdf = TRUE, nsim = nsim, islog = TRUE)
 }
 
 # 
 # ## ACE tree
-# newdata = "2022-03-09CoopSong__All.csv"
-# treefile <- "2021-08-31ConsensusPasserineTreeEricson10_1000.nex"
+ treefile <- "2021-08-31ConsensusPasserineTreeEricson10_1000.nex"
 # treefile <- "2020-10-11ConsensusPasserineTreeHack100.nex"
-# source("plotACEtree.R")
-# for (feature in songfeatures) {  # repeated Syllrep, Songrep, Interval with "ER"
-#   currentclassmethod <- classmethods[2]
-#   currentlabel <- paste0("PasserTreeHack-ARD-",currentclassmethod)
-#   print(feature)
-#   print(currentlabel)
-# plotACEtree(columns = c(currentclassmethod,feature), newdata = newdata, newtree = treefile, islog = feature, discretelabels = c("NonCoop","Coop"), discretemodel = "ARD", otherlabel = currentlabel)
+ source("plotACEtree.R")
+ for (feature in songfeatures) {  # repeated Syllrep, Songrep, Interval with "ER"
+  currentclassmethod <- classmethods[2]
+  currentlabel <- paste0("PasserTreeEric-ER-",currentclassmethod)
+  print(feature)
+  print(currentlabel)
+plotACEtree(columns = c(currentclassmethod,feature), newdata = newdata, newtree = treefile, islog = feature, discretelabels = c("NonCoop","Coop"), discretemodel = "ER", otherlabel = currentlabel)
+
+  currentclassmethod <- classmethods[3]
+  currentlabel <- paste0("PasserTreeEric-ER-",currentclassmethod)
+  print(feature)
+  print(currentlabel)
+  plotACEtree(columns = c(currentclassmethod,feature), newdata = newdata, newtree = treefile, islog = feature, discretelabels = c("NonCoop","Coop"), discretemodel = "ER", otherlabel = currentlabel)
+}
 # 
-#   currentclassmethod <- classmethods[3]
-#   currentlabel <- paste0("PasserTreeHack-ARD-",currentclassmethod)
-#   print(feature)
-#   print(currentlabel)
-#   plotACEtree(columns = c(currentclassmethod,feature), newdata = newdata, newtree = treefile, islog = feature, discretelabels = c("NonCoop","Coop"), discretemodel = "ARD", otherlabel = currentlabel)
-# }
-# 
-# ### Did not get below here
-# newdata = "2022-03-09CoopSong__All.csv"
-# treefile <- "2021-08-31ConsensusPasserineTreeEricson10_1000.nex" # 3/8/2022
-# currentclassmethod = classmethods[3]
-# currentlabel <- paste0("PasserTreeEric-",currentclassmethod)
-# print(currentlabel)
-# nsim = 150
-# for (k in 1:6) { 
-#   feature <- songfeatures[k]
-#   print(feature)
-#   print(currentlabel)
-#   btwfunction(MateParam = currentclassmethod,SongParam = feature, plot=FALSE, jackknife = FALSE, csvsout = TRUE, nsim = nsim, newtreefile = treefile, newdata = newdata)
-#   feature <- songfeatures[k]
-#   filename <- paste0(Sys.Date(),"Bayes", currentclassmethod,feature, nsim, "reps.csv") 
-#   BTdf <- read.csv(filename)
-#   #BTdf <- BTdf[,which(colnames(BTdf) != "X")]
-#   colnames(BTdf)[16:18] <- c("LRstat", "LRpval", "songcontvec")
-#   transitionBinplots(MateParam = currentclassmethod,SongParam = feature, df = BTdf,newpdf = TRUE, nsim = nsim, binnum = 3)
-# } 
+
+newdata = "2022-03-10CoopSong_All.csv"
+treefile <- "2021-08-31ConsensusPasserineTreeEricson10_1000.nex" 
+currentclassmethod = classmethods[2]
+currentlabel <- paste0("PasserTreeEric-",currentclassmethod)
+print(currentlabel)
+nsim = 11
+source("btwfunction.R")
+source("BayesPlots_choosebin.R")
+for (k in 1:3) {
+  feature <- songfeatures[k]
+  print(feature)
+  print(currentlabel)
+  btwfunction(MateParam = currentclassmethod,SongParam = feature, plot=FALSE, jackknife = FALSE, csvsout = TRUE, nsim = nsim, newtreefile = treefile, newdata = newdata)
+  #feature <- songfeatures[k]
+  filename <- paste0(Sys.Date(),"Bayes", currentclassmethod,feature, nsim, "reps.csv")
+  BTdf <- read.csv(filename)
+  #BTdf <- BTdf[,which(colnames(BTdf) != "X")]
+  colnames(BTdf)[16:18] <- c("LRstat", "LRpval", "songcontvec")
+  transitionBinplots(MateParam = currentclassmethod,SongParam = feature, df = BTdf,newpdf = TRUE, nsim = nsim, binnum = 3)
+}
+
+# test rate limits - failing?? Error in file(file, "r") : cannot open the connection
+nocorrD <- Discrete(subsettree, subsetdf, res = c("q10 q00 1.2", "q11 q01 1.2", "q01 q00 1.2"))
+corrD <- Discrete(subsettree, subsetdf, dependent=TRUE)
+
+# want to run btw with rate limits - limits didn't help at all
+currentclassmethod <- classmethods[2]
+currentclassmethod <- "MeanCoopTie2Noncoop"
+feature <- "Song.rep.final"
+columns <- c(currentclassmethod, feature)
+btwfunction(MateParam = currentclassmethod, SongParam = feature, plot=FALSE, jackknife = FALSE, csvsout = TRUE, nsim = nsim, newtreefile = treefile, newdata = newdata)
+
+
+## Jackknife brownie????
+source("findQrates.R")
+jackout <- jackbrowniefunction(columns = columns, islog = feature, matemodel = "ARD", matensim = 3, allcsvs = FALSE, plotsimmaps = TRUE, newtree = treefile, newdata = newdata, cladesubsetcolumn = "species", cladeJackvalues = jackspecies, otherlabel = NULL)
+
+browniejacks = browniejackout$brownielist
+familyvec = browniejackout$familyvec
+plotbrowniejacks(MateParam = currentclassmethod, SongParam = feature, browniejacks = browniejacks, allcsvs = FALSE)
+
 # 
 # 
 # ## scratch corHMM etc

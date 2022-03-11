@@ -1,0 +1,136 @@
+
+########
+#Coded by Kate T. Snyder
+#Last Modified 6-22-2018
+#Built using RStudio Version 1.1.453
+#R Version 3.4.2
+#
+#mnormt_1.5-5    plyr_1.8.4   geiger_2.0.6   btw_0.1
+#phytools_0.6-44   R.utils_2.6.0   nortest_1.0-4
+#maps_3.3.0        ape_5.1      nlme_3.1-137   nortest_1.0-4
+#BayesTraitsV2
+########
+# Modified 3/11/2022 - attempt to make it work with all the new code?
+
+#Jackknifing brownie
+
+jackbrowniefunction <- function(columns, islog = TRUE, matemodel = "ARD", matensim = 10, allcsvs = FALSE, plotsimmaps = FALSE, newtree, newdata, cladesubsetcolumn = NULL, cladeJackvalues = NULL, otherlabel = NULL) {
+  require(ape)
+  require(phytools)
+  require(base)
+  require(mnormt)
+  require(R.utils)
+  source(file = "subsettreedata.R")
+  source(file = "findQrates.R")
+  output <- list()
+  output$start <- Sys.time()
+  print(Sys.time())
+  
+  MateParam = columns[1]
+  SongParam = columns[2]
+  
+  subsetout <- subsettreedata(columns=columns, newtree = newtree, newdata = newdata, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, islog = islog)
+  bothtree <- tree <- subsetout$subsettree
+  songdf <- df <- subsetout$subsetdf
+  discretetraitvec <- df[,columns[1]]
+  names(discretetraitvec) <- df[,1]
+  continuoustraitvec <- df[,columns[2]]
+  names(continuoustraitvec) <- df[,1]  #species names 
+  matecol <- MateParam
+  songcol <- SongParam
+  # subset <- subsetbirddata(MateParam = MateParam,SongParam = SongParam)
+  # songdf <- subset$df
+  # bothtree <- subset$ditree
+  #  songdatavec <- subset$songcontvec
+  #  matingdatavec <- subset$matevec
+  # songcol <- subset$songcol
+  # matecol <- subset$matecol
+  
+  ##Jackknife test removing each family
+  #familyvecNoNone <- unique(songdf[,cladesubsetcolumn])
+  familyvec <- c("None",cladeJackvalues)
+  brownielist <- list()
+  
+  Qoutput <- findQrates(columns = columns, plot=FALSE, newtree = newtree, newdata = newdata, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, otherlabel = otherlabel)
+  qrates <- Qoutput$qrates
+  print(qrates)
+  # Qoutput <- findQrates(MateParam = MateParam, SongParam = "none")
+  # qrates <- Qoutput$qrates
+  
+  for (k in 1:length(familyvec)) {
+    jackedsongdf <- songdf  #have to do this so songdf doesn't get whittled down every time the for loop loops
+    jackedsongdf <- jackedsongdf[which(jackedsongdf[, cladesubsetcolumn] != familyvec[k]),]
+    
+    notjackedvec <- bothtree$tip.label %in% as.character(jackedsongdf$species)
+    dropforjack <- which(notjackedvec == FALSE)
+    
+    jacktree <- drop.tip(bothtree,tip = dropforjack)
+    
+    matevec <- as.character(jackedsongdf[,matecol])
+    names(matevec) <- jackedsongdf$species
+    songcontvec <- jackedsongdf[,songcol]
+    names(songcontvec) <- jackedsongdf$species
+    
+    set.seed(10)
+    print(paste("Beginning simmap for brownie",MateParam,SongParam)) 
+    starttimebrownie <- Sys.time()
+    
+    if (plotsimmaps == TRUE) {
+      print("Detour to plot simmaps...")
+      findQrates(columns = columns, plot=plotsimmaps, newtree = newtree, newdata = jackedsongdf, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, otherlabel = paste0("Jacked",familyvec[k]), GlobalQrates = qrates)
+    }
+    
+    simmappy <- make.simmap(jacktree,matevec,nsim=matensim, Q=qrates, message = FALSE) 
+    simmapsdone <- Sys.time()
+    simmaptime <- simmapsdone - starttimebrownie
+    print(paste("Simmaps generated. That step took this much time: ", simmaptime, ".  Starting for loop with ", matensim, " loops.", MateParam, SongParam, familyvec[k]))
+    
+    browniedata <- data.frame(MatePar=character(matensim),SongPar=character(matensim),Pval=numeric(matensim),ERRate=numeric(matensim),ERloglik=numeric(matensim),ERace=numeric(matensim),ARDRate0=numeric(matensim),ARDRate1=numeric(matensim),ARDloglik=numeric(matensim),ARDace=numeric(matensim),k2=numeric(matensim),convergence=character(matensim),simmapnumber=integer(matensim),jackedfam=character(matensim), stringsAsFactors = FALSE)
+    
+    
+    for (i in 1:matensim) {
+      simmapfor <- simmappy[[i]]
+      brownieliteresults <- set.seed(10)
+      
+      tryCatch(
+        expr = {
+          withTimeout(expr={
+            
+            brownieliteresults <- brownie.lite(simmapfor,songcontvec,maxit=75000)
+            browniedata[i,3] <- brownieliteresults$P.chisq
+            browniedata[i,4] <- brownieliteresults$sig2.single
+            browniedata[i,5] <- brownieliteresults$logL1
+            browniedata[i,6] <- brownieliteresults$a.single
+            browniedata[i,7] <- brownieliteresults$sig2.multiple[1]
+            browniedata[i,8] <- brownieliteresults$sig2.multiple[2]
+            browniedata[i,9] <- brownieliteresults$logL.multiple
+            browniedata[i,10] <- brownieliteresults$a.multiple
+            browniedata[i,11] <- brownieliteresults$k2
+            browniedata[i,12] <- as.character(brownieliteresults$convergence)
+            browniedata[i,13] <- i}, timeout = 16, cpu=Inf, onTimeout = "error")
+        },
+        TimeoutException = function(ex) {browniedata[i,3:13]<-c(NA,NA,NA,NA,NA,NA,NA,NA,NA,"timeout",i);
+        print(paste("timeout",i));
+        })
+      
+      browniedata[i,1] <- MateParam
+      browniedata[i,2] <- SongParam
+      browniedata[i,14] <- paste(familyvec[k])
+      
+      if (i %in% seq(0,2000,by=45)) {
+        print(paste("End brownie loop iteration",i,Sys.time()))
+      }
+    }  #end for loop 1:matensim
+    if (allcsvs == TRUE) {
+      write.csv(file = paste(Sys.Date(),"BrownieJack",MateParam,SongParam,familyvec[k],".csv"), browniedata)
+    }
+    brownielist[[k]] <- browniedata
+    
+  } #end for loop going thru each family
+  
+  outputty <- list()
+  outputty$brownielist <- brownielist
+  outputty$familyvec <- familyvec
+  return(outputty)
+  
+} #end jackfunction 

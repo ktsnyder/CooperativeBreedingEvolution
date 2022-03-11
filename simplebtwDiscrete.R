@@ -1,7 +1,8 @@
 # Simple BayesTraits Discrete run
 # Created 3/9/2022
 # Kate T Snyder
-# Last Edited: 3/9/2022
+# Last Edited: 3/10/2022
+# Added   res = c("q10 q00 1.2", "q11 q01 1.2")
 
 # Purposes: 
 #   Make transition plots between two discrete characters without having to use btw::plotdiscrete()
@@ -130,8 +131,8 @@ simplebtwDiscrete <- function(columns, newdata, newtree, treelabel, nsim, clades
   simplebtwOut <- set.seed(10)
   nsim = nsim
   for (n in 1:nsim) {
-    nocorrD <- Discrete(subsettree, subsetdf)
-    corrD <- Discrete(subsettree, subsetdf, dependent=TRUE)
+    nocorrD <- Discrete(subsettree, subsetdf, res = c("q10 q00 1.2", "q11 q01 1.2"))
+    corrD <- Discrete(subsettree, subsetdf, dependent=TRUE, res = c("q10 q00 1.2", "q11 q01 1.2"))
     lrtestresults <- lrtest(corrD, nocorrD)
     tempRow <- cbind(corrD, lrtestresults)
     simplebtwOut <- rbind(simplebtwOut, tempRow)
