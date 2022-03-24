@@ -32,22 +32,49 @@ dfnew %>% group_by(Jetz, Cockburn) %>% summarize(n=n())
 
 jetzview <- dfnew %>% group_by(Jetz, Cockburn, JetzSource) %>% summarize(n=n())
 
-jackspecies <- dfnew$species[which(dfnew$numSourcesNonCoop == dfnew$numSourcesCoop & dfnew$numSourcesNonCoop != 0 & !is.na(dfnew$Song.rep.final))]
+jackspecies <- dfnew$species[which(dfnew$numSourcesNonCoop == dfnew$numSourcesCoop & dfnew$numSourcesNonCoop != 0 & !is.na(dfnew$MeanCoopTie2Noncoop & !is.na(dfnew$FemaleSong)))][1:4]
 
 dfnew %>% group_by(MeanCoopTie2Noncoop ,Griesser2017FamilialLiving) %>% summarize(n = n())
-dfnew %>% group_by(MeanCoopTie2Noncoop , FemaleSong) %>% summarize(n = n())
+dfnew %>% group_by(MeanCoopTie2Noncoop, FemaleSong) %>% summarize(n = n())
 
+
+
+### Jackknife BayesTraits
 source("simplebtwDiscrete.R")
-classmethods <- c("MeanCoopOmitTies",  "MeanCoopTie2Noncoop", "MeanCoopTie2Coop",  "AnyCoopEqualsCoop" )
-nsim = 100
-for (i in classmethods) {
-  currentclassmethod <- i
-  columns <- c(currentclassmethod, "FemaleSong")
+nsim = 50
+df <- read.csv(newdata)
+currentclassmethod <- "MeanCoopTie2Noncoop"
+columns <- c(currentclassmethod, "FemaleSong")
+MateParam = currentclassmethod
+SongParam = columns[2]
+jackspecies <- dfnew$species[which(!is.na(dfnew[,MateParam]) & !is.na(dfnew[,SongParam]) )]
+pdf(paste0(getwd(),"/OutputFiles/BayesTraitsDiscrete/",Sys.Date(),"Plot BayesJacks ",MateParam, SongParam,nsim,"sim.pdf"), height = 10, width = 8)
+par(mfrow = c(6,4), cex = 0.3, mar=rep(2,4))
+for (i in jackspecies) {
+  dfJacked <- df[which(df$species != i),]
   print(columns)
   print(Sys.time())
-  simplebtwOutput <- simplebtwDiscrete(columns = columns, newdata = newdata, newtree = treefile, treelabel = treelabel, nsim = nsim)
-  plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim, treelabel = treelabel, newpdf = TRUE, ylabel = NULL)
+  simplebtwOutput <- simplebtwDiscrete(columns = columns, newdata = dfJacked, newtree = treefile, treelabel = treelabel, nsim = nsim, cladesubsetvalue = i)
+  plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim, treelabel = treelabel, newpdf = FALSE, ylabel = NULL, cladesubsetvalue = i)
 }
+dev.off()
+
+
+df <- read.csv(newdata)
+columns <- c("Final.polygyny", "FemaleSong")
+MateParam = columns[1]
+SongParam = columns[2]
+jackspecies <- dfnew$species[which(!is.na(dfnew[,MateParam]) & !is.na(dfnew[,SongParam]) )]
+pdf(paste0(getwd(),"/OutputFiles/BayesTraitsDiscrete/",Sys.Date(),"Plot BayesJacks ",MateParam, SongParam,nsim,"sim.pdf"), height = 10, width = 8)
+par(mfrow = c(6,4), cex = 0.3, mar=rep(2,4))
+for (i in jackspecies) {
+dfJacked <- df[which(df$species != i),]
+print(i)
+print(Sys.time())
+simplebtwOutput <- simplebtwDiscrete(columns = columns, newdata = dfJacked, newtree = treefile, treelabel = treelabel, nsim = nsim, cladesubsetvalue = i)
+plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim, treelabel = treelabel, newpdf = FALSE, ylabel = NULL, cladesubsetvalue = i)
+}
+dev.off()
 
 
 columns <- c("Griesser2017FamilialLiving", "FemaleSong")
@@ -59,7 +86,7 @@ plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim
 columns <- c("Kin_NK", "FemaleSong")
 print(columns)
 print(Sys.time())
-#simplebtwOutput <- simplebtwDiscrete(columns = columns, newdata = newdata, newtree = treefile, treelabel = treelabel, nsim = nsim)  - this seems to have broken BT, be careful
+#simplebtwOutput <- simplebtwDiscrete(columns = columns, newdata = newdata, newtree = treefile, treelabel = treelabel, nsim = nsim) # - this seems to have broken BT, be careful
 plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim, treelabel = treelabel, newpdf = TRUE, ylabel = " 'COOPERATIVE' ACTUALLY 'KIN COOP v NONKIN COOP' ")
 
 columns <- c("MeanCoopTie2Noncoop", "O.C")
@@ -72,7 +99,7 @@ columns <- c("Final.polygyny", "FemaleSong")
 print(columns)
 print(Sys.time())
 simplebtwOutput <- simplebtwDiscrete(columns = columns, newdata = newdata, newtree = treefile, treelabel = treelabel, nsim = nsim)
-plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim, treelabel = treelabel, newpdf = TRUE, ylabel = " 'COOPERATIVE' ACTUALLY 'POLYGYNY v MONOGAMY' ")
+plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim, treelabel = treelabel, newpdf = TRUE)
 
 columns <- c("Final.EPP", "FemaleSong") 
 print(columns)

@@ -1,7 +1,8 @@
 ########
 #Coded by Kate T. Snyder
-#Last Modified 10-31-2020 from Supplement2_btwfunction_newtree.R
+#Modified 10-31-2020 from Supplement2_btwfunction_newtree.R
 #Modified 8/20/2021 - add newdata arg
+#Last modified: 3/15/2022
 #Built using RStudio Version 1.0.136
 #R Version 3.4.1?
 #
@@ -96,7 +97,7 @@ btwfunction <- function(MateParam=c("Polygyny","EPP","OC", "CoopBreed"),SongPara
           lrtestresults <- lrtest(corrD, nocorrD)
           LRstat[i] <- lrtestresults$LRstat
           LRpval[i] <- lrtestresults$pval
-          transandp <- cbind(corrD,LRstat[i],LRpval[i],songcontvec[i])
+          transandp <- cbind(corrD,LRstat[i],LRpval[i],songcontvec[i], nocorrD)
           transitions <- rbind(transitions, transandp)
         } #end for i in 1:length(songcontvec)
         LRstatall <- c(LRstatall,LRstat)
@@ -156,8 +157,8 @@ btwfunction <- function(MateParam=c("Polygyny","EPP","OC", "CoopBreed"),SongPara
         songdiscvec[songdiscvec > thresh] <- 1
         names(songdiscvec) <- songdf$species
         btwdf <- as.data.frame(cbind(as.character(songdf$species),matevec,as.character(songdiscvec)))
-        nocorrD <- Discrete(bothtree, btwdf, res = c("q10 q00 1.2", "q11 q01 1.2", "q01 q00 1.2"))
-        corrD <- Discrete(bothtree, btwdf, dependent=TRUE, res = c("q10 q00 1.2", "q11 q01 1.2", "q01 q00 1.2"))
+        nocorrD <- Discrete(bothtree, btwdf) #, res = c("q10 q00 1.2", "q11 q01 1.2", "q01 q00 1.2"))
+        corrD <- Discrete(bothtree, btwdf, dependent=TRUE) #, res = c("q10 q00 1.2", "q11 q01 1.2", "q01 q00 1.2"))
         lrtestresults <- lrtest(corrD, nocorrD)
         LRstat[i] <- lrtestresults$LRstat
         LRpval[i] <- lrtestresults$pval

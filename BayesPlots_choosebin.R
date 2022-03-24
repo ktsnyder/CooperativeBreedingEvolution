@@ -1,4 +1,6 @@
-
+# Coded by Kate Snyder
+# Adapted from 2018 code from ?
+# last edited 3/16/2022 - adjust placement of segment delineation lines on pvalue plot; added one "if" statement to allow bin = 1
 
 
 plotBTjacks <- function(MateParam, SongParam, d, sigonly = FALSE, familysplit = NULL, nsim = 10) {
@@ -118,7 +120,9 @@ songvals <- unique(dfallsig$songcontvec)
   minvec = set.seed(10)
   maxvec = set.seed(10)
   minvec[1] = round(min(alldfvals),2)
-  minvec[2] <- alldfvals[ceiling(length(alldfvals)/binnum)]
+  if (binnum > 1) {
+    minvec[2] <- alldfvals[ceiling(length(alldfvals)/binnum)]
+  }
   maxvec[1] <- alldfvals[ceiling(length(alldfvals)/binnum)]
   if (binnum==2) {
     maxvec[2] <- max(alldfvals)
@@ -281,7 +285,7 @@ with(df, plot(songcontvec, LRpval, pch=20,
 title(ylab = "p-value", line = 2)
 title(xlab = paste("High/Low Threshold:",SongParam), line = 2.2)
 
-segments(x0 = minvec, x1 = maxvec, y0 = rep(-0.03,times=length(minvec)), y1=rep(-0.03,times=length(minvec)), lwd = 5, col = c("red","orange","blue","green","purple"))
+segments(x0 = minvec, x1 = maxvec, y0 = rep(-0.0,times=length(minvec)), y1=rep(-0.0,times=length(minvec)), lwd = 5, col = c("red","orange","blue","green","purple"))
 abline(h=0.05,col="blue")
 if (newpdf == TRUE) {
 dev.off()

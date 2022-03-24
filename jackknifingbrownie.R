@@ -11,6 +11,7 @@
 #BayesTraitsV2
 ########
 # Modified 3/11/2022 - attempt to make it work with all the new code?
+# Modified 3/16/2022 - reinstate ability to jackknife by all unique values in cladesubsetcolumn
 
 #Jackknifing brownie
 
@@ -29,7 +30,7 @@ jackbrowniefunction <- function(columns, islog = TRUE, matemodel = "ARD", matens
   MateParam = columns[1]
   SongParam = columns[2]
   
-  subsetout <- subsettreedata(columns=columns, newtree = newtree, newdata = newdata, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, islog = islog)
+  subsetout <- subsettreedata(columns=columns, newtree = newtree, newdata = newdata, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, islog = islog)  # these should be cladesubset__ = NULL since jackknifing happens later
   bothtree <- tree <- subsetout$subsettree
   songdf <- df <- subsetout$subsetdf
   discretetraitvec <- df[,columns[1]]
@@ -47,19 +48,23 @@ jackbrowniefunction <- function(columns, islog = TRUE, matemodel = "ARD", matens
   # matecol <- subset$matecol
   
   ##Jackknife test removing each family
-  #familyvecNoNone <- unique(songdf[,cladesubsetcolumn])
+  if (is.null(cladeJackvalues)) {
+    cladeJackvalues <- unique(songdf[,cladesubsetcolumn])
+  }
   familyvec <- c("None",cladeJackvalues)
   brownielist <- list()
   
   Qoutput <- findQrates(columns = columns, plot=FALSE, newtree = newtree, newdata = newdata, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, otherlabel = otherlabel)
   qrates <- Qoutput$qrates
-  print(qrates)
+  #print(qrates)
   # Qoutput <- findQrates(MateParam = MateParam, SongParam = "none")
   # qrates <- Qoutput$qrates
   
   for (k in 1:length(familyvec)) {
     jackedsongdf <- songdf  #have to do this so songdf doesn't get whittled down every time the for loop loops
     jackedsongdf <- jackedsongdf[which(jackedsongdf[, cladesubsetcolumn] != familyvec[k]),]
+    
+    print(familyvec[k])
     
     notjackedvec <- bothtree$tip.label %in% as.character(jackedsongdf$species)
     dropforjack <- which(notjackedvec == FALSE)
@@ -81,6 +86,7 @@ jackbrowniefunction <- function(columns, islog = TRUE, matemodel = "ARD", matens
     }
     
     simmappy <- make.simmap(jacktree,matevec,nsim=matensim, Q=qrates, message = FALSE) 
+    print(class(simmappy))
     simmapsdone <- Sys.time()
     simmaptime <- simmapsdone - starttimebrownie
     print(paste("Simmaps generated. That step took this much time: ", simmaptime, ".  Starting for loop with ", matensim, " loops.", MateParam, SongParam, familyvec[k]))
