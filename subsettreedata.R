@@ -1,10 +1,9 @@
 ########
 #Coded by Kate T. Snyder
-#Last Modified 8-18-2021  - added   print(subsettree) in columns loop
+#Last Modified 3-24-2022  - add ability to use multiPhylo input for newtree
 #Built using R Version 4.0.2
 #
 #ape_5.3  phytools_0.5-38   maps_3.1.0  btw_V1.0
-#BayesTraitsV2 
 ########
 ########
 
@@ -48,105 +47,126 @@
 ##    may have to change skinnydata to fit BayesTraits
 
 subsettreedata <- function(columns = NULL, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, newdata = FALSE, newtree = FALSE, islog = FALSE, suppresswarning = TRUE, skinnydata = FALSE) {
-require(phytools)
-#require(ape)
-#require(maps)
+  require(phytools)
+  #require(ape)
+  #require(maps)
   
-# mainDir <- getwd()
-# subDir <- "OutputFiles"
-# if (!dir.exists(file.path(mainDir,subDir))) {
-#   dir.create(file.path(mainDir, subDir))
-# }
+  # mainDir <- getwd()
+  # subDir <- "OutputFiles"
+  # if (!dir.exists(file.path(mainDir,subDir))) {
+  #   dir.create(file.path(mainDir, subDir))
+  # }
   
-output <- list()
-
-suppressWarnings(  # suppressing the warning that appears after first "if" if newdata is length > 1
-if (newdata == FALSE) {
-  alldatadfos <- as.data.frame(read.csv("SnyderCreanza_NatComms2019_SupplementalData_R.csv"))
-} else if (is.character(newdata)) {
-  alldatadfos <- as.data.frame(read.csv(newdata))
-} else {
-  alldatadfos <- newdata
-}
-) #end suppressWarnings
-
-#print(head(alldatadfos))
-
-
-if (is.character(newtree)) {
-  fulltree <- read.nexus(newtree)
-} else if (is.list(newtree)) {
-  fulltree <- newtree
-} else if (newtree == FALSE) {
-  fulltree <- read.nexus("birdzillatreeMaybeConsensus.nex")
-} else {
-  print("The tree is not a tree.")
-}
-
-alldatadfos[,1] <- as.character(alldatadfos[,1])
-colnames(alldatadfos)[1] <- "species"
-
-## check that all species in dataframe match a species in phylogeny
-matchtree <- alldatadfos[,1] %in% fulltree$tip.label
-alldatadfos <- alldatadfos[which(matchtree),]
-nonmatchedspecies <- alldatadfos[,1][!matchtree]
-numnonmatching <- length(nonmatchedspecies)
-
-if (suppresswarning == FALSE) {
-print(paste("There were", numnonmatching, "species in the data table that did not match a species in the phylogeny. These species were removed from the data:"))
-print(paste(nonmatchedspecies))
-}
-
-if (is.null(cladesubsetcolumn)) {
-  alldatadf <- alldatadfos
-} else {
-  includespecies <- alldatadfos[,1][which(alldatadfos[,cladesubsetcolumn] %in% cladesubsetvalue)]
-  includetips <- match(includespecies, fulltree$tip.label)
-  includetree <- keep.tip(fulltree, tip=includetips)
-  fulltree <- includetree
-  includerows <- alldatadfos[,1] %in% includespecies
-  alldatadf <- alldatadfos[which(includerows),]
-}
-
-####
-subsetdf <- alldatadf
-subsettree <- fulltree
-
-#print(subsettree)
-
-if (!is.null(columns)) {
-  for (i in 1:length(columns)) {
-    whichcol <- columns[i]
-    subsetdf <- subsetdf[!is.na(subsetdf[,whichcol]),]
-    havedatavec <- subsettree$tip.label %in% as.character(subsetdf[,1])
-    matingtips <- which(havedatavec == TRUE)
-    dropfortree <- which(havedatavec == FALSE)
-    subsettree <- drop.tip(subsettree, tip = dropfortree)
- #   print(subsettree)
-  }  # end for (i in length(columns))
-}  # end if !is.null(columns)
-
-if (islog != FALSE) {
-  for (j in 1:length(islog)) {  #islog should be a character vector with column names of columns to be log-transformed
-    whichcol <- islog[j]
-    subsetdf[,whichcol] <- log(subsetdf[,whichcol])
+  output <- list()
+  
+  suppressWarnings(  # suppressing the warning that appears after first "if" if newdata is length > 1
+    if (newdata == FALSE) {
+      alldatadfos <- as.data.frame(read.csv("SnyderCreanza_NatComms2019_SupplementalData_R.csv"))
+    } else if (is.character(newdata)) {
+      alldatadfos <- as.data.frame(read.csv(newdata))
+    } else {
+      alldatadfos <- newdata
+    }
+  ) #end suppressWarnings
+  
+  #print(head(alldatadfos))
+  
+  
+  if (is.character(newtree)) {
+    fulltree <- read.nexus(newtree)
+  } else if (is.list(newtree)) {
+    fulltree <- newtree
+  } else if (newtree == FALSE) {
+    fulltree <- read.nexus("birdzillatreeMaybeConsensus.nex")
+  } else {
+    print("The tree is not a tree.")
   }
-} # end if (islog != FALSE)
-
-if (skinnydata == TRUE) {
-  subsetdf <- subsetdf[, c("species", cladesubsetcolumn, columns)]
-}
-
-####
-
-ditree <- multi2di(subsettree)
-ditree$edge.length[ditree$edge.length == 0] <- 0.0000000000000000001
-
-output$subsettree <- ditree
-output$subsetdf <- subsetdf
-output$NonMatchedSpecies <- nonmatchedspecies
-
-return(output)
+  
+  alldatadfos[,1] <- as.character(alldatadfos[,1])
+  colnames(alldatadfos)[1] <- "species"
+  
+  if (class(fulltree) == "multiPhylo") {
+    subsettedMultiTree <- fullMultiTree <- fulltree
+    fulltree <- fulltree[[1]]
+  } else {
+    subsettedMultiTree = NULL
+  }
+  
+  
+  ## check that all species in dataframe match a species in phylogeny
+  matchtree <- alldatadfos[,1] %in% fulltree$tip.label
+  alldatadfos <- alldatadfos[which(matchtree),]
+  nonmatchedspecies <- alldatadfos[,1][!matchtree]
+  numnonmatching <- length(nonmatchedspecies)
+  
+  if (suppresswarning == FALSE) {
+    print(paste("There were", numnonmatching, "species in the data table that did not match a species in the phylogeny. These species were removed from the data:"))
+    print(paste(nonmatchedspecies))
+  }
+  
+  if (is.null(cladesubsetcolumn)) {
+    alldatadf <- alldatadfos
+  } else {
+    includespecies <- alldatadfos[,1][which(alldatadfos[,cladesubsetcolumn] %in% cladesubsetvalue)]
+    includetips <- match(includespecies, fulltree$tip.label)
+    includetree <- keep.tip(fulltree, tip=includetips)
+    fulltree <- includetree
+    includerows <- alldatadfos[,1] %in% includespecies
+    alldatadf <- alldatadfos[which(includerows),]
+  }
+  
+  ####
+  subsetdf <- alldatadf
+  subsettree <- fulltree  # if multitree input, this is one tree pared down by clade subset, won't actually use this
+  
+  #print(subsettree)
+  
+  if (!is.null(columns)) {
+    for (i in 1:length(columns)) {
+      whichcol <- columns[i]
+      subsetdf <- subsetdf[!is.na(subsetdf[,whichcol]),]
+      havedatavec <- subsettree$tip.label %in% as.character(subsetdf[,1])
+      matingtips <- which(havedatavec == TRUE)
+      dropfortree <- which(havedatavec == FALSE)
+      subsettree <- drop.tip(subsettree, tip = dropfortree)
+      if (!is.null(subsettedMultiTree)) {
+        keepspecies <- subsetdf[,1]
+        OneTreeFromMultiTreeInput <- subsettedMultiTree[[1]]
+        AllSpecies <- OneTreeFromMultiTreeInput$tip.label
+        DropSpeciesMultiTree <- AllSpecies[which(!AllSpecies %in% keepspecies)]
+        subsettedMultiTree <- lapply(subsettedMultiTree, drop.tip, tip = DropSpeciesMultiTree)
+        class(subsettedMultiTree) <- "multiPhylo"
+      }
+      
+      #   print(subsettree)
+    }  # end for (i in length(columns))
+  }  # end if !is.null(columns)
+  
+  if (islog != FALSE) {
+    for (j in 1:length(islog)) {  #islog should be a character vector with column names of columns to be log-transformed
+      whichcol <- islog[j]
+      subsetdf[,whichcol] <- log(subsetdf[,whichcol])
+    }
+  } # end if (islog != FALSE)
+  
+  if (skinnydata == TRUE) {
+    subsetdf <- subsetdf[, c("species", cladesubsetcolumn, columns)]
+  }
+  
+  ####
+  
+  ditree <- multi2di(subsettree)
+  ditree$edge.length[ditree$edge.length == 0] <- 0.0000000000000000001
+  
+  output$subsettree <- ditree
+  output$subsetdf <- subsetdf
+  output$NonMatchedSpecies <- nonmatchedspecies
+  
+  if (class(subsettedMultiTree) == "multiPhylo") {
+    output$subsettree <- subsettedMultiTree
+  }
+  
+  return(output)
 }
 
 
