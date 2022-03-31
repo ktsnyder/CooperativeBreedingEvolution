@@ -177,6 +177,14 @@ coopvec <- subsetdf$MeanCoopTie2Noncoop
 names(coopvec) <- subsetdf$species
 femvec <- subsetdf$FemaleSong
 names(femvec) <- subsetdf$species
+subsetout <- subsettreedata(columns = c(classmethods[2],"Song.rep.final"), newdata = newdata, newtree = treefile, skinnydata = FALSE)
+subsetdf <- subsetout$subsetdf
+subsettree <- subsetout$subsettree
+coopvecSong <- subsetdf$MeanCoopTie2Noncoop
+songvec <- log(subsetdf$Song.rep.final)
+names(songvec) <- subsetdf$species
+names(coopvecSong) <- subsetdf$species
+
 fitPagel_results <- fitPagel(subsettree,x=coopvec,y=femvec)
 
 library(phylolm)
@@ -195,7 +203,9 @@ data.frame(model=c("Coop","Null model"),
 
 
 
-compar.gee(coopvec ~ femvec, phy = subsettree)  #not working
+compar.gee(coopvec ~ femvec, phy = subsettree)  #now working - needed to install "gee"
+compar.gee(coopvecSong ~ songvec, phy = subsettree)
+compar.gee(songvec ~ coopvecSong-1, phy = subsettree)
 
 # this works
 pic.coop <- pic(coopvec, subsettree)

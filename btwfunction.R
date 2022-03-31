@@ -2,7 +2,7 @@
 #Coded by Kate T. Snyder
 #Modified 10-31-2020 from Supplement2_btwfunction_newtree.R
 #Modified 8/20/2021 - add newdata arg
-#Last modified: 3/15/2022
+#Last modified: 3/17/2022
 #Built using RStudio Version 1.0.136
 #R Version 3.4.1?
 #
@@ -10,16 +10,19 @@
 #BayesTraitsV2 
 ########
 ########
-# Modified 3/10/2022 -  added res = c("q10 q00 1.2", "q11 q01 1.2") to corrD 
+# Modified 3/15/2022 - output nocorrD stuff too
+# Modified 3/17/2022 - columns input instead of MateParam/SongParam, use BayesTraitsV4 and KTS version of Discrete, add treelabel
 
 #Must set .BayesTraitsPath to location of program BayesTraitsV2, which must be located in your working directory. E.g.:
 #.BayesTraitsPath <- "~/Documents/BayesTraits/BayesTraitsV2"
-.BayesTraitsPath <- "~/Documents/BayesTraitsV2"
-library(devtools)
-install_github("rgriff23/btw", ref="v1")
-library(btw)
+#.BayesTraitsPath <- "~/Documents/BayesTraitsV2"
+.BayesTraitsPath <- "~/Documents/BayesTraitsV4.0.0-OSX/BayesTraitsV4"
+source("btwDiscreteKTS.R")
+# library(devtools)
+# install_github("rgriff23/btw", ref="v1")
+# library(btw)
 
-btwfunction <- function(MateParam=c("Polygyny","EPP","OC", "CoopBreed"),SongParam, plot=TRUE, jackknife = FALSE, csvsout = FALSE, nsim = 10, newtreefile = FALSE, newdata = FALSE) {
+btwfunction <- function(columns, plot=TRUE, jackknife = FALSE, csvsout = FALSE, nsim = 10, newtreefile = FALSE, newdata = FALSE, treelabel = NULL) {
   output <- list()
   output$start <- Sys.time()
   print(Sys.time())
@@ -32,7 +35,9 @@ btwfunction <- function(MateParam=c("Polygyny","EPP","OC", "CoopBreed"),SongPara
   
   #source(file = "subsettreedata.R")  #removed 10/31/2020 to test
  # source(file = "Supplement_BayesPlots.R")
-  subset <- subsettreedata(columns = c(MateParam, SongParam), newtree = newtreefile, newdata = newdata)
+  MateParam <- columns[1]
+  SongParam <- columns[2]
+  subset <- subsettreedata(columns = columns, newtree = newtreefile, newdata = newdata)
   bothtree <- subset$subsettree
   matecol <- MateParam
   songdf <- subset$subsetdf
@@ -160,9 +165,12 @@ btwfunction <- function(MateParam=c("Polygyny","EPP","OC", "CoopBreed"),SongPara
         nocorrD <- Discrete(bothtree, btwdf) #, res = c("q10 q00 1.2", "q11 q01 1.2", "q01 q00 1.2"))
         corrD <- Discrete(bothtree, btwdf, dependent=TRUE) #, res = c("q10 q00 1.2", "q11 q01 1.2", "q01 q00 1.2"))
         lrtestresults <- lrtest(corrD, nocorrD)
-        LRstat[i] <- lrtestresults$LRstat
-        LRpval[i] <- lrtestresults$pval
-        transandp <- cbind(corrD,LRstat[i],LRpval[i],songcontvec[i])
+        # LRstat[i] <- lrtestresults$LRstat
+        # LRpval[i] <- lrtestresults$pval
+        # transandp <- cbind(corrD,LRstat[i],LRpval[i],songcontvec[i], nocorrD)
+        LRstat <- lrtestresults$LRstat
+        LRpval <- lrtestresults$pval
+        transandp <- cbind(corrD,LRstat,LRpval,thresh, nocorrD)
         transitions <- rbind(transitions, transandp)
       }
       LRstatall <- c(LRstatall,LRstat)
@@ -172,14 +180,16 @@ btwfunction <- function(MateParam=c("Polygyny","EPP","OC", "CoopBreed"),SongPara
     }
     
     print(length(transitions100reps[,2]))
+    colnames(transitions100reps)[which(colnames(transitions100reps) == "thresh")] <- "songcontvec"
     if (csvsout == TRUE) {
-      write.csv(transitions100reps,file=paste(Sys.Date(),"Bayes",MateParam,SongParam,nsim,"reps.csv",sep=""))
-      csvfile <- paste(Sys.Date(),"Bayes",MateParam,SongParam,nsim,"reps.csv",sep="")
+      write.csv(transitions100reps,file=paste(Sys.Date(),"Bayes",MateParam,SongParam,treelabel,nsim,"reps.csv",sep=""))
+      csvfile <- paste(Sys.Date(),"Bayes",MateParam,SongParam,treelabel,nsim,"reps.csv",sep="")
       output$nojackdf<- transitions100reps
     }
     df <-  transitions100reps
     d = data.frame(songcontvecall,LRstatall, LRpvalall)
-    colnames(df[,c(15:17)]) <- c("LRstat","LRpval","songcontvec")
+    #colnames(df[,c(15:17)]) <- c("LRstat","LRpval","songcontvec")
+
     
     if (plot == TRUE) {
       transitionBinplots(MateParam,SongParam,df = df,newpdf = TRUE, nsim = nsim)

@@ -84,7 +84,7 @@ for (k in 1:3) {
 source("findQrates.R")
 source("plotbrowniejacks.R")
 source("jackknifingbrownie.R")
-
+newtree <- treefile <- "2022-03-16ConsensusPasserineTreeHackett4_1000.nex"
 features <- c("Syll.song.final", "Song.rep.final") #,"Syllable.rep.final")
 currentclassmethod <- "MeanCoopTie2Noncoop"
 for (i in 1:length(features)) {
@@ -96,11 +96,11 @@ for (i in 1:length(features)) {
   #jackspecies <- dfnew$species[which(dfnew$numSourcesNonCoop == dfnew$numSourcesCoop & dfnew$numSourcesNonCoop != 0 & !is.na(dfnew[,feature]))]  # nsim = 100
   #jackspecies <- dfnew$species[which(!is.na(dfnew[,currentclassmethod]) & !is.na(dfnew[,feature]))]  # nsim = 20
   
-  browniejackout <- jackbrowniefunction(columns = columns, islog = feature, matemodel = "ARD", matensim = nsim, allcsvs = TRUE, plotsimmaps = FALSE, newtree = treefile, newdata = newdata, cladesubsetcolumn = "Family.x", cladeJackvalues = NULL, otherlabel = NULL)
+  browniejackout <- jackbrowniefunction(columns = columns, islog = feature, matemodel = "ARD", matensim = nsim, allcsvs = TRUE, plotsimmaps = FALSE, newtree = treefile, newdata = newdata, cladesubsetcolumn = "Family.x", cladeJackvalues = NULL, otherlabel = "Hackett")
   
   browniejacks = browniejackout$brownielist
   familyvec = browniejackout$familyvec
-  plotbrowniejacks(MateParam = currentclassmethod, SongParam = feature, browniejacks = browniejacks, allcsvs = "2022-03-17", nsim = nsim)
+  plotbrowniejacks(columns = columns, browniejacks = browniejacks, nsim = nsim)
 }
 
 
@@ -170,19 +170,51 @@ dev.off()
 source("subsettreedata.R")
 source("browniefunction.R")
 source("plotbrownie.R")
-treefile <- "2022-03-16ConsensusPasserineTreeHackett4_1000.nex"
-currentclassmethod = "MeanCoopTie2Noncoop"
-currentlabel <- paste0("PasserTreeHack-",currentclassmethod)
-feature <- "Syll.song.final"
-nsim = 100
+
+classmethods = c("MeanCoopTie2Noncoop", "MeanCoopTie2Coop")
+#currentlabel <- paste0("PasserTreeHack-",currentclassmethod)
+featurevec <- c("Syll.song.max", "Syll.song.min", "Song.rep.min", "Song.rep.max", "Syllable.rep.min","Syllable.rep.max", "Duration.final", "Duration.min", "Duration.max")
+nsim = 500
 newdata <- "2022-03-10CoopSong_All.csv"
-print(currentlabel)
-browniefunction(columns = c(currentclassmethod, feature), newdata = newdata, newtree = treefile, nsim = nsim, islog = feature, plotsimmaps = TRUE, otherlabel = currentlabel)
+treefile <- "2022-03-16ConsensusPasserineTreeHackett4_1000.nex"
 
-plotbrownie(data = paste0(Sys.Date(),currentclassmethod,feature, currentlabel, "_brownie",nsim,"sim.csv"), columns = c(currentclassmethod,feature), discreteCategoryLabels = c("Non-cooperative","Cooperative"), otherlabel = currentlabel, newpdf = TRUE, nsim = nsim, islog = TRUE)
+for (j in 1:2) {
+  currentclassmethod <- classmethods[j]
+  currentlabel <- paste0("PasserTreeHack-",currentclassmethod)
+  for  (i in 1:length(featurevec)) {
+    print(currentlabel)
+    feature <- featurevec[i]
+    browniefunction(columns = c(currentclassmethod, feature), newdata = newdata, newtree = treefile, nsim = nsim, islog = feature, plotsimmaps = TRUE, otherlabel = currentlabel)
+    
+    plotbrownie(data = paste0(Sys.Date(),currentclassmethod,feature, currentlabel, "_brownie",nsim,"sim.csv"), columns = c(currentclassmethod,feature), discreteCategoryLabels = c("Non-cooperative","Cooperative"), otherlabel = currentlabel, newpdf = TRUE, nsim = nsim, islog = TRUE)
+  } # end i
+} # end j
 
 
 
 
-# Attempt to use btw with BayesTraitsV4
+
+### Attempt to use btw with BayesTraitsV4
 .BayesTraitsPath <- "~/Documents/BayesTraitsV4.0.0-OSX/BayesTraitsV4"
+
+simplebtwOut <- set.seed(10)
+nsim = 10
+for (n in 1:nsim) {
+  if (n %in% c(1, 2, 5,10,25,50,100,150,200, 500, 1000, 1500, 2000)) {
+    print(n)
+    print(Sys.time())
+  }
+  nocorrD <- DiscreteKTS(subsettree, subsetdf)
+  corrD <- DiscreteKTS(subsettree, subsetdf, dependent=TRUE)
+  lrtestresults <- lrtest(corrD, nocorrD)
+  tempRow <- cbind(corrD, lrtestresults)
+  simplebtwOut <- rbind(simplebtwOut, tempRow)
+}
+simplebtwOut <- as.data.frame(simplebtwOut)
+means <- apply(X = simplebtwOut,MARGIN = 2,FUN = mean)
+meansdf <- as.data.frame(rbind(means,means))
+#meansdf <- as.data.frame(as.matrix(means))
+pvalMed <- median(simplebtwOut$pval)
+pdf(file = paste0(Sys.Date(),"BayesTraitsV4_",currentlabel," vs FemaleSongWebb ", nsim, "sims.pdf"))
+plotdiscrete(meansdf[1,1:14], main = paste(currentlabel, "vs FemSongWebb, \nnsims =",nsim, "median pval =", pvalMed))
+dev.off()

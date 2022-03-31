@@ -6,7 +6,7 @@
 DiscreteKTS <- function (tree, data, mode = "ML", dependent = FALSE, res = NULL, 
           resall = NULL, mrca = NULL, fo = NULL, mlt = 10, it = 1e+05, 
           bi = 5000, sa = 100, pr = NULL, pa = NULL, hp = NULL, hpall = NULL, 
-          rj = NULL, rjhp = NULL, silent = TRUE) 
+          rj = NULL, rjhp = NULL, silent = TRUE, KeepBTInputFiles = FALSE) 
 {
   if (class(tree) == "phylo") {
     tree$node.label = NULL
@@ -133,9 +133,10 @@ DiscreteKTS <- function (tree, data, mode = "ML", dependent = FALSE, res = NULL,
     Results = Results[, -ncol(Results)]
     system(paste("rm ./BTout.txt"))
   }
-  
+  if (KeepBTInputFiles == FALSE) {
   system(paste("rm ./inputfile.txt"))
   system(paste("rm", "./tree.nex"))
   system(paste("rm", "./data.txt"))
+  }
   return(Results)
 }

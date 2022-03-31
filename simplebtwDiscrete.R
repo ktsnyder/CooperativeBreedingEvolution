@@ -1,11 +1,11 @@
 # Simple BayesTraits Discrete run
 # Created 3/9/2022
 # Kate T Snyder
-# Last Edited: 3/15/2022
+# Last Edited: 3/30/2022
 # Added   res = c("q10 q00 1.2", "q11 q01 1.2") # remove
 # Still hard coded to do Female Song 
 # Saves nocorrD output to csv and plots this
-# 
+# Added optional input nocorrDdf to plotDiscreteBayes() for separate df corrD vs nocorrD; flexible calling of columns for q12, q13, etc; doesn't automatically plot pval density
 
 # Purposes: 
 #   Make transition plots between two discrete characters without having to use btw::plotdiscrete()
@@ -23,52 +23,8 @@ require(dplyr)
 # newdata = "2022-03-09CoopSong__All.csv"
 # newtree = "2021-08-31ConsensusPasserineTreeEricson10_1000.nex"
 .BayesTraitsPath <- "~/Documents/BayesTraitsV4.0.0-OSX/BayesTraitsV4"
+.BayesTraitsPath <- "~/Documents/BayesTraitsV2"
 
-# # multitree
-# startReadingTrees <- Sys.time()
-# startReadingTrees
-# #thousandtrees = read.tree(file="BirdzillaEricson10.tre")
-# #thousandtrees = read.tree(file="BirdzillaHackett3_Stage2_1000trees.tre")
-# thousandtrees = read.tree(file = "/Users/kate/Library/CloudStorage/Box-Box/Kate_Nicole/Birdsong - Life History Evolution/BirdzillaHackett4_Stage2_1000trees.tre")
-# endReadingTrees <- Sys.time()
-# endReadingTrees
-# timeReadingTrees <- endReadingTrees-startReadingTrees
-# timeReadingTrees #Now only 1 minute! Nice.
-# 
-# drop.tip.multiPhylo<-function(phy, tip, ...){
-#   if(!inherits(phy,"multiPhylo"))
-#     stop("phy is not an object of class \"multiPhylo\".")
-#   else {
-#     trees<-lapply(phy,drop.tip,tip=tip,...)
-#     class(trees)<-"multiPhylo"
-#   }
-#   trees
-# }
-# 
-# # running overnight 3/9/22-3/10/22
-# newdata = "2022-03-09CoopSong__All.csv"
-# currentclassmethod = classmethods[2]
-# columns = c(currentclassmethod, "FemaleSong")
-# nsim = 50
-# 
-# 
-# pdf(file = paste0(Sys.Date(),"BayesTraitsDiscrete_", currentclassmethod, "_",columns[2], "_50trees.pdf"), width = 8, height = 11)
-# par(mfrow = c(3,2))
-# par(oma = c(2,3,2,1))
-# for (i in 1:50) {
-#   temptree <- thousandtrees[[i]]
-#   treelabel = paste0("Hackett4-",i,"_")
-#   subset <- subsettreedata(columns = columns, newdata = newdata, newtree = temptree)
-#   subsetHack <- subset$subsettree
-#   simplebtwOutput <- simplebtwDiscrete(columns = columns, newdata = newdata, newtree = temptree, treelabel = treelabel, nsim = nsim)
-#   plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim, treelabel = treelabel, newpdf = FALSE, ylabel = NULL)
-# }
-# dev.off()
-# 
-# treefile = "2021-08-31ConsensusPasserineTreeEricson10_1000.nex"
-# nsim = 200
-# treelabel = "PasserineTreeEricson-"
-# currentclassmethod = classmethods[4]
 # 
 # ## Switch CoopBreed classifications of disputed birds
 # datain <- read.csv(newdata)
@@ -83,27 +39,12 @@ require(dplyr)
 # colnames(switchedClassesdf) <- c("species", "originalClass","switchedClass")
 # switchedClassesdf <- as.data.frame(switchedClassesdf)
 # 
-# pdf(file = paste0(Sys.Date(),"BayesTraitsDiscrete", treelabel, columns[2], nsim, "sim_switchedTies.pdf"), width = 8, height = 11)
-# par(mfrow = c(3,2))
-# par(oma = c(2,3,2,1))
-# for (i in 1:length(switchedClassesdf$species)) {
-#   switchBird <- switchedClassesdf$species[i]
-#   print(switchBird)
-#   oldValue <- switchedClassesdf$originalClass[i]
-#   switchedValue <- switchedClassesdf$switchedClass[i]
-#   datain[which(datain$species == switchBird),currentclassmethod] <- switchedValue
-#   tempY <- paste(switchBird,"CoopBreed was", oldValue, "now", switchedValue)
-#   
-#   simplebtwOutput <- simplebtwDiscrete(columns = columns, newdata = datain, newtree = treefile, treelabel = treelabel, nsim = nsim)
-#   plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim, treelabel = treelabel, newpdf = FALSE, ylabel = tempY)
-# }
-# dev.off()
 # 
-# 
+source("btwDiscreteKTS.R")
 classmethods <- c("MeanCoopOmitTies",  "MeanCoopTie2Noncoop", "MeanCoopTie2Coop") #,  "AnyCoopEqualsCoop" )
 currentclassmethod <- classmethods[2]
 nsim = 100
-nsim = 50
+nsim = 14
 treefile = "2021-08-31ConsensusPasserineTreeEricson10_1000.nex"
 treelabel = "PasserineTreeEricson-"
 newdata = "2022-03-10CoopSong_All.csv"
@@ -118,12 +59,13 @@ for (i in classmethods) {
   columns <- c(currentclassmethod, secondcol)
   print(columns)
   print(Sys.time())
-  simplebtwOutput <- simplebtwDiscrete(columns = columns, newdata = df, newtree = treefile, treelabel = treelabel, nsim = nsim, savecsvs = TRUE)
-  plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim, treelabel = treelabel, newpdf = TRUE, ylabel = "Old FS Data", arrowmod = 1)
+  simplebtwOutput <- simplebtwDiscrete(columns = columns, newdata = dfnew, newtree = treefile, treelabel = treelabel, nsim = nsim, savecsvs = TRUE, KeepBTInputFiles = TRUE)
+  plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim, treelabel = treelabel, newpdf = TRUE, ylabel = "Old FS Data, BayesTraitsV4", arrowmod = 1)
 }
 
 
-simplebtwDiscrete <- function(columns, newdata, newtree, treelabel, nsim, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, savecsvs = FALSE) {
+
+simplebtwDiscrete <- function(columns, newdata, newtree, treelabel, nsim, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, savecsvs = FALSE, KeepBTInputFiles = FALSE) {
   require(btw)
   currentclassmethod <- columns[1]
   currentlabel <- paste0(treelabel,currentclassmethod)
@@ -149,8 +91,8 @@ simplebtwDiscrete <- function(columns, newdata, newtree, treelabel, nsim, clades
       print(n)
       print(Sys.time())
     }
-    nocorrD <- DiscreteKTS(subsettree, subsetdf)
-    corrD <- DiscreteKTS(subsettree, subsetdf, dependent=TRUE)
+    nocorrD <- DiscreteKTS(subsettree, subsetdf, KeepBTInputFiles = KeepBTInputFiles)
+    corrD <- DiscreteKTS(subsettree, subsetdf, dependent=TRUE, KeepBTInputFiles = KeepBTInputFiles)
     lrtestresults <- lrtest(corrD, nocorrD)
     tempRow <- cbind(corrD, lrtestresults, nocorrD)
     simplebtwOut <- rbind(simplebtwOut, tempRow)
@@ -175,7 +117,7 @@ simplebtwDiscrete <- function(columns, newdata, newtree, treelabel, nsim, clades
 
 
 
-plotDiscreteBayes <- function(columns, simplebtwOut, nsim, treelabel, newpdf, cladesubsetvalue = NULL, ylabel = NULL, arrowmod = 1) {
+plotDiscreteBayes <- function(columns, simplebtwOut, nocorrDdf = NULL, nsim = NULL, treelabel = NULL, newpdf, cladesubsetvalue = NULL, ylabel = NULL, arrowmod = 1) {
   
   currentclassmethod <- columns[1]
   currentlabel <- paste0(treelabel,currentclassmethod)
@@ -187,8 +129,14 @@ plotDiscreteBayes <- function(columns, simplebtwOut, nsim, treelabel, newpdf, cl
   MateParam <- columns[1]
   SongParam <- columns[2]
   ## replace plotdiscrete - from BayesPlots_choosebin
-  means <- apply(X = dfrangetemp[,3:10],MARGIN = 2,FUN = mean)
-  ttests <- apply(X = dfrangetemp[,3:10],MARGIN = 2,FUN = t.test)
+  if (is.null(nocorrDdf)) {
+    qDepColumns <- 3:10
+  } else {
+    qDepColumns <- c("q12", "q13", "q21", "q24", "q31", "q34", "q42", "q43")
+  }
+  
+  means <- apply(X = dfrangetemp[,qDepColumns],MARGIN = 2,FUN = mean)
+  ttests <- apply(X = dfrangetemp[,qDepColumns],MARGIN = 2,FUN = t.test)
   confInts = list()
   segmentmeans <- set.seed(10)
   segmentmins <- set.seed(10)
@@ -197,11 +145,11 @@ plotDiscreteBayes <- function(columns, simplebtwOut, nsim, treelabel, newpdf, cl
     confInts[[k]] <- ttests[[k]]$conf.int[1:2]
   }
   confIntsdf <- as.data.frame(confInts)
-  names(means) <- colnames(df[,3:10])
+  names(means) <- colnames(df[,qDepColumns])
   mins <- confIntsdf[1,]
-  names(mins) <- colnames(df[,3:10])
+  names(mins) <- colnames(df[,qDepColumns])
   maxs <- confIntsdf[2,]
-  names(maxs) <- colnames(df[,3:10])
+  names(maxs) <- colnames(df[,qDepColumns])
   segmentmeans <- rbind(segmentmeans,means) #stores each(all) segment's mean rates
   segmentmins <- rbind(segmentmins,mins) #stores each(all) segment's lower 95CI rates
   segmentmaxs <- rbind(segmentmaxs,maxs) #stores each(all) segment's upper 95CI rates
@@ -245,9 +193,15 @@ plotDiscreteBayes <- function(columns, simplebtwOut, nsim, treelabel, newpdf, cl
     } #end for i in 1:4 (make transition matrix) max
     
     
-    ##### repeat rate processing for nocorrD 
-    means_nocorr <- apply(X = dfrangetemp[,21:28],MARGIN = 2,FUN = mean)
-    ttests_nocorr <- apply(X = dfrangetemp[,21:28],MARGIN = 2,FUN = t.test)
+    ##### repeat rate processing for nocorrD, if present
+    if (is.null(nocorrDdf)) {
+        qColumns = 21:28
+    } else {
+      qColumns = c("q12", "q13", "q21", "q24", "q31", "q34", "q42", "q43")
+      dfrangetemp = nocorrDdf
+    }
+    means_nocorr <- apply(X = dfrangetemp[,qColumns],MARGIN = 2,FUN = mean)
+    ttests_nocorr <- apply(X = dfrangetemp[,qColumns],MARGIN = 2,FUN = t.test)
     confInts_nocorr = list()
     segmentmeans_nocorr <- set.seed(10)
     segmentmins_nocorr <- set.seed(10)
@@ -256,11 +210,11 @@ plotDiscreteBayes <- function(columns, simplebtwOut, nsim, treelabel, newpdf, cl
       confInts_nocorr[[k]] <- ttests_nocorr[[k]]$conf.int[1:2]
     }
     confIntsdf_nocorr <- as.data.frame(confInts_nocorr)
-    names(means_nocorr) <- colnames(df[,21:28])
+    names(means_nocorr) <- colnames(df[,qColumns])
     mins_nocorr <- confIntsdf_nocorr[1,]
-    names(mins_nocorr) <- colnames(df[,21:28])
+    names(mins_nocorr) <- colnames(df[,qColumns])
     maxs_nocorr <- confIntsdf_nocorr[2,]
-    names(maxs_nocorr) <- colnames(df[,21:28])
+    names(maxs_nocorr) <- colnames(df[,qColumns])
     segmentmeans_nocorr <- rbind(segmentmeans_nocorr,means_nocorr) #stores each(all) segment's mean rates  # this isn't necessary for discrete
     segmentmins_nocorr <- rbind(segmentmins_nocorr,mins_nocorr) #stores each(all) segment's lower 95CI rates
     segmentmaxs_nocorr <- rbind(segmentmaxs_nocorr,maxs_nocorr) #stores each(all) segment's upper 95CI rates
@@ -387,7 +341,7 @@ plotDiscreteBayes <- function(columns, simplebtwOut, nsim, treelabel, newpdf, cl
     text(x=c(50, 50, 94, 66, 50, 50, 6, 34), y=c(93, 67, 50, 50, 7,33, 50, 50), labels=labs, cex=0.85)
     #end plot corrD
     
-    
+    if (!is.null(dfrangetemp$pval)) {
     D0 <- density(dfrangetemp$pval)
     
     plot(D0,col="black",
@@ -397,8 +351,8 @@ plotDiscreteBayes <- function(columns, simplebtwOut, nsim, treelabel, newpdf, cl
                 max(D0$y)),
          main=paste(columns[1], columns[2], "BayesTraits pvals", ", # sims =", nsim, " \n", otherlabel), cex.main = 0.85, xlab="Pval" ,ylab="Frequency") 
     abline(v=0.05, col = "gray")
-    
-  # } #end for (m in 1:length(segmentmeans$q12)), i.e. end of going through each segment - not needed for simple discrete
+    }
+
   if (newpdf == TRUE) {
   dev.off()
   }
