@@ -22,7 +22,7 @@ EricConsensus <- read.nexus("2021-08-31ConsensusPasserineTreeEricson10_1000.nex"
 HackConsensus <- read.nexus("2022-03-16ConsensusPasserineTreeHackett4_1000.nex")
 HackMulti <- read.nexus("PasserineMultiphy1000Hackett4_nondicho.nex")
 
-BTMulti <- read.nexus("CoopVfemsong_BT_multitree.nex") # 997 tips; Webb FS classification
+BTMulti <- read.nexus("CoopVfemsongWebb_BT_multitree.nex") # 997 tips; Webb FS classification
 BT1 <- BTMulti[[1]]
 
 
@@ -36,9 +36,9 @@ columns <- c("MeanCoopTie2Noncoop", "O.C")
 subsetdf <- dfnew[which(dfnew[,columns[2]] %in% c("Present","Absent")),]
 
 source("subsettreedata.R")
-output <- subsettreedata(columns = columns, newdata = subsetdf, newtree = HackMulti, skinnydata = TRUE)
+output <- subsettreedata(columns = columns, newdata = subsetdf, newtree = HackConsensus, skinnydata = TRUE)  # newtree = BT1
 multitree <- output$subsettree
-write.nexus(multitree, file = "CoopVfemsongOdom_BT_multitree.nex")
+#write.nexus(multitree, file = "CoopVfemsongOdom_BT_multitree.nex")
 df <- output$subsetdf
 df[,columns[2]][which(df[,columns[2]] == "Absent")] <- 0
 df[,columns[2]][which(df[,columns[2]] == "Present")] <- 1
@@ -102,21 +102,16 @@ mammaltrees <- read.nexus("Mammal.trees")
 # SOLUTION: So, assigning TipLabel by just pulling the vector out of one of the trees may not be ok. BUT writing the multiPhylo as nexus and then reading it back in puts it in the right format
 #OdomMultitreeNex <- read.nexus("CoopVfemsongOdom_BT_multitree.nex")
 columns <- c("MeanCoopTie2Noncoop","FemaleSong") # Odom FS
-# subsetdf <- dfnew[which(dfnew[,columns[2]] %in% c("Present","Absent")),]
-# #source("subsettreedata.R")
-# #output <- subsettreedata(columns = columns, newdata = subsetdf, newtree = HackConsensus, skinnydata = TRUE)
-# df <- output$subsetdf
-# df[,columns[2]][which(df[,columns[2]] == "Absent")] <- 0
-# df[,columns[2]][which(df[,columns[2]] == "Present")] <- 1
-# df[,columns[1]] <- as.character(df[,columns[1]])
-# df[,columns[2]] <- as.character(df[,columns[2]])
+columns <-  c("MeanCoopTie2Noncoop","Female_song_score") # Webb FS 
+HackConsensus <- read.nexus("2022-03-16ConsensusPasserineTreeHackett4_1000.nex")
+
 # setwd("~/Documents")
 .BayesTraitsPath <- "~/Documents/BayesTraitsV4"
 
-commandIndMCMC <- c("2","2", "PriorAll exp 10", "Seed 10", "Stones 10 10000")
-IndMCMCout <- bayestraits(df,OdomMultitreeNex,commandIndMCMC)
-commandDepMCMC <- c("3","2", "PriorAll exp 10", "Seed 10", "Stones 10 10000")
-DepMCMCout <- bayestraits(df,OdomMultitreeNex,commandDepMCMC)
+commandIndMCMC <- c("2","2", "Seed 10", "Stones 10 10000")
+IndMCMCout <- bayestraits(df,BTMulti,commandIndMCMC)
+commandDepMCMC <- c("3","2", "Seed 10", "Stones 10 10000")
+DepMCMCout <- bayestraits(df,BTMulti,commandDepMCMC)
 logMarLH_ind <- IndMCMCout$Stones$logMarLH
 IndLog <- IndMCMCout$Log$results
 a1 <- IndLog$alpha1
@@ -131,5 +126,56 @@ DepLog <- DepMCMCout$Log$results
 
 2*(logMarLH_dep - logMarLH_ind)
 
-plotDiscreteBayes(columns = columns, simplebtwOut = DepLog, nocorrDdf = IndLogQ, newpdf = TRUE)
+plotDiscreteBayes(columns = columns, simplebtwOut = DepLog, nocorrDdf = IndLogQ, newpdf = TRUE, treelabel = "NoPrior_MCMC_Webb")
+
+
+# ML
+output <- subsettreedata(columns = columns, newdata = subsetdf, newtree = HackConsensus, skinnydata = TRUE)
+tree <- output$subsettree
+
+df <- output$subsetdf
+df[,columns[2]][which(df[,columns[2]] == "Absent")] <- 0
+df[,columns[2]][which(df[,columns[2]] == "Present")] <- 1
+df[,columns[1]] <- as.character(df[,columns[1]])
+df[,columns[2]] <- as.character(df[,columns[2]])
+
+setwd("~/Documents")
+commandIndML <- c("2","1", "Seed 10")
+IndMLout <- bayestraits(df,tree,commandIndML)
+commandDepML <- c("3","1", "Seed 10")#, "res q31 q42 1.5")
+DepMLout <- bayestraits(df,tree,commandDepML, silent = FALSE)
+logMarLH_ind <- IndMLout$Stones$logMarLH
+IndLog <- IndMCMCout$Log$results
+a1 <- IndLog$alpha1
+a2 <- IndLog$alpha2
+b1 <- IndLog$beta1
+b2 <- IndLog$beta2
+qIndRates <- cbind(a2, a1, b2, a1, b1, a2, b1, b2)
+colnames(qIndRates) <- c("q12", "q13", "q21", "q24", "q31", "q34", "q42", "q43")
+IndLogQ <- cbind(IndLog, qIndRates)
+logMarLH_dep <- DepMCMCout$Stones$logMarLH
+DepLog <- DepMCMCout$Log$results
+
+commandIndML <- c("2","1", "Seed 10")
+IndMLout <- bayestraits(df,tree,commandIndML)
+
+
+
+# try with Webb data - doneish
+# compare ML and MCMC outputs
+# try setting rates in ML - can only do each of 8 q rates, not 4 alpha/beta 
+
+# 
+newdata = "2022-03-10CoopSong_All.csv"
+df <- read.csv(newdata)
+columns <- c("MeanCoopTie2Noncoop", "Syll.song.final")
+subsetout <- subsettreedata(columns = columns, newdata = df, newtree = HackConsensus, islog = columns[2])
+subsetdf <- subsetout$subsetdf
+subsettree <- subsetout$subsettree
+x <- subsetdf[,columns[2]]
+names(x) <- subsetdf$species
+ancOut<- fastAnc(subsettree, x)
+xDisc <- subsetdf[,columns[1]]
+names(xDisc) <- subsetdf$species
+simmap <- make.simmap(tree = subsettree, x = xDisc, model = "ARD")
 
