@@ -25,7 +25,7 @@ write.csv(df, "2022-03-10CoopSong_PlusWebbFS.csv")
 
 
 
-dfout <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","Female_song_score"), df = df, tree =  Hacktree, dummy = FALSE, nsims = 10, treelabel = "Hackett", datalabel = "CoopTie2NonCoop FSWebb")
+dfout <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","Female_song_score"), df = df, tree =  Hacktree, dummy = FALSE, nsims = 1000, treelabel = "Hackett", datalabel = "CoopTie2NonCoop FSWebb")
 dfDummy <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","Female_song_score"), df = df, tree =  Hacktree, dummy = TRUE, nsims = 10, treelabel = "Hackett", datalabel = "CoopTie2NonCoop FSWebb")
 calcHuel(dfout,dfDummy, nsims = 10)
 
@@ -45,11 +45,19 @@ dfDummy4 <- CharacterSimmaps(columns = c("MeanCoopTie2Coop","FemaleSong"), df = 
 dfout5 <- CharacterSimmaps(columns = c("Final.EPP","Female_song_score"), df = df, tree =  Hacktree, dummy = FALSE, nsims = 100, treelabel = "Hackett", datalabel = "CoopTie2NonCoop FSWebb")
 dfDummy5 <- CharacterSimmaps(columns = c("Final.EPP","Female_song_score"), df = df, tree =  Hacktree, dummy = TRUE, nsims = 100, treelabel = "Hackett", datalabel = "CoopTie2NonCoop FSWebb")
 
+dfDummy <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","Female_song_score"), df = df, tree =  Hacktree, dummy = TRUE, nsims = 10000, treelabel = "Hackett", datalabel = "CoopTie2NonCoop FSWebb")
+
+
 calcHuel(dfout,dfDummy, nsims = 1000)
 calcHuel(dfout2,dfDummy2, nsims = 1000)
 calcHuel(dfout3, dfDummy3, nsims= 1000)
 calcHuel(dfout4, dfDummy4, nsims= 1000)
 Sys.time()
+calcHuel(dfout5, dfDummy5, nsims= 100)
+
+dfout <- read.csv("CoopBreed FSWebb simmap overlap output nsim1000 Hackett .csv")
+calcHuel(dfout, dfDummy, nsims_real = 1000, nsims_dummy = 10000)
+
 
 CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalabel) {
   
@@ -76,6 +84,7 @@ CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalab
   } else {
     # Make randomized versions of CoopBreed simmaps / DUMMY data
     CoopsimtreesRand <- list()
+    print(paste("starting Dummy Coop simmaps", Sys.time()))
     for (j in 1:nsims) {
       Coopvec <- subsetdf[,columns[1]]
       CoopvecRandom <- sample(Coopvec)
@@ -88,6 +97,7 @@ CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalab
     Coopsimtrees <- CoopsimtreesRand
     # Make randomized versions of FemaleSong simmaps / DUMMY data
     FSsimtreesRand <- list()
+    print(paste("starting Dummy FemSong simmaps", Sys.time()))
     for (j in 1:nsims) {
       FSvec <- subsetdf[,columns[2]]
       FSvecRandom <- sample(FSvec)
@@ -161,11 +171,14 @@ CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalab
 #dfout <- read.csv("CoopBreed FSOdom simmap overlap output nsim1000 Hackett .csv")
 #dfout <- read.csv("CoopBreed FSWebb simmap overlap output nsim1000 Hackett .csv")
 dfout <- read.csv("CoopTie2NonCoop FSWebb simmap overlap output nsim 100 Hackett .csv")
+dfDummy <- read.csv("CoopTie2NonCoop FSWebb DUMMYResampledCoopFS simmap overlap output nsim 100 Hackett .csv")
+nsims = 100
 
 
 
 
-calcHuel <- function(dfout, dfDummy, nsims) {
+
+calcHuel <- function(dfout, dfDummy, nsims_real, nsims_dummy) {
   ExpPropAbsent0 <- as.numeric(dfout$propFSabsent)*as.numeric(dfout$propNoncoop)
   ExpPropAbsent1 <- as.numeric(dfout$propFSabsent)*as.numeric(dfout$propCoop)
   ExpPropPresent0 <- as.numeric(dfout$propFSpresent)*as.numeric(dfout$propNoncoop)
@@ -173,16 +186,28 @@ calcHuel <- function(dfout, dfDummy, nsims) {
   
   # sum(obs-expected) for each state
   dAbsent0 <- sum(abs(as.numeric(dfout$ObsProp0Absent) - ExpPropAbsent0))
+  #as.numeric(dfout$ObsProp0Absent) - ExpPropAbsent0
   dAbsent1 <- sum(abs(as.numeric(dfout$ObsProp1Absent) - ExpPropAbsent1))
+  #as.numeric(dfout$ObsProp1Absent) - ExpPropAbsent1
   dPresent0 <- sum(abs(as.numeric(dfout$ObsProp0Present) - ExpPropPresent0))
+  #as.numeric(dfout$ObsProp0Present) - ExpPropPresent0
   dPresent1 <- sum(abs(as.numeric(dfout$ObsProp1Present) - ExpPropPresent1))
-  
-  D_real <- sum(dAbsent0, dAbsent1, dPresent0, dPresent1)/nsims
+  #as.numeric(dfout$ObsProp1Present) - ExpPropPresent1
+ 
+   sum(dAbsent0, dAbsent1, dPresent0, dPresent1) 
+  D_real <- sum(dAbsent0, dAbsent1, dPresent0, dPresent1)/nsims_real
   print(paste("D_real:",D_real))
   
+  # do sum-sum in other order to get distribution of Dsims 
+  dAbsent0 <- abs(as.numeric(dfout$ObsProp0Absent) - ExpPropAbsent0)
+  dAbsent1 <- abs(as.numeric(dfout$ObsProp1Absent) - ExpPropAbsent1)
+  dPresent0 <- abs(as.numeric(dfout$ObsProp0Present) - ExpPropPresent0)
+  dPresent1 <- abs(as.numeric(dfout$ObsProp1Present) - ExpPropPresent1)
+  Real_dsims <- rowSums(cbind(dAbsent0, dAbsent1, dPresent0, dPresent1))
+  
   #dfDummy <- read.csv("CoopBreed FSOdom DUMMYResampledCoopFS simmap overlap output nsim1000 Hackett .csv")
-  dfDummy <- read.csv("CoopBreed FSWebb DUMMYResampledCoopFS simmap overlap output nsim1000 Hackett .csv")
-  dfDummy <- read.csv("CoopTie2NonCoop FSWebb DUMMYResampledCoopFS simmap overlap output nsim 100 Hackett .csv")
+  # dfDummy <- read.csv("CoopBreed FSWebb DUMMYResampledCoopFS simmap overlap output nsim1000 Hackett .csv")
+  # dfDummy <- read.csv("CoopTie2NonCoop FSWebb DUMMYResampledCoopFS simmap overlap output nsim 100 Hackett .csv")
   ExpPropAbsent0 <- as.numeric(dfDummy$propFSabsent)*as.numeric(dfDummy$propNoncoop)
   ExpPropAbsent1 <- as.numeric(dfDummy$propFSabsent)*as.numeric(dfDummy$propCoop)
   ExpPropPresent0 <- as.numeric(dfDummy$propFSpresent)*as.numeric(dfDummy$propNoncoop)
@@ -193,11 +218,16 @@ calcHuel <- function(dfout, dfDummy, nsims) {
   dPresent1 <- abs(as.numeric(dfDummy$ObsProp1Present) - ExpPropPresent1)
   Dummy_dsums <- rowSums(cbind(dAbsent0, dAbsent1, dPresent0, dPresent1))
   
-  pval <- sum(Dummy_dsums > D_real)/nsims
+  pval <- sum(Dummy_dsums > D_real)/nsims_dummy
   print(paste("pval:",pval))
+  
+  par(mfrow=c(2,1))
+  hist(Real_dsims)
+  abline(v = D_real, col = "red")
+  hist(Dummy_dsums)
+  
+  
 }
-
-
 
 
 

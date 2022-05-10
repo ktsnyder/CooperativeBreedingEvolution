@@ -1,0 +1,10 @@
+# Ignore OutputFiles
+OutputFiles
+
+
+# Ignore Mac system files
+.DS_Store
+
+
+# Ignore giant .tre file
+BirdzillaHackett3.tre
