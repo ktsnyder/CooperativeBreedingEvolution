@@ -1,6 +1,7 @@
 # Coded by Kate Snyder
 # Adapted from 2018 code from ?
 # last edited 3/16/2022 - adjust placement of segment delineation lines on pvalue plot; added one "if" statement to allow bin = 1
+# edited 6/2/23 - added arrowmod to plottransitionbins
 
 
 plotBTjacks <- function(MateParam, SongParam, d, sigonly = FALSE, familysplit = NULL, nsim = 10) {
@@ -52,7 +53,7 @@ dev.off()
 
 
 ############### arrow plots AND pval vs threshold plot
-transitionBinplots <- function(MateParam,SongParam,df = df, newpdf = TRUE, sigonly = FALSE, minvec = NULL, maxvec = NULL, onetransplot = FALSE, familysplit = NULL, nsim = 100, binnum = NULL) {
+transitionBinplots <- function(MateParam,SongParam,df = df, newpdf = TRUE, sigonly = FALSE, minvec = NULL, maxvec = NULL, onetransplot = FALSE, familysplit = NULL, nsim = 100, binnum = NULL, arrowmod = 1) {
 
   
 if (newpdf == TRUE) {
@@ -64,8 +65,10 @@ if (SongParam == "Interval") {
   df$songcontvec[which(df$songcontvec == 0.01)] <- 0.25
 }
 
-df <- df[order(df$songcontvec),]
-alldfvals <- unique(df$songcontvec)
+if (onetransplot == FALSE) {
+  df <- df[order(df$songcontvec),]
+  alldfvals <- unique(df$songcontvec)
+}
 
 if (sigonly == FALSE) {
 dfallsig <- df 
@@ -229,7 +232,7 @@ for (m in 1:length(segmentmeansdf$q12)) {
   if (newpdf == TRUE) {  #used when not plotting jackknifes
     par(mar = rep(2, 4))
     runsperthresh <- paste("/",nsim,sep="")
-    arrowmod <- 1
+    arrowmod <- arrowmod # changed from 1 6/2/2023
   } else if (newpdf == FALSE) {
     par(mar = c(1.9,1.9,2.4,1.9))
     runsperthresh <- paste("/",nsim,sep="")
@@ -253,7 +256,7 @@ for (m in 1:length(segmentmeansdf$q12)) {
   }
   arrowcolvec <- rep(arrowcols[m],times=8)
   arrowcolvec[which(rates == 0)] <- "gray"
-  arrows(x0=c(35, 65, 85, 75, 65, 35, 15, 25), y0=c(85, 75, 65, 35, 15, 25, 35, 65), x1=c(65, 35, 85, 75, 35, 65, 15, 25), y1=c(85, 75, 35, 65, 15, 25, 65, 35), lwd=rates*arrowmod/2*15, col=arrowcolvec, length = arrowmod/5) 
+  arrows(x0=c(35, 65, 85, 75, 65, 35, 15, 25), y0=c(85, 75, 65, 35, 15, 25, 35, 65), x1=c(65, 35, 85, 75, 35, 65, 15, 25), y1=c(85, 75, 35, 65, 15, 25, 65, 35), lwd=rates*arrowmod/2*15, col=arrowcolvec, length = arrowmod*2) # changed length arrowmod denominator 5 to 2 6/2/23
   
   mat <- maxratesmat
   maxlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),2) 

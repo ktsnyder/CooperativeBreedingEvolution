@@ -2,6 +2,7 @@
 ### Code imported from btw v1 
 ### Created 3/17/2022
 ### Kate Snyder
+### Last edited 5/31/2023: add plotdiscrete from btw v1; add LRtestV1 from v1
 
 DiscreteKTS <- function (tree, data, mode = "ML", dependent = FALSE, res = NULL, 
           resall = NULL, mrca = NULL, fo = NULL, mlt = 10, it = 1e+05, 
@@ -139,4 +140,49 @@ DiscreteKTS <- function (tree, data, mode = "ML", dependent = FALSE, res = NULL,
   system(paste("rm", "./data.txt"))
   }
   return(Results)
+}
+
+
+
+plotdiscrete = function (model, estimates=TRUE, main=NULL) {
+  
+  # CREATE TRANSITION RATE MATRIX
+  mat = matrix(0, 4, 4, dimnames=list(c("00", "01", "10", "11"), c("00", "01", "10", "11")))
+  for (i in 1:4) {
+    for (j in 1:4) {
+      if (i != j  && sum(i,j) != 5) {
+        mat[i,j] = mean(model[,grep(tail(paste("q", i, j, sep=""), 1), names(model))])
+      } else mat[i,j] = NaN
+    }
+  }
+  
+  # PLOT
+  rates <- labs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),2) 
+  if (estimates == F) {labs=rep("",8)}
+  if (is.null(main)) {main = ""}
+  plot(c(0,100), c(0,100), type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", main=main)
+  text(x=c(20, 80, 20, 80), y=c(80, 80, 20, 20), labels=c("00", "01", "10", "11"), cex=4)
+  text(x=c(50, 50, 93, 67, 50, 50, 7, 33), y=c(93, 67, 50, 50, 7,33, 50, 50), labels=labs, cex=0.75)
+  arrows(x0=c(35, 65, 85, 75, 65, 35, 15, 25), y0=c(85, 75, 65, 35, 15, 25, 35, 65), x1=c(65, 35, 85, 75, 35, 65, 15, 25), y1=c(85, 75, 35, 65, 15, 25, 65, 35), lwd=rates/max(rates, na.rm=T)*15)
+  
+}
+
+
+lrtestV1 = function (model1, model2) {
+  if (nrow(model1) != nrow(model2)) {stop("Objects must contain the same number of models.")}
+  Lhs = c(mean(model1$Lh), mean(model2$Lh))
+  ind = sort(Lhs, index.return=TRUE)$ix
+  max = which.max(c(model1$Lh, model2$Lh))
+  Lh1 = Lhs[ind[1]]
+  Lh2 = Lhs[ind[2]]
+  LRstat = c()
+  pval = c()
+  for (n in 1:length(Lh1)) {
+    lrs = 2*(Lh1[n] - Lh2[n])
+    if (Lh1[n] < Lh2[n]) {lrs = -lrs}
+    pv = pchisq(lrs, df=1, lower.tail=F) 
+    LRstat = c(LRstat, lrs)
+    pval = c(pval, pv)
+  }
+  return(data.frame(model1$Lh, model2$Lh, LRstat, pval))
 }

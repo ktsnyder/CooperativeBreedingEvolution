@@ -2,56 +2,86 @@
 ## Kate Snyder
 ## 4/4/2022
 ## Method based on Huelsenbeck et al (2003)
+## 
+## Edited 6/1/23 - added checkpoint save to CharacterSimmaps
+## 
 
+setwd("/Users/kate/Desktop/CooperativeBreedingEvolution/")
 library(phytools)
 source("subsettreedata.R")
-df <- read.csv("2022-03-10CoopSong_All.csv")
+#df <- read.csv("2022-03-10CoopSong_All.csv")
+#df <- read.csv("2022-03-10CoopSong_PlusWebbFS.csv")
+newdata = "/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-06-01_CoopSongFS_RColumns.csv"
+dfAgg = read.csv(newdata)
+dfAgg = dfAgg[which(dfAgg$FemaleSong_Aggregated != "Songless"),]
+df = dfAgg
+#colnames(df)[which(colnames(df) == "FemaleSong_Aggregated")] = "Female_song_score"
 Hacktree <- read.nexus("2022-03-16ConsensusPasserineTreeHackett4_1000.nex")
 treelabel <- "Hackett"
 Erictree <-read.nexus("2021-08-31ConsensusPasserineTreeEricson10_1000.nex")
 treelabel <- "Ericson"
 
-WebbFSdf <- read.csv("Webb et al 2016 Female Song Plumage Data.csv")
-dfnew <- merge(df, WebbFSdf, by.x = "species", by.y = "TipLabel")
-columns <- c("MeanCoopTie2Noncoop","Female_song_score") # Webb FS
-datalabel <- "CoopBreed FSWebb"
- columns <- c("MeanCoopTie2Noncoop","FemaleSong") # Odom FS
- datalabel <- "CoopBreed FSOdom"
-# columns <- c("MeanCoopTie2Noncoop", "O.C")
-df <- dfnew[which(dfnew[,columns[2]] %in% c("Present","Absent")),]
-write.csv(df, "2022-03-10CoopSong_PlusWebbFS.csv")
-# df[,columns[2]][which(df[,columns[2]] == "Absent")] <- 0
-# df[,columns[2]][which(df[,columns[2]] == "Present")] <- 1
+# WebbFSdf <- read.csv("Webb et al 2016 Female Song Plumage Data.csv")
+# dfnew <- merge(df, WebbFSdf, by.x = "species", by.y = "TipLabel")
+# columns <- c("MeanCoopTie2Noncoop","Female_song_score") # Webb FS
+# datalabel <- "CoopBreed FSWebb"
+#  columns <- c("MeanCoopTie2Noncoop","FemaleSong") # Odom FS
+#  datalabel <- "CoopBreed FSOdom"
+# # columns <- c("MeanCoopTie2Noncoop", "O.C")
+# df <- dfnew[which(dfnew[,columns[2]] %in% c("Present","Absent")),]
+# write.csv(df, "2022-03-10CoopSong_PlusWebbFS.csv")
+# # df[,columns[2]][which(df[,columns[2]] == "Absent")] <- 0
+# # df[,columns[2]][which(df[,columns[2]] == "Present")] <- 1
+
+nsims_real = 1000
+nsims_dummy = 5000
+
+dfout5 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Aggregated"), df = df, tree =  Hacktree, dummy = FALSE, nsims = nsims_real, treelabel = "Hackett", datalabel = "Tie2NonCoop FSAgg")
+write.csv(dfout5, "Simmap overlap output_Tie2NonCoop FSAgg nsim1000_Hackett REAL.csv")
+dfout6 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Aggregated"), df = df, tree =  Erictree, dummy = FALSE, nsims = nsims_real, treelabel = "Ericson", datalabel = "Tie2NonCoop FSAgg")
+write.csv(dfout6, "Simmap overlap output_Tie2NonCoop FSAgg nsim1000_Ericson REAL.csv")
+
+dfDummy5 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Aggregated"), df = df, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Tie2NonCoop FSAgg")
+write.csv(dfDummy5, "Simmap overlap output_Tie2NonCoop FSAgg nsim10000_Hackett DUMMY.csv")
+dfDummy6 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Aggregated"), df = df, tree =  Erictree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Ericson", datalabel = "Tie2NonCoop FSAgg")
+write.csv(dfDummy6, "Simmap overlap output_Tie2NonCoop FSAgg nsim10000_Ericson DUMMY.csv")
+
+calcHuel(dfout5,dfDummy5, nsims_real = nsims_real, nsims_dummy = nsims_dummy)
+calcHuel(dfout6,dfDummy6, nsims_real = nsims_real, nsims_dummy = nsims_dummy)
 
 
+dfout5 <- CharacterSimmaps(columns = c("MeanCoopTie2Coop","FemaleSong_Aggregated"), df = df, tree =  Hacktree, dummy = FALSE, nsims = nsims_real, treelabel = "Hackett", datalabel = "Tie2Coop FSAgg")
+write.csv(dfout5, "Simmap overlap output_Tie2Coop FSAgg nsim1000_Hackett REAL.csv")
+dfout6 <- CharacterSimmaps(columns = c("MeanCoopTie2Coop","FemaleSong_Aggregated"), df = df, tree =  Erictree, dummy = FALSE, nsims = nsims_real, treelabel = "Ericson", datalabel = "Tie2Coop FSAgg")
+write.csv(dfout6, "Simmap overlap output_Tie2Coop FSAgg nsim1000_Ericson REAL.csv")
 
-dfout <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","Female_song_score"), df = df, tree =  Hacktree, dummy = FALSE, nsims = 1000, treelabel = "Hackett", datalabel = "CoopTie2NonCoop FSWebb")
-dfDummy <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","Female_song_score"), df = df, tree =  Hacktree, dummy = TRUE, nsims = 10, treelabel = "Hackett", datalabel = "CoopTie2NonCoop FSWebb")
-calcHuel(dfout,dfDummy, nsims = 10)
+dfDummy5 <- CharacterSimmaps(columns = c("MeanCoopTie2Coop","FemaleSong_Aggregated"), df = df, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Tie2Coop FSAgg")
+write.csv(dfDummy5, "Simmap overlap output_Tie2Coop FSAgg nsim10000_Hackett DUMMY.csv")
+dfDummy6 <- CharacterSimmaps(columns = c("MeanCoopTie2Coop","FemaleSong_Aggregated"), df = df, tree =  Erictree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Ericson", datalabel = "Tie2Coop FSAgg")
+write.csv(dfDummy6, "Simmap overlap output_Tie2Coop FSAgg nsim10000_Ericson DUMMY.csv")
 
-dfout <- CharacterSimmaps(columns = c("MeanCoopTie2Coop","Female_song_score"), df = df, tree =  Hacktree, dummy = FALSE, nsims = 1000, treelabel = "Hackett", datalabel = "CoopTie2Coop FSWebb")
-dfDummy <- CharacterSimmaps(columns = c("MeanCoopTie2Coop","Female_song_score"), df = df, tree =  Hacktree, dummy = TRUE, nsims = 1000, treelabel = "Hackett", datalabel = "CoopTie2Coop FSWebb")
+# dfout <- CharacterSimmaps(columns = c("MeanCoopTie2Coop","Webb_FemaleSong"), df = df, tree =  Hacktree, dummy = FALSE, nsims = 10, treelabel = "Hackett", datalabel = "CoopTie2Coop FSWebb")
+# dfDummy <- CharacterSimmaps(columns = c("MeanCoopTie2Coop","Webb_FemaleSong"), df = df, tree =  Hacktree, dummy = TRUE, nsims = 50, treelabel = "Hackett", datalabel = "CoopTie2Coop FSWebb")
 
-dfout2 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","Female_song_score"), df = df, tree =  Erictree, dummy = FALSE, nsims = 1000, treelabel = "Ericson", datalabel = "CoopTie2NonCoop FSWebb")
-dfDummy2 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","Female_song_score"), df = df, tree =  Erictree, dummy = TRUE, nsims = 1000, treelabel = "Ericson", datalabel = "CoopTie2NonCoop FSWebb")
+dfout2 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Aggregated"), df = df, tree =  Erictree, dummy = FALSE, nsims = nsims_real, treelabel = "Ericson", datalabel = "Tie2NonCoop FSAgg")
+dfDummy2 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Aggregated"), df = df, tree =  Erictree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Ericson", datalabel = "Tie2NonCoop FSAgg")
 
-df <- read.csv("2022-03-10CoopSong_All.csv")
-dfout3 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong"), df = df, tree =  Hacktree, dummy = FALSE, nsims = 1000, treelabel = "Hackett", datalabel = "CoopTie2NonCoop FSOdom")
-dfDummy3 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong"), df = df, tree =  Hacktree, dummy = TRUE, nsims = 1000, treelabel = "Hackett", datalabel = "CoopTie2NonCoop FSOdom")
+dfout3 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","Webb_FemaleSong"), df = df, tree =  Hacktree, dummy = FALSE, nsims = nsims_real, treelabel = "Hackett", datalabel = "Tie2NonCoop FSWebb")
+dfDummy3 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","Webb_FemaleSong"), df = df, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Tie2NonCoop FSWebb")
 
-dfout4 <- CharacterSimmaps(columns = c("MeanCoopTie2Coop","FemaleSong"), df = df, tree =  Hacktree, dummy = FALSE, nsims = 1000, treelabel = "Hackett", datalabel = "CoopTie2Coop FSOdom")
-dfDummy4 <- CharacterSimmaps(columns = c("MeanCoopTie2Coop","FemaleSong"), df = df, tree =  Hacktree, dummy = TRUE, nsims = 1000, treelabel = "Hackett", datalabel = "CoopTie2Coop FSOdom")
+dfout4 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","Odom_FemaleSong"), df = df, tree =  Hacktree, dummy = FALSE, nsims = nsims_real, treelabel = "Hackett", datalabel = "Tie2NonCoop FSOdom")
+dfDummy4 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong"), df = df, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Tie2NonCoop FSOdom")
 
-dfout5 <- CharacterSimmaps(columns = c("Final.EPP","Female_song_score"), df = df, tree =  Hacktree, dummy = FALSE, nsims = 100, treelabel = "Hackett", datalabel = "CoopTie2NonCoop FSWebb")
-dfDummy5 <- CharacterSimmaps(columns = c("Final.EPP","Female_song_score"), df = df, tree =  Hacktree, dummy = TRUE, nsims = 100, treelabel = "Hackett", datalabel = "CoopTie2NonCoop FSWebb")
+#dfout5 <- CharacterSimmaps(columns = c("Final.EPP","Female_song_score"), df = df, tree =  Hacktree, dummy = FALSE, nsims = 100, treelabel = "Hackett", datalabel = "CoopTie2NonCoop FSWebb")
+#dfDummy5 <- CharacterSimmaps(columns = c("Final.EPP","Female_song_score"), df = df, tree =  Hacktree, dummy = TRUE, nsims = 100, treelabel = "Hackett", datalabel = "CoopTie2NonCoop FSWebb")
 
-dfDummy <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","Female_song_score"), df = df, tree =  Hacktree, dummy = TRUE, nsims = 10000, treelabel = "Hackett", datalabel = "CoopTie2NonCoop FSWebb")
+#dfDummy <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","Female_song_score"), df = df, tree =  Hacktree, dummy = TRUE, nsims = 10000, treelabel = "Hackett", datalabel = "CoopTie2NonCoop FSWebb")
 
 
-calcHuel(dfout,dfDummy, nsims = 1000)
-calcHuel(dfout2,dfDummy2, nsims = 1000)
-calcHuel(dfout3, dfDummy3, nsims= 1000)
-calcHuel(dfout4, dfDummy4, nsims= 1000)
+calcHuel(dfout, dfDummy, nsims_real = nsims_real, nsims_dummy = nsims_dummy)
+calcHuel(dfout2, dfDummy2, nsims_real = nsims_real, nsims_dummy = nsims_dummy)
+calcHuel(dfout3, dfDummy3, nsims_real = nsims_real, nsims_dummy = nsims_dummy)
+calcHuel(dfout4, dfDummy4, nsims_real = nsims_real, nsims_dummy = nsims_dummy)
 Sys.time()
 calcHuel(dfout5, dfDummy5, nsims= 100)
 
@@ -157,6 +187,11 @@ CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalab
     # temprow <- c(treenum, column1, column2, coopQ01, coopQ10, FSQAbsPres, FSQPresAbs, Nspecies, propFSabsent, propFSpresent, propNoncoop, propCoop, ObsProp0Absent, ObsProp0Present, ObsProp1Absent, ObsProp1Present, totaltime, chiStat, chiPval, chiStatSim, chiPvalSim)
     temprow <- c(treenum, column1, column2, coopQ01, coopQ10, FSQAbsPres, FSQPresAbs, Nspecies, propFSabsent, propFSpresent, propNoncoop, propCoop, ObsProp0Absent, ObsProp0Present, ObsProp1Absent, ObsProp1Present, totaltime)
     dfout <- rbind(dfout, temprow)
+    dfout <- as.data.frame(dfout)
+    colnames(dfout) <- c("treenum", "column1", "column2", "coopQ01", "coopQ10", "FSQAbsPres", "FSQPresAbs", "Nspecies", "propFSabsent", "propFSpresent", "propNoncoop", "propCoop", "ObsProp0Absent", "ObsProp0Present", "ObsProp1Absent", "ObsProp1Present", "totaltime")
+    if (i %in% c(100,250,500,1000,2000,3000,4000,5000)) {
+      write.csv(dfout, file = paste(datalabel, "simmap overlap output nsim", nsims, treelabel,".csv"))
+    }
   }
   dfout <- as.data.frame(dfout)
   #colnames(dfout) <- c("treenum", "column1", "column2", "coopQ01", "coopQ10", "FSQAbsPres", "FSQPresAbs", "Nspecies", "propFSabsent", "propFSpresent", "propNoncoop", "propCoop", "ObsProp0Absent", "ObsProp0Present", "ObsProp1Absent", "ObsProp1Present", "totaltime", "chiStat", "chiPval", "chiStatSim", "chiPvalSim")
@@ -313,22 +348,22 @@ dfout <- cbind(dfout, pvalgroup)
 library(ggplot2)
 library(cowplot)
 library(reshape2)
-dfDummy <- melt(dfDummy, measure.vars = c("ObsProp0Absent","ObsProp1Absent","ObsProp0Present","ObsProp1Present"), variable.name = "state", value.name = "state.prop")
-dfDummy <- melt(dfDummy, measure.vars = c("propFSabsent", "propFSpresent"), variable.name = "FS_state", value.name = "FSstate.prop")
-dfDummy <- melt(dfDummy, measure.vars = c("propNoncoop", "propCoop"), variable.name = "CB_state", value.name = "CBstate.prop")
+dfDummyMelt <- melt(dfDummy, measure.vars = c("ObsProp0Absent","ObsProp1Absent","ObsProp0Present","ObsProp1Present"), variable.name = "state", value.name = "state.prop")
+dfDummyMelt <- melt(dfDummyMelt, measure.vars = c("propFSabsent", "propFSpresent"), variable.name = "FS_state", value.name = "FSstate.prop")
+dfDummyMelt <- melt(dfDummyMelt, measure.vars = c("propNoncoop", "propCoop"), variable.name = "CB_state", value.name = "CBstate.prop")
 
-a <- ggplot(dfDummy, aes(x = state, y = state.prop, fill = pvalgroup)) + geom_boxplot() + ggtitle("dummy CoopBreed data")
-b <- ggplot(dfDummy, aes(x = FS_state, y = FSstate.prop, fill = pvalgroup)) + geom_boxplot()+ ggtitle("dummy CoopBreed data")
-c <- ggplot(dfDummy, aes(x = CB_state, y = CBstate.prop, fill = pvalgroup)) + geom_boxplot()+ ggtitle("dummy CoopBreed data")
+a <- ggplot(dfDummyMelt, aes(x = state, y = state.prop, fill = pvalgroup)) + geom_boxplot() + ggtitle("dummy CoopBreed data")
+b <- ggplot(dfDummyMelt, aes(x = FS_state, y = FSstate.prop, fill = pvalgroup)) + geom_boxplot()+ ggtitle("dummy CoopBreed data")
+c <- ggplot(dfDummyMelt, aes(x = CB_state, y = CBstate.prop, fill = pvalgroup)) + geom_boxplot()+ ggtitle("dummy CoopBreed data")
 
 
-dfout <- melt(dfout, measure.vars = c("ObsProp0Absent","ObsProp1Absent","ObsProp0Present","ObsProp1Present"), variable.name = "state", value.name = "state.prop")
-dfout <- melt(dfout, measure.vars = c("propFSabsent", "propFSpresent"), variable.name = "FS_state", value.name = "FSstate.prop")
-dfout <- melt(dfout, measure.vars = c("propNoncoop", "propCoop"), variable.name = "CB_state", value.name = "CBstate.prop")
+dfoutMelt <- melt(dfout, measure.vars = c("ObsProp0Absent","ObsProp1Absent","ObsProp0Present","ObsProp1Present"), variable.name = "state", value.name = "state.prop")
+dfoutMelt <- melt(dfoutMelt, measure.vars = c("propFSabsent", "propFSpresent"), variable.name = "FS_state", value.name = "FSstate.prop")
+dfoutMelt <- melt(dfoutMelt, measure.vars = c("propNoncoop", "propCoop"), variable.name = "CB_state", value.name = "CBstate.prop")
 
-d <- ggplot(dfout, aes(x = state, y = state.prop, fill = pvalgroup)) + geom_boxplot() + ggtitle("real CoopBreed data")
-e <- ggplot(dfout, aes(x = FS_state, y = FSstate.prop, fill = pvalgroup)) + geom_boxplot() + ggtitle("real CoopBreed data")
-f <- ggplot(dfout, aes(x = CB_state, y = CBstate.prop, fill = pvalgroup)) + geom_boxplot() + ggtitle("real CoopBreed data")
+d <- ggplot(dfoutMelt, aes(x = state, y = state.prop, fill = pvalgroup)) + geom_boxplot() + ggtitle("real CoopBreed data")
+e <- ggplot(dfoutMelt, aes(x = FS_state, y = FSstate.prop, fill = pvalgroup)) + geom_boxplot() + ggtitle("real CoopBreed data")
+f <- ggplot(dfoutMelt, aes(x = CB_state, y = CBstate.prop, fill = pvalgroup)) + geom_boxplot() + ggtitle("real CoopBreed data")
 
 
 plot_grid(a,b,c,d,e,f, ncol = 3)

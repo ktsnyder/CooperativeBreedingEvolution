@@ -12,12 +12,13 @@
 ########
 # Modified 3/15/2022 - output nocorrD stuff too
 # Modified 3/17/2022 - columns input instead of MateParam/SongParam, use BayesTraitsV4 and KTS version of Discrete, add treelabel
+# Split from btwfunction2.R to make it use btwDiscreteKTS.R functions
 
 #Must set .BayesTraitsPath to location of program BayesTraitsV2, which must be located in your working directory. E.g.:
 #.BayesTraitsPath <- "~/Documents/BayesTraits/BayesTraitsV2"
 #.BayesTraitsPath <- "~/Documents/BayesTraitsV2"
 .BayesTraitsPath <- "~/Documents/BayesTraitsV4.0.0-OSX/BayesTraitsV4"
-#source("btwDiscreteKTS.R")
+source("btwDiscreteKTS.R")
 # library(devtools)
 # install_github("rgriff23/btw", ref="v1")
  library(btw)
@@ -169,9 +170,9 @@ btwfunction <- function(columns, plot=TRUE, jackknife = FALSE, csvsout = FALSE, 
         songdiscvec[songdiscvec > thresh] <- 1
         names(songdiscvec) <- songdf$species
         btwdf <- as.data.frame(cbind(as.character(songdf$species),matevec,as.character(songdiscvec)))
-        nocorrD <- Discrete(bothtree, btwdf) #, res = c("q10 q00 1.2", "q11 q01 1.2", "q01 q00 1.2"))
-        corrD <- Discrete(bothtree, btwdf, dependent=TRUE) #, res = c("q10 q00 1.2", "q11 q01 1.2", "q01 q00 1.2"))
-        lrtestresults <- lrtest(corrD, nocorrD)
+        nocorrD <- DiscreteKTS(bothtree, btwdf) #, res = c("q10 q00 1.2", "q11 q01 1.2", "q01 q00 1.2"))
+        corrD <- DiscreteKTS(bothtree, btwdf, dependent=TRUE) #, res = c("q10 q00 1.2", "q11 q01 1.2", "q01 q00 1.2"))
+        lrtestresults <- lrtestV1(corrD, nocorrD)
         # LRstat[i] <- lrtestresults$LRstat
         # LRpval[i] <- lrtestresults$pval
         # transandp <- cbind(corrD,LRstat[i],LRpval[i],songcontvec[i], nocorrD)
