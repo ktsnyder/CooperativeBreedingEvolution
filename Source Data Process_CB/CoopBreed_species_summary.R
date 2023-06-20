@@ -7,15 +7,16 @@
 ## 3/10/2022 - correct Jetz et al classification to reflect more liberal use of Cockburn et al data; add OC data
 ## 5/30/2023 - commented out last write csv since song data already added; removed Female Song from output since not included in input yet
 ## 6/14/2023 - added Mikula and Dale columns to output
+## 6/20/2023 - included Dale in MeanCoop calculation
 
 setwd("~/Desktop/CooperativeBreedingEvolution/Source Data Process_CB")
 
-CoopBreed_species_summary(coopbreedfile = "Aggregate_Source_Data_AllColumns.csv", allcoop = TRUE, OCdatafile = TRUE)
-CoopBreed_species_summary(coopbreedfile = "2023-05-30_Aggregate_Source_Data_AllColumns.csv", allcoop = TRUE, OCdatafile = TRUE)
-CoopBreed_species_summary(coopbreedfile = coopbreedfile, allcoop = TRUE, OCdatafile = TRUE)
+#CoopBreed_species_summary(coopbreedfile = "Aggregate_Source_Data_AllColumns.csv", allcoop = TRUE, OCdatafile = TRUE)
+#CoopBreed_species_summary(coopbreedfile = "2023-05-30_Aggregate_Source_Data_AllColumns.csv", allcoop = TRUE, OCdatafile = TRUE)
+#CoopBreed_species_summary(coopbreedfile = coopbreedfile, allcoop = TRUE, OCdatafile = TRUE)
 
-coopbreedfile = "2023-05-30_Aggregate_Source_Data_AllColumns.csv"
-coopbreedfile = "/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-06-14_Aggregate_Source_Data_AllColumns.csv"
+#coopbreedfile = "2023-05-30_Aggregate_Source_Data_AllColumns.csv"
+#coopbreedfile = "/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-06-14_Aggregate_Source_Data_AllColumns.csv"
 
 CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Update.csv", allcoop = FALSE, OCdatafile = FALSE) {
   
@@ -118,6 +119,18 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
     # Birds of the World
     BOWCoop <- tempRowIn$Cooperative.BOW
     
+    # Add Mikula and Dale data 06/2023
+    Mikula <- tempRowIn$Coop_breed
+    
+    if (is.na(tempRowIn$Cooperative_breeding_ppca)) {
+      Dale = NA
+    } else if (tempRowIn$Cooperative_breeding_ppca < 0) {
+      Dale = 0
+    } else if (tempRowIn$Cooperative_breeding_ppca > 0) {
+      Dale = 1
+    }
+    
+    
     if (is.na(tempRowIn$Kin)) {
       RiehlKin <- NA
     } else if (tempRowIn$Kin %in% c("K", "NK", "M")) {
@@ -128,7 +141,6 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
       RiehlKin <- NA
     }
  
-    
     # Griesser 2017 - family living vs non family, and coop vs noncoop
     if (is.na(tempRowIn$social_system_incl_nk_coop)) {
       Griesser2017_Coop <- NA
@@ -157,7 +169,8 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
     
     FemaleSong <- tempRowIn$Female.Song.Score
     
-    allsourcesvec <- c(Dunn, Biagolini, DowningCoop, Jetz, Rubenstien, Cockburn, ReihlCoop, Griesser2017_Coop, BOWCoop)
+    # Dale et al added 6/20/2023
+    allsourcesvec <- c(Dunn, Biagolini, DowningCoop, Jetz, Rubenstien, Cockburn, ReihlCoop, Griesser2017_Coop, BOWCoop, Dale) # Mikula not included because they only added one new species compared to Dale et al (which has many more species than Mikula et al) and otherwise totally agreed with Dale. The one species in Mikula but not Dale is already present in the dataset 
     allsourcesNoNA <- na.omit(allsourcesvec)
     meanclass <- sum(allsourcesNoNA)/length(allsourcesNoNA) 
     
@@ -223,17 +236,6 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
     } else if (numMixedKinNonKin > numKin + numNonKin) {
       Kin_NK <- "Mixed"
     }
-    
-    # Add Mikula and Dale data 06/2023
-      Mikula <- tempRowIn$Coop_breed
-      
-      if (is.na(tempRowIn$Cooperative_breeding_ppca)) {
-        Dale = NA
-      } else if (tempRowIn$Cooperative_breeding_ppca < 0) {
-        Dale = 0
-      } else if (tempRowIn$Cooperative_breeding_ppca > 0) {
-        Dale = 1
-      }
     
     
     # this comes after all the if...else statements for each column - putting the whole thing together!

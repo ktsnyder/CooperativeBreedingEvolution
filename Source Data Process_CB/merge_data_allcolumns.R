@@ -113,7 +113,7 @@ newdf15 <- merge(newdf14, Mikula5, by.x = "BirdtreeSpecies", by.y = "Sci_name", 
 colnames(DaleData)[which(colnames(DaleData) == "Scientific_name")] <- "Scientific_name_Dale2015"
 newdf16 <- merge(newdf15, DaleData, by.x = "BirdtreeSpecies", by.y = "TipLabel", all = T, suffixes = c("","_Dale"))
 
-# Merge Remes data
+# Merge Remes data - does not contain female song or cooperative breeding per se, but has EPP and biparental cooperation
 RemesData = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/Remes et al 2015 PNAS doi_10.5061_dryad.02jk0__v1/PNAS_data.csv")
 RemesClimateData = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/Remes et al 2015 PNAS doi_10.5061_dryad.02jk0__v1/PNAS_data_climatic.csv")
 sum(RemesData$Species_name %in% newdf14$BirdtreeSpecies)
@@ -128,8 +128,27 @@ newdf18 = newdf17[which(newdf17$BirdtreeSpecies %in% birdtree$tip.label),]
 # remove duplicated rows
 newdf19 = newdf18[which(!duplicated(newdf18$BirdtreeSpecies)),]
 
-# write file - then this file used in CoopBreed_species_summary.R
-write.csv(newdf19, file = paste0(Sys.Date(),"_Aggregate_Source_Data_AllColumns.csv"), row.names = FALSE)
+# write file - then use file in CoopBreed_species_summary.R
+write.csv(newdf19, file = paste0(Sys.Date(),"_Aggregate_Source_Data_AllCoopBreedColumns.csv"), row.names = FALSE)
+source("CoopBreed_species_summary.R")
+CoopBreed_species_summary(paste0(Sys.Date(),"_Aggregate_Source_Data_AllCoopBreedColumns.csv"), songfile = "SongData_R_Update.csv", allcoop = TRUE, OCdatafile = FALSE)
+cbSong = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-06-20CoopSong_All.csv") # created with above line
+
+FSdata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-06-20_Female Song Data_GSheetDownload.csv")
+colnames(FSdata)[which(colnames(FSdata) == "Song_data_source_Webb..NOTE..appears.to.be.reversed...ones.marked..del.Hoyo..were.actually.from.Odom..ones.marked..del.Hoyo..actually.from.HBW.")] = "Song_data_source_Webb"
+
+
+FSdata$BirdtreeSpecies[which(!FSdata$BirdtreeSpecies %in% birdtree$tip.label)]
+FSdata = FSdata[which(!FSdata$BirdtreeSpecies %in% birdtree$tip.label),]
+FSdata$Odom_FemaleSong[which(FSdata$Odom_FemaleSong == "")] <- NA
+FSdata$Webb_FemaleSong[which(FSdata$Webb_FemaleSong == "")] <- NA
+cbSong$species[which(!cbSong$species %in% birdtree$tip.label)]
+FSCBSong = merge(cbSong, FSdata, by.x = "species", by.y = "BirdtreeSpecies", all = T)
+write.csv(FSCBSong, file = paste0(Sys.Date(),"_CoopBreed-FemaleSong-Song_Data_R.csv"), row.names = FALSE)
+
+
+
+
 
 
 # Additional (non-Cooperative Breeding) Sources
@@ -194,12 +213,12 @@ Aggdf = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data P
 #cbdf = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-05-30CoopSong_All.csv")
 cbdf = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-06-14_working_coop_breed.csv")
 
-FSdata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-05-30_Female Song Data_GSheetDownload.csv")
-colnames(FSdata) %in% colnames(Aggdf)
-colnames(Aggdf) %in% colnames(FSdata)
-sum(colnames(Aggdf) %in% colnames(cbdf))
-AggdfNewFS = Aggdf[which(!is.na(Aggdf$Mikula1_Duetting_vs_NoDuetting)),c("BirdtreeSpecies", "Mikula1_Duetting_vs_NoDuetting", "Mikula2_Duetting_vs_NoFS", "Mikula3_FemaleSoloSong_vs_Duetting", "Mikula4_FemaleSoloSong_vs_NoFS")]
-!AggdfNewFS$BirdtreeSpecies %in% FSdata$BirdtreeSpecies
+FSdata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-06-14_Female Song Data_GSheetDownload.csv")
+#colnames(FSdata) %in% colnames(Aggdf)
+#colnames(Aggdf) %in% colnames(FSdata)
+#sum(colnames(Aggdf) %in% colnames(cbdf))
+#AggdfNewFS = Aggdf[which(!is.na(Aggdf$Mikula1_Duetting_vs_NoDuetting)),c("BirdtreeSpecies", "Mikula1_Duetting_vs_NoDuetting", "Mikula2_Duetting_vs_NoFS", "Mikula3_FemaleSoloSong_vs_Duetting", "Mikula4_FemaleSoloSong_vs_NoFS")]
+#!AggdfNewFS$BirdtreeSpecies %in% FSdata$BirdtreeSpecies
 
 FSdata$BirdtreeSpecies[which(!FSdata$BirdtreeSpecies %in% birdtree$tip.label)]
 #FSdata = FSdata[,c("BirdtreeSpecies","Odom_FemaleSong","Webb_FemaleSong","FemaleSong_Aggregated")]
@@ -208,13 +227,13 @@ FSdata$Webb_FemaleSong[which(FSdata$Webb_FemaleSong == "")] <- NA
 cbdf$species[which(!cbdf$species %in% birdtree$tip.label)]
 
 orderedNewFS = merge(FSdata, AggdfNewFS, all = T)
-#write.csv(orderedNewFS, file = "2023-06-16_Female Song Data_GSheet2023-05-30_addedMikula.csv", row.names = F)  #pasted this new file back into the Female Song Data Google Sheet https://docs.google.com/spreadsheets/d/1kEijryIyLgJ-Co40pVKkxqAPUDEoWGkCd6YY4tVTMVM/edit#gid=0
-sum(!orderedNewFS$BirdtreeSpecies %in% birdtree$tip.label)
-orderedNewFS %>% group_by(FemaleSong_Aggregated, Mikula1_Duetting_vs_NoDuetting, Mikula2_Duetting_vs_NoFS, Mikula3_FemaleSoloSong_vs_Duetting, Mikula4_FemaleSoloSong_vs_NoFS) %>% summarize(n=n())
-newFS = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-06-16_Female Song Data_GSheetDownload.csv")
+#write.csv(orderedNewFS, file = "2023-06-16_Female Song Data_GSheet2023-05-30_addedMikula.csv", row.names = F)  #pasted this new file back into the Female Song Data Google Sheet https://docs.google.com/spreadsheets/d/1kEijryIyLgJ-Co40pVKkxqAPUDEoWGkCd6YY4tVTMVM/edit#gid=0; then manually changed FemaleSong_Aggregate column to include Mikula classifications on 6/20/2023 KTS
+#sum(!orderedNewFS$BirdtreeSpecies %in% birdtree$tip.label)
+#orderedNewFS %>% group_by(FemaleSong_Aggregated, Mikula1_Duetting_vs_NoDuetting, Mikula2_Duetting_vs_NoFS, Mikula3_FemaleSoloSong_vs_Duetting, Mikula4_FemaleSoloSong_vs_NoFS) %>% summarize(n=n())
+newFS = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-06-20_Female Song Data_GSheetDownload.csv")
 newFS %>% group_by(Mikula_SummaryClass, FemaleSong_Aggregated) %>% summarize(n=n())
-ReviewFS = newFS[which(newFS$Mikula_SummaryClass == "Absent Female Song" & newFS$FemaleSong_Aggregated == "Present" | (newFS$Mikula_SummaryClass == "Duetting" & newFS$FemaleSong_Aggregated == "Absent") | newFS$Mikula_SummaryClass == "Female Solo Song" & newFS$FemaleSong_Aggregated == "Absent"),]
-AddFS = newFS[which(newFS$Mikula_SummaryClass == "Absent Female Song" & is.na(newFS$FemaleSong_Aggregated) | newFS$Mikula_SummaryClass == "Female Solo Song" & is.na(newFS$FemaleSong_Aggregated)),]
+#ReviewFS = newFS[which(newFS$Mikula_SummaryClass == "Absent Female Song" & newFS$FemaleSong_Aggregated == "Present" | (newFS$Mikula_SummaryClass == "Duetting" & newFS$FemaleSong_Aggregated == "Absent") | newFS$Mikula_SummaryClass == "Female Solo Song" & newFS$FemaleSong_Aggregated == "Absent"),]
+#AddFS = newFS[which(newFS$Mikula_SummaryClass == "Absent Female Song" & is.na(newFS$FemaleSong_Aggregated) | newFS$Mikula_SummaryClass == "Female Solo Song" & is.na(newFS$FemaleSong_Aggregated)),]
 
 cbFS = merge(cbdf, FSdata, by.x = "species", by.y = "BirdtreeSpecies", all=T)
 cbFSAgg = merge(cbFS, Aggdf, by.x = "species", by.y = "BirdtreeSpecies", all=T)
