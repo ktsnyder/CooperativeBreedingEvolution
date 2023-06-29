@@ -1,21 +1,28 @@
 ## Execute analysis code
 ## Coded by Kate T Snyder
 ## Created 8/18/2021
-## Last Edited 3/8/2022
+## Last Edited 6/29/2023
 
 setwd("~/Desktop/CooperativeBreedingEvolution")
 
 songfeatures <- c("Syllable.rep.final", "Syll.song.final", "Song.rep.final", "Duration.final", "Interval.final", "Song.rate", "Continuity")
-newdata = "2022-03-08CoopSong_AnyCoopEqualsCoop_All.csv"
-newdata = "2022-03-08CoopSong_MeanCoop_All.csv"
-treefile <- "2021-08-31ConsensusPasserineTreeEricson10_1000.nex" # 3/8/2022
-currentlabel <- "PasserineTreeEricson-AllCoop"
+#newdata = "2022-03-08CoopSong_AnyCoopEqualsCoop_All.csv"
+#newdata = "2022-03-08CoopSong_MeanCoop_All.csv"
+#newdata = "/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-06-01_CoopSongFS_RColumns.csv"
+newdata = "2023-06-20_CoopBreed-FemaleSong01-Song_Data_R.csv"
+dataNoSongless = read.csv(newdata)
+dataNoSongless = dataNoSongless[which(dataNoSongless$FemaleSong_Aggregated != "Songless"),]
+#treefile <- "2021-08-31ConsensusPasserineTreeEricson10_1000.nex" # 3/8/2022
+treefile <- "/Users/kate/Desktop/CooperativeBreedingEvolution/2022-03-16ConsensusPasserineTreeHackett4_1000.nex"
+currentlabel <- "PasserineTreeHackett-TieNoncoop"
+CBcolumn = "MeanCoopTie2Noncoop"
 
 # test ER/ARD brownie
-source("findQrates")
+source("findQrates.R")
 #findQrates(columns = "CoopBreed", plot=TRUE, newtree = "2021-08-31ConsensusPasserineTreeEricson10_1000.nex", newdata = newdata, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, otherlabel = "PasserineTreeEricson-MeanCoop")
-findQrates(columns = c("CoopBreed","Syll.song.final"), plot=TRUE, newtree = "2021-08-31ConsensusPasserineTreeEricson10_1000.nex", newdata = newdata, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, otherlabel = currentlabel)
-findQrates(columns = "CoopBreed", plot=FALSE, newtree = "birdzillatreeMaybeConsensus.nex", newdata = newdata, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, otherlabel = NULL)
+findQrates(columns = c("MeanCoopTie2Noncoop","Syll.song.final"), plot=TRUE, newtree = "2021-08-31ConsensusPasserineTreeEricson10_1000.nex", newdata = newdata, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, otherlabel = currentlabel)
+findQrates(columns = CBcolumn, plot=TRUE, newtree = treefile, newdata = newdata, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, otherlabel = NULL)
+findQrates(columns = "FemaleSong_Aggregated", plot=TRUE, newtree = treefile, newdata = dataNoSongless, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, otherlabel = NULL)
 ## getting these warnings: Warning messages: 1: In rstate(p/sum(p)) : Some probabilities (slightly?) < 0. Setting p < 0 to zero. - only when doing AnyCoop though? Not MeanCoop
 
 source("subsettreedata.R")
@@ -23,39 +30,48 @@ source("browniefunction.R")
 source("plotbrownie.R")
 #below run with "2020-10-11ConsensusPasserineTreeHack100.nex" 8/19/21
 #run with "birdzillatreeMaybeConsensus.nex" 8/24/21
-songfeatures <- c("Syll.song.min", "Syll.song.max", "Syll.song.final", "Song.rep.final", "Song.rep.min", "Song.rep.max")
+songfeatures <- c("Syllable.rep.final", "Syllable.rep.max", "Syllable.rep.min", "Syll.song.min", "Syll.song.max", "Syll.song.final", "Song.rep.final", "Song.rep.min", "Song.rep.max", "Duration.final", "Interval.final", "Duration.min", "Duration.max", "Interval.min", "Interval.max", "Song.rate","Continuity")
 nsim = 500
-for (k in 1:6) {
-  newdata = "2022-03-08CoopSong_AnyCoopEqualsCoop_All.csv"
-  treefile = "2021-08-31ConsensusPasserineTreeEricson10_1000.nex" # 3/8/2022
-  currentlabel <- "PasserineTreeEricson-AnyCoop"
+for (k in 1:17) {
+  print(Sys.time())
+  newdata = newdata
+  #treefile = "2021-08-31ConsensusPasserineTreeEricson10_1000.nex" # 3/8/2022
+  currentlabel <- currentlabel
   feature <- songfeatures[k]
   print(feature)
-  browniefunction(columns = c("CoopBreed", feature), newdata = newdata, newtree = treefile, nsim = nsim, islog = feature, plotsimmaps = TRUE, otherlabel = currentlabel)
+  browniefunction(columns = c(CBcolumn, feature), newdata = newdata, newtree = treefile, nsim = nsim, islog = feature, plotsimmaps = TRUE, otherlabel = currentlabel)
   
-  plotbrownie(data = paste0(Sys.Date(),"CoopBreed",feature, currentlabel, "_brownie",nsim,"sim.csv"), columns = c("CoopBreed",feature), discreteCategoryLabels = c("Non-cooperative","Cooperative"), otherlabel = currentlabel, newpdf = TRUE, nsim = nsim, islog = TRUE)
+  if (file.exists(paste0("OutputFiles/",Sys.Date(),CBcolumn,feature, currentlabel, "_brownie",nsim,"sim.csv"))) {
+    print("file exists")
+    plotbrownie(data = paste0(Sys.Date(),CBcolumn,feature, currentlabel, "_brownie",nsim,"sim.csv"), columns = c(CBcolumn,feature), discreteCategoryLabels = c("Non-cooperative","Cooperative"), otherlabel = currentlabel, newpdf = TRUE, nsim = nsim, islog = TRUE)
+  } else if (file.exists(paste0("OutputFiles/",Sys.Date()-1,CBcolumn,feature, currentlabel, "_brownie",nsim,"sim.csv"))) {
+    plotbrownie(data = paste0(Sys.Date()-1,CBcolumn,feature, currentlabel, "_brownie",nsim,"sim.csv"), columns = c(CBcolumn,feature), discreteCategoryLabels = c("Non-cooperative","Cooperative"), otherlabel = currentlabel, newpdf = TRUE, nsim = nsim, islog = TRUE)
+    print("yesterday's file exists")
+  } else {
+    print("file does not exist")
+    print(paste0("OutputFiles/",Sys.Date()-1,CBcolumn,feature, currentlabel, "_brownie",nsim,"sim.csv"))
+  }
   
-  newdata = "2022-03-08CoopSong_MeanCoop_All.csv"
-  currentlabel <- "PasserineTreeEricson-MeanCoop"
-  browniefunction(columns = c("CoopBreed", feature), newdata = newdata, newtree = treefile, nsim = nsim, islog = feature, plotsimmaps = TRUE, otherlabel = currentlabel)
-  
-  plotbrownie(data = paste0(Sys.Date(),"CoopBreed",feature, currentlabel, "_brownie",nsim,"sim.csv"), columns = c("CoopBreed",feature), discreteCategoryLabels = c("Non-cooperative","Cooperative"), otherlabel = currentlabel, newpdf = TRUE, nsim = nsim, islog = TRUE)
+  # newdata = "2022-03-08CoopSong_MeanCoop_All.csv"
+  # currentlabel <- "PasserineTreeEricson-MeanCoop"
+  # browniefunction(columns = c("CoopBreed", feature), newdata = newdata, newtree = treefile, nsim = nsim, islog = feature, plotsimmaps = TRUE, otherlabel = currentlabel)
+  # 
+  # plotbrownie(data = paste0(Sys.Date(),"CoopBreed",feature, currentlabel, "_brownie",nsim,"sim.csv"), columns = c("CoopBreed",feature), discreteCategoryLabels = c("Non-cooperative","Cooperative"), otherlabel = currentlabel, newpdf = TRUE, nsim = nsim, islog = TRUE)
   
 }
 
 
 
 source("scatterboxes.R")
-scatterboxes(DiscreteTrait = "CoopBreed", newdata = "2022-03-08CoopSong_AnyCoopEqualsCoop_All.csv", newtree = "2021-08-31ConsensusPasserineTreeEricson10_1000.nex", otherlabel = "AnyCoop")
-scatterboxes(DiscreteTrait = "CoopBreed", newdata = "2022-03-08CoopSong_MeanCoop_All.csv", newtree = "2021-08-31ConsensusPasserineTreeEricson10_1000.nex", otherlabel = "MeanCoop")
+#scatterboxes(DiscreteTrait = CBcolumn, newdata = newdata, newtree = "2021-08-31ConsensusPasserineTreeEricson10_1000.nex", otherlabel = "AnyCoop")
+scatterboxes(DiscreteTrait = CBcolumn, newdata = newdata, newtree = treefile, otherlabel = currentlabel)
 
 
 source("plotACEtree.R")
-for (k in 1:7) {
+for (k in 1) {
   feature <- songfeatures[k]
-plotACEtree(columns = c("CoopBreed", feature), cladesubsetcolumn = NULL, cladesubsetvalue = NULL, newdata = newdata, newtree = newtree, islog = feature, discretelabels = c("Non-cooperative","Cooperative"), discretemodel = "ARD", otherlabel = currentlabel)
+plotACEtree(columns = c(CBcolumn, feature), cladesubsetcolumn = NULL, cladesubsetvalue = NULL, newdata = newdata, newtree = newtree, islog = feature, discretelabels = c("Non-cooperative","Cooperative"), discretemodel = "ARD", otherlabel = currentlabel)
 } 
-
 
 # Change each "Cooperative" species to "Noncooperative" iteratively to test robustness of results
 source("subsettreedata.R")
@@ -78,79 +94,110 @@ for (coopbird in cooperativebirds) {
 }
 dev.off()
 
-## Simple bayestraits discrete test for Female Song and CoopBreed
-## Using btw V1 - run 3/9/2022
+
+#### Simple bayestraits discrete test for Female Song and CoopBreed ----
+source("btwDiscreteKTS.R")
+.BayesTraitsPath = "~/Documents/BayesTraitsV4"
+.BayesTraitsPath = "~/Documents/BayesTraitsV3"
+dataNoSongless = read.csv(newdata)
+dataNoSongless = dataNoSongless[which(dataNoSongless$FemaleSong_Aggregated != "Songless"),]
+columns = c(CBcolumn, "FemaleSong_Agg01")
+currentlabel <- "Hackett-TieNoncoop-FSAgg"
+subsetbtw <- subsettreedata(columns = columns, newdata = dataNoSongless, newtree = treefile, skinnydata = TRUE)
+subsetdf <- subsetbtw$subsetdf
+#colnames(subsetdf)[which(colnames(subsetdf) == "FemaleSong_Aggregated")] <- "FemaleSong"
+subsetdf$FemaleSong_Aggregated[which(subsetdf$FemaleSong_Aggregated == "Present")] <- "1"
+subsetdf$FemaleSong_Aggregated[which(subsetdf$FemaleSong_Aggregated == "Absent")] <- "0"
+subsetdf[,CBcolumn] <- as.character(subsetdf[,CBcolumn])
+subsettree <- subsetbtw$subsettree
+
+## Using btw V1 - run 3/9/2022; replaced with function names from btwDiscreteKTS.R 6/1/23
+simplebtwV1Out <- set.seed(10)
+currentlabel <- "V1-Hackett-TieNoncoop-FSAgg"
+nsim = 50
+for (n in 1:nsim) {
+  print(paste("v1 #", n))
+  nocorrD <- DiscreteKTS(subsettree, subsetdf)
+  corrD <- DiscreteKTS(subsettree, subsetdf, dependent=TRUE)
+  lrtestresults <- lrtestV1(corrD, nocorrD)
+  tempRow <- cbind(corrD, lrtestresults, nocorrD)
+  simplebtwV1Out <- rbind(simplebtwV1Out, tempRow)
+}
+simplebtwV1Out <- as.data.frame(simplebtwV1Out)
+write.csv(simplebtwV1Out, file = paste0(Sys.Date(), "_BayesTraits_", currentlabel, "_", nsim, "sims.csv"))
+means <- apply(X = simplebtwV1Out,MARGIN = 2,FUN = mean)
+meansdf <- as.data.frame(rbind(means,means))
+#meansdf <- as.data.frame(as.matrix(means))
+pvalMed <- median(simplebtwV1Out$pval)
+pdf(file = paste0(Sys.Date(),"BayesTraits_",currentlabel," vs FemaleSong ", nsim, "sims.pdf"))
+#plotdiscrete(meansdf[1,1:14], main = paste(currentlabel, "vs FemSong, \nnsims =",nsim, "median pval =", pvalMed))
+plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwV1Out, nsim = nsim, newpdf = T)
+dev.off()
+
+
+simplebtwDiscrete(columns = columns, newdata = newdata, newtree = treefile, nsim = nsim, )
+
+
+## Using btw V2 - run 5/31/2023
 require("btw")
-subsetbtw <- subsettreedata(columns = c("CoopBreed","FemaleSong"), newdata = "2022-03-08CoopSong_AnyCoopEqualsCoop_All.csv", newtree = "2021-08-31ConsensusPasserineTreeEricson10_1000.nex", skinnydata = TRUE)
-currentlabel <- "PasserineTreeEricson-AnyCoop"
-subsetdf <- subsetbtw$subsetdf
-subsetdf$FemaleSong[which(subsetdf$FemaleSong == "Present")] <- "1"
-subsetdf$FemaleSong[which(subsetdf$FemaleSong == "Absent")] <- "0"
-subsetdf$CoopBreed <- as.character(subsetdf$CoopBreed)
-subsettree <- subsetbtw$subsettree
-subsetdf %>% group_by(CoopBreed,FemaleSong) %>% summarise(n=n())
-simplebtwOut <- set.seed(10)
-nsim = 2000
-for (n in 1:nsim) {
-  nocorrD <- Discrete(subsettree, subsetdf)
-  corrD <- Discrete(subsettree, subsetdf, dependent=TRUE)
-  lrtestresults <- lrtest(corrD, nocorrD)
-  tempRow <- cbind(corrD, lrtestresults)
-  simplebtwOut <- rbind(simplebtwOut, tempRow)
-}
-simplebtwOut <- as.data.frame(simplebtwOut)
-means <- apply(X = simplebtwOut,MARGIN = 2,FUN = mean)
-meansdf <- as.data.frame(rbind(means,means))
-#meansdf <- as.data.frame(as.matrix(means))
-pvalMed <- median(simplebtwOut$pval)
-pdf(file = paste0(Sys.Date(),"BayesTraits_",currentlabel," vs FemaleSong ", nsim, "sims.pdf"))
-plotdiscrete(meansdf[1,1:14], main = paste(currentlabel, "vs FemSong, \nnsims =",nsim, "median pval =", pvalMed))
-dev.off()
+setwd("/Users/kate/Documents")
+tree = subsettree
+df = subsetdf
+currentlabel <- "V2-Hackett-TieNoncoop-FSAgg-q31q42Lim15"
+simplebtwV2Out <- set.seed(10)
+nsim = 50
 
-subsetbtw <- subsettreedata(columns = c("CoopBreed","FemaleSong"), newdata = "2022-03-08CoopSong_MeanCoop_All.csv", newtree = "2021-08-31ConsensusPasserineTreeEricson10_1000.nex", skinnydata = TRUE)
-currentlabel <- "PasserineTreeEricson-MeanCoop"
-subsetdf <- subsetbtw$subsetdf
-subsetdf$FemaleSong[which(subsetdf$FemaleSong == "Present")] <- "1"
-subsetdf$FemaleSong[which(subsetdf$FemaleSong == "Absent")] <- "0"
-subsetdf$CoopBreed <- as.character(subsetdf$CoopBreed)
-subsettree <- subsetbtw$subsettree
-subsetdf %>% group_by(CoopBreed,FemaleSong) %>% summarise(n=n())
-simplebtwOut <- set.seed(10)
-nsim = 2000
 for (n in 1:nsim) {
-  nocorrD <- Discrete(subsettree, subsetdf)
-  corrD <- Discrete(subsettree, subsetdf, dependent=TRUE)
-  lrtestresults <- lrtest(corrD, nocorrD)
-  tempRow <- cbind(corrD, lrtestresults)
-  simplebtwOut <- rbind(simplebtwOut, tempRow)
+  print(paste("v2 #", n))
+  commandIndML <- c("2","1", "mlt 10")#, "res q31 q42 15") # replace nocorrD
+  IndMLout <- bayestraits(df,tree,commandIndML)
+  
+  commandDepML <- c("3","1", "mlt 10")#, "res q31 q42 15")  # replace corrD
+  DepMLout <- bayestraits(df,tree,commandDepML) # , silent = FALSE
+  
+  lrtestresults <- lrtest(DepMLout, IndMLout)
+  LRstat <- lrtestresults$LRstat
+  LRpval <- lrtestresults$pval
+  corrD = DepMLout$Log$results
+  nocorrD = IndMLout$Log$results
+  transandp <- cbind(corrD,LRstat,LRpval, nocorrD)
+  simplebtwV2Out <- rbind(simplebtwV2Out, transandp)
 }
-simplebtwOut <- as.data.frame(simplebtwOut)
-means <- apply(X = simplebtwOut,MARGIN = 2,FUN = mean)
+means <- apply(X = simplebtwV2Out,MARGIN = 2,FUN = mean)
 meansdf <- as.data.frame(rbind(means,means))
-#meansdf <- as.data.frame(as.matrix(means))
-pvalMed <- median(simplebtwOut$pval)
+pvalMed <- median(simplebtwV2Out$LRpval)
 pdf(file = paste0(Sys.Date(),"BayesTraits_",currentlabel," vs FemaleSong ", nsim, "sims.pdf"))
-plotdiscrete(meansdf[1,1:14], main = paste(currentlabel, "vs FemSong, \nnsims =",nsim, "median pval =", pvalMed))
+plotdiscrete(meansdf[1,3:10], main = paste(currentlabel, "vs FemSong, \nnsims =",nsim, "median pval =", pvalMed)) # plotdiscrete from btwV1 now in btwDiscreteKTS.R
 dev.off()
 
 
-# BayesTraits song features
-source("btwfunction.R")
+# Using simplebtwDiscrete.R
+
+read.csv("")
+simplebtwOutput <- simplebtwDiscrete(columns = columns, newdata = dfnew, newtree = treefile, treelabel = treelabel, nsim = nsim, savecsvs = TRUE, KeepBTInputFiles = TRUE)
+simplebtwOutput1 = simplebtwOutput[]
+plotDiscreteBayes(columns=columns, simplebtwOut = simplebtwOutput, nsim = 100, newpdf = T, treelabel = "Hackett", )
+
+
+#### BayesTraits song features ----
+#source("btwfunction.R")
+source("~/Desktop/CooperativeBreedingEvolution/btw2function_DiscreteKTS.R")
 source("BayesPlots_choosebin.R")
 songfeatures <- c("Syllable.rep.final", "Syll.song.final", "Song.rep.final", "Duration.final", "Interval.final", "Song.rate")
-newdata = "2022-03-08CoopSong_AnyCoopEqualsCoop_All.csv"
+#newdata = "2022-03-08CoopSong_AnyCoopEqualsCoop_All.csv"
 #newdata = "2022-03-08CoopSong_MeanCoop_All.csv"
-treefile <- "2021-08-31ConsensusPasserineTreeEricson10_1000.nex" # 3/8/2022
-currentlabel <- "PasserineTreeEricson-AnyCoop"
+#treefile <- "2021-08-31ConsensusPasserineTreeEricson10_1000.nex" # 3/8/2022
+treefile <- "/Users/kate/Desktop/CooperativeBreedingEvolution/2022-03-16ConsensusPasserineTreeHackett4_1000.nex"
+currentlabel <- "PasserineTreeHackett-Tie2Noncoop"
 nsim = 100
-for (k in 1:6) { 
+for (k in 3) { 
   feature <- songfeatures[k]
-  btwfunction(MateParam = "CoopBreed",SongParam = feature, plot=FALSE, jackknife = FALSE, csvsout = TRUE, nsim = nsim, newtreefile = treefile, newdata = newdata)
+  btwfunction(columns = c(CBcolumn, feature), plot=FALSE, jackknife = FALSE, csvsout = TRUE, nsim = nsim, newtreefile = treefile, newdata = dataNoSongless)
   feature <- songfeatures[k]
-  filename <- paste0(Sys.Date(),"BayesCoopBreed",feature, nsim, "reps.csv") 
+  filename <- paste0(Sys.Date(),"_Bayes_Tie2Noncoop_",feature, nsim, "reps.csv") 
   BTdf <- read.csv(filename)
   #BTdf <- BTdf[,which(colnames(BTdf) != "X")]
-  colnames(BTdf)[16:18] <- c("LRstat", "LRpval", "songcontvec")
+  #colnames(BTdf)[16:18] <- c("LRstat", "LRpval", "songcontvec")
   transitionBinplots(MateParam = "CoopBreed",SongParam = feature, df = BTdf,newpdf = TRUE, nsim = nsim, binnum = 3)
 } 
 

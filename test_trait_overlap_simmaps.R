@@ -6,20 +6,22 @@
 ## Edited 6/1/23 - added checkpoint save to CharacterSimmaps
 ## 
 
-setwd("/Users/kate/Desktop/CooperativeBreedingEvolution/")
+#setwd("/Users/kate/Desktop/CooperativeBreedingEvolution/")
 library(phytools)
 source("subsettreedata.R")
 #df <- read.csv("2022-03-10CoopSong_All.csv")
 #df <- read.csv("2022-03-10CoopSong_PlusWebbFS.csv")
-newdata = "/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-06-01_CoopSongFS_RColumns.csv"
+#newdata = "/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-06-01_CoopSongFS_RColumns.csv"
+
+newdata = "2023-06-20_CoopBreed-FemaleSong-Song_Data_R.csv"
 dfAgg = read.csv(newdata)
 dfAgg = dfAgg[which(dfAgg$FemaleSong_Aggregated != "Songless"),]
 df = dfAgg
 #colnames(df)[which(colnames(df) == "FemaleSong_Aggregated")] = "Female_song_score"
 Hacktree <- read.nexus("2022-03-16ConsensusPasserineTreeHackett4_1000.nex")
 treelabel <- "Hackett"
-Erictree <-read.nexus("2021-08-31ConsensusPasserineTreeEricson10_1000.nex")
-treelabel <- "Ericson"
+#Erictree <-read.nexus("2021-08-31ConsensusPasserineTreeEricson10_1000.nex")
+#treelabel <- "Ericson"
 
 # WebbFSdf <- read.csv("Webb et al 2016 Female Song Plumage Data.csv")
 # dfnew <- merge(df, WebbFSdf, by.x = "species", by.y = "TipLabel")
@@ -34,17 +36,17 @@ treelabel <- "Ericson"
 # # df[,columns[2]][which(df[,columns[2]] == "Present")] <- 1
 
 nsims_real = 1000
-nsims_dummy = 5000
+nsims_dummy = 500
 
 dfout5 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Aggregated"), df = df, tree =  Hacktree, dummy = FALSE, nsims = nsims_real, treelabel = "Hackett", datalabel = "Tie2NonCoop FSAgg")
-write.csv(dfout5, "Simmap overlap output_Tie2NonCoop FSAgg nsim1000_Hackett REAL.csv")
+#write.csv(dfout5, "Simmap overlap output_Tie2NonCoop FSAgg nsim1000_Hackett REAL.csv")
 dfout6 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Aggregated"), df = df, tree =  Erictree, dummy = FALSE, nsims = nsims_real, treelabel = "Ericson", datalabel = "Tie2NonCoop FSAgg")
-write.csv(dfout6, "Simmap overlap output_Tie2NonCoop FSAgg nsim1000_Ericson REAL.csv")
+#write.csv(dfout6, "Simmap overlap output_Tie2NonCoop FSAgg nsim1000_Ericson REAL.csv")
 
 dfDummy5 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Aggregated"), df = df, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Tie2NonCoop FSAgg")
-write.csv(dfDummy5, "Simmap overlap output_Tie2NonCoop FSAgg nsim10000_Hackett DUMMY.csv")
+#write.csv(dfDummy5, "Simmap overlap output_Tie2NonCoop FSAgg nsim10000_Hackett DUMMY.csv")
 dfDummy6 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Aggregated"), df = df, tree =  Erictree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Ericson", datalabel = "Tie2NonCoop FSAgg")
-write.csv(dfDummy6, "Simmap overlap output_Tie2NonCoop FSAgg nsim10000_Ericson DUMMY.csv")
+#write.csv(dfDummy6, "Simmap overlap output_Tie2NonCoop FSAgg nsim10000_Ericson DUMMY.csv")
 
 calcHuel(dfout5,dfDummy5, nsims_real = nsims_real, nsims_dummy = nsims_dummy)
 calcHuel(dfout6,dfDummy6, nsims_real = nsims_real, nsims_dummy = nsims_dummy)
@@ -122,7 +124,7 @@ CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalab
       names(CoopvecRandom) <- subsetdf$species
       Coopsimtree <- make.simmap(tree = subsettree, x = CoopvecRandom, model = "ARD", nsim = 1, Q = coopQ)
       CoopsimtreesRand[[j]] <- Coopsimtree
-      print(j)
+      print(paste(j, Sys.time()))
     }
     Coopsimtrees <- CoopsimtreesRand
     # Make randomized versions of FemaleSong simmaps / DUMMY data
@@ -205,9 +207,14 @@ CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalab
 ## 
 #dfout <- read.csv("CoopBreed FSOdom simmap overlap output nsim1000 Hackett .csv")
 #dfout <- read.csv("CoopBreed FSWebb simmap overlap output nsim1000 Hackett .csv")
-dfout <- read.csv("CoopTie2NonCoop FSWebb simmap overlap output nsim 100 Hackett .csv")
-dfDummy <- read.csv("CoopTie2NonCoop FSWebb DUMMYResampledCoopFS simmap overlap output nsim 100 Hackett .csv")
-nsims = 100
+# dfout <- read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Tie2NonCoop FSAgg simmap overlap output nsim 1000 Hackett .csv")
+# dfDummy <- read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Tie2NonCoop FSAgg DUMMYResampledCoopFS simmap overlap output nsim 500 Hackett .csv")
+# dfdummy2 = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Tie2NonCoop FSAgg DUMMYResampledCoopFS simmap overlap output nsim 100 Hackett .csv")
+# dfdummy400 = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Tie2NonCoop FSAgg DUMMYResampledCoopFS simmap overlap output nsim 400 Hackett .csv")
+# dfDummy500b = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Tie2NonCoop FSAgg DUMMYResampledCoopFS simmap overlap output nsim 500 Hackett .csv")
+# dfDummy3 = rbind(dfDummy, dfdummy2, dfDummy500b, dfdummy400)
+# nsims = 100
+# calcHuel(dfout,dfDummy3, nsims_real = 1000, nsims_dummy = 1500)
 
 
 
@@ -254,12 +261,16 @@ calcHuel <- function(dfout, dfDummy, nsims_real, nsims_dummy) {
   Dummy_dsums <- rowSums(cbind(dAbsent0, dAbsent1, dPresent0, dPresent1))
   
   pval <- sum(Dummy_dsums > D_real)/nsims_dummy
+  print(paste("num Dummy dsums > D_real:", sum(Dummy_dsums > D_real)))
   print(paste("pval:",pval))
   
   par(mfrow=c(2,1))
-  hist(Real_dsims)
+  hist(Real_dsims, xlim = c(0,0.1), breaks = 20)
   abline(v = D_real, col = "red")
-  hist(Dummy_dsums)
+  hist(Dummy_dsums, xlim = c(0,0.1), breaks = 20)
+  
+  realDsimDF = cbind(c(rep("real", length(Real_dsims))), Real_dsims)
+  dummyDsimDF = cbind(c(rep("dummy", length(Real_dsims))), Real_dsims)
   
   
 }

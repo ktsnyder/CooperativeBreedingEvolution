@@ -2,7 +2,7 @@
 # Created 3/9/2022
 # Kate T Snyder
 # Last Edited: 3/30/2022
-# Added   res = c("q10 q00 1.2", "q11 q01 1.2") # remove
+# Added   res = c("q10 q00 1.2", "q11 q01 1.2") # remove because that would require it to use btwV2 bayestraits(), not Discrete # actually maybe this is possible with Discrete after all? Not sure if with all BT versions
 # Still hard coded to do Female Song 
 # Saves nocorrD output to csv and plots this
 # Added optional input nocorrDdf to plotDiscreteBayes() for separate df corrD vs nocorrD; flexible calling of columns for q12, q13, etc; doesn't automatically plot pval density
@@ -41,26 +41,29 @@ require(dplyr)
 # 
 # 
 source("btwDiscreteKTS.R")
-classmethods <- c("MeanCoopOmitTies",  "MeanCoopTie2Noncoop", "MeanCoopTie2Coop") #,  "AnyCoopEqualsCoop" )
+classmethods <- c("MeanCoopTie2Noncoop", "MeanCoopOmitTies",  "MeanCoopTie2Coop") #,  "AnyCoopEqualsCoop" )
 currentclassmethod <- classmethods[2]
-nsim = 100
-nsim = 14
-treefile = "2021-08-31ConsensusPasserineTreeEricson10_1000.nex"
-treelabel = "PasserineTreeEricson-"
-newdata = "2022-03-10CoopSong_All.csv"
+nsim = 1000
+treefile = "/Users/kate/Desktop/CooperativeBreedingEvolution/2022-03-16ConsensusPasserineTreeHackett4_1000.nex"
+treelabel = "PasserineTreeHackett-"
+#newdata = "2022-03-10CoopSong_All.csv"
+newdata = "2023-06-20_CoopBreed-FemaleSong-Song_Data_R.csv"
 df <- read.csv(newdata)
-WebbFSdf <- read.csv("Webb et al 2016 Female Song Plumage Data.csv")
-dfnew <- merge(df, WebbFSdf, by.x = "species", by.y = "TipLabel")
-dfnew <- dfnew[which(dfnew$Female_song_score %in% c("Present","Absent")),]
-secondcol <- "Female_song_score"
-secondcol <- "FemaleSong"
+dfNoSongless = df[which(df$FemaleSong_Aggregated != "Songless"),]
+#WebbFSdf <- read.csv("Webb et al 2016 Female Song Plumage Data.csv")
+#dfnew <- merge(df, WebbFSdf, by.x = "species", by.y = "TipLabel")
+#dfnew <- dfnew[which(dfnew$Female_song_score %in% c("Present","Absent")),]
+#secondcol <- "Female_song_score"
+#secondcol <- "FemaleSong"
+secondcol = "FemaleSong_Aggregated"
+dfnew = dfNoSongless
 for (i in classmethods) {
   currentclassmethod <- i
   columns <- c(currentclassmethod, secondcol)
   print(columns)
   print(Sys.time())
   simplebtwOutput <- simplebtwDiscrete(columns = columns, newdata = dfnew, newtree = treefile, treelabel = treelabel, nsim = nsim, savecsvs = TRUE, KeepBTInputFiles = TRUE)
-  plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim, treelabel = treelabel, newpdf = TRUE, ylabel = "Old FS Data, BayesTraitsV4", arrowmod = 1)
+  plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwOutput, nsim = nsim, treelabel = treelabel, newpdf = TRUE, ylabel = "KTSDiscrete, BayesTraitsV4", arrowmod = 1)
 }
 
 
@@ -93,7 +96,7 @@ simplebtwDiscrete <- function(columns, newdata, newtree, treelabel, nsim, clades
     }
     nocorrD <- DiscreteKTS(subsettree, subsetdf, KeepBTInputFiles = KeepBTInputFiles)
     corrD <- DiscreteKTS(subsettree, subsetdf, dependent=TRUE, KeepBTInputFiles = KeepBTInputFiles)
-    lrtestresults <- lrtest(corrD, nocorrD)
+    lrtestresults <- lrtestV1(corrD, nocorrD)
     tempRow <- cbind(corrD, lrtestresults, nocorrD)
     simplebtwOut <- rbind(simplebtwOut, tempRow)
   }
@@ -117,7 +120,7 @@ simplebtwDiscrete <- function(columns, newdata, newtree, treelabel, nsim, clades
 
 
 
-plotDiscreteBayes <- function(columns, simplebtwOut, nocorrDdf = NULL, nsim = NULL, treelabel = NULL, newpdf, cladesubsetvalue = NULL, ylabel = NULL, arrowmod = 1) {
+plotDiscreteBayes <- function(columns, simplebtwOut, nocorrDdf = NULL, nsim = NULL, treelabel = NULL, newpdf, cladesubsetvalue = NULL, ylabel = NULL, arrowmod = 1, otherlabel = NULL) {
   
   currentclassmethod <- columns[1]
   currentlabel <- paste0(treelabel,currentclassmethod)
@@ -299,7 +302,7 @@ plotDiscreteBayes <- function(columns, simplebtwOut, nocorrDdf = NULL, nsim = NU
     }
     arrowcolvec <- rep(arrowcols[2],times=8)
     arrowcolvec[which(rates == 0)] <- "gray"
-    arrows(x0=c(35, 65, 85, 75, 65, 35, 15, 25), y0=c(85, 75, 65, 35, 15, 25, 35, 65), x1=c(65, 35, 85, 75, 35, 65, 15, 25), y1=c(85, 75, 35, 65, 15, 25, 65, 35), lwd=rates*arrowmod/2*15, col=arrowcolvec, length = arrowmod/4) 
+    arrows(x0=c(35, 65, 85, 75, 65, 35, 15, 25), y0=c(85, 75, 65, 35, 15, 25, 35, 65), x1=c(65, 35, 85, 75, 35, 65, 15, 25), y1=c(85, 75, 35, 65, 15, 25, 65, 35), lwd=rates*arrowmod/2*15, col=arrowcolvec, length = arrowmod*2) 
     
     mat <- maxratesmat_nocorr
     maxlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),2) 
@@ -327,7 +330,7 @@ plotDiscreteBayes <- function(columns, simplebtwOut, nocorrDdf = NULL, nsim = NU
     }
     arrowcolvec <- rep(arrowcols[m],times=8)
     arrowcolvec[which(rates == 0)] <- "gray"
-    arrows(x0=c(35, 65, 85, 75, 65, 35, 15, 25), y0=c(85, 75, 65, 35, 15, 25, 35, 65), x1=c(65, 35, 85, 75, 35, 65, 15, 25), y1=c(85, 75, 35, 65, 15, 25, 65, 35), lwd=rates*arrowmod/2*15, col=arrowcolvec, length = arrowmod/5) 
+    arrows(x0=c(35, 65, 85, 75, 65, 35, 15, 25), y0=c(85, 75, 65, 35, 15, 25, 35, 65), x1=c(65, 35, 85, 75, 35, 65, 15, 25), y1=c(85, 75, 35, 65, 15, 25, 65, 35), lwd=rates*arrowmod/2*15, col=arrowcolvec, length = arrowmod*2) 
     
     mat <- maxratesmat
     maxlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),2) 

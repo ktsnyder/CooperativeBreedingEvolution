@@ -3,11 +3,12 @@
 ### Created 3/17/2022
 ### Kate Snyder
 ### Last edited 5/31/2023: add plotdiscrete from btw v1; add LRtestV1 from v1
+### Last edited 6/26/2023: added ability to handle bayestraits V3 (may need to be slightly adjusted), Added Seed-setting
 
 DiscreteKTS <- function (tree, data, mode = "ML", dependent = FALSE, res = NULL, 
           resall = NULL, mrca = NULL, fo = NULL, mlt = 10, it = 1e+05, 
           bi = 5000, sa = 100, pr = NULL, pa = NULL, hp = NULL, hpall = NULL, 
-          rj = NULL, rjhp = NULL, silent = TRUE, KeepBTInputFiles = FALSE) 
+          rj = NULL, rjhp = NULL, silent = TRUE, KeepBTInputFiles = FALSE, Seed = NULL) 
 {
   if (class(tree) == "phylo") {
     tree$node.label = NULL
@@ -65,6 +66,11 @@ DiscreteKTS <- function (tree, data, mode = "ML", dependent = FALSE, res = NULL,
   if (!is.null(resall)) {
     input = c(input, paste("resall", resall))
   }
+  
+  if (!is.null(Seed)) { # kts added 6/27/23
+    input = c(input, paste("Se", Seed))
+  }
+  
   if (!is.null(mrca)) {
     for (i in 1:length(mrca)) {
       input = c(input, paste("mrca", paste("mrcaNode", 
@@ -107,7 +113,7 @@ DiscreteKTS <- function (tree, data, mode = "ML", dependent = FALSE, res = NULL,
       input = c(input, paste("rjhp", rjhp))
     }
   }
-  input = c(input, paste("lf ./BTout.txt"))  # kts deleted ".log.txt"
+  input = c(input, paste("lf ./BTout.txt"))  # kts deleted ".log.txt". # lf = log file
   input = c(input, "run")
   write(input, file = "./inputfile.txt")
   ape::write.nexus(tree, file = "./tree.nex", translate = T)
@@ -132,7 +138,14 @@ DiscreteKTS <- function (tree, data, mode = "ML", dependent = FALSE, res = NULL,
     Results = read.table("./BTout.txt", skip = Skip, sep = "\t", 
                          quote = "\"", header = TRUE)
     Results = Results[, -ncol(Results)]
-    system(paste("rm ./BTout.txt"))
+    #system(paste("rm ./BTout.txt"))
+  } else if (str_detect(.BayesTraitsPath, "V3")) {
+    Skip = grep("Tree No", scan(file = "./BTout.txt.Log.txt", what = "c",  # kts capitalized Log
+                                quiet = T, sep = "\n", blank.lines.skip = FALSE)) - 1
+    Results = read.table("./BTout.txt.Log.txt", skip = Skip, sep = "\t", 
+                         quote = "\"", header = TRUE)
+    Results = Results[, -ncol(Results)]
+    system(paste("rm ./BTout.txt.Log.txt"))
   }
   if (KeepBTInputFiles == FALSE) {
   system(paste("rm ./inputfile.txt"))

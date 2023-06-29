@@ -139,7 +139,7 @@ colnames(FSdata)[which(colnames(FSdata) == "Song_data_source_Webb..NOTE..appears
 
 
 FSdata$BirdtreeSpecies[which(!FSdata$BirdtreeSpecies %in% birdtree$tip.label)]
-FSdata = FSdata[which(!FSdata$BirdtreeSpecies %in% birdtree$tip.label),]
+FSdata = FSdata[which(FSdata$BirdtreeSpecies %in% birdtree$tip.label),]
 FSdata$Odom_FemaleSong[which(FSdata$Odom_FemaleSong == "")] <- NA
 FSdata$Webb_FemaleSong[which(FSdata$Webb_FemaleSong == "")] <- NA
 cbSong$species[which(!cbSong$species %in% birdtree$tip.label)]

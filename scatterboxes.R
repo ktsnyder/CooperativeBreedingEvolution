@@ -62,11 +62,11 @@ scatterboxes <- function(DiscreteTrait = "CoopBreed", newdata = FALSE, newtree =
  #   if (DiscreteTrait == "EPP") { 
       datalist <- list() 
       datalistnames <- set.seed(10)
-      df$CoopBreed[which(df$CoopBreed == 0)] <- discreteCategoryLabels[1]
-      df$CoopBreed[which(df$CoopBreed == 1)] <- discreteCategoryLabels[2]
+      df[,DiscreteTrait][which(df[,DiscreteTrait] == 0)] <- discreteCategoryLabels[1]
+      df[,DiscreteTrait][which(df[,DiscreteTrait] == 1)] <- discreteCategoryLabels[2]
       factors <- discreteCategoryLabels 
       for (i in 1:2) {
-        onefactordf <- df[which(df$CoopBreed == factors[i]),]
+        onefactordf <- df[which(df[,DiscreteTrait] == factors[i]),]
         tempfactordata <- onefactordf[,songcol]
         datalist[[i]] <- tempfactordata
         datalistnames[i] <- as.character(factors[i]) 
