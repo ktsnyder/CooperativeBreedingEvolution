@@ -1,7 +1,7 @@
 ## Adapting btw v2 function "bayestraits" to use any version of BayesTraits
 ## Kate Snyder
 ## 6/27/2023
-##
+## Edited 6/29/2023 - variable logfile name
 
 
 bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = TRUE, 
@@ -62,21 +62,20 @@ bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = 
               row.names = F)
   if (windows) {
     if (silent) {
-      invisible(shell(paste0("BayesTraits",version,".exe tree.nex data.txt < inputfile.txt"), 
-                      intern = TRUE))
+      invisible(shell(paste0("BayesTraits",version,".exe tree.nex data.txt < inputfile.txt"), intern = TRUE))
     }
     else {
       shell(paste0("BayesTraits",version,".exe tree.nex data.txt < inputfile.txt"))
     }
   }
   else {
-    system(paste(paste0(dir, "/BayesTraits", version), paste0(dir, 
-                                                       "/tree.nex"), paste0(dir, "/data.txt"), paste0("< ", 
-                                                                                                      dir, "/inputfile.txt")), ignore.stdout = silent)
+    system(paste(paste0(dir, "/BayesTraits", version), paste0(dir, "/tree.nex"), paste0(dir, "/data.txt"), paste0("< ", dir, "/inputfile.txt")), ignore.stdout = silent)
   }
   log <- "data.txt.Log.txt" %in% list.files()
-  if (version == "V2") {
+  logfile = "data.txt.Log.txt" # KTS added 
+  if (log == FALSE) { # KTS added
    log <-  "data.txt.log.txt" %in% list.files()
+   logfile = "data.txt.log.txt"
   }
   schedule <- "data.txt.Schedule.txt" %in% list.files()
   stones <- "data.txt.Stones.txt" %in% list.files()
@@ -103,11 +102,12 @@ bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = 
     else OutputTrees <- NULL
   }
   else {
-    if (version %in% c("V3","V4")) {
-      Log <- parse_log(paste0(dir, "/data.txt.Log.txt"))
-    } else if (version == "V2") {
-      Log <- parse_log(paste0(dir, "/data.txt.log.txt"))
-    }
+    #if (version %in% c("V3","V4")) {
+    #  Log <- parse_log(paste0(dir, "/data.txt.Log.txt"))
+    #} else if (version == "V2") {
+    #  Log <- parse_log(paste0(dir, "/data.txt.log.txt"))
+    #}
+    Log <- parse_log(paste0(dir, "/", logfile)) # kts added/changed
     if (schedule) 
       Schedule <- parse_schedule(paste0(dir, "/data.txt.Schedule.txt"))
     else Schedule <- NULL
@@ -139,7 +139,7 @@ bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = 
         shell(paste("DEL", "data.txt.Output.trees"))
     }
     else {
-      system(paste0("rm ", dir, "/data.txt.Log.txt"))
+      system(paste0("rm ", dir, "/", logfile)) # kts changed to logfile
       system(paste0("rm ", dir, "/data.txt"))
       system(paste0("rm ", dir, "/tree.nex"))
       system(paste0("rm ", dir, "/inputfile.txt"))
