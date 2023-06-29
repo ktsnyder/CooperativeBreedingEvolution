@@ -2,6 +2,7 @@
 # 
 # Did repeated tests of data on BTv2, v3, v4. Independent, dependent, independent via restriction
 
+source("subsettreedata.R")
 source("~/Desktop/CooperativeBreedingEvolution/btwDiscreteKTS.R")
 newdata = "~/Desktop/CooperativeBreedingEvolution/2023-06-20_CoopBreed-FemaleSong01-Song_Data_R.csv"
 dataNoSongless = read.csv(newdata)
@@ -46,6 +47,10 @@ DepMLout <- bayestraits(df,tree,commandDepML, remove_files = FALSE) # , silent =
 corrDbtwV2 = DepMLout$Log$results
 lrtestresultsBTWv2 <- lrtest(corrDbtwV2, nocorrDbtwV2)
 lrtestresultsBTWv2reverse <- lrtest(nocorrDbtwV2, corrDbtwV2)
+
+# bayestraitsKTS
+commandDepML <- c("3","1", "mlt 10", "Se 10")
+DepMLout <- bayestraitsKTS(subsetdf,subsettree,commandDepML, remove_files = FALSE, version = "V3", BTdirpath = "~/Documents")
 
 
 # Major differences between corrDv3 and corrDbtwV2/corrDv4: q13, q31, q34, q43

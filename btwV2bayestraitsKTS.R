@@ -1,11 +1,11 @@
 ## Adapting btw v2 function "bayestraits" to use any version of BayesTraits
 ## Kate Snyder
 ## 6/27/2023
-## Edited 6/29/2023 - variable logfile name
+## Edited 6/29/2023 - variable logfile name; BTdirpath, BTdir added
 
 
 bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = TRUE, 
-          remove_files = TRUE, version = "V3") {
+          remove_files = TRUE, version = "V3", BTdirpath = NULL) {
   
   if (version == "V3") {
     BTversion = "BayesTraitsV3"
@@ -13,6 +13,11 @@ bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = 
     BTversion = "BayesTraitsV4"
   } else if (version == "V2") {
     BTversion = "BayesTraitsV2"
+  }
+  if (is.null(BTdirpath)) {
+    BTdir = getwd()
+  } else {
+    BTdir = BTdirpath
   }
   
   if (!inherits(data, "data.frame")) 
@@ -52,8 +57,8 @@ bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = 
     if (!(BTversion %in% list.files())) 
       stop(paste(BTversion, "is not in your current working directory."))
   }
-  else if (!(BTversion %in% list.files())) 
-    stop(paste(BTversion, "is not in your current working directory."))
+  else if (!(BTversion %in% list.files(BTdir))) 
+    stop(paste(BTversion, "is not in your designated working directory:", BTdir))
   
   dir <- getwd()
   write(c(commands, "run"), file = "./inputfile.txt")
@@ -69,7 +74,7 @@ bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = 
     }
   }
   else {
-    system(paste(paste0(dir, "/BayesTraits", version), paste0(dir, "/tree.nex"), paste0(dir, "/data.txt"), paste0("< ", dir, "/inputfile.txt")), ignore.stdout = silent)
+    system(paste(paste0(BTdir, "/BayesTraits", version), paste0(dir, "/tree.nex"), paste0(dir, "/data.txt"), paste0("< ", dir, "/inputfile.txt")), ignore.stdout = silent)
   }
   log <- "data.txt.Log.txt" %in% list.files()
   logfile = "data.txt.Log.txt" # KTS added 
@@ -109,16 +114,16 @@ bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = 
     #}
     Log <- parse_log(paste0(dir, "/", logfile)) # kts added/changed
     if (schedule) 
-      Schedule <- parse_schedule(paste0(dir, "/data.txt.Schedule.txt"))
+      Schedule <- parse_schedule(paste0(BTdir, "/data.txt.Schedule.txt"))
     else Schedule <- NULL
     if (stones) 
-      Stones <- parse_stones(paste0(dir, "/data.txt.Stones.txt"))
+      Stones <- parse_stones(paste0(BTdir, "/data.txt.Stones.txt"))
     else Stones <- NULL
     if (ancstates) 
-      AncStates <- parse_ancstates(paste0(dir, "/data.txt.AncStates.txt"))
+      AncStates <- parse_ancstates(paste0(BTdir, "/data.txt.AncStates.txt"))
     else AncStates <- NULL
     if (output.trees) 
-      OutputTrees <- ape::read.nexus(paste0(dir, "/data.txt.Output.trees"))
+      OutputTrees <- ape::read.nexus(paste0(BTdir, "/data.txt.Output.trees"))
     else OutputTrees <- NULL
   }
   results <- list(Log = Log, Schedule = Schedule, Stones = Stones, 
@@ -144,13 +149,13 @@ bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = 
       system(paste0("rm ", dir, "/tree.nex"))
       system(paste0("rm ", dir, "/inputfile.txt"))
       if (schedule) 
-        system(paste0("rm ", dir, "/data.txt.Schedule.txt"))
+        system(paste0("rm ", BTdir, "/data.txt.Schedule.txt"))
       if (stones) 
-        system(paste0("rm ", dir, "/data.txt.Stones.txt"))
+        system(paste0("rm ", BTdir, "/data.txt.Stones.txt"))
       if (ancstates) 
-        system(paste0("rm ", dir, "/data.txt.AncStates.txt"))
+        system(paste0("rm ", BTdir, "/data.txt.AncStates.txt"))
       if (output.trees) 
-        system(paste0("rm ", dir, "/data.txt.Output.trees"))
+        system(paste0("rm ", BTdir, "/data.txt.Output.trees"))
     }
   }
   return(results)
