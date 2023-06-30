@@ -9,14 +9,14 @@ songfeatures <- c("Syllable.rep.final", "Syll.song.final", "Song.rep.final", "Du
 #newdata = "2022-03-08CoopSong_AnyCoopEqualsCoop_All.csv"
 #newdata = "2022-03-08CoopSong_MeanCoop_All.csv"
 #newdata = "/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-06-01_CoopSongFS_RColumns.csv"
-newdata = "2023-06-20_CoopBreed-FemaleSong01-Song_Data_R.csv"
+newdata = "2023-06-20_CoopBreed-FemaleSong01HighConf-Song_Data_R.csv"
 dataNoSongless = read.csv(newdata)
 dataNoSongless$X = NULL
 #treefile <- "2021-08-31ConsensusPasserineTreeEricson10_1000.nex" # 3/8/2022
 treefile <- "/Users/kate/Desktop/CooperativeBreedingEvolution/2022-03-16ConsensusPasserineTreeHackett4_1000.nex"
-currentlabel <- "PasserineTreeHackett-TieNoncoop"
-CBcolumn = "MeanCoopTie2Noncoop"
-columns = c("FemaleSong_Aggregated", CBcolumn)
+currentlabel <- "Hackett-Tie2Coop-FSHighConf"
+CBcolumn = "MeanCoopTie2Coop"
+columns = c("HighConfidence_FemaleSong", CBcolumn)
 
 # test ER/ARD brownie
 source("findQrates.R")
@@ -70,19 +70,80 @@ plotACEtree(columns = c(CBcolumn, feature), cladesubsetcolumn = NULL, cladesubse
 
 
 
-#### Simple bayestraits discrete test for Female Song and CoopBreed ----
+#### Simple bayestraits discrete tests for Female Song and CoopBreed ----
 source("btwDiscreteKTS.R")
 .BayesTraitsPath = "~/Documents/BayesTraitsV4"
 .BayesTraitsPath = "~/Documents/BayesTraitsV3"
 dataIn = read.csv(newdata)
 dataIn$X = NULL
-columns = c(CBcolumn, "FemaleSong_Agg01")
-currentlabel <- "Hackett-TieNoncoop-FSAgg"
+#columns = c(CBcolumn, "FemaleSong_Agg01")
+#currentlabel <- "Hackett-TieNoncoop-FSAgg"
 subsetbtw <- subsettreedata(columns = columns, newdata = dataIn, newtree = treefile, skinnydata = TRUE)
 subsettree <- subsetbtw$subsettree
 subsetdf <- subsetbtw$subsetdf
 subsetdf[,columns[1]] <- as.character(subsetdf[,columns[1]])
 subsetdf[,columns[2]] <- as.character(subsetdf[,columns[2]])
+
+
+## Using my altered btw::bayestraits function
+source("btwV2bayestraitsKTS.R")
+seeds = 101:600
+Version = "V4"
+Method = "ML"
+MLtries = 100
+currentlabel = paste0(currentlabel, " mlt", MLtries, "_noRes") # no restrictions
+
+outputdf = set.seed(10)
+# Do Independent first
+for (i in seeds) {
+  print(paste("Independent, Seed:", i))
+  tempdf = set.seed(i)
+  Seed = i
+  Model = "Independent"
+  commandVector = c("2", "1", paste("mlt", MLtries), paste("Se", i)) # mlt number of tries
+  
+  outInd <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, version = Version, remove_files = T, BTdirpath = "~/Documents")
+  resultsInd = outInd$Log$results
+  temprow = cbind(Seed, Version, Model, Method, MLtries, resultsInd)
+  tempdf = rbind(tempdf, temprow)
+  
+  outdf = tempdf[,c("Seed","Version","Model","Method","MLtries","Tree.No", "Lh")]
+  outdf$q12 = tempdf$alpha2
+  outdf$q13 = tempdf$alpha1
+  outdf$q21 = tempdf$beta2
+  outdf$q24 = tempdf$alpha1
+  outdf$q31 = tempdf$beta1
+  outdf$q34 = tempdf$alpha2
+  outdf$q42 = tempdf$beta1
+  outdf$q43 = tempdf$beta2
+  outdf = cbind(outdf, tempdf[,c("Root...P.0.0.", "Root...P.0.1.", "Root...P.1.0.", "Root...P.1.1.")])
+  
+  outputdf = rbind(outputdf,outdf)
+}
+write.csv(outputdf, paste0("BayesTraitsDiscrete_", currentlabel, ".csv"))
+
+# Then do dependent
+for (i in seeds[6:length(seeds)]) {
+  print(paste("Dependent, Seed:", i))
+  tempdf = set.seed(i)
+  Seed = i
+  Model = "Dependent"
+  
+  commandVector = c("3", "1", paste("mlt", MLtries), paste("Se", i))
+  
+  outDep <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, version = Version, remove_files = T, BTdirpath = "~/Documents")
+  resultsDep = outDep$Log$results
+  temprow = cbind(Seed, Version, Model, Method, MLtries, resultsDep)
+  tempdf = rbind(tempdf, temprow)
+  
+  outputdf = rbind(outputdf, tempdf)
+  
+  if (Seed %in% c(110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 240, 260, 280, 300, 350, 400, 450, 500)) {
+    write.csv(outputdf, paste0("BayesTraitsDiscrete_", currentlabel, ".csv"))
+  }
+}
+write.csv(outputdf, paste0("BayesTraitsDiscrete_", currentlabel, ".csv"))
+
 
 
 ## Using btw V2 - run 5/31/2023
@@ -118,7 +179,7 @@ plotdiscrete(meansdf[1,3:10], main = paste(currentlabel, "vs FemSong, \nnsims ="
 dev.off()
 
 
-# Using simplebtwDiscrete.R
+# Using simplebtwDiscrete.R - UNFINISHED
 simplebtwOutput <- simplebtwDiscrete(columns = columns, newdata = dfnew, newtree = treefile, treelabel = treelabel, nsim = nsim, savecsvs = TRUE, KeepBTInputFiles = TRUE)
 simplebtwOutput1 = simplebtwOutput[]
 plotDiscreteBayes(columns=columns, simplebtwOut = simplebtwOutput, nsim = 100, newpdf = T, treelabel = "Hackett", )

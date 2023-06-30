@@ -6,7 +6,7 @@
 
 bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = TRUE, 
           remove_files = TRUE, version = "V3", BTdirpath = NULL) {
-  
+  require(btw)
   if (version == "V3") {
     BTversion = "BayesTraitsV3"
   } else if (version == "V4") {
@@ -61,6 +61,7 @@ bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = 
     stop(paste(BTversion, "is not in your designated working directory:", BTdir))
   
   dir <- getwd()
+  #print(dir)
   write(c(commands, "run"), file = "./inputfile.txt")
   ape::write.nexus(tree, file = "./tree.nex", translate = T)
   write.table(data, file = "./data.txt", quote = F, col.names = F, 
@@ -76,19 +77,24 @@ bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = 
   else {
     system(paste(paste0(BTdir, "/BayesTraits", version), paste0(dir, "/tree.nex"), paste0(dir, "/data.txt"), paste0("< ", dir, "/inputfile.txt")), ignore.stdout = silent)
   }
+  
   log <- "data.txt.Log.txt" %in% list.files()
   logfile = "data.txt.Log.txt" # KTS added 
   if (log == FALSE) { # KTS added
+    print(log)
    log <-  "data.txt.log.txt" %in% list.files()
    logfile = "data.txt.log.txt"
   }
+  
   schedule <- "data.txt.Schedule.txt" %in% list.files()
   stones <- "data.txt.Stones.txt" %in% list.files()
   ancstates <- "data.txt.AncStates.txt" %in% list.files()
   output.trees <- "data.txt.Output.trees" %in% list.files()
   varrates <- "data.txt.VarRates" %in% list.files()
-  if (!log) 
+  if (!log) {
+    print(getwd())
     stop("Something went wrong: btw can't find a log file")
+  }
   if (varrates) 
     warning("btw does not handle output from a variable rates model.")
   if (windows) {
