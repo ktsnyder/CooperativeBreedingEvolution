@@ -8,7 +8,7 @@ newdata = "~/Desktop/CooperativeBreedingEvolution/2023-06-20_CoopBreed-FemaleSon
 dataNoSongless = read.csv(newdata)
 columns = c(CBcolumn, "FemaleSong_Agg01")
 treefile = "/Users/kate/Desktop/CooperativeBreedingEvolution/2022-03-16ConsensusPasserineTreeHackett4_1000.nex"
-currentlabel <- "Hackett-TieNoncoop-FSAgg"
+currentlabel <- "Hackett-TieNoncoop-FSAgg mlt100_noRes"
 subsetbtw <- subsettreedata(columns = columns, newdata = dataNoSongless, newtree = treefile, skinnydata = TRUE)
 subsetdf <- subsetbtw$subsetdf
 subsetdf[,CBcolumn] <- as.character(subsetdf[,CBcolumn])
@@ -266,18 +266,20 @@ ratecounts = outputdf[which(outputdf$Version %in% c("V3","V4")),rates] %>% group
 unique(ratecounts$n)
 
 
+outputdf = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/BayesTraitsDiscrete_Hackett-TieNoncoop-FSAgg mlt100_noRes.csv")
+outputdf$X = NULL
 library(tidyverse)
 Modelsummary = outputdf %>% group_by(Version, Model) %>% summarize(MeanLh = mean(Lh), n=n(), MinLh = min(Lh), MaxLh = max(Lh), Meanq12 = mean(q12), Minq12 = min(q12), Maxq12 = max(q12), Meanq13 = mean(q13), Minq13 = min(q13), Maxq13 = max(q13), Meanq21 = mean(q21), Minq21 = min(q21), Maxq21 = max(q21), Meanq24 = mean(q24), Minq24 = min(q24), Maxq24 = max(q24), Meanq31 = mean(q31), Minq31 = min(q31), Maxq31 = max(q31),Meanq34 = mean(q34), Minq34 = min(q34), Maxq34 = max(q34), Meanq42 = mean(q42), Minq42 = min(q42), Maxq42 = max(q42), Meanq43 = mean(q43), Minq43 = min(q43), Maxq43 = max(q43) )
 
 
 Lh2 = LhDependent = Modelsummary$MeanLh[which(Modelsummary$Model == "Dependent")]  
 Lh1 = LhIndependent = Modelsummary$MeanLh[which(Modelsummary$Model == "Independent")]  
-Lh1 = LhIndependent = Modelsummary$MeanLh[which(Modelsummary$Model == "Independent-DependentRestrictedRates")]  
+#Lh1 = LhIndependent = Modelsummary$MeanLh[which(Modelsummary$Model == "Independent-DependentRestrictedRates")]  
   # LRstat from btwV1
 
-version = c("V2","V3","V4")
+version = c("V4")
 LRstatdf = c()
-for (IndModel in c("Independent","Independent-DependentRestrictedRates")) {
+for (IndModel in c("Independent")) { # ,"Independent-DependentRestrictedRates"
   Lh1 = LhIndependent = Modelsummary$MeanLh[which(Modelsummary$Model == IndModel)]  
   Lh2 = LhDependent = Modelsummary$MeanLh[which(Modelsummary$Model == "Dependent")]
   version = Modelsummary$Version[which(Modelsummary$Model == IndModel)]
@@ -310,7 +312,7 @@ ggplot(df_long, aes(x = Rate, y = log(Value), color = Model)) +
   labs(color = "Model") +
   theme_minimal()
 
-hist(outputdf$Lh[which(outputdf$Version=="V3" & outputdf$Model == "Independent")])
+hist(outputdf$Lh[which(outputdf$Version=="V4" & outputdf$Model == "Independent")])
 dev.off()
 
 
@@ -319,7 +321,7 @@ df_summary <- df_long %>%
   summarise(mean_value = mean(Value, na.rm = TRUE),
             se = sd(Value, na.rm = TRUE) / sqrt(n()), min_value = min(Value, na.rm = TRUE), max_value = max(Value, na.rm = TRUE), .groups = "drop")
 
-pdf(paste("TestBayesTraits-MeanRates", currentlabel, ".pdf"), width = 11, height = 5)
+pdf(paste("BayesTraits-MeanRates", currentlabel, ".pdf"), width = 11, height = 5)
 ggplot(df_summary, aes(x = Rate, y = log(mean_value), color = Model)) +
   geom_point() +
   geom_errorbar(aes(ymin = log(mean_value - se), ymax = log(mean_value + se)), width = 0.2) +
@@ -340,19 +342,19 @@ dev.off()
 #   
 
 # Plot rates
-outputdf = read.csv("/Users/kate/Documents/TestBayesTraits_Hackett-OmitTies-Polygyny_mlt100.csv")
+outputdf = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/BayesTraitsDiscrete_Hackett-Tie2Noncoop-FSHighConf mlt100_noRes.csv")
 outputdf$X = NULL
-currentlabel = "Hackett-OmitTies-Polygyny_mlt100_100reps"
+currentlabel = "Hackett-Tie2Noncoop-FSHighConf mlt100_noRes"
 source("~/Desktop/CooperativeBreedingEvolution/btwDiscreteKTS.R")
-Models = c("Dependent", "Independent-DependentRestrictedRates", "Independent")
+Models = c("Dependent",  "Independent") #"Independent-DependentRestrictedRates",
 Versions = c("V2","V3","V4")
-pdf(file = paste("TestBayesTraits-TransitionPlots", currentlabel,".pdf"), height = 8, width = 5)
-par(mfrow = c(3,1))
+pdf(file = paste("BayesTraits-TransitionPlots", currentlabel,".pdf"), height = 7, width = 5)
+par(mfrow = c(2,1))
 par(mar = c(1,1,4,1))
-for (i in 1:3) { 
+for (i in 3) { 
   Version = Versions[i]
   print(Version)
-  for (j in 1:3) { 
+  for (j in 1:2) { 
     Model = Models[j]
     print(Model)
     subdf = outputdf[which(outputdf$Model == Model & outputdf$Version == Version),]
@@ -398,3 +400,114 @@ ggplot(outputdf, aes(x = Lh, color = Model, fill = Model)) +
   geom_histogram() +
   facet_wrap(~Version, dir = "v")
 dev.off()
+
+
+#### MCMC ----
+library(psych)
+commandVector = c("3", "2", "Prior q21 exp 10", "Prior q43 exp 10", "burnin 220000", "Stones 100 1000") 
+outDep <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, version = Version, remove_files = F, BTdirpath = "~/Documents", silent = FALSE)
+outDepLog = outDep$Log$results
+outDepStonesLh = outDep$Stones$logMarLH
+harmonic.mean(outDepLog$Lh)
+mean(outDepLog$Lh)
+
+commandVector = c("2", "2", "Prior alpha?? exp 10", "burnin 220000", "Stones 100 1000") 
+outInd <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = F, BTdirpath = "~/Documents", silent = FALSE)
+
+# PriorAll - individual runs
+commandVector = c("3", "2", "PriorAll exp 10", "burnin 220000", "Stones 100 1000") 
+outPriorAllDep <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = F, BTdirpath = "~/Documents", silent = FALSE, OutputFolderPath = "PriorAll-Exp-10_3")
+commandVector = c("2", "2", "PriorAll exp 10", "burnin 220000", "Stones 100 1000") 
+outPriorAllInd <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = F, BTdirpath = "~/Documents", silent = FALSE, OutputFolderPath = "PriorAll-Exp-10_3")
+
+# PriorAll - loop
+columns = c("MeanCoopTie2Noncoop", "HighConfidence_FemaleSong")
+columns = c("MeanCoopTie2Noncoop", "FemaleSong_Agg01")
+columns = c("MeanCoopTie2Coop", "FemaleSong_Agg01")
+newdata = "2023-06-20_CoopBreed-FemaleSong01HighConf-Song_Data_R.csv"
+dataNoSongless = read.csv(newdata)
+dataNoSongless$X = NULL
+treefile <- "/Users/kate/Desktop/CooperativeBreedingEvolution/2022-03-16ConsensusPasserineTreeHackett4_1000.nex"
+subsetbtw = subsettreedata(columns, newdata = dataNoSongless, newtree = treefile, skinnydata = T)
+subsettree = subsetbtw$subsettree
+subsetdf = subsetbtw$subsetdf
+nsims = 100
+outDepdf = set.seed(10)
+outInddf = set.seed(10)
+for (i in 1:nsims) { 
+  # Dependent
+  commandVector = c("3", "2", "PriorAll exp 10", "burnin 220000", "Stones 100 1000") 
+  outPriorAllDep <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = T, BTdirpath = "~/Documents", silent = T, OutputFolderPath = paste0("PriorAll-Exp-10"))
+
+outPriorAllDepOptions <- outPriorAllDep$Log$options
+outPriorAllDepResults <- outPriorAllDep$Log$results
+outPriorAllDepStonesLh <- outPriorAllDep$Stones$logMarLH
+Model = str_remove(str_squish(outPriorAllDepOptions[str_detect(outPriorAllDepOptions, "Model")]), "Model: ")
+Iterations = str_remove(str_squish(outPriorAllDepOptions[str_detect(outPriorAllDepOptions, "Iterations")]), "Iterations: ")
+BurnIn = str_remove(str_squish(outPriorAllDepOptions[str_detect(outPriorAllDepOptions, "Burn in")]), "Burn in: ")
+Seed = str_remove(str_squish(outPriorAllDepOptions[str_detect(outPriorAllDepOptions, "Seed")]), "Seed: ")
+ScheduleFile = NA #str_remove(str_squish(outPriorAllDepOptions[str_detect(outPriorAllDepOptions, "Schedule File:")]), "Schedule File: ")
+StonesLh = outPriorAllDepStonesLh
+meanResults = apply(outPriorAllDepResults[,c("Lh", "q12", "q13", "q21", "q24", "q31", "q34", "q42", "q43")], 2, mean)
+names(meanResults)[which(names(meanResults) == "Lh")] <- "SamplingMeanLh"
+outDeprow = c(i, Model, Iterations, BurnIn, Seed, ScheduleFile, StonesLh, meanResults)
+names(outDeprow) = c("Sim", "Model", "Iterations", "BurnIn", "Seed", "ScheduleFile", "StonesLh", "SamplingMeanLh", "q12", "q13", "q21", "q24", "q31", "q34", "q42", "q43")
+outDepdf = rbind(outDepdf, outDeprow)
+
+# Independent
+commandVector = c("2", "2", "PriorAll exp 10", "burnin 220000", "Stones 100 1000") 
+outPriorAllInd <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = T, BTdirpath = "~/Documents", silent = T, OutputFolderPath = paste0("PriorAll-Exp-10"))
+
+outPriorAllIndOptions <- outPriorAllInd$Log$options
+outPriorAllIndResults <- outPriorAllInd$Log$results
+outPriorAllIndStonesLh <- outPriorAllInd$Stones$logMarLH
+Model = str_remove(str_squish(outPriorAllIndOptions[str_detect(outPriorAllIndOptions, "Model")]), "Model: ")
+Iterations = str_remove(str_squish(outPriorAllIndOptions[str_detect(outPriorAllIndOptions, "Iterations")]), "Iterations: ")
+BurnIn = str_remove(str_squish(outPriorAllIndOptions[str_detect(outPriorAllIndOptions, "Burn in")]), "Burn in: ")
+Seed = str_remove(str_squish(outPriorAllIndOptions[str_detect(outPriorAllIndOptions, "Seed")]), "Seed: ")
+ScheduleFile = NA #str_remove(str_squish(outPriorAllIndOptions[str_detect(outPriorAllIndOptions, "Schedule File:")]), "Schedule File: ")
+StonesLh = outPriorAllIndStonesLh
+meanResultsInd = apply(outPriorAllIndResults[,c("Lh", "alpha1", "beta1", "alpha2", "beta2")], 2, mean)
+names(meanResultsInd)[which(names(meanResultsInd) == "Lh")] <- "SamplingMeanLh"
+outIndrow = c(i, Model, Iterations, BurnIn, Seed, ScheduleFile, StonesLh, meanResultsInd)
+names(outIndrow) = c("Sim", "Model", "Iterations", "BurnIn", "Seed", "ScheduleFile", "StonesLh", "SamplingMeanLh", "alpha1", "beta1", "alpha2", "beta2")
+outInddf = rbind(outInddf, outIndrow)
+
+if (i %in% seq(1,100, by = 10)) {
+  filenameDep = paste0("PriorAll-Exp-10/",columns[1], "-", columns[2], "_", "DependentMCMC_", Sys.Date(),".csv")
+  write.csv(outDepdf, file = filenameDep, row.names = FALSE)
+  filenameInd = paste0("PriorAll-Exp-10/", columns[1], "-", columns[2], "_", "IndependentMCMC_", Sys.Date(),".csv")
+  write.csv(outInddf, file = filenameInd, row.names = FALSE)
+  print(paste("Finished loop ", i, "with columns", columns[1], columns[2], "at", Sys.time())
+}
+}
+
+
+
+
+
+# Hyperpriors
+commandVector = c("3", "2", "HyperPriorAll exp 0 10", "burnin 250000", "Stones 100 1000") 
+outHyperDep <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = F, BTdirpath = "~/Documents", silent = FALSE, OutputFolderPath = "HyperPriorAll-Exp-0-10_3")
+commandVector = c("2", "2", "HyperPriorAll exp 0 10", "burnin 250000", "Stones 100 1000") 
+outHyperInd <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = F, BTdirpath = "~/Documents", silent = FALSE, OutputFolderPath = "HyperPriorAll-Exp-0-10_3")
+print(paste(Sys.time(), "both hyper jumps ended"))
+
+# Reverse Jump
+commandVector = c("3", "2", "RevJump exp 10", "burnin 250000", "Stones 100 1000") 
+outHyperDep <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = F, BTdirpath = "~/Documents", silent = FALSE, OutputFolderPath = "RevJump-exp-10_2")
+
+commandVector = c("3", "2", "RevJumpHP exp 0 10", "burnin 250000", "Stones 100 1000") 
+outHyperRevJump <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = F, BTdirpath = "~/Documents", silent = FALSE, OutputFolderPath = "RevJumpHP-exp-0-100_2")
+print(paste(Sys.time(), "both rev jumps ended"))
+
+
+
+
+Results <- outHyperRevJump$Log$results
+Options <- outHyperDep$Log$options
+logMarLH <- outHyperDep$Stones$logMarLH
+
+write.csv()
+
+

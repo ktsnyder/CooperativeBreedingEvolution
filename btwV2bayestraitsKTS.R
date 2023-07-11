@@ -2,16 +2,18 @@
 ## Kate Snyder
 ## 6/27/2023
 ## Edited 6/29/2023 - variable logfile name; BTdirpath, BTdir added
-
+## Edited 7/5/2023 - MCMC output files to dir instead of BTdir; added parse_scheduleKTS derived from btw::parse_schedule to be functional with BTv4
+## Edited 7/6/2023 - OutputFolderPath and my_outdir, my_suboutdir, my_outdir_fullpath - not finished in code!
 
 bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = TRUE, 
-          remove_files = TRUE, version = "V3", BTdirpath = NULL) {
+          remove_files = TRUE, BTversionNum = "V4", BTdirpath = NULL, OutputFolderPath = NULL) {
   require(btw)
-  if (version == "V3") {
+  source("btwV2-parse_scheduleKTS.R")
+  if (BTversionNum == "V3") {
     BTversion = "BayesTraitsV3"
-  } else if (version == "V4") {
+  } else if (BTversionNum == "V4") {
     BTversion = "BayesTraitsV4"
-  } else if (version == "V2") {
+  } else if (BTversionNum == "V2") {
     BTversion = "BayesTraitsV2"
   }
   if (is.null(BTdirpath)) {
@@ -20,52 +22,76 @@ bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = 
     BTdir = BTdirpath
   }
   
-  if (!inherits(data, "data.frame")) 
-    stop("Data frame containing species data must be supplied")
+  if (!inherits(data, "data.frame")) {
+    stop("Data frame containing species data must be supplied")}
   if (inherits(tree, "phylo")) {
     treelabs <- tree$tip.label
-  }
-  else if (inherits(tree, "multiPhylo")) {
+  } else if (inherits(tree, "multiPhylo")) {
     treelabs = attributes(tree)$TipLabel
-  }
-  else {
+  } else {
     stop("Tree must be of class phylo or multiPhylo")
   }
-  if (class(commands) != "character") 
-    stop("Character vector containing BayesTraits commands must be supplied.")
-  if (!(class(data[[1]]) %in% c("character", "factor"))) 
-    stop("First column of data must contain species names.")
-  if (length(setdiff(treelabs, data[[1]])) > 0) 
+  if (class(commands) != "character") {
+    stop("Character vector containing BayesTraits commands must be supplied.")}
+  if (!(class(data[[1]]) %in% c("character", "factor")))  {
+    stop("First column of data must contain species names.")}
+  if (length(setdiff(treelabs, data[[1]])) > 0) {
     stop(paste("No match found in the data:", paste(setdiff(tree$tip.label, 
-                                                            data[[1]]), collapse = ", ")))
-  if (length(setdiff(data[[1]], treelabs)) > 0) 
+                                                            data[[1]]), collapse = ", ")))}
+  if (length(setdiff(data[[1]], treelabs)) > 0) {
     stop(paste("No match found in the phylogeny:", paste(setdiff(data[[1]], 
-                                                                 tree$tip.label), collapse = ", ")))
+                                                                 tree$tip.label), collapse = ", ")))}
   if (length(setdiff(treelabs, data[[1]])) > 0 | length(setdiff(data[[1]], 
-                                                                treelabs)) > 0) 
-    stop("Species in your phylogeny and data must match up exactly.")
+                                                                treelabs)) > 0) {
+    stop("Species in your phylogeny and data must match up exactly.")}
   if (.Platform$OS.type == "windows") {
     windows = TRUE
-  }
-  else if (Sys.info()["sysname"] == "Darwin") {
+  } else if (Sys.info()["sysname"] == "Darwin") {
     windows = FALSE
-  }
-  else {
+  } else {
     stop("Operating system not supported")
   }
   if (windows) {
-    if (!(BTversion %in% list.files())) 
-      stop(paste(BTversion, "is not in your current working directory."))
-  }
-  else if (!(BTversion %in% list.files(BTdir))) 
-    stop(paste(BTversion, "is not in your designated working directory:", BTdir))
+    if (!(BTversion %in% list.files())) {
+      stop(paste(BTversion, "is not in your current working directory."))}
+  } else if (!(BTversion %in% list.files(BTdir)))  {
+    stop(paste(BTversion, "is not in your designated working directory:", BTdir))}
   
-  dir <- getwd()
-  #print(dir)
-  write(c(commands, "run"), file = "./inputfile.txt")
-  ape::write.nexus(tree, file = "./tree.nex", translate = T)
-  write.table(data, file = "./data.txt", quote = F, col.names = F, 
-              row.names = F)
+  my_wd <- getwd()
+  if (is.null(OutputFolderPath)) {
+    my_outdir = my_wd
+  } else if (!dir.exists(OutputFolderPath)) {
+    dir.create(OutputFolderPath)
+    my_outdir = paste0(OutputFolderPath)
+  } else {
+    my_outdir = paste0(OutputFolderPath)
+  }
+  if (commands[1] == "3") {
+    ModelName = "Discrete-Dependent"
+  } else if (commands[1] == "2") {
+    ModelName = "Discrete-Independent"
+  } 
+  if (commands[2] == "1") {
+    ModelMethod = "ML"
+  } else if (commands[2] == "2") {
+    ModelMethod = "MCMC"
+  }
+  my_suboutdir = paste(ModelName, ModelMethod, sep="_")
+  my_suboutdir_fullpath = paste0(my_outdir,"/",my_suboutdir)
+  print(my_suboutdir_fullpath)
+  if (!dir.exists(my_suboutdir_fullpath)) {
+    dir.create(my_suboutdir_fullpath)
+  }
+  
+  #write(c(commands, "run"), file = "./inputfile.txt")
+  #ape::write.nexus(tree, file = "./tree.nex", translate = T)
+  #write.table(data, file = "./data.txt", quote = F, col.names = F,      row.names = F)
+  write(c(commands, "run"), file = paste0(my_suboutdir_fullpath, "/inputfile.txt"))
+  ape::write.nexus(tree, file = paste0(my_suboutdir_fullpath, "/tree.nex"), translate = T)
+  write.table(data, file = paste0(my_suboutdir_fullpath, "/data.txt"), quote = F, col.names = F,  row.names = F)
+  my_wd = my_suboutdir_fullpath
+  
+  
   if (windows) {
     if (silent) {
       invisible(shell(paste0("BayesTraits",version,".exe tree.nex data.txt < inputfile.txt"), intern = TRUE))
@@ -75,24 +101,30 @@ bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = 
     }
   }
   else {
-    system(paste(paste0(BTdir, "/BayesTraits", version), paste0(dir, "/tree.nex"), paste0(dir, "/data.txt"), paste0("< ", dir, "/inputfile.txt")), ignore.stdout = silent)
+    system(paste(paste0(BTdir, "/BayesTraits", BTversionNum), paste0(my_wd, "/tree.nex"), paste0(my_wd, "/data.txt"), paste0("< ", my_wd, "/inputfile.txt")), ignore.stdout = silent)
   }
   
-  log <- "data.txt.Log.txt" %in% list.files()
+  print(my_suboutdir_fullpath)
+  print(my_wd)
+  
+  log <- "data.txt.Log.txt" %in% list.files(my_suboutdir_fullpath)
   logfile = "data.txt.Log.txt" # KTS added 
   if (log == FALSE) { # KTS added
     print(log)
-   log <-  "data.txt.log.txt" %in% list.files()
+   log <-  "data.txt.log.txt" %in% list.files(my_suboutdir_fullpath)
    logfile = "data.txt.log.txt"
+   print("no log - is log TRUE now?")
+   print(log)
   }
   
-  schedule <- "data.txt.Schedule.txt" %in% list.files()
-  stones <- "data.txt.Stones.txt" %in% list.files()
-  ancstates <- "data.txt.AncStates.txt" %in% list.files()
-  output.trees <- "data.txt.Output.trees" %in% list.files()
-  varrates <- "data.txt.VarRates" %in% list.files()
+  schedule <- "data.txt.Schedule.txt" %in% list.files(my_wd)
+  stones <- "data.txt.Stones.txt" %in% list.files(my_wd)
+  ancstates <- "data.txt.AncStates.txt" %in% list.files(my_wd)
+  output.trees <- "data.txt.Output.trees" %in% list.files(my_wd)
+  varrates <- "data.txt.VarRates" %in% list.files(my_wd)
   if (!log) {
     print(getwd())
+    print(my_suboutdir_fullpath)
     stop("Something went wrong: btw can't find a log file")
   }
   if (varrates) 
@@ -118,19 +150,19 @@ bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = 
     #} else if (version == "V2") {
     #  Log <- parse_log(paste0(dir, "/data.txt.log.txt"))
     #}
-    Log <- parse_log(paste0(dir, "/", logfile)) # kts added/changed
-    if (schedule) 
-      Schedule <- parse_schedule(paste0(BTdir, "/data.txt.Schedule.txt"))
-    else Schedule <- NULL
-    if (stones) 
-      Stones <- parse_stones(paste0(BTdir, "/data.txt.Stones.txt"))
-    else Stones <- NULL
-    if (ancstates) 
-      AncStates <- parse_ancstates(paste0(BTdir, "/data.txt.AncStates.txt"))
-    else AncStates <- NULL
-    if (output.trees) 
-      OutputTrees <- ape::read.nexus(paste0(BTdir, "/data.txt.Output.trees"))
-    else OutputTrees <- NULL
+    Log <- parse_log(paste0(my_wd, "/", logfile)) # kts added/changed
+    if (schedule) {
+      Schedule <- parse_scheduleKTS(paste0(my_wd, "/data.txt.Schedule.txt"))
+    } else {Schedule <- NULL}
+    if (stones) {
+      Stones <- parse_stones(paste0(my_wd, "/data.txt.Stones.txt"))
+    } else {Stones <- NULL}
+    if (ancstates) {
+      AncStates <- parse_ancstates(paste0(my_wd, "/data.txt.AncStates.txt"))
+    } else {AncStates <- NULL}
+    if (output.trees) {
+      OutputTrees <- ape::read.nexus(paste0(my_wd, "/data.txt.Output.trees"))
+    } else {OutputTrees <- NULL}
   }
   results <- list(Log = Log, Schedule = Schedule, Stones = Stones, 
                   AncStates = AncStates, OutputTrees = OutputTrees)
@@ -150,18 +182,18 @@ bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = 
         shell(paste("DEL", "data.txt.Output.trees"))
     }
     else {
-      system(paste0("rm ", dir, "/", logfile)) # kts changed to logfile
-      system(paste0("rm ", dir, "/data.txt"))
-      system(paste0("rm ", dir, "/tree.nex"))
-      system(paste0("rm ", dir, "/inputfile.txt"))
+      system(paste0("rm ", my_wd, "/", logfile)) # kts changed to logfile
+      system(paste0("rm ", my_wd, "/data.txt"))
+      system(paste0("rm ", my_wd, "/tree.nex"))
+      system(paste0("rm ", my_wd, "/inputfile.txt"))
       if (schedule) 
-        system(paste0("rm ", BTdir, "/data.txt.Schedule.txt"))
+        system(paste0("rm ", my_wd, "/data.txt.Schedule.txt"))
       if (stones) 
-        system(paste0("rm ", BTdir, "/data.txt.Stones.txt"))
+        system(paste0("rm ", my_wd, "/data.txt.Stones.txt"))
       if (ancstates) 
-        system(paste0("rm ", BTdir, "/data.txt.AncStates.txt"))
+        system(paste0("rm ", my_wd, "/data.txt.AncStates.txt"))
       if (output.trees) 
-        system(paste0("rm ", BTdir, "/data.txt.Output.trees"))
+        system(paste0("rm ", my_wd, "/data.txt.Output.trees"))
     }
   }
   return(results)

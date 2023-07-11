@@ -2,6 +2,7 @@
 ## Coded by Kate T Snyder
 ## Created 8/18/2021
 ## Last Edited 6/29/2023
+## Copied to Creanza Lab Server 6/30/2023 to run bayestraits Discrete
 
 setwd("~/Desktop/CooperativeBreedingEvolution")
 
@@ -87,7 +88,7 @@ subsetdf[,columns[2]] <- as.character(subsetdf[,columns[2]])
 
 ## Using my altered btw::bayestraits function
 source("btwV2bayestraitsKTS.R")
-seeds = 101:600
+seeds = 101:350
 Version = "V4"
 Method = "ML"
 MLtries = 100
