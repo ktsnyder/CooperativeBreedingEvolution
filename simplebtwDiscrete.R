@@ -1,11 +1,13 @@
 # Simple BayesTraits Discrete run
 # Created 3/9/2022
 # Kate T Snyder
-# Last Edited: 3/30/2022
+# Edited: 3/30/2022
 # Added   res = c("q10 q00 1.2", "q11 q01 1.2") # remove because that would require it to use btwV2 bayestraits(), not Discrete # actually maybe this is possible with Discrete after all? Not sure if with all BT versions
 # Still hard coded to do Female Song 
 # Saves nocorrD output to csv and plots this
 # Added optional input nocorrDdf to plotDiscreteBayes() for separate df corrD vs nocorrD; flexible calling of columns for q12, q13, etc; doesn't automatically plot pval density
+# Edited 7/5/2023 - plotting
+# 7/13/2023 - moved plotting to new file
 
 # Purposes: 
 #   Make transition plots between two discrete characters without having to use btw::plotdiscrete()
@@ -132,7 +134,12 @@ plotDiscreteBayes <- function(columns, simplebtwOut, nocorrDdf = NULL, nsim = NU
   MateParam <- columns[1]
   SongParam <- columns[2]
   ## replace plotdiscrete - from BayesPlots_choosebin
-  if (is.null(nocorrDdf)) {
+  if ("Model" %in% colnames(df)) {
+    if ("Dependent" %in% df$Model) {
+      dfrangetemp = df[which(df$Model == "Dependent"),]
+      qDepColumns <- c("q12", "q13", "q21", "q24", "q31", "q34", "q42", "q43")
+    }
+  } else if (is.null(nocorrDdf)) {
     qDepColumns <- 3:10
   } else {
     qDepColumns <- c("q12", "q13", "q21", "q24", "q31", "q34", "q42", "q43")
@@ -197,7 +204,12 @@ plotDiscreteBayes <- function(columns, simplebtwOut, nocorrDdf = NULL, nsim = NU
     
     
     ##### repeat rate processing for nocorrD, if present
-    if (is.null(nocorrDdf)) {
+    if ("Model" %in% colnames(df)) {
+      if ("Independent" %in% df$Model) {
+        dfrangetemp = df[which(df$Model == "Independent"),]
+        qDepColumns <- c("q12", "q13", "q21", "q24", "q31", "q34", "q42", "q43")
+      }
+    } else if (is.null(nocorrDdf)) {
         qColumns = 21:28
     } else {
       qColumns = c("q12", "q13", "q21", "q24", "q31", "q34", "q42", "q43")
@@ -261,9 +273,14 @@ plotDiscreteBayes <- function(columns, simplebtwOut, nocorrDdf = NULL, nsim = NU
     
     
     # calculate number runs significant
-    dfrangesig <- dfrangetemp[which(dfrangetemp$pval < 0.05),]
-    meannumbersig <- length(dfrangesig$Tree.No)
-    
+    if ("pval" %in% colnames(dfrangetemp)) {
+      dfrangesig <- dfrangetemp[which(dfrangetemp$pval < 0.05),]
+      meannumbersig <- length(dfrangesig$Tree.No)
+      LRplot = FALSE
+    } else {
+      LRplot = TRUE
+      
+    }
     
     if (newpdf == TRUE) {  #used when not plotting jackknifes
       par(mar = rep(2, 4))

@@ -422,8 +422,8 @@ outPriorAllInd <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = 
 
 # PriorAll - loop
 columns = c("MeanCoopTie2Noncoop", "HighConfidence_FemaleSong")
-columns = c("MeanCoopTie2Noncoop", "FemaleSong_Agg01")
-columns = c("MeanCoopTie2Coop", "FemaleSong_Agg01")
+#columns = c("MeanCoopTie2Noncoop", "FemaleSong_Agg01")
+#columns = c("MeanCoopTie2Coop", "FemaleSong_Agg01")
 newdata = "2023-06-20_CoopBreed-FemaleSong01HighConf-Song_Data_R.csv"
 dataNoSongless = read.csv(newdata)
 dataNoSongless$X = NULL
@@ -431,57 +431,125 @@ treefile <- "/Users/kate/Desktop/CooperativeBreedingEvolution/2022-03-16Consensu
 subsetbtw = subsettreedata(columns, newdata = dataNoSongless, newtree = treefile, skinnydata = T)
 subsettree = subsetbtw$subsettree
 subsetdf = subsetbtw$subsetdf
-nsims = 100
+nsims = 40
+
+AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll exp 10", "burnin 220000", "Stones 100 1000")
+OutputFolderPath = "PriorAll-Exp-10"
+#AdditionalCommands = NULL
+#OutputFolderPath = "MaxLikelihood-Defaults"
+AdditionalCommandsDep = c("Prior q12 exp 11", "Prior q13 exp 4", "Prior q21 exp 7", "Prior q24 exp 11", "Prior q31 exp 43", "Prior q34 exp 20", "Prior q42 exp 60", "Prior q43 exp 7", "burnin 220000", "Stones 100 1000")
+AdditionalCommandsInd = c("Prior alpha1 exp 8", "Prior beta1 exp 51", "Prior alpha2 exp 6", "Prior beta2 exp 4", "burnin 220000", "Stones 100 1000")
+OutputFolderPath = "Priors-exp-MaxLikValues20230712"
+
+# alpha1 = q13, q24
+# alpha2 = q12, q34
+# beta1 = q42, q31
+# beta2 = q43, q21
+AdditionalCommandsDep = c("Prior q12 exp 6", "Prior q13 exp 8", "Prior q21 exp 4", "Prior q24 exp 8", "Prior q31 exp 51", "Prior q34 exp 6", "Prior q42 exp 51", "Prior q43 exp 4", "burnin 220000", "Stones 100 1000")
+AdditionalCommandsInd = c("Prior alpha1 exp 8", "Prior beta1 exp 51", "Prior alpha2 exp 6", "Prior beta2 exp 4", "burnin 220000", "Stones 100 1000")
+OutputFolderPath = "Priors-exp-MaxLikIndependentValues20230712"
+
+# qrates from ace
+column1qrates= findQrates(columns = columns[1], plot=FALSE, newtree = treefile, newdata = dataNoSongless, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, otherlabel = NULL)
+column2qrates= findQrates(columns = columns[2], plot=FALSE, newtree = treefile, newdata = dataNoSongless, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, otherlabel = NULL)
+AdditionalCommandsDep = c("Prior q12 exp 0.062", "Prior q13 exp 0.009", "Prior q21 exp 0.037", "Prior q24 exp 0.009", "Prior q31 exp 0.059", "Prior q34 exp 0.062", "Prior q42 exp 0.059", "Prior q43 exp 0.037", "burnin 220000", "Stones 100 1000")
+AdditionalCommandsInd = c("Prior alpha1 exp 0.009", "Prior beta1 exp 0.059", "Prior alpha2 exp 0.062", "Prior beta2 exp 0.037", "burnin 220000", "Stones 100 1000")
+OutputFolderPath = "Priors-exp-AceQrates"
+
+# 
+AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll exp 0.01", "burnin 220000", "Stones 100 1000")
+OutputFolderPath = "PriorAll-Exp-0.01"
+
+AdditionalCommandsDep = AdditionalCommandsInd = c("burnin 220000", "Stones 100 1000")
+OutputFolderPath = "NoPriors_Stones100-1000"
+
+AdditionalCommandsDep = AdditionalCommandsInd = c("burnin 220000", "Stones 100 10000")
+OutputFolderPath = "NoPriors_Stones100-10000"
+
+nsims = 40
+AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll uniform 0 50", "burnin 220000", "Stones 100 1000")
+OutputFolderPath = "PriorAll-Uniform-0-50_2"
+
+AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll uniform 0 10", "burnin 220000", "Stones 100 1000")
+OutputFolderPath = "PriorAll-Uniform-0-10_2"
+
+AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll uniform 0 5", "burnin 220000", "Stones 100 1000")
+OutputFolderPath = "PriorAll-Uniform-0-5"
+
+
 outDepdf = set.seed(10)
 outInddf = set.seed(10)
+
 for (i in 1:nsims) { 
+  print(i)
   # Dependent
-  commandVector = c("3", "2", "PriorAll exp 10", "burnin 220000", "Stones 100 1000") 
-  outPriorAllDep <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = T, BTdirpath = "~/Documents", silent = T, OutputFolderPath = paste0("PriorAll-Exp-10"))
-
-outPriorAllDepOptions <- outPriorAllDep$Log$options
-outPriorAllDepResults <- outPriorAllDep$Log$results
-outPriorAllDepStonesLh <- outPriorAllDep$Stones$logMarLH
-Model = str_remove(str_squish(outPriorAllDepOptions[str_detect(outPriorAllDepOptions, "Model")]), "Model: ")
-Iterations = str_remove(str_squish(outPriorAllDepOptions[str_detect(outPriorAllDepOptions, "Iterations")]), "Iterations: ")
-BurnIn = str_remove(str_squish(outPriorAllDepOptions[str_detect(outPriorAllDepOptions, "Burn in")]), "Burn in: ")
-Seed = str_remove(str_squish(outPriorAllDepOptions[str_detect(outPriorAllDepOptions, "Seed")]), "Seed: ")
-ScheduleFile = NA #str_remove(str_squish(outPriorAllDepOptions[str_detect(outPriorAllDepOptions, "Schedule File:")]), "Schedule File: ")
-StonesLh = outPriorAllDepStonesLh
-meanResults = apply(outPriorAllDepResults[,c("Lh", "q12", "q13", "q21", "q24", "q31", "q34", "q42", "q43")], 2, mean)
-names(meanResults)[which(names(meanResults) == "Lh")] <- "SamplingMeanLh"
-outDeprow = c(i, Model, Iterations, BurnIn, Seed, ScheduleFile, StonesLh, meanResults)
-names(outDeprow) = c("Sim", "Model", "Iterations", "BurnIn", "Seed", "ScheduleFile", "StonesLh", "SamplingMeanLh", "q12", "q13", "q21", "q24", "q31", "q34", "q42", "q43")
-outDepdf = rbind(outDepdf, outDeprow)
-
-# Independent
-commandVector = c("2", "2", "PriorAll exp 10", "burnin 220000", "Stones 100 1000") 
-outPriorAllInd <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = T, BTdirpath = "~/Documents", silent = T, OutputFolderPath = paste0("PriorAll-Exp-10"))
-
-outPriorAllIndOptions <- outPriorAllInd$Log$options
-outPriorAllIndResults <- outPriorAllInd$Log$results
-outPriorAllIndStonesLh <- outPriorAllInd$Stones$logMarLH
-Model = str_remove(str_squish(outPriorAllIndOptions[str_detect(outPriorAllIndOptions, "Model")]), "Model: ")
-Iterations = str_remove(str_squish(outPriorAllIndOptions[str_detect(outPriorAllIndOptions, "Iterations")]), "Iterations: ")
-BurnIn = str_remove(str_squish(outPriorAllIndOptions[str_detect(outPriorAllIndOptions, "Burn in")]), "Burn in: ")
-Seed = str_remove(str_squish(outPriorAllIndOptions[str_detect(outPriorAllIndOptions, "Seed")]), "Seed: ")
-ScheduleFile = NA #str_remove(str_squish(outPriorAllIndOptions[str_detect(outPriorAllIndOptions, "Schedule File:")]), "Schedule File: ")
-StonesLh = outPriorAllIndStonesLh
-meanResultsInd = apply(outPriorAllIndResults[,c("Lh", "alpha1", "beta1", "alpha2", "beta2")], 2, mean)
-names(meanResultsInd)[which(names(meanResultsInd) == "Lh")] <- "SamplingMeanLh"
-outIndrow = c(i, Model, Iterations, BurnIn, Seed, ScheduleFile, StonesLh, meanResultsInd)
-names(outIndrow) = c("Sim", "Model", "Iterations", "BurnIn", "Seed", "ScheduleFile", "StonesLh", "SamplingMeanLh", "alpha1", "beta1", "alpha2", "beta2")
-outInddf = rbind(outInddf, outIndrow)
-
-if (i %in% seq(1,100, by = 10)) {
-  filenameDep = paste0("PriorAll-Exp-10/",columns[1], "-", columns[2], "_", "DependentMCMC_", Sys.Date(),".csv")
-  write.csv(outDepdf, file = filenameDep, row.names = FALSE)
-  filenameInd = paste0("PriorAll-Exp-10/", columns[1], "-", columns[2], "_", "IndependentMCMC_", Sys.Date(),".csv")
-  write.csv(outInddf, file = filenameInd, row.names = FALSE)
-  print(paste("Finished loop ", i, "with columns", columns[1], columns[2], "at", Sys.time())
+  commandVector = c("3", "2", AdditionalCommandsDep) 
+  outPriorAllDep <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = F, BTdirpath = "~/Documents", silent = T, OutputFolderPath = OutputFolderPath)
+  
+  outPriorAllDepOptions <- outPriorAllDep$Log$options
+  outPriorAllDepResults <- outPriorAllDep$Log$results
+  outPriorAllDepStonesLh <- outPriorAllDep$Stones$logMarLH
+  Model = str_remove(str_squish(outPriorAllDepOptions[str_detect(outPriorAllDepOptions, "Model")]), "Model: ")
+  if (sum(str_detect(outPriorAllDepOptions, "Iterations")) == 1) {
+    Iterations = str_remove(str_squish(outPriorAllDepOptions[str_detect(outPriorAllDepOptions, "Iterations")]), "Iterations: ")
+  } else {Iterations = NA}
+  if (sum(str_detect(outPriorAllDepOptions, "Burn in")) == 1) {
+    BurnIn = str_remove(str_squish(outPriorAllDepOptions[str_detect(outPriorAllDepOptions, "Burn in")]), "Burn in: ")
+  } else {BurnIn = NA}
+  Seed = str_remove(str_squish(outPriorAllDepOptions[str_detect(outPriorAllDepOptions, "Seed")]), "Seed: ")
+  ScheduleFile = NA #str_remove(str_squish(outPriorAllDepOptions[str_detect(outPriorAllDepOptions, "Schedule File:")]), "Schedule File: ")
+  if (!is.null(outPriorAllDepStonesLh)) {
+    StonesLh = outPriorAllDepStonesLh
+  } else {StonesLh = NA}
+  meanResults = apply(outPriorAllDepResults[,c("Lh", "q12", "q13", "q21", "q24", "q31", "q34", "q42", "q43")], 2, mean)
+  names(meanResults)[which(names(meanResults) == "Lh")] <- "SamplingMeanLh"
+  outDeprow = c(i, Model, Iterations, BurnIn, Seed, ScheduleFile, StonesLh, meanResults)
+  names(outDeprow) = c("Sim", "Model", "Iterations", "BurnIn", "Seed", "ScheduleFile", "StonesLh", "SamplingMeanLh", "q12", "q13", "q21", "q24", "q31", "q34", "q42", "q43")
+  outDepdf = rbind(outDepdf, outDeprow)
+  outDepdf = as.data.frame(outDepdf)
+  
+  # Independent
+  commandVector = c("2", "2", AdditionalCommandsInd) 
+  outPriorAllInd <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = F, BTdirpath = "~/Documents", silent = T, OutputFolderPath = OutputFolderPath)
+  
+  outPriorAllIndOptions <- outPriorAllInd$Log$options
+  outPriorAllIndResults <- outPriorAllInd$Log$results
+  outPriorAllIndStonesLh <- outPriorAllInd$Stones$logMarLH
+  Model = str_remove(str_squish(outPriorAllIndOptions[str_detect(outPriorAllIndOptions, "Model")]), "Model: ")
+  #Iterations = str_remove(str_squish(outPriorAllIndOptions[str_detect(outPriorAllIndOptions, "Iterations")]), "Iterations: ")
+  #BurnIn = str_remove(str_squish(outPriorAllIndOptions[str_detect(outPriorAllIndOptions, "Burn in")]), "Burn in: ")
+  if (sum(str_detect(outPriorAllIndOptions, "Iterations")) == 1) {
+    Iterations = str_remove(str_squish(outPriorAllIndOptions[str_detect(outPriorAllIndOptions, "Iterations")]), "Iterations: ")
+  } else {Iterations = NA}
+  if (sum(str_detect(outPriorAllIndOptions, "Burn in")) == 1) {
+    BurnIn = str_remove(str_squish(outPriorAllIndOptions[str_detect(outPriorAllIndOptions, "Burn in")]), "Burn in: ")
+  } else {BurnIn = NA}
+  Seed = str_remove(str_squish(outPriorAllIndOptions[str_detect(outPriorAllIndOptions, "Seed")]), "Seed: ")
+  ScheduleFile = NA #str_remove(str_squish(outPriorAllIndOptions[str_detect(outPriorAllIndOptions, "Schedule File:")]), "Schedule File: ")
+  #StonesLh = outPriorAllIndStonesLh
+  if (!is.null(outPriorAllIndStonesLh)) {
+    StonesLh = outPriorAllIndStonesLh
+  } else {StonesLh = NA}
+  meanResultsInd = apply(outPriorAllIndResults[,c("Lh", "alpha1", "beta1", "alpha2", "beta2")], 2, mean)
+  names(meanResultsInd)[which(names(meanResultsInd) == "Lh")] <- "SamplingMeanLh"
+  outIndrow = c(i, Model, Iterations, BurnIn, Seed, ScheduleFile, StonesLh, meanResultsInd)
+  names(outIndrow) = c("Sim", "Model", "Iterations", "BurnIn", "Seed", "ScheduleFile", "StonesLh", "SamplingMeanLh", "alpha1", "beta1", "alpha2", "beta2")
+  outInddf = rbind(outInddf, outIndrow)
+  outInddf = as.data.frame(outInddf)
+  
+  if (i %in% seq(1,100, by = 9)) {
+    filenameDep = paste0(OutputFolderPath, "/",columns[1], "-", columns[2], "_", "Dependent_", Sys.Date(),".csv")
+    write.csv(outDepdf, file = filenameDep, row.names = FALSE)
+    filenameInd = paste0(OutputFolderPath, "/", columns[1], "-", columns[2], "_", "Independent_", Sys.Date(),".csv")
+    write.csv(outInddf, file = filenameInd, row.names = FALSE)
+    print(paste("Finished loop ", i, "with columns", columns[1], columns[2], "at", Sys.time()))
+  }
 }
-}
-
+filenameDep = paste0(OutputFolderPath, "/",columns[1], "-", columns[2], "_", "Dependent_", Sys.Date(),".csv")
+write.csv(outDepdf, file = filenameDep, row.names = FALSE)
+filenameInd = paste0(OutputFolderPath, "/", columns[1], "-", columns[2], "_", "Independent_", Sys.Date(),".csv")
+write.csv(outInddf, file = filenameInd, row.names = FALSE)
+print(paste("Finished loop ", i, "with columns", columns[1], columns[2], "at", Sys.time(), "in", OutputFolderPath))
 
 
 
@@ -510,4 +578,13 @@ logMarLH <- outHyperDep$Stones$logMarLH
 
 write.csv()
 
+commandVector = c("TestPrior", "gamma 0 10") 
+TestPriorOff <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, Model)
 
+
+AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll uniform 0 5", "TestPrior q12 1000", "burnin 220000", "Stones 100 1000")
+commandVector = c("3", "2", AdditionalCommandsDep) 
+outPriorAllInd <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = F, BTdirpath = "~/Documents", silent = F, OutputFolderPath = OutputFolderPath)
+
+commandVector = c("2", "2", AdditionalCommandsInd) 
+outPriorAllInd <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = F, BTdirpath = "~/Documents", silent = F, OutputFolderPath = OutputFolderPath)

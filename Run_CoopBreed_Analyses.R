@@ -15,9 +15,11 @@ dataNoSongless = read.csv(newdata)
 dataNoSongless$X = NULL
 #treefile <- "2021-08-31ConsensusPasserineTreeEricson10_1000.nex" # 3/8/2022
 treefile <- "/Users/kate/Desktop/CooperativeBreedingEvolution/2022-03-16ConsensusPasserineTreeHackett4_1000.nex"
-currentlabel <- "Hackett-Tie2Coop-FSHighConf"
-CBcolumn = "MeanCoopTie2Coop"
+currentlabel <- "Hackett-Tie2Noncoop-FSHighConf"
+CBcolumn = "MeanCoopTie2Noncoop"
+#columns = c("HighConfidence_FemaleSong", CBcolumn)
 columns = c("HighConfidence_FemaleSong", CBcolumn)
+
 
 # test ER/ARD brownie
 source("findQrates.R")
@@ -124,7 +126,7 @@ for (i in seeds) {
 write.csv(outputdf, paste0("BayesTraitsDiscrete_", currentlabel, ".csv"))
 
 # Then do dependent
-for (i in seeds[6:length(seeds)]) {
+for (i in seeds[118:length(seeds)]) {
   print(paste("Dependent, Seed:", i))
   tempdf = set.seed(i)
   Seed = i
