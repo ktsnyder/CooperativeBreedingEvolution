@@ -584,7 +584,11 @@ TestPriorOff <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = co
 
 AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll uniform 0 5", "TestPrior q12 1000", "burnin 220000", "Stones 100 1000")
 commandVector = c("3", "2", AdditionalCommandsDep) 
-outPriorAllInd <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = F, BTdirpath = "~/Documents", silent = F, OutputFolderPath = OutputFolderPath)
+outPriorAllDep <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = F, BTdirpath = "~/Documents", silent = F, OutputFolderPath = OutputFolderPath)
 
 commandVector = c("2", "2", AdditionalCommandsInd) 
 outPriorAllInd <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = F, BTdirpath = "~/Documents", silent = F, OutputFolderPath = OutputFolderPath)
+
+
+my_wd = "/Users/kate/Library/CloudStorage/Box-Box/Kate_Nicole/CooperativeBreedingEvolutionOutputs/Test_BayesTraits_MCMC_settings/PriorAll-Uniform-0-5/Discrete-Independent_MCMC"
+system(paste(paste0(BTdir, "/BayesTraits", BTversionNum), paste0(my_wd, "/tree.nex"), paste0(my_wd, "/data.txt"), paste0("< ", my_wd, "/inputfile.txt"), paste0(">", my_wd, "/LogAllOutputs.txt")), ignore.stdout = silent)
