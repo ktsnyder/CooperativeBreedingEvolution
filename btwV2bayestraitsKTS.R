@@ -3,7 +3,8 @@
 ## 6/27/2023
 ## Edited 6/29/2023 - variable logfile name; BTdirpath, BTdir added
 ## Edited 7/5/2023 - MCMC output files to dir instead of BTdir; added parse_scheduleKTS derived from btw::parse_schedule to be functional with BTv4
-## Edited 7/6/2023 - OutputFolderPath and my_outdir, my_suboutdir, my_outdir_fullpath - not finished in code!
+## Edited 7/6/2023 - OutputFolderPath and my_outdir, my_suboutdir, my_outdir_fullpath 
+## Edited 7/17/2023 - new function: parse_TestPrior_log
 
 bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = TRUE, 
           remove_files = TRUE, BTversionNum = "V4", BTdirpath = NULL, OutputFolderPath = NULL) {
@@ -197,4 +198,18 @@ bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = 
     }
   }
   return(results)
+}
+
+
+
+parse_TestPrior_log <-  function (file) {
+  out <- scan(file = file, what = "c", quiet = T, sep = "\n")
+  header_start <- grep("Sample form prior", out)
+  
+  LogLines = readLines(file)
+  header_start <- grep("Sample form prior", LogLines)
+  TestPriorLines <- LogLines[(header_start+1):(header_start+1000)]
+  TestPriorMat = str_split(TestPriorLines, "\t", simplify = T)
+  TestPriorSample = as.data.frame(TestPriorMat)
+  return(TestPriorSample)
 }
