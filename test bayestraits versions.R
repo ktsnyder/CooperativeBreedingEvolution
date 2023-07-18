@@ -476,6 +476,14 @@ OutputFolderPath = "PriorAll-Uniform-0-10_2"
 AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll uniform 0 5", "burnin 220000", "Stones 100 1000")
 OutputFolderPath = "PriorAll-Uniform-0-5"
 
+AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll gamma 0 5", "burnin 220000", "Stones 100 1000")
+OutputFolderPath = "PriorAll-Gamma-0-5"
+
+TestPrior = TRUE
+if (TestPrior) {
+  AdditionalCommandsDep <- c(AdditionalCommandsDep, "TestPrior q12 1000")
+  AdditionalCommandsInd <- c(AdditionalCommandsInd, "TestPrior alpha1 1000")
+}
 
 outDepdf = set.seed(10)
 outInddf = set.seed(10)
@@ -484,7 +492,7 @@ for (i in 1:nsims) {
   print(i)
   # Dependent
   commandVector = c("3", "2", AdditionalCommandsDep) 
-  outPriorAllDep <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = F, BTdirpath = "~/Documents", silent = T, OutputFolderPath = OutputFolderPath)
+  outPriorAllDep <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = F, BTdirpath = "~/Documents", silent = T, OutputFolderPath = OutputFolderPath, TestPrior = TestPrior)
   
   outPriorAllDepOptions <- outPriorAllDep$Log$options
   outPriorAllDepResults <- outPriorAllDep$Log$results
@@ -510,7 +518,7 @@ for (i in 1:nsims) {
   
   # Independent
   commandVector = c("2", "2", AdditionalCommandsInd) 
-  outPriorAllInd <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = F, BTdirpath = "~/Documents", silent = T, OutputFolderPath = OutputFolderPath)
+  outPriorAllInd <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = F, BTdirpath = "~/Documents", silent = T, OutputFolderPath = OutputFolderPath, TestPrior = TestPrior)
   
   outPriorAllIndOptions <- outPriorAllInd$Log$options
   outPriorAllIndResults <- outPriorAllInd$Log$results
@@ -587,7 +595,7 @@ commandVector = c("3", "2", AdditionalCommandsDep)
 outPriorAllDep <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = F, BTdirpath = "~/Documents", silent = F, OutputFolderPath = OutputFolderPath)
 
 commandVector = c("2", "2", AdditionalCommandsInd) 
-outPriorAllInd <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = F, BTdirpath = "~/Documents", silent = F, OutputFolderPath = OutputFolderPath)
+outPriorAllInd <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = F, BTdirpath = "~/Documents", silent = F, OutputFolderPath = OutputFolderPath, TestPrior = T)
 
 
 my_wd = "/Users/kate/Library/CloudStorage/Box-Box/Kate_Nicole/CooperativeBreedingEvolutionOutputs/Test_BayesTraits_MCMC_settings/PriorAll-Uniform-0-5/Discrete-Independent_MCMC"

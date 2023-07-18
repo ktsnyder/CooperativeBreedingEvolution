@@ -123,6 +123,7 @@ bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = 
   ancstates <- "data.txt.AncStates.txt" %in% list.files(my_wd)
   output.trees <- "data.txt.Output.trees" %in% list.files(my_wd)
   varrates <- "data.txt.VarRates" %in% list.files(my_wd)
+  TestPrior_log <- "LogAllOutputs.txt" %in% list.files(my_wd)
   if (!log) {
     print(getwd())
     print(my_suboutdir_fullpath)
@@ -164,6 +165,9 @@ bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = 
     if (output.trees) {
       OutputTrees <- ape::read.nexus(paste0(my_wd, "/data.txt.Output.trees"))
     } else {OutputTrees <- NULL}
+    if (TestPrior_log) {
+      TestPriorDF <- parse_TestPrior_log(file = paste0(my_wd, "/LogAllOutputs.txt"))
+    } else {TestPriorDF <- NULL}
   }
   results <- list(Log = Log, Schedule = Schedule, Stones = Stones, 
                   AncStates = AncStates, OutputTrees = OutputTrees)
