@@ -4,10 +4,10 @@
 ## Edited 6/29/2023 - variable logfile name; BTdirpath, BTdir added
 ## Edited 7/5/2023 - MCMC output files to dir instead of BTdir; added parse_scheduleKTS derived from btw::parse_schedule to be functional with BTv4
 ## Edited 7/6/2023 - OutputFolderPath and my_outdir, my_suboutdir, my_outdir_fullpath 
-## Edited 7/17/2023 - new function: parse_TestPrior_log
+## Edited 7/17/2023 - new function: parse_TestPrior_log; new parameter: TestPrior
 
 bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = TRUE, 
-          remove_files = TRUE, BTversionNum = "V4", BTdirpath = NULL, OutputFolderPath = NULL) {
+          remove_files = TRUE, BTversionNum = "V4", BTdirpath = NULL, OutputFolderPath = NULL, TestPrior = FALSE) {
   require(btw)
   source("btwV2-parse_scheduleKTS.R")
   if (BTversionNum == "V3") {
@@ -102,7 +102,13 @@ bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = 
     }
   }
   else {
-    system(paste(paste0(BTdir, "/BayesTraits", BTversionNum), paste0(my_wd, "/tree.nex"), paste0(my_wd, "/data.txt"), paste0("< ", my_wd, "/inputfile.txt")), ignore.stdout = silent)
+    if (TestPrior) {
+      TestPriorInput <- paste0("> ", my_wd, "/LogAllOutputs.txt")
+      silent = FALSE
+    } else {
+      TestPriorInput <- NULL
+    }
+    system(paste(paste0(BTdir, "/BayesTraits", BTversionNum), paste0(my_wd, "/tree.nex"), paste0(my_wd, "/data.txt"), paste0("< ", my_wd, "/inputfile.txt"), TestPriorInput), ignore.stdout = silent)
   }
   
   print(my_suboutdir_fullpath)
@@ -170,7 +176,7 @@ bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = 
     } else {TestPriorDF <- NULL}
   }
   results <- list(Log = Log, Schedule = Schedule, Stones = Stones, 
-                  AncStates = AncStates, OutputTrees = OutputTrees)
+                  AncStates = AncStates, OutputTrees = OutputTrees, TestPrior_log = TestPriorDF)
   if (remove_files) {
     if (windows) {
       shell(paste("DEL", "data.txt.Log.txt"))

@@ -15,10 +15,10 @@ loglikType <- "StonesLh"
 loglikType <- "SamplingMeanLh"
 
 
-pdf(file = paste0(Sys.Date(), " bayestraits priors CoopBreed HighConfFS_", loglikType,".pdf"), width = 15, height = 5)
+pdf(file = paste0(Sys.Date(), " bayestraits priors CoopBreed HighConfFS_", loglikType,"_scaledArrows.pdf"), width = 15, height = 5)
 par(mfrow=c(1,3))
 par(mar = c(4,3,3,1))
-for (j in 2:15) {
+for (j in 1:length(bayesIndFiles)) {
   tempfolder = bayesIndSplit$Folder[j]
   outInddf = read.csv(bayesIndFiles[j])
   if (length(bayesDepFiles[which(bayesDepSplit$Folder == tempfolder)]) == 1) {
@@ -26,7 +26,9 @@ for (j in 2:15) {
   } else {
     outDepdf = read.csv(bayesDepFiles[which(bayesDepSplit$Folder == tempfolder)][2])
   }
-  plotSimpleDiscreteBayes(columns = c("MeanCoopTie2Noncoop","HighConfidence_FemaleSong"), df = outDepdf, nocorrDdf = outInddf, LhCol = loglikType, nsim = NULL, treelabel = NULL, newpdf = FALSE, otherlabel = tempfolder, ylabel = tempfolder, arrowmod = 1)
+  if (length(outDepdf$Sim) > 1 & length(outInddf$Sim) > 1 &   sum(!is.na(outDepdf[,loglikType])) > 2  ) {
+    plotSimpleDiscreteBayes(columns = c("MeanCoopTie2Noncoop","HighConfidence_FemaleSong"), df = outDepdf, nocorrDdf = outInddf, LhCol = loglikType, nsim = NULL, treelabel = NULL, newpdf = FALSE, otherlabel = tempfolder, ylabel = tempfolder, arrowmod = 1)
+  }
 }
 dev.off()
 
@@ -186,6 +188,18 @@ plotSimpleDiscreteBayes <- function(columns, df, nocorrDdf = NULL, LhCol = NULL,
   segmentminsdf_nocorr <- as.data.frame(segmentmins_nocorr)
   segmentmaxsdf_nocorr <- as.data.frame(segmentmaxs_nocorr)
   
+  
+  ## get arrow mod based on max rates
+  allrates = c(means, means_nocorr)
+  if (max(allrates) < 1) {
+    arrowmod = arrowmod*50
+  } else if (max(allrates) < 5) {
+    arrowmod = 20
+  } else if (max(allrates) < 20) {
+    arrowmod = 5
+  }
+  
+  
   arrowcols = c("red","blue","green","purple")
   #  for (m in 1:length(segmentmeansdf$q12)) {  # goes til end
   model <- segmentmeansdf_nocorr[m,]
@@ -238,7 +252,7 @@ plotSimpleDiscreteBayes <- function(columns, df, nocorrDdf = NULL, LhCol = NULL,
   } else if (newpdf == FALSE) {
     par(mar = c(1.9,1.9,2.4,1.9))
     runsperthresh <- paste("/",nsim,sep="")
-    arrowmod <- 0.6
+    arrowmod <- arrowmod*0.6
     yfamilylabel = paste(ylabel, cladesubsetvalue)
   }
   
@@ -266,7 +280,7 @@ plotSimpleDiscreteBayes <- function(columns, df, nocorrDdf = NULL, LhCol = NULL,
   }
   arrowcolvec <- rep(arrowcols[2],times=8)
   arrowcolvec[which(rates == 0)] <- "gray"
-    arrows(x0=c(35, 65, 85, 75, 65, 35, 15, 25), y0=c(85, 75, 65, 35, 15, 25, 35, 65), x1=c(65, 35, 85, 75, 35, 65, 15, 25), y1=c(85, 75, 35, 65, 15, 25, 65, 35), lwd=rates*arrowmod, col=arrowcolvec, length = arrowmod) 
+    arrows(x0=c(35, 65, 85, 75, 65, 35, 15, 25), y0=c(85, 75, 65, 35, 15, 25, 35, 65), x1=c(65, 35, 85, 75, 35, 65, 15, 25), y1=c(85, 75, 35, 65, 15, 25, 65, 35), lwd=rates*arrowmod, col=arrowcolvec, length = 0.7) 
     
     mat <- maxratesmat_nocorr
     maxlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),2) 
@@ -295,7 +309,7 @@ plotSimpleDiscreteBayes <- function(columns, df, nocorrDdf = NULL, LhCol = NULL,
     }
     arrowcolvec <- rep(arrowcols[m],times=8)
     arrowcolvec[which(rates == 0)] <- "gray"
-      arrows(x0=c(35, 65, 85, 75, 65, 35, 15, 25), y0=c(85, 75, 65, 35, 15, 25, 35, 65), x1=c(65, 35, 85, 75, 35, 65, 15, 25), y1=c(85, 75, 35, 65, 15, 25, 65, 35), lwd=rates*arrowmod, col=arrowcolvec, length = arrowmod) 
+      arrows(x0=c(35, 65, 85, 75, 65, 35, 15, 25), y0=c(85, 75, 65, 35, 15, 25, 35, 65), x1=c(65, 35, 85, 75, 35, 65, 15, 25), y1=c(85, 75, 35, 65, 15, 25, 65, 35), lwd=rates*arrowmod, col=arrowcolvec, length = 0.7) 
       
       mat <- maxratesmat
       maxlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),2) 

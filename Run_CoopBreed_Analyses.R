@@ -66,10 +66,22 @@ scatterboxes(DiscreteTrait = CBcolumn, newdata = newdata, newtree = treefile, ot
 
 
 source("plotACEtree.R")
+# Song Features
 for (k in 1) {
   feature <- songfeatures[k]
 plotACEtree(columns = c(CBcolumn, feature), cladesubsetcolumn = NULL, cladesubsetvalue = NULL, newdata = newdata, newtree = newtree, islog = feature, discretelabels = c("Non-cooperative","Cooperative"), discretemodel = "ARD", otherlabel = currentlabel)
 } 
+
+# Cooperative Breeding and Female Song
+columns = c("MeanCoopTie2Noncoop", "HighConfidence_FemaleSong")
+currentlabel <- c("Tie2Noncoop FSHighConf Hackett")
+subsetout <- subsettreedata(columns = columns, newdata = newdata, newtree = treefile)
+subsetdf = subsetout$subsetdf
+subsettree = subsetout$subsettree
+findQrates(columns = columns[1], plot=TRUE, newtree = subsettree, newdata = subsetdf, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, otherlabel = currentlabel)
+findQrates(columns = columns[2], plot=TRUE, newtree = subsettree, newdata = subsetdf, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, otherlabel = currentlabel)
+plotACEtree(columns = "MeanCoopTie2Noncoop", cladesubsetcolumn = NULL, cladesubsetvalue = NULL, newdata = subsetdf, newtree = subsettree, discretelabels = c("Non-cooperative","Cooperative"), discretemodel = "ARD", otherlabel = currentlabel)
+plotACEtree(columns = "HighConfidence_FemaleSong", cladesubsetcolumn = NULL, cladesubsetvalue = NULL, newdata = subsetdf, newtree = subsettree, discretelabels = c("Female Song Absent","Female Song Present"), discretemodel = "ARD", otherlabel = currentlabel)
 
 
 
