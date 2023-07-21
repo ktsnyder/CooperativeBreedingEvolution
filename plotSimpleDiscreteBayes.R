@@ -2,10 +2,13 @@
 ## From simplebtwDiscrete.R
 ## Kate Snyder
 ## 7/13/2023
+## Last edited: 7/21/2023 - add parameter roundDigits (labeling arrow rates)
 
 
-bayesIndFiles <- list.files(pattern = "FemaleSong_Independent", recursive = T)
-bayesDepFiles <- list.files(pattern = "FemaleSong_Dependent", recursive = T)
+#bayesIndFiles <- list.files(pattern = "FemaleSong_Independent", recursive = T)
+#bayesDepFiles <- list.files(pattern = "FemaleSong_Dependent", recursive = T)
+bayesIndFiles <- list.files(pattern = "Independent_2023-", recursive = T)
+bayesDepFiles <- list.files(pattern = "Dependent_2023-", recursive = T)
 
 bayesIndSplit = as.data.frame(str_split(bayesIndFiles, "/", simplify = T))
 bayesDepSplit = as.data.frame(str_split(bayesDepFiles, "/", simplify = T))
@@ -15,7 +18,7 @@ loglikType <- "StonesLh"
 loglikType <- "SamplingMeanLh"
 
 
-pdf(file = paste0(Sys.Date(), " bayestraits priors CoopBreed HighConfFS_", loglikType,"_scaledArrows.pdf"), width = 15, height = 5)
+pdf(file = paste0(Sys.Date(), " bayestraits AceQrates etc ", loglikType,"_scaledArrows.pdf"), width = 15, height = 5)
 par(mfrow=c(1,3))
 par(mar = c(4,3,3,1))
 for (j in 1:length(bayesIndFiles)) {
@@ -27,13 +30,13 @@ for (j in 1:length(bayesIndFiles)) {
     outDepdf = read.csv(bayesDepFiles[which(bayesDepSplit$Folder == tempfolder)][2])
   }
   if (length(outDepdf$Sim) > 1 & length(outInddf$Sim) > 1 &   sum(!is.na(outDepdf[,loglikType])) > 2  ) {
-    plotSimpleDiscreteBayes(columns = c("MeanCoopTie2Noncoop","HighConfidence_FemaleSong"), df = outDepdf, nocorrDdf = outInddf, LhCol = loglikType, nsim = NULL, treelabel = NULL, newpdf = FALSE, otherlabel = tempfolder, ylabel = tempfolder, arrowmod = 1)
+    plotSimpleDiscreteBayes(columns = c("MeanCoopTie2Noncoop","HighConfidence_FemaleSong"), df = outDepdf, nocorrDdf = outInddf, LhCol = loglikType, nsim = NULL, treelabel = NULL, newpdf = FALSE, otherlabel = tempfolder, ylabel = tempfolder, arrowmod = 1, roundDigits = 3)
   }
 }
 dev.off()
 
 #### Top ----
-plotSimpleDiscreteBayes <- function(columns, df, nocorrDdf = NULL, LhCol = NULL, nsim = NULL, treelabel = NULL, newpdf = TRUE, cladesubsetvalue = NULL, ylabel = NULL, arrowmod = 1, otherlabel = NULL) {
+plotSimpleDiscreteBayes <- function(columns, df, nocorrDdf = NULL, LhCol = NULL, nsim = NULL, treelabel = NULL, newpdf = TRUE, cladesubsetvalue = NULL, ylabel = NULL, arrowmod = 1, otherlabel = NULL, roundDigits = 2) {
   
   traitColsLabel <- paste(columns[1], columns[2])
   currentlabel <- paste(treelabel,traitColsLabel)
@@ -269,7 +272,7 @@ plotSimpleDiscreteBayes <- function(columns, df, nocorrDdf = NULL, LhCol = NULL,
   
   ## nocorrD rates
   mat <- meanratesmat_nocorr
-  rates <- meanlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),2)  
+  rates <- meanlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),roundDigits)  
   
   ## nocorrD plot  (plot 1)
   plot(c(0,100), c(0,100), type = "n", xaxt = "n", yaxt = "n", xlab = "", main=paste(currentlabel,"Independent Model"), cex.main=1, ylab = "")
@@ -283,9 +286,9 @@ plotSimpleDiscreteBayes <- function(columns, df, nocorrDdf = NULL, LhCol = NULL,
     arrows(x0=c(35, 65, 85, 75, 65, 35, 15, 25), y0=c(85, 75, 65, 35, 15, 25, 35, 65), x1=c(65, 35, 85, 75, 35, 65, 15, 25), y1=c(85, 75, 35, 65, 15, 25, 65, 35), lwd=rates*arrowmod, col=arrowcolvec, length = 0.7) 
     
     mat <- maxratesmat_nocorr
-    maxlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),2) 
+    maxlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),roundDigits) 
     mat <- minratesmat_nocorr
-    minlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),2) 
+    minlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),roundDigits) 
     
     labs = set.seed(10)
     for (y in 1:8) {
@@ -297,7 +300,7 @@ plotSimpleDiscreteBayes <- function(columns, df, nocorrDdf = NULL, LhCol = NULL,
     
     ## corrD rates
     mat <- meanratesmat
-    rates <- meanlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),2)  
+    rates <- meanlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),roundDigits)  
     
     ## corrD plot
     plot(c(0,100), c(0,100), type = "n", xaxt = "n", yaxt = "n", xlab = "", main = paste(columns[1], columns[2], "Dependent Model"), cex.main=1, ylab = "")
@@ -312,9 +315,9 @@ plotSimpleDiscreteBayes <- function(columns, df, nocorrDdf = NULL, LhCol = NULL,
       arrows(x0=c(35, 65, 85, 75, 65, 35, 15, 25), y0=c(85, 75, 65, 35, 15, 25, 35, 65), x1=c(65, 35, 85, 75, 35, 65, 15, 25), y1=c(85, 75, 35, 65, 15, 25, 65, 35), lwd=rates*arrowmod, col=arrowcolvec, length = 0.7) 
       
       mat <- maxratesmat
-      maxlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),2) 
+      maxlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),roundDigits) 
       mat <- minratesmat
-      minlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),2) 
+      minlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),roundDigits) 
       
       labs = set.seed(10)
       for (y in 1:8) {
