@@ -421,63 +421,93 @@ commandVector = c("2", "2", "PriorAll exp 10", "burnin 220000", "Stones 100 1000
 outPriorAllInd <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = F, BTdirpath = "~/Documents", silent = FALSE, OutputFolderPath = "PriorAll-Exp-10_3")
 
 # PriorAll - loop
+setwd("/Users/kate/Desktop/CooperativeBreedingEvolution")
 columns = c("MeanCoopTie2Noncoop", "HighConfidence_FemaleSong")
-#columns = c("MeanCoopTie2Noncoop", "FemaleSong_Agg01")
-#columns = c("MeanCoopTie2Coop", "FemaleSong_Agg01")
+columns = c("MeanCoopTie2Coop", "HighConfidence_FemaleSong")
+columns = c("MeanCoopTie2Noncoop", "FemaleSong_Agg01")
+columns = c("MeanCoopTie2Coop", "FemaleSong_Agg01")
+columns = c("AnyCoopEqualsCoop", "HighConfidence_FemaleSong")
+columns = c("AnyCoopEqualsCoop", "FemaleSong_Agg01")
+columns = c("Griesser2017FamilialLiving", "FemaleSong_Agg01")
+#columns = c("Final.polygyny", "FemaleSong_Agg01")
+#columns = c("Final.polygyny", "HighConfidence_FemaleSong")
+columns = c("Kin_NK", "FemaleSong_Agg01")
 newdata = "2023-06-20_CoopBreed-FemaleSong01HighConf-Song_Data_R.csv"
 dataNoSongless = read.csv(newdata)
 dataNoSongless$X = NULL
+dataNoSongless$Kin_NK[which(dataNoSongless$Kin_NK == "Mixed")] <- 1
+dataNoSongless$Kin_NK[which(dataNoSongless$Kin_NK == "NonKin")] <- 0
+dataNoSongless$Kin_NK[which(dataNoSongless$Kin_NK == "Kin")] <- 1
 treefile <- "/Users/kate/Desktop/CooperativeBreedingEvolution/2022-03-16ConsensusPasserineTreeHackett4_1000.nex"
 subsetbtw = subsettreedata(columns, newdata = dataNoSongless, newtree = treefile, skinnydata = T)
 subsettree = subsetbtw$subsettree
-subsetdf = subsetbtw$subsetdf
-nsims = 40
+dataNoSongless = subsetdf = subsetbtw$subsetdf
+nsims = 100
 
-AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll exp 10", "burnin 220000", "Stones 100 1000")
-OutputFolderPath = "PriorAll-Exp-10"
-#AdditionalCommands = NULL
-#OutputFolderPath = "MaxLikelihood-Defaults"
-AdditionalCommandsDep = c("Prior q12 exp 11", "Prior q13 exp 4", "Prior q21 exp 7", "Prior q24 exp 11", "Prior q31 exp 43", "Prior q34 exp 20", "Prior q42 exp 60", "Prior q43 exp 7", "burnin 220000", "Stones 100 1000")
-AdditionalCommandsInd = c("Prior alpha1 exp 8", "Prior beta1 exp 51", "Prior alpha2 exp 6", "Prior beta2 exp 4", "burnin 220000", "Stones 100 1000")
-OutputFolderPath = "Priors-exp-MaxLikValues20230712"
+# AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll exp 10", "burnin 220000", "Stones 100 1000")
+# OutputFolderPath = "PriorAll-Exp-10"
+# #AdditionalCommands = NULL
+# #OutputFolderPath = "MaxLikelihood-Defaults"
+# AdditionalCommandsDep = c("Prior q12 exp 11", "Prior q13 exp 4", "Prior q21 exp 7", "Prior q24 exp 11", "Prior q31 exp 43", "Prior q34 exp 20", "Prior q42 exp 60", "Prior q43 exp 7", "burnin 220000", "Stones 100 1000")
+# AdditionalCommandsInd = c("Prior alpha1 exp 8", "Prior beta1 exp 51", "Prior alpha2 exp 6", "Prior beta2 exp 4", "burnin 220000", "Stones 100 1000")
+# OutputFolderPath = "Priors-exp-MaxLikValues20230712"
+# 
+# # alpha1 = q13, q24 
+# # alpha2 = q12, q34
+# # beta1 = q42, q31
+# # beta2 = q43, q21
+# AdditionalCommandsDep = c("Prior q12 exp 6", "Prior q13 exp 8", "Prior q21 exp 4", "Prior q24 exp 8", "Prior q31 exp 51", "Prior q34 exp 6", "Prior q42 exp 51", "Prior q43 exp 4", "burnin 220000", "Stones 100 1000")
+# AdditionalCommandsInd = c("Prior alpha1 exp 8", "Prior beta1 exp 51", "Prior alpha2 exp 6", "Prior beta2 exp 4", "burnin 220000", "Stones 100 1000")
+# OutputFolderPath = "Priors-exp-MaxLikIndependentValues20230712"
 
-# alpha1 = q13, q24
-# alpha2 = q12, q34
-# beta1 = q42, q31
-# beta2 = q43, q21
-AdditionalCommandsDep = c("Prior q12 exp 6", "Prior q13 exp 8", "Prior q21 exp 4", "Prior q24 exp 8", "Prior q31 exp 51", "Prior q34 exp 6", "Prior q42 exp 51", "Prior q43 exp 4", "burnin 220000", "Stones 100 1000")
-AdditionalCommandsInd = c("Prior alpha1 exp 8", "Prior beta1 exp 51", "Prior alpha2 exp 6", "Prior beta2 exp 4", "burnin 220000", "Stones 100 1000")
-OutputFolderPath = "Priors-exp-MaxLikIndependentValues20230712"
 
-# qrates from ace
+#### qrates from ace ----
 column1qrates= findQrates(columns = columns[1], plot=FALSE, newtree = treefile, newdata = dataNoSongless, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, otherlabel = NULL)
 column2qrates= findQrates(columns = columns[2], plot=FALSE, newtree = treefile, newdata = dataNoSongless, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, otherlabel = NULL)
-AdditionalCommandsDep = c("Prior q12 exp 0.062", "Prior q13 exp 0.009", "Prior q21 exp 0.037", "Prior q24 exp 0.009", "Prior q31 exp 0.059", "Prior q34 exp 0.062", "Prior q42 exp 0.059", "Prior q43 exp 0.037", "burnin 220000", "Stones 100 1000")
-AdditionalCommandsInd = c("Prior alpha1 exp 0.009", "Prior beta1 exp 0.059", "Prior alpha2 exp 0.062", "Prior beta2 exp 0.037", "burnin 220000", "Stones 100 1000")
-OutputFolderPath = "Priors-exp-AceQrates"
+alpha1q = column1qrates$qrates[1,2]
+beta1q = column1qrates$qrates[2,1]
+alpha2q = column2qrates$qrates[1,2]
+beta2q = column2qrates$qrates[2,1]
+AdditionalCommandsDep = c(paste("Prior q12 exp", alpha2q), paste("Prior q13 exp", alpha1q), paste("Prior q21 exp", beta2q), paste("Prior q24 exp", alpha1q), paste("Prior q31 exp", beta1q), paste("Prior q34 exp", alpha2q), paste("Prior q42 exp", beta1q), paste("Prior q43 exp", beta2q), "burnin 220000", "Stones 100 1000")
+AdditionalCommandsInd = c(paste("Prior alpha1 exp",alpha1q), paste("Prior beta1 exp", beta1q), paste("Prior alpha2 exp", alpha2q), paste("Prior beta2 exp", beta2q), "burnin 220000", "Stones 100 1000")
+#AdditionalCommandsDep = c("Prior q12 exp 0.062", "Prior q13 exp 0.009", "Prior q21 exp 0.037", "Prior q24 exp 0.009", "Prior q31 exp 0.059", "Prior q34 exp 0.062", "Prior q42 exp 0.059", "Prior q43 exp 0.037", "burnin 220000", "Stones 100 1000")
+#AdditionalCommandsInd = c("Prior alpha1 exp 0.009", "Prior beta1 exp 0.059", "Prior alpha2 exp 0.062", "Prior beta2 exp 0.037", "burnin 220000", "Stones 100 1000")
+OutputFolderPath = paste0("Priors-exp-AceQrates_", columns[1], "-", columns[2])
+#newfolder = paste(columns[1],columns[2],sep = "-")
+#dir.create(newfolder)
+#setwd(newfolder)
 
 # 
-AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll exp 0.01", "burnin 220000", "Stones 100 1000")
-OutputFolderPath = "PriorAll-Exp-0.01"
+# AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll exp 0.01", "burnin 220000", "Stones 100 1000")
+# OutputFolderPath = "PriorAll-Exp-0.01"
+# 
+# AdditionalCommandsDep = AdditionalCommandsInd = c("burnin 220000", "Stones 100 1000")
+# OutputFolderPath = "NoPriors_Stones100-1000"
+# 
+# AdditionalCommandsDep = AdditionalCommandsInd = c("burnin 220000", "Stones 100 10000")
+# OutputFolderPath = "NoPriors_Stones100-10000"
 
-AdditionalCommandsDep = AdditionalCommandsInd = c("burnin 220000", "Stones 100 1000")
-OutputFolderPath = "NoPriors_Stones100-1000"
-
-AdditionalCommandsDep = AdditionalCommandsInd = c("burnin 220000", "Stones 100 10000")
-OutputFolderPath = "NoPriors_Stones100-10000"
-
-nsims = 40
-AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll uniform 0 50", "burnin 220000", "Stones 100 1000")
-OutputFolderPath = "PriorAll-Uniform-0-50_2"
-
-AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll uniform 0 10", "burnin 220000", "Stones 100 1000")
-OutputFolderPath = "PriorAll-Uniform-0-10_2"
-
-AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll uniform 0 5", "burnin 220000", "Stones 100 1000")
-OutputFolderPath = "PriorAll-Uniform-0-5"
-
-AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll gamma 0 5", "burnin 220000", "Stones 100 1000")
-OutputFolderPath = "PriorAll-Gamma-0-5"
+#nsims = 40
+# AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll uniform 0 50", "burnin 220000", "Stones 100 1000")
+# OutputFolderPath = "PriorAll-Uniform-0-50_2"
+# 
+# AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll uniform 0 10", "burnin 220000", "Stones 100 1000")
+# OutputFolderPath = "PriorAll-Uniform-0-10_2"
+# 
+# AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll uniform 0 5", "burnin 220000", "Stones 100 1000")
+# OutputFolderPath = "PriorAll-Uniform-0-5"
+# 
+# AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll gamma 1 5", "burnin 220000", "Stones 100 1000")
+# OutputFolderPath = "PriorAll-Gamma-1-5"
+# 
+# AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll gamma 1 2", "burnin 220000", "Stones 100 1000")
+# OutputFolderPath = "PriorAll-Gamma-1-2"
+# 
+# AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll gamma 2 3", "burnin 220000", "Stones 100 1000")
+# OutputFolderPath = "PriorAll-Gamma-2-3"
+# 
+# AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll gamma 1 1", "burnin 220000", "Stones 100 1000")
+# OutputFolderPath = "PriorAll-Gamma-1-1"
 
 TestPrior = TRUE
 if (TestPrior) {
@@ -584,15 +614,12 @@ Results <- outHyperRevJump$Log$results
 Options <- outHyperDep$Log$options
 logMarLH <- outHyperDep$Stones$logMarLH
 
-write.csv()
-
-commandVector = c("TestPrior", "gamma 0 10") 
-TestPriorOff <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, Model)
 
 
-AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll uniform 0 5", "TestPrior q12 1000", "burnin 220000", "Stones 100 1000")
+
+AdditionalCommandsDep = AdditionalCommandsInd = c("PriorAll gamma 4 5", "TestPrior q12 1000", "burnin 220000", "Stones 100 1000")
 commandVector = c("3", "2", AdditionalCommandsDep) 
-outPriorAllDep <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = F, BTdirpath = "~/Documents", silent = F, OutputFolderPath = OutputFolderPath)
+outPriorAllDep <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = F, BTdirpath = "~/Documents", silent = F, OutputFolderPath = OutputFolderPath, TestPrior = T)
 
 commandVector = c("2", "2", AdditionalCommandsInd) 
 outPriorAllInd <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, remove_files = F, BTdirpath = "~/Documents", silent = F, OutputFolderPath = OutputFolderPath, TestPrior = T)
