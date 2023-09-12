@@ -6,9 +6,12 @@
 
 
 #bayesIndFiles <- list.files(pattern = "FemaleSong_Independent", recursive = T)
-#bayesDepFiles <- list.files(pattern = "FemaleSong_Dependent", recursive = T)
+#bayesDepFiles <- list.files(pattern = "FemaleSong_Dependent", recursive = T
 bayesIndFiles <- list.files(pattern = "Independent_2023-", recursive = T)
 bayesDepFiles <- list.files(pattern = "Dependent_2023-", recursive = T)
+bayesIndFiles <- bayesIndFiles[5:19]
+bayesDepFiles <- bayesDepFiles[5:19]
+
 
 bayesIndSplit = as.data.frame(str_split(bayesIndFiles, "/", simplify = T))
 bayesDepSplit = as.data.frame(str_split(bayesDepFiles, "/", simplify = T))
@@ -30,10 +33,25 @@ for (j in 1:length(bayesIndFiles)) {
     outDepdf = read.csv(bayesDepFiles[which(bayesDepSplit$Folder == tempfolder)][2])
   }
   if (length(outDepdf$Sim) > 1 & length(outInddf$Sim) > 1 &   sum(!is.na(outDepdf[,loglikType])) > 2  ) {
-    plotSimpleDiscreteBayes(columns = c("MeanCoopTie2Noncoop","HighConfidence_FemaleSong"), df = outDepdf, nocorrDdf = outInddf, LhCol = loglikType, nsim = NULL, treelabel = NULL, newpdf = FALSE, otherlabel = tempfolder, ylabel = tempfolder, arrowmod = 1, roundDigits = 3)
+    plotSimpleDiscreteBayes(columns = c("Kin_NK","FemaleSong_Agg01"), df = outDepdf, nocorrDdf = outInddf, LhCol = loglikType, nsim = NULL, treelabel = NULL, newpdf = FALSE, otherlabel = tempfolder, ylabel = tempfolder, arrowmod = 1, roundDigits = 3)
   }
 }
 dev.off()
+
+bayesIndFiles <- list.files("Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01", pattern = "Independent_2023-", recursive = T)
+bayesDepFiles <- list.files("Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01", pattern = "Dependent_2023-", recursive = T)
+otherlabels = c("Mixed2Kin", "Mixed2NA", "Mixed2NonKin")
+pdf(file = paste0(Sys.Date(), "KinNK FSAgg bayestraits AceQrates etc ", loglikType,"_scaledArrows.pdf"), width = 15, height = 5)
+par(mfrow=c(1,3))
+par(mar = c(4,3,3,1))
+for (j in 1:3) {
+  outInddf = read.csv(paste0("Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/", bayesIndFiles[j]))
+  outDepdf = read.csv(paste0("Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/", bayesDepFiles[j]))
+  otherlabel = otherlabels[j]
+  plotSimpleDiscreteBayes(columns = c("Kin_NK","FemaleSong_Agg01"), df = outDepdf, nocorrDdf = outInddf, LhCol = loglikType, nsim = NULL, treelabel = NULL, newpdf = FALSE, otherlabel = otherlabel, ylabel = otherlabel, arrowmod = 1, roundDigits = 3)
+}
+dev.off()
+
 
 #### Top ----
 plotSimpleDiscreteBayes <- function(columns, df, nocorrDdf = NULL, LhCol = NULL, nsim = NULL, treelabel = NULL, newpdf = TRUE, cladesubsetvalue = NULL, ylabel = NULL, arrowmod = 1, otherlabel = NULL, roundDigits = 2) {
@@ -268,6 +286,12 @@ plotSimpleDiscreteBayes <- function(columns, df, nocorrDdf = NULL, LhCol = NULL,
   } else if (grepl("coop", trait1, ignore.case = T)) {  #(str_detect(trait1, "coop")) {
     lab0x = paste("Non-Cooperative")
     lab1x = paste("Cooperative")
+  } else if (str_detect(trait1, "Kin")) {
+    lab0x = paste("Non-kin")
+    lab1x = paste("Kin")
+  } else if (str_detect(trait1, "Familial")) {
+    lab0x = paste("Non-Familial Living")
+    lab1x = paste("Familial Living")
   }
   
   ## nocorrD rates
@@ -283,7 +307,7 @@ plotSimpleDiscreteBayes <- function(columns, df, nocorrDdf = NULL, LhCol = NULL,
   }
   arrowcolvec <- rep(arrowcols[2],times=8)
   arrowcolvec[which(rates == 0)] <- "gray"
-    arrows(x0=c(35, 65, 85, 75, 65, 35, 15, 25), y0=c(85, 75, 65, 35, 15, 25, 35, 65), x1=c(65, 35, 85, 75, 35, 65, 15, 25), y1=c(85, 75, 35, 65, 15, 25, 65, 35), lwd=rates*arrowmod, col=arrowcolvec, length = 0.7) 
+    arrows(x0=c(35, 65, 85, 75, 65, 35, 15, 25), y0=c(85, 75, 65, 35, 15, 25, 35, 65), x1=c(65, 35, 85, 75, 35, 65, 15, 25), y1=c(85, 75, 35, 65, 15, 25, 65, 35), lwd=rates*arrowmod, col=arrowcolvec, length = 0.3) 
     
     mat <- maxratesmat_nocorr
     maxlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),roundDigits) 
@@ -312,7 +336,7 @@ plotSimpleDiscreteBayes <- function(columns, df, nocorrDdf = NULL, LhCol = NULL,
     }
     arrowcolvec <- rep(arrowcols[m],times=8)
     arrowcolvec[which(rates == 0)] <- "gray"
-      arrows(x0=c(35, 65, 85, 75, 65, 35, 15, 25), y0=c(85, 75, 65, 35, 15, 25, 35, 65), x1=c(65, 35, 85, 75, 35, 65, 15, 25), y1=c(85, 75, 35, 65, 15, 25, 65, 35), lwd=rates*arrowmod, col=arrowcolvec, length = 0.7) 
+      arrows(x0=c(35, 65, 85, 75, 65, 35, 15, 25), y0=c(85, 75, 65, 35, 15, 25, 35, 65), x1=c(65, 35, 85, 75, 35, 65, 15, 25), y1=c(85, 75, 35, 65, 15, 25, 65, 35), lwd=rates*arrowmod, col=arrowcolvec, length = 0.3) 
       
       mat <- maxratesmat
       maxlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),roundDigits) 

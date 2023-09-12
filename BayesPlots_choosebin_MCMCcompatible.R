@@ -3,7 +3,16 @@
 # last edited 3/16/2022 - adjust placement of segment delineation lines on pvalue plot; added one "if" statement to allow bin = 1
 # edited 6/2/23 - added arrowmod to plottransitionbins
 # edited 7/30/2023 - made arrow head length constant
-# 8/9/2023 - added resetting colname "Threshold" from MCMC btwfunction output to "songcontvec"
+# 8/9/2023 - split from BayesPlots_choosebin.R
+#.         - added resetting colname "Threshold" from MCMC btwfunction output to "songcontvec"
+#          - made this work more flexibly with either ML or MCMC bayestraits results
+
+# df = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/MeanCoopTie2Noncoop Song.rep.final BayesDependent MCMC Ace Hackett 20 reps 2023-08-11 .csv")
+ df1 = df[which(!df$Sim %in% 70:71),]
+ transitionBinplots(MateParam = "MeanCoopTie2Noncoop", SongParam = columns[2], df=df1, newpdf = TRUE, nsim = 20, binnum = 3, arrowmod = 5, rateDigits = 3)
+# df = read.csv("MeanCoopTie2Coop Song.rep.final BayesDependent MCMC Ace Hackett 2 reps 2023-08-09 .csv")
+#df2 = df[which(!df$BayesFactor_SamplingMeanLh > 500),]
+# transitionBinplots(MateParam = "MeanCoopTie2Coop", SongParam = columns[2], df=df2, newpdf = TRUE, nsim = 2, binnum = 3, arrowmod = 5)
 
 
 plotBTjacks <- function(MateParam, SongParam, d, sigonly = FALSE, familysplit = NULL, nsim = 10) {
@@ -55,7 +64,7 @@ dev.off()
 
 
 ############### arrow plots AND pval vs threshold plot
-transitionBinplots <- function(MateParam,SongParam,df = df, newpdf = TRUE, sigonly = FALSE, minvec = NULL, maxvec = NULL, onetransplot = FALSE, familysplit = NULL, nsim = 100, binnum = NULL, arrowmod = 1) {
+transitionBinplots <- function(MateParam,SongParam,df = df, newpdf = TRUE, sigonly = FALSE, minvec = NULL, maxvec = NULL, onetransplot = FALSE, familysplit = NULL, nsim = 100, binnum = NULL, arrowmod = 1, rateDigits = 2) {
   
 colnames(df)[which(colnames(df) == "Threshold")] <- "songcontvec"
   
@@ -79,11 +88,17 @@ dfallsig <- df
   dfallsig <- df[df$LRpval < 0.05,]
 }
 
+if ("q12" %in% colnames(dfallsig)) {
+  qCols = c("q12", "q13", "q21","q24", "q31", "q34","q42","q43")
+} else {
+  qCols = 4:11
+}
+
 songcontvec <- dfallsig$songcontvec
 LRpval <- dfallsig$LRpval
 if (onetransplot == TRUE) {
-  means <- apply(X = dfallsig[,4:11],MARGIN = 2,FUN = mean)
-  ttests <- apply(X = dfallsig[,4:11],MARGIN = 2,FUN = t.test)
+  means <- apply(X = dfallsig[,qCols],MARGIN = 2,FUN = mean)
+  ttests <- apply(X = dfallsig[,qCols],MARGIN = 2,FUN = t.test)
   pdf(file=paste(Sys.Date(),MateParam,SongParam,"Bayes1plot.pdf",sep=""), width = 5, height = 5)
   labx0 = paste("Low",SongParam)
   labx1 = paste("High",SongParam)
@@ -108,16 +123,15 @@ labx1 = "High"
 if (MateParam == "OC") {
   lab0x = "Song-stable"
   lab1x = "Song-plastic"
-} #end if MateParam == "OC"
-else if (MateParam == "Polygyny") {
+} else if (MateParam == "Polygyny") {
   lab0x = "Monogamous"
   lab1x = "Polygynous"
 } else if (MateParam == "EPP") {#end if MateParam == "Polygyny"
   lab0x = "Low EPP"
   lab1x = "High EPP"
 } else { #if (MateParam == "CoopBreed") { #end if MateParam == "EPP"
-lab0x = "Noncooperative"
-lab1x = "Cooperative"
+  lab0x = "Noncooperative"
+  lab1x = "Cooperative"
 } 
 
 
@@ -167,18 +181,18 @@ for (j in 1:length(minvec)) { #when doing 3rds, this is 1:3
   
   numberofthreshs <- length(unique(dfrangetemp$songcontvec))
   meannumbersig <- length(dfrangetemp$Tree.No)/numberofthreshs
-  means <- apply(X = dfrangetemp[,4:11],MARGIN = 2,FUN = mean)
-  ttests <- apply(X = dfrangetemp[,4:11],MARGIN = 2,FUN = t.test)
+  means <- apply(X = dfrangetemp[,qCols],MARGIN = 2,FUN = mean)
+  ttests <- apply(X = dfrangetemp[,qCols],MARGIN = 2,FUN = t.test)
   confInts = list()
   for (k in 1:8) {
     confInts[[k]] <- ttests[[k]]$conf.int[1:2]
   }
   confIntsdf <- as.data.frame(confInts)
-  names(means) <- colnames(df[,4:11])
+  names(means) <- colnames(df[,qCols])
   mins <- confIntsdf[1,]
-  names(mins) <- colnames(df[,4:11])
+  names(mins) <- colnames(df[,qCols])
   maxs <- confIntsdf[2,]
-  names(maxs) <- colnames(df[,4:11])
+  names(maxs) <- colnames(df[,qCols])
   segmentmeans <- rbind(segmentmeans,means) #stores each(all) segment's mean rates
   segmentmins <- rbind(segmentmins,mins) #stores each(all) segment's lower 95CI rates
   segmentmaxs <- rbind(segmentmaxs,maxs) #stores each(all) segment's upper 95CI rates
@@ -224,8 +238,26 @@ for (m in 1:length(segmentmeansdf$q12)) {
   ##This part repeated from earlier for loop so the plot titles have the right values
   dfrangetemp <- dfallsig[which(dfallsig$songcontvec >= minvec[m] & dfallsig$songcontvec < maxvec[m]),]
   numberofthreshs <- length(unique(dfrangetemp$songcontvec))
-  dfrangesig <- dfrangetemp[which(dfrangetemp$LRpval < 0.05),]
-  meannumbersig <- length(dfrangesig$LRpval)/numberofthreshs
+  if ("LRpval" %in% colnames(dfrangetemp)) {
+    dfrangesig <- dfrangetemp[which(dfrangetemp$LRpval < 0.05),]
+    meannumbersig <- length(dfrangesig$LRpval)/numberofthreshs
+    runsperthresh <- paste("/",nsim,sep="")
+    TransitionPlotSigTitle = paste0("Mean # Runs significant: ", round(meannumbersig, digits = 1), runsperthresh)
+    significanceYlab = "p-value"
+    sigcol = "LRpval"
+  } else if ("BayesFactor_StonesLh" %in% colnames(dfrangetemp)) {
+    meanBFStonesLh = mean(dfrangetemp$BayesFactor_StonesLh, na.rm = T)
+    meanBFSamplingMeanLh = mean(dfrangetemp$BayesFactor_SamplingMeanLh, na.rm = T)
+    TransitionPlotSigTitle = paste0("Mean BayesFactor - Sampling: ", round(meanBFSamplingMeanLh, digits = 3), " Stones: ", round(meanBFStonesLh, digits = 3))
+    runsperthresh <- NULL
+    significanceYlab = "BayesFactor - Sampling Means Lh"
+    sigcol = "BayesFactor_SamplingMeanLh"
+  } else {
+    TransitionPlotSigTitle = NULL
+    runsperthresh <- NULL
+    significanceYlab = NULL
+  }
+  
   ##end repeated code
   if (SongParam == "Song") {
     SongParam = "SongRep"
@@ -234,24 +266,23 @@ for (m in 1:length(segmentmeansdf$q12)) {
   yfamilylabel <- ""
   if (newpdf == TRUE) {  #used when not plotting jackknifes
     par(mar = rep(2, 4))
-    runsperthresh <- paste("/",nsim,sep="")
+    #runsperthresh <- paste("/",nsim,sep="")
     arrowmod <- arrowmod # changed from 1 6/2/2023
   } else if (newpdf == FALSE) {
     par(mar = c(1.9,1.9,2.4,1.9))
-    runsperthresh <- paste("/",nsim,sep="")
+    #runsperthresh <- paste("/",nsim,sep="")
     arrowmod <- 0.5
   }
 
     labx0 = paste("Lower",SongParam)
     labx1 = paste("Higher",SongParam)
-
-  runsperthresh <- paste("/",nsim,sep="")
   
   #PLOT (arrows taken from btw function plotdiscrete)
   mat <- meanratesmat
-  rates <- meanlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),2)  
+  rates <- meanlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]), rateDigits)  
  
-  plot(c(0,100), c(0,100), type = "n", xaxt = "n", yaxt = "n", xlab = "", main=paste("Thresholds >=", round(minvec[m], digits = 3)," - <",round(maxvec[m], digits = 3), " (", numberofthreshs,")", "\nMean # Runs significant: ", round(meannumbersig, digits = 1), runsperthresh, sep = ""), cex.main=1, ylab = "")
+#  plot(c(0,100), c(0,100), type = "n", xaxt = "n", yaxt = "n", xlab = "", main=paste("Thresholds >=", round(minvec[m], digits = 3)," - <",round(maxvec[m], digits = 3), " (", numberofthreshs,")", "\n", TransitionPlotSigTitle, round(meannumbersig, digits = 1), runsperthresh, sep = ""), cex.main=1, ylab = "")
+  plot(c(0,100), c(0,100), type = "n", xaxt = "n", yaxt = "n", xlab = "", main=paste("Thresholds >=", round(minvec[m], digits = 3)," - <",round(maxvec[m], digits = 3), " (", numberofthreshs,")", "\n", TransitionPlotSigTitle, sep = ""), cex.main=1, ylab = "")
   title(ylab = yfamilylabel, line = 1)
   text(x=c(15, 85, 15, 85), y=c(80, 80, 20, 20), labels=c(paste(lab0x,"\n",labx0,sep=""), paste(lab0x,"\n",labx1,sep=""), paste(lab1x,"\n",labx0,sep=""), paste(lab1x,"\n",labx1,sep="")), cex=0.8)
   if (MateParam == "EPP") {
@@ -262,11 +293,11 @@ for (m in 1:length(segmentmeansdf$q12)) {
   arrows(x0=c(35, 65, 85, 75, 65, 35, 15, 25), y0=c(85, 75, 65, 35, 15, 25, 35, 65), x1=c(65, 35, 85, 75, 35, 65, 15, 25), y1=c(85, 75, 35, 65, 15, 25, 65, 35), lwd=rates*arrowmod/2*15, col=arrowcolvec, length = 0.4) # changed length arrowmod denominator 5 to 2 6/2/23
   
   mat <- maxratesmat
-  maxlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),2) 
+  maxlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),rateDigits) 
 
 
   mat <- minratesmat
-  minlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),2) 
+  minlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),rateDigits) 
   
   labs = set.seed(10)
   for (y in 1:8) {
@@ -285,14 +316,14 @@ if (newpdf == TRUE) {
 } #end if newpdf = TRUE
 
 #plot pvals vs thresholds
-with(df, plot(songcontvec, LRpval, pch=20, 
-              main = paste(MateSongParams, "Original threshold range: ", round(min(alldfvals),4)," - ",round(max(alldfvals),3)," (",length(alldfvals)-1,")", sep = ""), xlim = c(min(songvals)-0.1*min(songvals),max(songvals)+0.1*max(songvals)), log = "x", xlab = "", ylab="", cex.main = 0.7
+with(df, plot(songcontvec, df[[sigcol]], pch=20, 
+              main = paste(MateSongParams, " Original threshold range: ", round(min(alldfvals),4)," - ",round(max(alldfvals),3)," (",length(alldfvals)-1,")", sep = ""), xlim = c(min(songvals)-0.1*min(songvals),max(songvals)+0.1*max(songvals)), log = "x", xlab = "", ylab="", cex.main = 0.7
 ))
-title(ylab = "p-value", line = 2)
+title(ylab = significanceYlab, line = 2)
 title(xlab = paste("High/Low Threshold:",SongParam), line = 2.2)
-
 segments(x0 = minvec, x1 = maxvec, y0 = rep(-0.0,times=length(minvec)), y1=rep(-0.0,times=length(minvec)), lwd = 5, col = c("red","orange","blue","green","purple"))
 abline(h=0.05,col="blue")
+
 if (newpdf == TRUE) {
 dev.off()
   } # end if newpdf == TRUE
