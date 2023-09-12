@@ -146,12 +146,19 @@ cbSong$species[which(!cbSong$species %in% birdtree$tip.label)]
 FSCBSong = merge(cbSong, FSdata, by.x = "species", by.y = "BirdtreeSpecies", all = T)
 write.csv(FSCBSong, file = paste0(Sys.Date(),"_CoopBreed-FemaleSong-Song_Data_R.csv"), row.names = FALSE)
 
+## 9/12/2023 - add in learning window data
+## what to do with Philesturnus rufusater? Also have data that's not present in the all-sources song features file from 6/20/2023 - philesturnus rufusater, passerculus sandwichensis, parus palustris - not sure how to add yet
+# read most recent file
+dfIn = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-06-20_Aggregate_Source_Data_AllCoopBreedColumns.csv")
+# read OC data
+OCin = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/OCPaperData.csv")
+colnames(OCin) = paste(colnames(OCin), )
+
+df = merge(dfIn, OCin, by.x = "BirdtreeSpecies", by.y = "BirdtreeFormat", all = T)
+OCin$BirdtreeFormat[which(!OCin$BirdtreeFormat %in% dfIn$BirdtreeSpecies)]
 
 
-
-
-
-# Additional (non-Cooperative Breeding) Sources
+#### Additional (non-Cooperative Breeding) Sources ----
 LislevandData <- read.csv("/Users/kate/Documents/Creanza Lab/Comparative Evolution/Lislevand et al 2007 supp data.csv")
 SpottiswoodeData <- read.csv("/Users/kate/Documents/Creanza Lab/Comparative Evolution/Spottiswoode and Moller 2004_data_noWeirdCharacters.csv")
 DatabaseUpdate2019 <- read.csv("/Users/kate/Documents/Creanza Lab/Comparative Evolution/Song Database Update 2019_LastEdited_20200408_539PM_LislevandSpottiswoodeClementsOnly.csv")

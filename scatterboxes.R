@@ -1,6 +1,6 @@
 ########
 #Coded by Kate T. Snyder
-#Last Modified 8-18-2021
+#Last Modified 9-12-2023 - outline
 #Built using RStudio Version 1.1.453
 #R Version 4.0
 #
@@ -14,7 +14,7 @@
 
 #Plots merged boxplot/scatterplot for each song characteristic for each mating classification
 
-# require(phytools)
+ require(phytools)
 # 
 # datafile <- "2020-10-30_CoopSong_AnyCoop_NatCommsSubset.csv"
 # ourdf <- read.csv(file = datafile)
@@ -23,7 +23,7 @@
 # passertree <- read.nexus("2020-10-11ConsensusPasserineTreeHack100.nex")
 # treefile <- "birdzillatreeMaybeConsensus.nex"
 # 
-# #e.g.:
+#### Example usage: ----
 # scatterboxes(DiscreteTrait = "CoopBreed", newdata = datafile, newtree = passertree)
 
 

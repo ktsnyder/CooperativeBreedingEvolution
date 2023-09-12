@@ -1,6 +1,6 @@
 ########
 #Coded by Kate T. Snyder
-#Last Modified 3-24-2022  - add ability to use multiPhylo input for newtree
+#Last Modified 9-12-2023  - added outline to code
 #Built using R Version 4.0.2
 #
 #ape_5.3  phytools_0.5-38   maps_3.1.0  btw_V1.0
@@ -9,7 +9,7 @@
 
 ################## Subset bird data and generate associated trees##################
  
-##### Inputs:
+#### Inputs: ----
 ## columns: vector of character values matching names of columns in dataframe. Will subset dataframe to only the subset of species which do not have NA values in any of the specified columns
 ## cladesubsetcolumn: a character object (aka a character vector of length 1) that is the column name of whichever column lists classification (e.g. Family) for a species
 ## cladesubsetvalue: a character object (aka a character vector of length 1) that is the clade/family (e.g. "Corvidae") that you want to analyze fdata for
@@ -19,13 +19,13 @@
 ## suppresswarning: TRUE (default) or FALSE. Determines whether certain warnings that occur while running the code will be printed in the console or not
 ## skinnydata: TRUE or FALSE (default). Return dataframe subsetted just to columns mentioned plus species (including columns and cladesubsetcolumn)
  
-##### Outputs (list of 2 items):
+#### Outputs (list of 2 items): ----
 ## subsettree - subsetted tree (.nex format)
 ## subsetdf - subsetted dataframe
 ## NonMatchedSpecies - vector of any species in data that are not in the tree
 
 ## 
-## Examples:
+#### Examples: ----
 #outputall <- subsetbirddata(columns = c("PolygynyOrMonog", "EPP10threshold"), newdata = "20200123_SongDatabaseUpdate2019_R.csv", newtree = "2019-10-22matezilla2treeHack_nondicho.nex")
 #outputnonpass <- subsetbirddata(columns = c("PolygynyOrMonog", "EPP10threshold"), cladesubsetcolumn = "oscine", cladesubsetvalue = "nonpasserine", newdata = "20200123_SongDatabaseUpdate2019_R.csv", newtree = "2019-10-22matezilla2treeHack_nondicho.nex")
 #subsettreedata(columns = c("Final.polygyny", "Syllable.rep.final"), cladesubsetcolumn = "Family", cladesubsetvalue = c("Acrocephalidae", "Icteridae"), islog = "Syllable.rep.final", suppresswarning = FALSE, skinnydata = TRUE)
@@ -46,6 +46,8 @@
 ##    remove some # of species at random?
 ##    may have to change skinnydata to fit BayesTraits
 
+
+#### Function ----
 subsettreedata <- function(columns = NULL, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, newdata = FALSE, newtree = FALSE, islog = FALSE, suppresswarning = TRUE, skinnydata = FALSE) {
   require(phytools)
   #require(ape)
