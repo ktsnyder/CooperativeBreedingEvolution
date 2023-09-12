@@ -5,6 +5,7 @@
 ## Edited 7/5/2023 - MCMC output files to dir instead of BTdir; added parse_scheduleKTS derived from btw::parse_schedule to be functional with BTv4
 ## Edited 7/6/2023 - OutputFolderPath and my_outdir, my_suboutdir, my_outdir_fullpath 
 ## Edited 7/17/2023 - new function: parse_TestPrior_log; new parameter: TestPrior
+## Edited 8/9/2023 - removed excessive printouts
 
 bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = TRUE, 
           remove_files = TRUE, BTversionNum = "V4", BTdirpath = NULL, OutputFolderPath = NULL, TestPrior = FALSE) {
@@ -79,9 +80,10 @@ bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = 
   }
   my_suboutdir = paste(ModelName, ModelMethod, sep="_")
   my_suboutdir_fullpath = paste0(my_outdir,"/",my_suboutdir)
-  print(my_suboutdir_fullpath)
+  #print(my_suboutdir_fullpath)
   if (!dir.exists(my_suboutdir_fullpath)) {
     dir.create(my_suboutdir_fullpath)
+    print(my_suboutdir_fullpath)
   }
   
   #write(c(commands, "run"), file = "./inputfile.txt")
@@ -111,8 +113,6 @@ bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = 
     system(paste(paste0(BTdir, "/BayesTraits", BTversionNum), paste0(my_wd, "/tree.nex"), paste0(my_wd, "/data.txt"), paste0("< ", my_wd, "/inputfile.txt"), TestPriorInput), ignore.stdout = silent)
   }
   
-  print(my_suboutdir_fullpath)
-  print(my_wd)
   
   log <- "data.txt.Log.txt" %in% list.files(my_suboutdir_fullpath)
   logfile = "data.txt.Log.txt" # KTS added 
@@ -122,6 +122,8 @@ bayestraitsKTS <- function (data = NULL, tree = NULL, commands = NULL, silent = 
    logfile = "data.txt.log.txt"
    print("no log - is log TRUE now?")
    print(log)
+   print(my_suboutdir_fullpath)
+   print(my_wd)
   }
   
   schedule <- "data.txt.Schedule.txt" %in% list.files(my_wd)
