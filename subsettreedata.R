@@ -1,6 +1,6 @@
 ########
 #Coded by Kate T. Snyder
-#Last Modified 9-12-2023  - added outline to code
+#Last Modified 9-14-2023
 #Built using R Version 4.0.2
 #
 #ape_5.3  phytools_0.5-38   maps_3.1.0  btw_V1.0
@@ -38,6 +38,8 @@
 ## 5/12/2020 - now makes subfolder "OutputFiles" for output files
 ## 10-9-2020 - made ability to put in new data and tree directly rather than just the file name to be read; added code to remove any species from data that don't match a species in Phylogeny and tell the user that that happened - also ability to suppress that warning; nonmatchedspecies now outputted
 ## 6/4/2021 - can input vector of values as cladesubsetvalue to subset (rather than only one value); commented out dir.create; defaults columns = NULL - if not specified, will allow subsetting by just clade; change name of first column to "species"; added skinnydata option to return dataframe subsetted just to columns mentioned (including columns and cladesubsetcolumn); cladesubsetcolumn defaults to NULL instead of FALSE; commented out requiring packages "ape" and "maps")
+## 9/13/2023 - changed order of newdata import to check whether it's dataframe first, then character, then FALSE because newdata == FALSE was throwing an error instead of a warning
+## 
 ## 
 ## new objectives: 
 ##    ability to select clade based on a formula? like != "Passeriformes" or something
@@ -61,13 +63,13 @@ subsettreedata <- function(columns = NULL, cladesubsetcolumn = NULL, cladesubset
   
   output <- list()
   
-  suppressWarnings(  # suppressing the warning that appears after first "if" if newdata is length > 1
-    if (newdata == FALSE) {
-      alldatadfos <- as.data.frame(read.csv("SnyderCreanza_NatComms2019_SupplementalData_R.csv"))
+  suppressWarnings(  # suppressing the warning that appears after last "if" if newdata is length > 1
+    if (is.data.frame(newdata)) {
+      alldatadfos <- newdata
     } else if (is.character(newdata)) {
       alldatadfos <- as.data.frame(read.csv(newdata))
-    } else {
-      alldatadfos <- newdata
+    } else if (newdata == FALSE) {
+      alldatadfos <- as.data.frame(read.csv("SnyderCreanza_NatComms2019_SupplementalData_R.csv"))
     }
   ) #end suppressWarnings
   
