@@ -5,10 +5,14 @@
 ## 3/7/2022 - add in Griesser 2017 data, female song (Odom 2014) data
 ## 3/8/2022 - add in BOW data
 ## 9/7/2022 - female song dataset
-## Last edited 5/30/2023
+## Last edited 9/13/2023 - cornwallis data
 
+require(ape)
+require(phytools)
 
 setwd("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/")
+
+birdtree = read.nexus("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/birdzillatreeMaybeConsensus.nex")
 
 ourdatabase <- read.csv("SongData_R_Update.csv", stringsAsFactors = FALSE)
 ourdatabaserefs <- read.csv("SupplementDataRefs_Update.csv")
@@ -121,20 +125,26 @@ RemesDataAll = merge(RemesData, RemesClimateData)
 colnames(RemesDataAll)[which(colnames(RemesDataAll) == "Species_name")] <- "Species_Name_Remes"
 newdf17 = merge(newdf16, RemesDataAll, by.x = "BirdtreeSpecies", by.y = "Species_Name_Remes", all = T, suffixes = c("","_Remes"))
 
+# Merge Cornwallis et al 2017 Nature EcoEvo
+cornwallisData = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/Unaltered from publication/Cornwallis 2017 supp table13.csv")
+cornwallisDataNoDups = cornwallisData[which(!duplicated(cornwallisData$Species)),] # all species that have 2+ rows have the same breeding system in both/all rows, so duplicates removed 
+newdf17b = merge(newdf17, cornwallisDataNoDups, by.x = "BirdtreeSpecies", by.y = "Species", all = T, suffixes = c("", "_Cornwallis"))
+
+
 # remove non-birdtrees
-sum(!newdf17$BirdtreeSpecies %in% birdtree$tip.label)
-newdf18 = newdf17[which(newdf17$BirdtreeSpecies %in% birdtree$tip.label),]
+sum(!newdf17b$BirdtreeSpecies %in% birdtree$tip.label)
+newdf18 = newdf17b[which(newdf17b$BirdtreeSpecies %in% birdtree$tip.label),]
 
 # remove duplicated rows
 newdf19 = newdf18[which(!duplicated(newdf18$BirdtreeSpecies)),]
 
 # write file - then use file in CoopBreed_species_summary.R
-write.csv(newdf19, file = paste0(Sys.Date(),"_Aggregate_Source_Data_AllCoopBreedColumns.csv"), row.names = FALSE)
+write.csv(newdf19, file = paste0(Sys.Date(),"_Aggregate_CBSource_Data_AllCoopBreedColumns.csv"), row.names = FALSE)
 source("CoopBreed_species_summary.R")
-CoopBreed_species_summary(paste0(Sys.Date(),"_Aggregate_Source_Data_AllCoopBreedColumns.csv"), songfile = "SongData_R_Update.csv", allcoop = TRUE, OCdatafile = FALSE)
-cbSong = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-06-20CoopSong_All.csv") # created with above line
+CoopBreed_species_summary(paste0(Sys.Date(),"_Aggregate_CBSource_Data_AllCoopBreedColumns.csv"), songfile = "SongData_R_Update.csv", allcoop = TRUE, OCdatafile = TRUE)
+cbSong = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-09-14CoopSong_All.csv") # created with above line
 
-FSdata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-06-20_Female Song Data_GSheetDownload.csv")
+FSdata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-09-13_Female Song Data_GSheetDownload_withHighConfFS01.csv")
 colnames(FSdata)[which(colnames(FSdata) == "Song_data_source_Webb..NOTE..appears.to.be.reversed...ones.marked..del.Hoyo..were.actually.from.Odom..ones.marked..del.Hoyo..actually.from.HBW.")] = "Song_data_source_Webb"
 
 
@@ -146,16 +156,34 @@ cbSong$species[which(!cbSong$species %in% birdtree$tip.label)]
 FSCBSong = merge(cbSong, FSdata, by.x = "species", by.y = "BirdtreeSpecies", all = T)
 write.csv(FSCBSong, file = paste0(Sys.Date(),"_CoopBreed-FemaleSong-Song_Data_R.csv"), row.names = FALSE)
 
-## 9/12/2023 - add in learning window data
+
+
+## 9/12/2023 - add in learning window data - actually ended up doing this above using the CoopBreed_species_summary.R function
 ## what to do with Philesturnus rufusater? Also have data that's not present in the all-sources song features file from 6/20/2023 - philesturnus rufusater, passerculus sandwichensis, parus palustris - not sure how to add yet
 # read most recent file
 dfIn = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-06-20_Aggregate_Source_Data_AllCoopBreedColumns.csv")
+# read Fem Song data
+dfFS = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-06-20_Female Song Data_GSheetDownload.csv")
+dfFSR = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/2023-06-20_CoopBreed-FemaleSong01HighConf-Song_Data_R.csv")
+FSbin = merge(dfFS, dfFSR[,c("species", "FemaleSong_Agg01", "HighConfidence_FemaleSong")], all.x = T, by.x = "BirdtreeSpecies", by.y = "species")
+write.csv(FSbin, "2023-06-20_Female Song Data_GSheetDownload_withHighConfFS01.csv")
+
 # read OC data
 OCin = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/OCPaperData.csv")
-colnames(OCin) = paste(colnames(OCin), )
+# Read song data
+dfSong = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/SongData_R_Update.csv")
 
-df = merge(dfIn, OCin, by.x = "BirdtreeSpecies", by.y = "BirdtreeFormat", all = T)
-OCin$BirdtreeFormat[which(!OCin$BirdtreeFormat %in% dfIn$BirdtreeSpecies)]
+#colnames(OCin) = paste(colnames(OCin), )
+
+dfOC = merge(dfIn, OCin, by.x = "BirdtreeSpecies", by.y = "BirdtreeFormat", all = T)
+dfOCFS = merge(dfOC, dfFS, by = "BirdtreeSpecies", all = T)
+dfOCFSsong = merge(dfOCFS, dfSong, by.x = "BirdtreeSpecies", by.y= "BirdtreeFormat", all = T, suffixes = c(".NotUpdated",""))
+colnames(dfOCFSsong)
+dfOCFSsong$BirdtreeSpecies[which(dfOCFSsong$Song.rep.final != dfOCFSsong$Song.rep.final.Update)]
+dfOCFSsong$BirdtreeSpecies[which(dfOCFSsong$Interval.final != dfOCFSsong$Interval.final.Update)]
+dfOCFSsong$BirdtreeSpecies[which(dfOCFSsong$Duration.final != dfOCFSsong$Duration.final.Update)]
+
+write.csv()
 
 
 #### Additional (non-Cooperative Breeding) Sources ----
@@ -177,6 +205,9 @@ DatabaseUpdate2019_LisSpo <- DatabaseUpdate2019[,c(1,18:64)]
 
 
 #### Female song ----
+# most recent aggregated FS data file
+FSdf = read.csv("2023-09-13_Female Song Data_GSheetDownload_withHighConfFS01.csv")
+
 OdomFSData <- read.csv("FemaleSongData_OdomEtal2014_PresentAbsentSubset_BirdTreeNames.csv")
 OdomFSData$Latin_binomial <- str_replace(OdomFSData$Latin_binomial, " ", "_")
 OdomFSDataNonBT=read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/FemaleSongData_OdomEtal2014_PresentAbsentSubset.csv")
@@ -304,3 +335,5 @@ cbdf[which(cbdf$MeanCoopTie2Coop == 1 & cbdf$DaleCoop == 0),]
 cbdf[which(is.na(cbdf$MeanCoopTie2Coop) & cbdf$DaleCoop == 0),]
 
 coopsongdf = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-06-14CoopSong_All.csv")
+
+

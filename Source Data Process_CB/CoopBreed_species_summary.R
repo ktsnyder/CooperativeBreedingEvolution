@@ -8,6 +8,7 @@
 ## 5/30/2023 - commented out last write csv since song data already added; removed Female Song from output since not included in input yet
 ## 6/14/2023 - added Mikula and Dale columns to output
 ## 6/20/2023 - included Dale in MeanCoop calculation
+## 9/13/2023 - added Cornwallis et al data handling
 
 setwd("~/Desktop/CooperativeBreedingEvolution/Source Data Process_CB")
 
@@ -130,6 +131,15 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
       Dale = 1
     }
     
+    # add Cornwallis et al data 9/2023
+    if (is.na(tempRowIn$Breeding.system)) {
+      Cornwallis = NA
+    } else if (tempRowIn$Breeding.system == "Noncooperative") {
+      Cornwallis = 0
+    } else if (tempRowIn$Breeding.system == "Cooperative") {
+      Cornwallis = 1
+    }
+    
     
     if (is.na(tempRowIn$Kin)) {
       RiehlKin <- NA
@@ -170,7 +180,7 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
     FemaleSong <- tempRowIn$Female.Song.Score
     
     # Dale et al added 6/20/2023
-    allsourcesvec <- c(Dunn, Biagolini, DowningCoop, Jetz, Rubenstien, Cockburn, ReihlCoop, Griesser2017_Coop, BOWCoop, Dale) # Mikula not included because they only added one new species compared to Dale et al (which has many more species than Mikula et al) and otherwise totally agreed with Dale. The one species in Mikula but not Dale is already present in the dataset 
+    allsourcesvec <- c(Dunn, Biagolini, DowningCoop, Jetz, Rubenstien, Cockburn, ReihlCoop, Griesser2017_Coop, BOWCoop, Dale, Cornwallis) # Mikula not included because they only added one new species compared to Dale et al (which has many more species than Mikula et al) and otherwise totally agreed with Dale. The one species in Mikula but not Dale is already present in the dataset 
     allsourcesNoNA <- na.omit(allsourcesvec)
     meanclass <- sum(allsourcesNoNA)/length(allsourcesNoNA) 
     
@@ -240,10 +250,10 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
     
     # this comes after all the if...else statements for each column - putting the whole thing together!
   #  tempRowOut <- c(species, MeanCoopOmitTies, MeanCoopTie2Noncoop, MeanCoopTie2Coop, AnyCoopEqualsCoop, Kin_NK, numSourcesNonCoop, numSourcesCoop, SourceDiscrepancy, Dunn, Biagolini, DowningCoop, Jetz, Rubenstien, Cockburn, ReihlCoop, Griesser2017_Coop, BOWCoop, RiehlKin, DowningKinCoop, Griesser2017_KinCoop, Griesser2017_Familial, numKin, numNonKin, numMixedKinNonKin, FemaleSong, JetzSource)  
-    tempRowOut <- c(species, MeanCoopOmitTies, MeanCoopTie2Noncoop, MeanCoopTie2Coop, AnyCoopEqualsCoop, Kin_NK, numSourcesNonCoop, numSourcesCoop, SourceDiscrepancy, Dunn, Biagolini, DowningCoop, Jetz, Rubenstien, Cockburn, ReihlCoop, Griesser2017_Coop, BOWCoop, Mikula, Dale, RiehlKin, DowningKinCoop, Griesser2017_KinCoop, Griesser2017_Familial, numKin, numNonKin, numMixedKinNonKin, JetzSource)  # removed FemaleSong, added Mikula and Dale
+    tempRowOut <- c(species, MeanCoopOmitTies, MeanCoopTie2Noncoop, MeanCoopTie2Coop, AnyCoopEqualsCoop, Kin_NK, numSourcesNonCoop, numSourcesCoop, SourceDiscrepancy, Dunn, Biagolini, DowningCoop, Jetz, Rubenstien, Cockburn, ReihlCoop, Griesser2017_Coop, BOWCoop, Mikula, Dale, Cornwallis, RiehlKin, DowningKinCoop, Griesser2017_KinCoop, Griesser2017_Familial, numKin, numNonKin, numMixedKinNonKin, JetzSource)  # removed FemaleSong, added Mikula and Dale
     summarydf <- rbind(summarydf, tempRowOut)
    # colnames(summarydf) <- c("species","MeanCoopOmitTies", "MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "AnyCoopEqualsCoop", "Kin_NK", "numSourcesNonCoop", "numSourcesCoop", "SourceDiscrepancy", "Dunn","Biagolini", "DowningCoop", "Jetz", "Rubenstein", "Cockburn", "ReihlCoop", "Griesser2017Coop", "BOWCoop", "RiehlKin", "DowningKinNKCoop", "Griesser2017KinCoop", "Griesser2017FamilialLiving", "numKin", "numNonKin", "numMixed", "FemaleSong", "JetzSource") # must have the same length as tempRowOut
-    colnames(summarydf) <- c("species","MeanCoopOmitTies", "MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "AnyCoopEqualsCoop", "Kin_NK", "numSourcesNonCoop", "numSourcesCoop", "SourceDiscrepancy", "Dunn","Biagolini", "DowningCoop", "Jetz", "Rubenstein", "Cockburn", "ReihlCoop", "Griesser2017Coop", "BOWCoop", "MikulaCoop", "DaleCoop", "RiehlKin", "DowningKinNKCoop", "Griesser2017KinCoop", "Griesser2017FamilialLiving", "numKin", "numNonKin", "numMixed", "JetzSource") # removed FemaleSong, added Mikula and Dale
+    colnames(summarydf) <- c("species","MeanCoopOmitTies", "MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "AnyCoopEqualsCoop", "Kin_NK", "numSourcesNonCoop", "numSourcesCoop", "SourceDiscrepancy", "Dunn","Biagolini", "DowningCoop", "Jetz", "Rubenstein", "Cockburn", "ReihlCoop", "Griesser2017Coop", "BOWCoop", "MikulaCoop", "DaleCoop", "CornwallisCoop", "RiehlKin", "DowningKinNKCoop", "Griesser2017KinCoop", "Griesser2017FamilialLiving", "numKin", "numNonKin", "numMixed", "JetzSource") # removed FemaleSong, added Mikula and Dale
     
   }  # end for (i in 1:length(ourdf$species_in_birdtree))
   
