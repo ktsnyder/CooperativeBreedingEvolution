@@ -4,6 +4,7 @@
 ## Method based on Huelsenbeck et al (2003)
 ## 
 ## Edited 6/1/23 - added checkpoint save to CharacterSimmaps
+## Edited 9/27/23 - changed "Dummy" simmap generation to use sim.history() with Q rates, ancestral character estimation instead of randomizing tip states; but seems to have gotten totally weird - output values odd
 ## 
 
 setwd("/Users/kate/Desktop/CooperativeBreedingEvolution/")
@@ -13,45 +14,28 @@ source("subsettreedata.R")
 #df <- read.csv("2022-03-10CoopSong_PlusWebbFS.csv")
 #newdata = "/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-06-01_CoopSongFS_RColumns.csv"
 
-newdata = "2023-06-20_CoopBreed-FemaleSong-Song_Data_R.csv"
-dfAgg = read.csv(newdata)
-#dfAgg = dfAgg[which(!dfAgg$FemaleSong_Aggregated %in% "Songless"),]
-dfAgg$FemaleSong_Agg01 = dfAgg$FemaleSong_Aggregated
-dfAgg$FemaleSong_Agg01[which(dfAgg$FemaleSong_Agg01 == "Songless")] = NA
-dfAgg$FemaleSong_Agg01[which(dfAgg$FemaleSong_Agg01 == "Present")] = 1
-dfAgg$FemaleSong_Agg01[which(dfAgg$FemaleSong_Agg01 == "Absent")] = 0
+newdata = "2023-09-14_CoopBreed-FemaleSong-Song_Data_R.csv"
+df = read.csv(newdata)
 
-#write.csv(dfAgg, "2023-06-20_CoopBreed-FemaleSong01-Song_Data_R.csv", row.names = FALSE)
-
-df <- read.csv("2023-06-20_CoopBreed-FemaleSong01HighConf-Song_Data_R.csv")
-#colnames(df)[which(colnames(df) == "FemaleSong_Aggregated")] = "Female_song_score"
 Hacktree <- read.nexus("2022-03-16ConsensusPasserineTreeHackett4_1000.nex")
 treelabel <- "Hackett"
 #Erictree <-read.nexus("2021-08-31ConsensusPasserineTreeEricson10_1000.nex")
 #treelabel <- "Ericson"
 
-# WebbFSdf <- read.csv("Webb et al 2016 Female Song Plumage Data.csv")
-# dfnew <- merge(df, WebbFSdf, by.x = "species", by.y = "TipLabel")
-# columns <- c("MeanCoopTie2Noncoop","Female_song_score") # Webb FS
-# datalabel <- "CoopBreed FSWebb"
-#  columns <- c("MeanCoopTie2Noncoop","FemaleSong") # Odom FS
-#  datalabel <- "CoopBreed FSOdom"
-# # columns <- c("MeanCoopTie2Noncoop", "O.C")
-# df <- dfnew[which(dfnew[,columns[2]] %in% c("Present","Absent")),]
-# write.csv(df, "2022-03-10CoopSong_PlusWebbFS.csv")
-# # df[,columns[2]][which(df[,columns[2]] == "Absent")] <- 0
-# # df[,columns[2]][which(df[,columns[2]] == "Present")] <- 1
+subsets = subsettreedata(columns = c("MeanCoopTie2Noncoop", "FemaleSong_Agg01"), newdata = df, newtree = Hacktree)    # decided that for these, will put the pre-subsetted dataset into CharacterSimmaps, to be passed to findQrates, so the Qrates and ancestral character estimation aren't based on any of the non-passerines etc. May want to go back to regular full-subset Q/Anc estimation for other trait combinations
+subsetdf = subsets$subsetdf
 
-nsims_real = 1000
-nsims_dummy = 5000
 
-dfout5 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Aggregated"), df = df, tree =  Hacktree, dummy = FALSE, nsims = nsims_real, treelabel = "Hackett", datalabel = "Tie2NonCoop FSAgg")
-#write.csv(dfout5, "Simmap overlap output_Tie2NonCoop FSAgg nsim1000_Hackett REAL.csv")
-dfout6 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Aggregated"), df = df, tree =  Erictree, dummy = FALSE, nsims = nsims_real, treelabel = "Ericson", datalabel = "Tie2NonCoop FSAgg")
+nsims_real = 500
+nsims_dummy = 2000
+
+dfout5 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Agg01"), df = subsetdf, tree =  Hacktree, dummy = FALSE, nsims = nsims_real, treelabel = "Hackett", datalabel = "Tie2NonCoop FSAgg_SubsetQs")
+write.csv(dfout5, paste0("Simmap overlap output_Tie2NonCoop FSAgg nsim", nsims_real,"_Hackett REAL ", Sys.Date(),".csv"))
+dfout6 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Agg01"), df = df, tree =  Erictree, dummy = FALSE, nsims = nsims_real, treelabel = "Ericson", datalabel = "Tie2NonCoop FSAgg")
 #write.csv(dfout6, "Simmap overlap output_Tie2NonCoop FSAgg nsim1000_Ericson REAL.csv")
 
-dfDummy5 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Aggregated"), df = df, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Tie2NonCoop FSAgg")
-#write.csv(dfDummy5, "Simmap overlap output_Tie2NonCoop FSAgg nsim10000_Hackett DUMMY.csv")
+dfDummy5 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Agg01"), df = subsetdf, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Tie2NonCoop FSAgg_SubsetQs")
+write.csv(dfDummy5, paste0("Simmap overlap output_Tie2NonCoop FSAgg nsim", nsims_dummy,"_Hackett DUMMY ", Sys.Date(),".csv"))
 dfDummy6 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Aggregated"), df = df, tree =  Erictree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Ericson", datalabel = "Tie2NonCoop FSAgg")
 #write.csv(dfDummy6, "Simmap overlap output_Tie2NonCoop FSAgg nsim10000_Ericson DUMMY.csv")
 
@@ -59,35 +43,35 @@ calcHuel(dfout5,dfDummy5, nsims_real = nsims_real, nsims_dummy = nsims_dummy)
 calcHuel(dfout6,dfDummy6, nsims_real = nsims_real, nsims_dummy = nsims_dummy)
 
 
-dfout5 <- CharacterSimmaps(columns = c("MeanCoopTie2Coop","FemaleSong_Aggregated"), df = df, tree =  Hacktree, dummy = FALSE, nsims = nsims_real, treelabel = "Hackett", datalabel = "Tie2Coop FSAgg")
-write.csv(dfout5, "Simmap overlap output_Tie2Coop FSAgg nsim1000_Hackett REAL.csv")
-dfout6 <- CharacterSimmaps(columns = c("MeanCoopTie2Coop","FemaleSong_Aggregated"), df = df, tree =  Erictree, dummy = FALSE, nsims = nsims_real, treelabel = "Ericson", datalabel = "Tie2Coop FSAgg")
-write.csv(dfout6, "Simmap overlap output_Tie2Coop FSAgg nsim1000_Ericson REAL.csv")
-
-dfDummy5 <- CharacterSimmaps(columns = c("MeanCoopTie2Coop","FemaleSong_Aggregated"), df = df, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Tie2Coop FSAgg")
-write.csv(dfDummy5, "Simmap overlap output_Tie2Coop FSAgg nsim10000_Hackett DUMMY.csv")
-dfDummy6 <- CharacterSimmaps(columns = c("MeanCoopTie2Coop","FemaleSong_Aggregated"), df = df, tree =  Erictree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Ericson", datalabel = "Tie2Coop FSAgg")
-write.csv(dfDummy6, "Simmap overlap output_Tie2Coop FSAgg nsim10000_Ericson DUMMY.csv")
+# dfout5 <- CharacterSimmaps(columns = c("MeanCoopTie2Coop","FemaleSong_Aggregated"), df = df, tree =  Hacktree, dummy = FALSE, nsims = nsims_real, treelabel = "Hackett", datalabel = "Tie2Coop FSAgg")
+# #write.csv(dfout5, "Simmap overlap output_Tie2Coop FSAgg nsim1000_Hackett REAL.csv")
+# dfout6 <- CharacterSimmaps(columns = c("MeanCoopTie2Coop","FemaleSong_Aggregated"), df = df, tree =  Erictree, dummy = FALSE, nsims = nsims_real, treelabel = "Ericson", datalabel = "Tie2Coop FSAgg")
+# #write.csv(dfout6, "Simmap overlap output_Tie2Coop FSAgg nsim1000_Ericson REAL.csv")
+# 
+# dfDummy5 <- CharacterSimmaps(columns = c("MeanCoopTie2Coop","FemaleSong_Aggregated"), df = df, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Tie2Coop FSAgg")
+# write.csv(dfDummy5, "Simmap overlap output_Tie2Coop FSAgg nsim10000_Hackett DUMMY.csv")
+# dfDummy6 <- CharacterSimmaps(columns = c("MeanCoopTie2Coop","FemaleSong_Aggregated"), df = df, tree =  Erictree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Ericson", datalabel = "Tie2Coop FSAgg")
+# write.csv(dfDummy6, "Simmap overlap output_Tie2Coop FSAgg nsim10000_Ericson DUMMY.csv")
 
 # dfout <- CharacterSimmaps(columns = c("MeanCoopTie2Coop","Webb_FemaleSong"), df = df, tree =  Hacktree, dummy = FALSE, nsims = 10, treelabel = "Hackett", datalabel = "CoopTie2Coop FSWebb")
 # dfDummy <- CharacterSimmaps(columns = c("MeanCoopTie2Coop","Webb_FemaleSong"), df = df, tree =  Hacktree, dummy = TRUE, nsims = 50, treelabel = "Hackett", datalabel = "CoopTie2Coop FSWebb")
 
-dfout2 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Aggregated"), df = df, tree =  Erictree, dummy = FALSE, nsims = nsims_real, treelabel = "Ericson", datalabel = "Tie2NonCoop FSAgg")
-dfDummy2 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Aggregated"), df = df, tree =  Erictree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Ericson", datalabel = "Tie2NonCoop FSAgg")
-
-dfout3 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","Webb_FemaleSong"), df = df, tree =  Hacktree, dummy = FALSE, nsims = nsims_real, treelabel = "Hackett", datalabel = "Tie2NonCoop FSWebb")
-dfDummy3 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","Webb_FemaleSong"), df = df, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Tie2NonCoop FSWebb")
-
-dfout4 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","Odom_FemaleSong"), df = df, tree =  Hacktree, dummy = FALSE, nsims = nsims_real, treelabel = "Hackett", datalabel = "Tie2NonCoop FSOdom")
-dfDummy4 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong"), df = df, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Tie2NonCoop FSOdom")
-
-dfDummy4 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","HighConfidence_FemaleSong"), df = df, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Tie2NonCoop FSHighConf")
-
-
-dfout4 <- CharacterSimmaps(columns = c("Final.polygyny","FemaleSong_Agg01"), df = df, tree =  Hacktree, dummy = FALSE, nsims = nsims_real, treelabel = "Hackett", datalabel = "Polygyny FSAgg")
-dfDummy4 <- CharacterSimmaps(columns = c("Final.polygyny","FemaleSong_Agg01"), df = df, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Polygyny FSAgg")
-dfout5 <- CharacterSimmaps(columns = c("Final.polygyny","HighConfidence_FemaleSong"), df = df, tree =  Hacktree, dummy = FALSE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Polygyny FSHighConf")
-dfDummy5 <- CharacterSimmaps(columns = c("Final.polygyny","HighConfidence_FemaleSong"), df = df, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Polygyny FSHighConf")
+# dfout2 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Aggregated"), df = df, tree =  Erictree, dummy = FALSE, nsims = nsims_real, treelabel = "Ericson", datalabel = "Tie2NonCoop FSAgg")
+# dfDummy2 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Aggregated"), df = df, tree =  Erictree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Ericson", datalabel = "Tie2NonCoop FSAgg")
+# 
+# dfout3 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","Webb_FemaleSong"), df = df, tree =  Hacktree, dummy = FALSE, nsims = nsims_real, treelabel = "Hackett", datalabel = "Tie2NonCoop FSWebb")
+# dfDummy3 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","Webb_FemaleSong"), df = df, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Tie2NonCoop FSWebb")
+# 
+# dfout4 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","Odom_FemaleSong"), df = df, tree =  Hacktree, dummy = FALSE, nsims = nsims_real, treelabel = "Hackett", datalabel = "Tie2NonCoop FSOdom")
+# dfDummy4 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong"), df = df, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Tie2NonCoop FSOdom")
+# 
+# dfDummy4 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","HighConfidence_FemaleSong"), df = df, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Tie2NonCoop FSHighConf")
+# 
+# 
+# dfout4 <- CharacterSimmaps(columns = c("Final.polygyny","FemaleSong_Agg01"), df = df, tree =  Hacktree, dummy = FALSE, nsims = nsims_real, treelabel = "Hackett", datalabel = "Polygyny FSAgg")
+# dfDummy4 <- CharacterSimmaps(columns = c("Final.polygyny","FemaleSong_Agg01"), df = df, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Polygyny FSAgg")
+# dfout5 <- CharacterSimmaps(columns = c("Final.polygyny","HighConfidence_FemaleSong"), df = df, tree =  Hacktree, dummy = FALSE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Polygyny FSHighConf")
+# dfDummy5 <- CharacterSimmaps(columns = c("Final.polygyny","HighConfidence_FemaleSong"), df = df, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Polygyny FSHighConf")
 
 
 df$Kin_NK[which(df$Kin_NK == "Mixed")] <- NA
@@ -109,34 +93,29 @@ nsims_real = length(FamFSreal$treenum)
 nsims_dummy = length(FamFSdummy$treenum)
 calcHuel(FamFSreal, FamFSdummy, nsims_real = nsims_real, nsims_dummy = nsims_dummy)
 
-#dfout5 <- CharacterSimmaps(columns = c("Final.EPP","Female_song_score"), df = df, tree =  Hacktree, dummy = FALSE, nsims = 100, treelabel = "Hackett", datalabel = "CoopTie2NonCoop FSWebb")
-#dfDummy5 <- CharacterSimmaps(columns = c("Final.EPP","Female_song_score"), df = df, tree =  Hacktree, dummy = TRUE, nsims = 100, treelabel = "Hackett", datalabel = "CoopTie2NonCoop FSWebb")
 
-#dfDummy <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","Female_song_score"), df = df, tree =  Hacktree, dummy = TRUE, nsims = 10000, treelabel = "Hackett", datalabel = "CoopTie2NonCoop FSWebb")
-
-
-calcHuel(dfout, dfDummy, nsims_real = nsims_real, nsims_dummy = nsims_dummy)
-calcHuel(dfout2, dfDummy2, nsims_real = nsims_real, nsims_dummy = nsims_dummy)
-calcHuel(dfout3, dfDummy3, nsims_real = nsims_real, nsims_dummy = nsims_dummy)
-calcHuel(dfout4, dfDummy4, nsims_real = nsims_real, nsims_dummy = nsims_dummy)
-Sys.time()
-calcHuel(dfout5, dfDummy5, nsims= 100)
-
-dfout <- read.csv("CoopBreed FSWebb simmap overlap output nsim1000 Hackett .csv")
-calcHuel(dfout, dfDummy, nsims_real = 1000, nsims_dummy = 10000)
+# dfout <- read.csv("CoopBreed FSWebb simmap overlap output nsim1000 Hackett .csv")
+# calcHuel(dfout, dfDummy, nsims_real = 1000, nsims_dummy = 10000)
 
 
 CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalabel) {
   
+  require(stringr)
   source("findQrates.R")
   cooprates <- findQrates(columns = columns[1], newdata = df, newtree = tree)
   coopQ <- cooprates$qrates
   coopQ01 <- coopQ[3]
   coopQ10 <- coopQ[2]
+  coopAnc = str_remove(cooprates$ARDlikanc, "ARDlik.anc ")  # added this for sim.history()
+  coopAnc = as.numeric(coopAnc)
+  names(coopAnc) <- c("0","1")
   FSrates <- findQrates(columns = columns[2], newdata = df, newtree = tree)
   FSQ <- FSrates$qrates
   FSQAbsPres <- FSQ[3]
   FSQPresAbs <- FSQ[2]
+  FSAnc = str_remove(FSrates$ARDlikanc, "ARDlik.anc ")  # added this for sim.history()
+  FSAnc = as.numeric(FSAnc)
+  names(FSAnc) <- c("0","1")
   subsets <- subsettreedata(columns = columns, newdata = df, newtree = tree)
   subsetdf <- subsets$subsetdf
   subsettree <- subsets$subsettree
@@ -150,32 +129,36 @@ CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalab
     Coopsimtrees <- make.simmap(tree = subsettree, x = Coopvec, model = "ARD", nsim = nsims, Q = coopQ)
   } else {
     # Make randomized versions of CoopBreed simmaps / DUMMY data
-    CoopsimtreesRand <- list()
+    #CoopsimtreesRand <- list()
     print(paste("starting Dummy Coop simmaps", Sys.time()))
-    for (j in 1:nsims) {
-      Coopvec <- subsetdf[,columns[1]]
-      CoopvecRandom <- sample(Coopvec)
-      #CoopvecRandom <- sample(c(0,1), length(Coopvec), replace = TRUE)
-      names(CoopvecRandom) <- subsetdf$species
-      Coopsimtree <- make.simmap(tree = subsettree, x = CoopvecRandom, model = "ARD", nsim = 1, Q = coopQ)
-      CoopsimtreesRand[[j]] <- Coopsimtree
-      print(paste(j, Sys.time()))
-    }
-    Coopsimtrees <- CoopsimtreesRand
+    #for (j in 1:nsims) { # commented out because realized make.simmap was not correct here - need to use sim.history()
+      # Coopvec <- subsetdf[,columns[1]]
+      # CoopvecRandom <- sample(Coopvec)
+      # #CoopvecRandom <- sample(c(0,1), length(Coopvec), replace = TRUE)
+      # names(CoopvecRandom) <- subsetdf$species
+      # Coopsimtree <- make.simmap(tree = subsettree, x = CoopvecRandom, model = "ARD", nsim = 1, Q = coopQ)
+      Coopsimtrees <- sim.history(tree = subsettree, Q = coopQ, nsim = nsims, anc = coopAnc)
+      #CoopsimtreesRand[[j]] <- Coopsimtree
+      #print(paste(j, Sys.time()))
+    #}
+    #Coopsimtrees <- CoopsimtreesRand
     # Make randomized versions of FemaleSong simmaps / DUMMY data
-    FSsimtreesRand <- list()
+    #FSsimtreesRand <- list()
     print(paste("starting Dummy FemSong simmaps", Sys.time()))
-    for (j in 1:nsims) {
-      FSvec <- subsetdf[,columns[2]]
-      FSvecRandom <- sample(FSvec)
-      names(FSvecRandom) <- subsetdf$species
-      FSsimtree <- make.simmap(tree = subsettree, x = FSvecRandom, model = "ARD", nsim = 1, Q = FSQ)
-      FSsimtreesRand[[j]] <- FSsimtree
-      print(j)
-    }
+    #for (j in 1:nsims) {
+      #FSvec <- subsetdf[,columns[2]]
+      #FSvecRandom <- sample(FSvec)
+      #names(FSvecRandom) <- subsetdf$species
+      #FSsimtree <- make.simmap(tree = subsettree, x = FSvecRandom, model = "ARD", nsim = 1, Q = FSQ)
+    FSsimtrees = sim.history(tree = subsettree, Q = FSQ, nsim = nsims, anc = FSAnc)
+      #FSsimtreesRand[[j]] <- FSsimtree
+      #print(j)
+    #}
     
-    FSsimtrees<- FSsimtreesRand
-    datalabel <- paste(datalabel,"DUMMYResampledCoopFS")
+    #FSsimtrees<- FSsimtreesRand
+    #datalabel <- paste(datalabel,"DUMMYResampledCoopFS")
+    datalabel <- paste(datalabel,"DUMMYSimHist-CoopFS")
+    
   } # end if dummy = FALSE else
   
   
@@ -226,7 +209,7 @@ CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalab
     dfout <- rbind(dfout, temprow)
     dfout <- as.data.frame(dfout)
     colnames(dfout) <- c("treenum", "column1", "column2", "coopQ01", "coopQ10", "FSQAbsPres", "FSQPresAbs", "Nspecies", "propFSabsent", "propFSpresent", "propNoncoop", "propCoop", "ObsProp0Absent", "ObsProp0Present", "ObsProp1Absent", "ObsProp1Present", "totaltime")
-    if (i %in% c(100,250,500,1000,2000,3000,4000,5000)) {
+    if (i %in% c(100, 200, 250,500,1000,2000,3000,4000,5000)) {
       write.csv(dfout, file = paste(datalabel, "simmap overlap output nsim", nsims, treelabel,".csv"))
     }
   }
@@ -299,19 +282,40 @@ calcHuel <- function(dfout, dfDummy, nsims_real, nsims_dummy) {
   print(paste("num Dummy dsums > D_real:", sum(Dummy_dsums > D_real)))
   print(paste("pval:",pval))
   
+  xmax = max(c(Real_dsims, Dummy_dsums))*1.1
+  
   par(mfrow=c(2,1))
-  hist(Real_dsims, xlim = c(0,0.3), breaks = 20)
+  hist(Real_dsims, xlim = c(0,xmax), breaks = 20)
   abline(v = D_real, col = "red")
-  hist(Dummy_dsums, xlim = c(0,0.3), breaks = 20)
+  hist(Dummy_dsums, xlim = c(0,xmax), breaks = 20)
   
   realDsimDF = cbind(c(rep("real", length(Real_dsims))), Real_dsims)
   dummyDsimDF = cbind(c(rep("dummy", length(Real_dsims))), Real_dsims)
   
-  
 }
 
 
+### Plot hists better
+font_size <- 1.25
 
+# Setting layout for 2 plots
+par(mfrow=c(2,1), mai=c(0.8,1.0,0.5,0.3), oma=c(2,3,2,3), 
+    font.main=1, cex.main=1.5, cex.lab=font_size, cex.axis=1.2)
+
+# Histogram for Real_dsims
+hist(Real_dsims, xlim=c(0,xmax), breaks=20, 
+     col=rgb(0.2,0.5,0.7,0.5), # semi-transparent blue color
+     main="", xlab="D statistic from real data simmaps", ylab="Frequency",
+     border="white")
+abline(v = D_real, col="red", lwd=2.5) # thicker red line
+
+# Histogram for Dummy_dsums
+hist(Dummy_dsums, xlim=c(0,xmax), breaks=20, 
+     col=rgb(0.7,0.5,0.2,0.5), # semi-transparent orange color
+     main="", xlab="D statistic from simulated independent data simmaps", ylab="Frequency",
+     border="white")
+
+dev.off()
 
 
 ### Plot trees and pval hist
@@ -398,18 +402,18 @@ dfDummyMelt <- melt(dfDummy, measure.vars = c("ObsProp0Absent","ObsProp1Absent",
 dfDummyMelt <- melt(dfDummyMelt, measure.vars = c("propFSabsent", "propFSpresent"), variable.name = "FS_state", value.name = "FSstate.prop")
 dfDummyMelt <- melt(dfDummyMelt, measure.vars = c("propNoncoop", "propCoop"), variable.name = "CB_state", value.name = "CBstate.prop")
 
-a <- ggplot(dfDummyMelt, aes(x = state, y = state.prop, fill = pvalgroup)) + geom_boxplot() + ggtitle("dummy CoopBreed data")
-b <- ggplot(dfDummyMelt, aes(x = FS_state, y = FSstate.prop, fill = pvalgroup)) + geom_boxplot()+ ggtitle("dummy CoopBreed data")
-c <- ggplot(dfDummyMelt, aes(x = CB_state, y = CBstate.prop, fill = pvalgroup)) + geom_boxplot()+ ggtitle("dummy CoopBreed data")
+a <- ggplot(dfDummyMelt, aes(x = state, y = state.prop)) + geom_boxplot() + ggtitle("dummy CoopBreed data")
+b <- ggplot(dfDummyMelt, aes(x = FS_state, y = FSstate.prop)) + geom_boxplot()+ ggtitle("dummy CoopBreed data")
+c <- ggplot(dfDummyMelt, aes(x = CB_state, y = CBstate.prop)) + geom_boxplot()+ ggtitle("dummy CoopBreed data")
 
 
 dfoutMelt <- melt(dfout, measure.vars = c("ObsProp0Absent","ObsProp1Absent","ObsProp0Present","ObsProp1Present"), variable.name = "state", value.name = "state.prop")
 dfoutMelt <- melt(dfoutMelt, measure.vars = c("propFSabsent", "propFSpresent"), variable.name = "FS_state", value.name = "FSstate.prop")
 dfoutMelt <- melt(dfoutMelt, measure.vars = c("propNoncoop", "propCoop"), variable.name = "CB_state", value.name = "CBstate.prop")
 
-d <- ggplot(dfoutMelt, aes(x = state, y = state.prop, fill = pvalgroup)) + geom_boxplot() + ggtitle("real CoopBreed data")
-e <- ggplot(dfoutMelt, aes(x = FS_state, y = FSstate.prop, fill = pvalgroup)) + geom_boxplot() + ggtitle("real CoopBreed data")
-f <- ggplot(dfoutMelt, aes(x = CB_state, y = CBstate.prop, fill = pvalgroup)) + geom_boxplot() + ggtitle("real CoopBreed data")
+d <- ggplot(dfoutMelt, aes(x = state, y = state.prop)) + geom_boxplot() + ggtitle("real CoopBreed data")
+e <- ggplot(dfoutMelt, aes(x = FS_state, y = FSstate.prop)) + geom_boxplot() + ggtitle("real CoopBreed data")
+f <- ggplot(dfoutMelt, aes(x = CB_state, y = CBstate.prop)) + geom_boxplot() + ggtitle("real CoopBreed data")
 
-
+require(cowplot)
 plot_grid(a,b,c,d,e,f, ncol = 3)
