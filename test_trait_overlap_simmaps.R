@@ -5,7 +5,7 @@
 ## 
 ## Edited 6/1/23 - added checkpoint save to CharacterSimmaps
 ## Edited 9/27/23 - changed "Dummy" simmap generation to use sim.history() with Q rates, ancestral character estimation instead of randomizing tip states; but seems to have gotten totally weird - output values odd
-## 
+## Edited 9/29/23
 
 setwd("/Users/kate/Desktop/CooperativeBreedingEvolution/")
 library(phytools)
@@ -24,20 +24,24 @@ treelabel <- "Hackett"
 
 subsets = subsettreedata(columns = c("MeanCoopTie2Noncoop", "FemaleSong_Agg01"), newdata = df, newtree = Hacktree)    # decided that for these, will put the pre-subsetted dataset into CharacterSimmaps, to be passed to findQrates, so the Qrates and ancestral character estimation aren't based on any of the non-passerines etc. May want to go back to regular full-subset Q/Anc estimation for other trait combinations
 subsetdf = subsets$subsetdf
+subsettree = subsets$subsettree
 
+# checking whether the Qs from ace and make.simmap are the same - they are!
+tempBinTrait <- subsetdf$MeanCoopTie2Noncoop
+names(tempBinTrait) <- subsetdf$species
+tempSim = make.simmap(subsettree, tempBinTrait, "ARD")
+tempSim$Q
+ace(tempBinTrait, subsettree, type = "discrete", model = "ARD")
 
-nsims_real = 500
-nsims_dummy = 2000
+nsims_real = 5
+nsims_dummy = 20
 
 dfout5 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Agg01"), df = subsetdf, tree =  Hacktree, dummy = FALSE, nsims = nsims_real, treelabel = "Hackett", datalabel = "Tie2NonCoop FSAgg_SubsetQs")
-write.csv(dfout5, paste0("Simmap overlap output_Tie2NonCoop FSAgg nsim", nsims_real,"_Hackett REAL ", Sys.Date(),".csv"))
-dfout6 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Agg01"), df = df, tree =  Erictree, dummy = FALSE, nsims = nsims_real, treelabel = "Ericson", datalabel = "Tie2NonCoop FSAgg")
-#write.csv(dfout6, "Simmap overlap output_Tie2NonCoop FSAgg nsim1000_Ericson REAL.csv")
+#write.csv(dfout5, paste0("Simmap overlap output_Tie2NonCoop FSAgg nsim", nsims_real,"_Hackett REAL ", Sys.Date(),".csv"))
+#dfout6 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Agg01"), df = df, tree =  Erictree, dummy = FALSE, nsims = nsims_real, treelabel = "Ericson", datalabel = "Tie2NonCoop FSAgg")
 
-dfDummy5 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Agg01"), df = subsetdf, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Tie2NonCoop FSAgg_SubsetQs")
-write.csv(dfDummy5, paste0("Simmap overlap output_Tie2NonCoop FSAgg nsim", nsims_dummy,"_Hackett DUMMY ", Sys.Date(),".csv"))
-dfDummy6 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Aggregated"), df = df, tree =  Erictree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Ericson", datalabel = "Tie2NonCoop FSAgg")
-#write.csv(dfDummy6, "Simmap overlap output_Tie2NonCoop FSAgg nsim10000_Ericson DUMMY.csv")
+dfDummyMkSimmap <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Agg01"), df = subsetdf, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Tie2NonCoop FSAgg_SubsetQs", dummyMethod = "makeSimmap")
+dfDummySimHist <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Agg01"), df = subsetdf, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Tie2NonCoop FSAgg_SubsetQs", dummyMethod = "simHistory")
 
 calcHuel(dfout5,dfDummy5, nsims_real = nsims_real, nsims_dummy = nsims_dummy)
 calcHuel(dfout6,dfDummy6, nsims_real = nsims_real, nsims_dummy = nsims_dummy)
@@ -98,7 +102,8 @@ calcHuel(FamFSreal, FamFSdummy, nsims_real = nsims_real, nsims_dummy = nsims_dum
 # calcHuel(dfout, dfDummy, nsims_real = 1000, nsims_dummy = 10000)
 
 
-CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalabel) {
+#### CharacterSimmaps fxn ----
+CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalabel, dummyMethod = c("simHistory", "makeSimmap")) {
   
   require(stringr)
   source("findQrates.R")
@@ -127,37 +132,45 @@ CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalab
   if (dummy == FALSE) {
     FSsimtrees <- make.simmap(tree = subsettree, x = FSvec, model = "ARD", nsim = nsims, Q = FSQ)
     Coopsimtrees <- make.simmap(tree = subsettree, x = Coopvec, model = "ARD", nsim = nsims, Q = coopQ)
+    datalabel = paste(datalabel, "REAL")
   } else {
-    # Make randomized versions of CoopBreed simmaps / DUMMY data
-    #CoopsimtreesRand <- list()
-    print(paste("starting Dummy Coop simmaps", Sys.time()))
-    #for (j in 1:nsims) { # commented out because realized make.simmap was not correct here - need to use sim.history()
-      # Coopvec <- subsetdf[,columns[1]]
-      # CoopvecRandom <- sample(Coopvec)
-      # #CoopvecRandom <- sample(c(0,1), length(Coopvec), replace = TRUE)
-      # names(CoopvecRandom) <- subsetdf$species
-      # Coopsimtree <- make.simmap(tree = subsettree, x = CoopvecRandom, model = "ARD", nsim = 1, Q = coopQ)
+    # dummy simmaps made from one of two methods
+    if (dummyMethod == "simHistory") {
+      print(paste("starting Dummy Coop simmaps", Sys.time()))
       Coopsimtrees <- sim.history(tree = subsettree, Q = coopQ, nsim = nsims, anc = coopAnc)
-      #CoopsimtreesRand[[j]] <- Coopsimtree
-      #print(paste(j, Sys.time()))
-    #}
-    #Coopsimtrees <- CoopsimtreesRand
-    # Make randomized versions of FemaleSong simmaps / DUMMY data
-    #FSsimtreesRand <- list()
-    print(paste("starting Dummy FemSong simmaps", Sys.time()))
-    #for (j in 1:nsims) {
-      #FSvec <- subsetdf[,columns[2]]
-      #FSvecRandom <- sample(FSvec)
-      #names(FSvecRandom) <- subsetdf$species
-      #FSsimtree <- make.simmap(tree = subsettree, x = FSvecRandom, model = "ARD", nsim = 1, Q = FSQ)
-    FSsimtrees = sim.history(tree = subsettree, Q = FSQ, nsim = nsims, anc = FSAnc)
-      #FSsimtreesRand[[j]] <- FSsimtree
-      #print(j)
-    #}
+      print(paste("starting Dummy FemSong simmaps", Sys.time()))
+      FSsimtrees = sim.history(tree = subsettree, Q = FSQ, nsim = nsims, anc = FSAnc)
+      datalabel <- paste(datalabel,"DUMMYSimHist-CoopFS")
+    } else if (dummyMethod == "makeSimmap") {
+      # Make randomized versions of CoopBreed simmaps / DUMMY data
+      CoopsimtreesRand <- list()
+      for (j in 1:nsims) { 
+        Coopvec <- subsetdf[,columns[1]]
+        CoopvecRandom <- sample(Coopvec)
+        names(CoopvecRandom) <- subsetdf$species
+        Coopsimtree <- make.simmap(tree = subsettree, x = CoopvecRandom, model = "ARD", nsim = 1, Q = coopQ)
+
+        CoopsimtreesRand[[j]] <- Coopsimtree
+        print(paste(j, Sys.time()))
+      } # end for j in 1:nsims (Coop)
+      Coopsimtrees <- CoopsimtreesRand
+      
+      # Make randomized versions of FemaleSong simmaps / DUMMY data
+      FSsimtreesRand <- list()
+      print(paste("starting Dummy FemSong simmaps", Sys.time()))
+      for (j in 1:nsims) {
+        FSvec <- subsetdf[,columns[2]]
+        FSvecRandom <- sample(FSvec)
+        names(FSvecRandom) <- subsetdf$species
+        FSsimtree <- make.simmap(tree = subsettree, x = FSvecRandom, model = "ARD", nsim = 1, Q = FSQ)
+        FSsimtreesRand[[j]] <- FSsimtree
+        print(j)
+      } # end for j in 1:nsims (FS)
+      FSsimtrees<- FSsimtreesRand
+      
+      datalabel <- paste(datalabel,"DUMMYResampledMkSimmap-CoopFS")
+    } # end if dummyMethod else
     
-    #FSsimtrees<- FSsimtreesRand
-    #datalabel <- paste(datalabel,"DUMMYResampledCoopFS")
-    datalabel <- paste(datalabel,"DUMMYSimHist-CoopFS")
     
   } # end if dummy = FALSE else
   
@@ -216,9 +229,49 @@ CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalab
   dfout <- as.data.frame(dfout)
   #colnames(dfout) <- c("treenum", "column1", "column2", "coopQ01", "coopQ10", "FSQAbsPres", "FSQPresAbs", "Nspecies", "propFSabsent", "propFSpresent", "propNoncoop", "propCoop", "ObsProp0Absent", "ObsProp0Present", "ObsProp1Absent", "ObsProp1Present", "totaltime", "chiStat", "chiPval", "chiStatSim", "chiPvalSim")
   colnames(dfout) <- c("treenum", "column1", "column2", "coopQ01", "coopQ10", "FSQAbsPres", "FSQPresAbs", "Nspecies", "propFSabsent", "propFSpresent", "propNoncoop", "propCoop", "ObsProp0Absent", "ObsProp0Present", "ObsProp1Absent", "ObsProp1Present", "totaltime")
-  write.csv(dfout, file = paste(datalabel, "simmap overlap output nsim", nsims, treelabel,".csv"))
+  write.csv(dfout, file = paste("simmap overlap output nsim", nsims, treelabel, datalabel,".csv"))
   return(dfout)
 } # end function
+
+
+#### Cycle families ----
+newdata = "2023-09-14_CoopBreed-FemaleSong-Song_Data-wAvoNetFamilies_R.csv"
+treefile <- "/Users/kate/Desktop/CooperativeBreedingEvolution/2022-03-16ConsensusPasserineTreeHackett4_1000.nex"
+dataIn = read.csv(newdata)
+dataIn$X = NULL
+
+CBcolumn = "MeanCoopTie2Coop"
+columns = c(CBcolumn, "FemaleSong_Agg01")
+
+subset1 <- subsettreedata(columns = columns, newdata = dataIn, newtree = treefile, skinnydata = FALSE)
+subsettree1 <- subset1$subsettree
+subsetdf1 <- subset1$subsetdf
+subsetdf1[,columns[1]] <- as.character(subsetdf1[,columns[1]])
+subsetdf1[,columns[2]] <- as.character(subsetdf1[,columns[2]])
+
+unique(subsetdf1$Order3_BirdtreeMatchSpecies2)
+familyvec = unique(subsetdf1$Family3_BirdtreeMatchSpecies2)
+familyvec = na.omit(familyvec)
+
+for (i in 1:length(familyvec)) {
+  
+  familyToRemove = familyvec[i]
+  currentlabel = paste0("remove",familyToRemove)
+  print(currentlabel)
+  tempdfIn = subsetdf1[which(subsetdf1$Family3_BirdtreeMatchSpecies2 != familyToRemove),]
+  
+  subsetbtw <- subsettreedata(columns = columns, newdata = tempdfIn, newtree = subsettree1, skinnydata = TRUE)
+  subsettree <- subsetbtw$subsettree
+  subsetdf <- subsetbtw$subsetdf
+  subsetdf[,columns[1]] <- as.character(subsetdf[,columns[1]])
+  subsetdf[,columns[2]] <- as.character(subsetdf[,columns[2]])
+  numSpecies = length(subsetdf$species)
+  
+  
+  
+  
+} # end cycle through families
+
 
 
 #### Rest of procedure from Huelsenbeck et al 2003
@@ -237,7 +290,7 @@ CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalab
 
 
 
-
+#### calcHuel fxn ----
 calcHuel <- function(dfout, dfDummy, nsims_real, nsims_dummy) {
   ExpPropAbsent0 <- as.numeric(dfout$propFSabsent)*as.numeric(dfout$propNoncoop)
   ExpPropAbsent1 <- as.numeric(dfout$propFSabsent)*as.numeric(dfout$propCoop)
