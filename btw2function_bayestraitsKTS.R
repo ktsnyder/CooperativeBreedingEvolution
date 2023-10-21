@@ -5,7 +5,9 @@
 # Modified 3/15/2022 - output nocorrD stuff too
 # Modified 3/17/2022 - columns input instead of MateParam/SongParam, use BayesTraitsV4 and KTS version of Discrete, add treelabel
 # Modified: 4/25/2022 - from btwfunction.R - started to replace Discrete() usage
-#Last modified: 7/21/2023 - Split from btw2function_DiscreteKTS.R to make use bayestraitsKTS instead of DiscreteKTS - started 8/8/2023, mostly only tested for use with MCMC & Ace priors
+# Modified: 7/21/2023 - Split from btw2function_DiscreteKTS.R to make use bayestraitsKTS instead of DiscreteKTS - started 8/8/2023, mostly only tested for use with MCMC & Ace priors
+# Last modified: 9/15/2023 - reorder if statements for priors since it wasn't liking the default priors = NULL; did not seem to work with song feature data
+# 
 #Built using RStudio Version 1.0.136
 #R Version 3.4.1?
 #
@@ -28,12 +30,13 @@ source("btwV2bayestraitsKTS.R")
 
 btwfunction(columns = c("MeanCoopTie2Coop","Song.rep.final"), plot = FALSE, csvsout = TRUE, nsim = 10, newtreefile = "/Users/kate/Desktop/CooperativeBreedingEvolution/2022-03-16ConsensusPasserineTreeHackett4_1000.nex", newdata = "2023-06-20_CoopBreed-FemaleSong01HighConf-Song_Data_R.csv", treelabel = "Hackett", priors = "Ace", MCMCorML = "MCMC")
 btwfunction(columns = c("MeanCoopTie2Noncoop","Song.rep.final"), plot = FALSE, csvsout = TRUE, nsim = 20, newtreefile = "/Users/kate/Desktop/CooperativeBreedingEvolution/2022-03-16ConsensusPasserineTreeHackett4_1000.nex", newdata = "2023-06-20_CoopBreed-FemaleSong01HighConf-Song_Data_R.csv", treelabel = "Hackett", priors = "Ace", MCMCorML = "MCMC")
+btwfunction(columns = c("MeanCoopTie2Noncoop","Song.rep.final"), plot = FALSE, csvsout = TRUE, nsim = 100, newtreefile = "/Users/kate/Desktop/CooperativeBreedingEvolution/2022-03-16ConsensusPasserineTreeHackett4_1000.nex", newdata = "2023-09-14_CoopBreed-FemaleSong-Song_Data_R.csv", treelabel = "Hackett", MCMCorML = "ML", priors = NULL)
 
 btwfunction <- function(columns, plot=TRUE, jackknife = FALSE, csvsout = FALSE, nsim = 10, newtreefile = FALSE, newdata = FALSE, treelabel = NULL, priors = NULL, MCMCorML = "MCMC") {
   output <- list()
   output$start <- Sys.time()
   print(Sys.time())
-  require(btw)
+  #require(btw)
   require(phytools)
   require(base)
   #require(mnormt)
@@ -51,7 +54,10 @@ btwfunction <- function(columns, plot=TRUE, jackknife = FALSE, csvsout = FALSE, 
   songcol <- SongParam
   OutputFolderPath = paste0("No-Priors_", columns[1], "-", columns[2])
   
-  if (priors == "Ace") {
+ 
+    if (is.null(priors)) {
+      print("no priors")
+    } else if (priors == "Ace") {
     source(file = "findQrates.R")
     column1qrates= tryCatch({
       findQrates(columns = columns[1], plot=FALSE, newtree = newtreefile, newdata = newdata, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, otherlabel = NULL)
@@ -198,7 +204,16 @@ btwfunction <- function(columns, plot=TRUE, jackknife = FALSE, csvsout = FALSE, 
       btwdf <- as.data.frame(cbind(as.character(songdf$species),matevec,as.character(songdiscvec)))
       colnames(btwdf) = c("species", columns)
       
-      if (priors == "Ace") {
+      
+      
+      if (is.null(priors)) {
+        AdditionalCommandsDep = NULL
+        AdditionalCommandsInd = NULL
+        alpha2q = NULL
+        beta2q = NULL
+        alpha1q = NULL
+        beta1q = NULL
+      } else if (priors == "Ace") {
         binarysongdf = read.csv(newdata)
         binarysongdf[which(binarysongdf[,columns[2]] <= thresh),columns[2]] <- 0
         binarysongdf[which(binarysongdf[,columns[2]] > thresh),columns[2]] <- 1

@@ -10,15 +10,18 @@ songfeatures <- c("Syllable.rep.final", "Syll.song.final", "Song.rep.final", "Du
 #newdata = "2022-03-08CoopSong_AnyCoopEqualsCoop_All.csv"
 #newdata = "2022-03-08CoopSong_MeanCoop_All.csv"
 #newdata = "/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-06-01_CoopSongFS_RColumns.csv"
-newdata = "2023-06-20_CoopBreed-FemaleSong01HighConf-Song_Data_R.csv"
+olddata = read.csv("2023-06-20_CoopBreed-FemaleSong01HighConf-Song_Data_R.csv") # pre-cornwallis
+newdata = "2023-09-14_CoopBreed-FemaleSong-Song_Data_R.csv"
 dataNoSongless = read.csv(newdata)
 dataNoSongless$X = NULL
 #treefile <- "2021-08-31ConsensusPasserineTreeEricson10_1000.nex" # 3/8/2022
 treefile <- "/Users/kate/Desktop/CooperativeBreedingEvolution/2022-03-16ConsensusPasserineTreeHackett4_1000.nex"
+tree = read.nexus(treefile)
+write.tree(tree, file = "/Users/kate/Desktop/CooperativeBreedingEvolution/2022-03-16ConsensusPasserineTreeHackett4_1000.nwk")
 currentlabel <- "Hackett-Tie2Noncoop"
 CBcolumn = "MeanCoopTie2Noncoop"
 #columns = c("HighConfidence_FemaleSong", CBcolumn)
-columns = c("HighConfidence_FemaleSong", CBcolumn)
+columns = c("FemaleSong_Agg01", CBcolumn)
 
 
 # test ER/ARD brownie
@@ -42,8 +45,8 @@ CBcolumn = "MeanCoopTie2Noncoop"
 #discreteCatLabels = c("Female Song Absent", "Female Song Present")
 discreteCatLabels = c("Noncooperative", "Cooperative")
 currentlabel <- "_Hackett"
-nsim = 101
-for (k in 7:9) {
+nsim = 100
+for (k in 7) {
   print(Sys.time())
   newdata = newdata
   treefile = treefile
@@ -420,3 +423,112 @@ plotDiscreteBayes(columns = columns, simplebtwOut = simplebtwV1Out, nsim = nsim,
 dev.off()
 
 simplebtwDiscrete(columns = columns, newdata = newdata, newtree = treefile, nsim = nsim, )
+
+
+
+#### Cycle Simple BT Discrete ----
+# Simple bayestraits discrete tests for Female Song and CoopBreed
+
+library(devtools)
+install_github("rgriff23/btw")
+library(btw)
+
+newdata = "2023-09-14_CoopBreed-FemaleSong-Song_Data-wAvoNetFamilies_R.csv"
+treefile <- "/Users/kate/Desktop/CooperativeBreedingEvolution/2022-03-16ConsensusPasserineTreeHackett4_1000.nex"
+
+source("btwDiscreteKTS.R")
+.BayesTraitsPath = "~/Documents/BayesTraitsV4"
+#.BayesTraitsPath = "~/Documents/BayesTraitsV3"
+dataIn = read.csv(newdata)
+dataIn$X = NULL
+
+CBcolumn = "MeanCoopTie2Coop"
+columns = c(CBcolumn, "FemaleSong_Agg01")
+currentlabel <- "Hackett-TieNoncoop-FSAgg"
+subset1 <- subsettreedata(columns = columns, newdata = dataIn, newtree = treefile, skinnydata = FALSE)
+subsettree1 <- subset1$subsettree
+subsetdf1 <- subset1$subsetdf
+subsetdf1[,columns[1]] <- as.character(subsetdf1[,columns[1]])
+subsetdf1[,columns[2]] <- as.character(subsetdf1[,columns[2]])
+
+# unique(subsetdf1$Order3_BirdtreeMatchSpecies2)
+# familyvec = unique(subsetdf1$Family3_BirdtreeMatchSpecies2)
+# familyvec = na.omit(familyvec)
+
+require(dplyr)
+familycounts = subsetdf1 %>% group_by(Family3_BirdtreeMatchSpecies2) %>% count
+familyvec = familycounts$Family3_BirdtreeMatchSpecies2[which(familycounts$n > 2)]
+
+for (i in 1:length(familyvec)) {
+  
+  familyToRemove = familyvec[i]
+  currentlabel = paste0("remove",familyToRemove)
+  print(currentlabel)
+  tempdfIn = subsetdf1[which(subsetdf1$Family3_BirdtreeMatchSpecies2 != familyToRemove),]
+
+subsetbtw <- subsettreedata(columns = columns, newdata = tempdfIn, newtree = subsettree1, skinnydata = TRUE)
+subsettree <- subsetbtw$subsettree
+subsetdf <- subsetbtw$subsetdf
+subsetdf[,columns[1]] <- as.character(subsetdf[,columns[1]])
+subsetdf[,columns[2]] <- as.character(subsetdf[,columns[2]])
+numSpecies = length(subsetdf$species)
+
+## Using my altered btw::bayestraits function
+source("btwV2bayestraitsKTS.R")
+seeds = 101:120
+Version = "V4"
+Method = "ML"
+MLtries = 100
+
+outputdf = set.seed(10)
+# Do Independent first
+for (i in seeds) {
+  print(paste("Independent, Seed:", i))
+  tempdf = set.seed(i)
+  Seed = i
+  Model = "Independent"
+  commandVector = c("2", "1", paste("mlt", MLtries), paste("Se", i)) # mlt number of tries
+  
+  outInd <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, BTversionNum = Version, remove_files = T, BTdirpath = "~/Documents")
+  resultsInd = outInd$Log$results
+  temprow = cbind(Seed, Version, Model, Method, MLtries, numSpecies, resultsInd)
+  tempdf = rbind(tempdf, temprow)
+  
+  outdf = tempdf[,c("Seed","Version","Model","Method","MLtries", "numSpecies", "Tree.No", "Lh")]
+  outdf$q12 = tempdf$alpha2
+  outdf$q13 = tempdf$alpha1
+  outdf$q21 = tempdf$beta2
+  outdf$q24 = tempdf$alpha1
+  outdf$q31 = tempdf$beta1
+  outdf$q34 = tempdf$alpha2
+  outdf$q42 = tempdf$beta1
+  outdf$q43 = tempdf$beta2
+  outdf = cbind(outdf, tempdf[,c("Root...P.0.0.", "Root...P.0.1.", "Root...P.1.0.", "Root...P.1.1.")])
+  
+  outputdf = rbind(outputdf,outdf)
+}
+write.csv(outputdf, paste0("BayesTraitsDiscreteML_", columns[1], "-", columns[2], "_", currentlabel, ".csv"))
+
+# Then do dependent
+for (i in seeds[1:length(seeds)]) {
+  print(paste("Dependent, Seed:", i))
+  tempdf = set.seed(i)
+  Seed = i
+  Model = "Dependent"
+  
+  commandVector = c("3", "1", paste("mlt", MLtries), paste("Se", i))
+  
+  outDep <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, BTversionNum = Version, remove_files = T, BTdirpath = "~/Documents")
+  resultsDep = outDep$Log$results
+  temprow = cbind(Seed, Version, Model, Method, MLtries, numSpecies, resultsDep)
+  tempdf = rbind(tempdf, temprow)
+  
+  outputdf = rbind(outputdf, tempdf)
+  
+  if (Seed %in% c(110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 240, 260, 280, 300, 350, 400, 450, 500)) {
+    write.csv(outputdf, paste0("BayesTraitsDiscreteML_", columns[1], "-", columns[2], "_", currentlabel, ".csv"))
+  }
+}
+write.csv(outputdf, paste0("BayesTraitsDiscreteML_", columns[1], "-", columns[2], "_", currentlabel, ".csv"))
+
+} # end cycle through familyvec
