@@ -222,26 +222,31 @@ CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalab
     dfout <- rbind(dfout, temprow)
     dfout <- as.data.frame(dfout)
     colnames(dfout) <- c("treenum", "column1", "column2", "coopQ01", "coopQ10", "FSQAbsPres", "FSQPresAbs", "Nspecies", "propFSabsent", "propFSpresent", "propNoncoop", "propCoop", "ObsProp0Absent", "ObsProp0Present", "ObsProp1Absent", "ObsProp1Present", "totaltime")
+    if (!dir.exists("Simmap Overlap Outputs")) {
+      dir.create("Simmap Overlap Outputs")
+    }
     if (i %in% c(100, 200, 250,500,1000,2000,3000,4000,5000)) {
-      write.csv(dfout, file = paste(datalabel, "simmap overlap output nsim", nsims, treelabel,".csv"))
+      write.csv(dfout, file = paste("Simmap Overlap Outputs/", datalabel, "simmap overlap output nsim", nsims, treelabel,".csv"))
     }
   }
   dfout <- as.data.frame(dfout)
   #colnames(dfout) <- c("treenum", "column1", "column2", "coopQ01", "coopQ10", "FSQAbsPres", "FSQPresAbs", "Nspecies", "propFSabsent", "propFSpresent", "propNoncoop", "propCoop", "ObsProp0Absent", "ObsProp0Present", "ObsProp1Absent", "ObsProp1Present", "totaltime", "chiStat", "chiPval", "chiStatSim", "chiPvalSim")
   colnames(dfout) <- c("treenum", "column1", "column2", "coopQ01", "coopQ10", "FSQAbsPres", "FSQPresAbs", "Nspecies", "propFSabsent", "propFSpresent", "propNoncoop", "propCoop", "ObsProp0Absent", "ObsProp0Present", "ObsProp1Absent", "ObsProp1Present", "totaltime")
-  write.csv(dfout, file = paste("simmap overlap output nsim", nsims, treelabel, datalabel,".csv"))
+  write.csv(dfout, file = paste("Simmap Overlap Outputs/", datalabel, "simmap overlap output nsim", nsims, treelabel,".csv"))
   return(dfout)
 } # end function
 
 
-#### Cycle families ----
+#### Cycle families - jackknife ----
 newdata = "2023-09-14_CoopBreed-FemaleSong-Song_Data-wAvoNetFamilies_R.csv"
 treefile <- "/Users/kate/Desktop/CooperativeBreedingEvolution/2022-03-16ConsensusPasserineTreeHackett4_1000.nex"
+Hacktree = read.nexus(treefile)
 dataIn = read.csv(newdata)
 dataIn$X = NULL
 
 CBcolumn = "MeanCoopTie2Coop"
-columns = c(CBcolumn, "FemaleSong_Agg01")
+#columns = c(CBcolumn, "FemaleSong_Agg01")
+columns = c(CBcolumn, "HighConfidence_FemaleSong")
 
 subset1 <- subsettreedata(columns = columns, newdata = dataIn, newtree = treefile, skinnydata = FALSE)
 subsettree1 <- subset1$subsettree
@@ -249,15 +254,18 @@ subsetdf1 <- subset1$subsetdf
 subsetdf1[,columns[1]] <- as.character(subsetdf1[,columns[1]])
 subsetdf1[,columns[2]] <- as.character(subsetdf1[,columns[2]])
 
-unique(subsetdf1$Order3_BirdtreeMatchSpecies2)
-familyvec = unique(subsetdf1$Family3_BirdtreeMatchSpecies2)
-familyvec = na.omit(familyvec)
+familycounts = subsetdf1 %>% group_by(Family3_BirdtreeMatchSpecies2) %>% count
+familyvec = familycounts$Family3_BirdtreeMatchSpecies2[which(familycounts$n > 2)]
 
-for (i in 1:length(familyvec)) {
+nsims_real = 50
+nsims_dummy = 200
+
+
+for (j in 1:length(familyvec)) {
   
-  familyToRemove = familyvec[i]
-  currentlabel = paste0("remove",familyToRemove)
-  print(currentlabel)
+  familyToRemove = familyvec[j]
+  templabel = paste0(columns[1], "_", columns[2], "_", "remove",familyToRemove)
+  print(paste(j, templabel))
   tempdfIn = subsetdf1[which(subsetdf1$Family3_BirdtreeMatchSpecies2 != familyToRemove),]
   
   subsetbtw <- subsettreedata(columns = columns, newdata = tempdfIn, newtree = subsettree1, skinnydata = TRUE)
@@ -267,11 +275,57 @@ for (i in 1:length(familyvec)) {
   subsetdf[,columns[2]] <- as.character(subsetdf[,columns[2]])
   numSpecies = length(subsetdf$species)
   
+  dfout4 <- CharacterSimmaps(columns = columns, df = subsetdf, tree =  subsettree, dummy = FALSE, nsims = nsims_real, treelabel = "Hackett", datalabel = templabel, dummyMethod = "makeSimmap")
+  dfDummy4 <- CharacterSimmaps(columns = columns, df = subsetdf, tree =  subsettree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = templabel, dummyMethod = "makeSimmap")
   
   
-  
-} # end cycle through families
+} # end cycle through families for jackknife
 
+
+#### Cycle families - single family ----
+newdata = "2023-09-14_CoopBreed-FemaleSong-Song_Data-wAvoNetFamilies_R.csv"
+treefile <- "/Users/kate/Desktop/CooperativeBreedingEvolution/2022-03-16ConsensusPasserineTreeHackett4_1000.nex"
+Hacktree = read.nexus(treefile)
+dataIn = read.csv(newdata)
+dataIn$X = NULL
+
+CBcolumn = "MeanCoopTie2Noncoop"
+columns = c(CBcolumn, "FemaleSong_Agg01")
+
+subset1 <- subsettreedata(columns = columns, newdata = dataIn, newtree = treefile, skinnydata = FALSE)
+subsettree1 <- subset1$subsettree
+subsetdf1 <- subset1$subsetdf
+subsetdf1[,columns[1]] <- as.character(subsetdf1[,columns[1]])
+subsetdf1[,columns[2]] <- as.character(subsetdf1[,columns[2]])
+
+familycounts = subsetdf1 %>% group_by(Family3_BirdtreeMatchSpecies2) %>% count
+familyvec = familycounts$Family3_BirdtreeMatchSpecies2[which(familycounts$n > 4)]
+
+nsims_real = 100
+nsims_dummy = 500
+
+
+for (j in 1:length(familyvec)) {
+  
+  familyToKeep = familyvec[j]
+  templabel = paste0(columns[1], "_", columns[2], "_", "only",familyToKeep)
+  print(paste(j, templabel))
+  tempdfIn = subsetdf1[which(subsetdf1$Family3_BirdtreeMatchSpecies2 == familyToKeep),]
+  
+  subsetbtw <- subsettreedata(columns = columns, newdata = tempdfIn, newtree = subsettree1, skinnydata = TRUE)
+  subsettree <- subsetbtw$subsettree
+  subsetdf <- subsetbtw$subsetdf
+  subsetdf[,columns[1]] <- as.character(subsetdf[,columns[1]])
+  subsetdf[,columns[2]] <- as.character(subsetdf[,columns[2]])
+  numSpecies = length(subsetdf$species)
+  
+  if ( length(unique(subsetdf[,columns[1]])) == 2 & length(unique(subsetdf[,columns[2]])) == 2 ) {
+    print(paste(familyToKeep, "has both FS/noFS and CB/nonCB"))
+  dfout4 <- CharacterSimmaps(columns = columns, df = subsetdf, tree =  subsettree, dummy = FALSE, nsims = nsims_real, treelabel = "Hackett", datalabel = templabel, dummyMethod = "makeSimmap")
+  dfDummy4 <- CharacterSimmaps(columns = columns, df = subsetdf, tree =  subsettree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = templabel, dummyMethod = "makeSimmap")
+  } # end if family has instances of CB = 0,1 and FS = 0,1
+  
+} # end cycle through families for single family
 
 
 #### Rest of procedure from Huelsenbeck et al 2003
@@ -291,7 +345,18 @@ for (i in 1:length(familyvec)) {
 
 
 #### calcHuel fxn ----
-calcHuel <- function(dfout, dfDummy, nsims_real, nsims_dummy) {
+calcHuel <- function(dfout, dfDummy, nsims_real = NULL, nsims_dummy = NULL, otherlabel = NULL, newplot = TRUE) {
+  if (is.null(nsims_real)) {
+    nsims_real = length(dfout[,1])
+  }
+  if (is.null(nsims_dummy)) {
+    nsims_dummy = length(dfDummy[,1])
+  }
+  
+  Nspecies = dfout[1,"Nspecies"]
+  trait1 = dfout[1,"column1"]
+  trait2 = dfout[1,"column2"]
+  
   ExpPropAbsent0 <- as.numeric(dfout$propFSabsent)*as.numeric(dfout$propNoncoop)
   ExpPropAbsent1 <- as.numeric(dfout$propFSabsent)*as.numeric(dfout$propCoop)
   ExpPropPresent0 <- as.numeric(dfout$propFSpresent)*as.numeric(dfout$propNoncoop)
@@ -335,12 +400,39 @@ calcHuel <- function(dfout, dfDummy, nsims_real, nsims_dummy) {
   print(paste("num Dummy dsums > D_real:", sum(Dummy_dsums > D_real)))
   print(paste("pval:",pval))
   
+  plotlabel = paste(trait1, trait2, "\nN species =", Nspecies, otherlabel)
+  dummytitle = paste("Nsims =", nsims_dummy, otherlabel, "\nnum Dummy dsums > D_real:", sum(Dummy_dsums > D_real), ", pval =", pval)
+  
   xmax = max(c(Real_dsims, Dummy_dsums))*1.1
   
-  par(mfrow=c(2,1))
-  hist(Real_dsims, xlim = c(0,xmax), breaks = 20)
-  abline(v = D_real, col = "red")
-  hist(Dummy_dsums, xlim = c(0,xmax), breaks = 20)
+  # par(mfrow=c(2,1))
+  # hist(Real_dsims, xlim = c(0,xmax), breaks = 20)
+  # abline(v = D_real, col = "red")
+  # hist(Dummy_dsums, xlim = c(0,xmax), breaks = 20)
+  
+  
+  ### Plot hists better
+  
+if (newplot == TRUE) {
+  font_size <- 1.0
+  # Setting layout for 2 plots
+  par(mfrow=c(2,1), mai=c(0.8,1.0,0.5,0.3), oma=c(2,3,2,3), 
+      font.main=1, cex.main=1.25, cex.lab=font_size, cex.axis=1)
+}
+  
+  # Histogram for Real_dsims
+  hist(Real_dsims, xlim=c(0,xmax), breaks=20, 
+       col=rgb(0.2,0.5,0.7,0.5), # semi-transparent blue color
+       main=plotlabel, xlab="D statistic from real data simmaps", ylab="Frequency",
+       border="white")
+  abline(v = D_real, col="red", lwd=2.5) # thicker red line
+  
+  # Histogram for Dummy_dsums
+  hist(Dummy_dsums, xlim=c(0,xmax), breaks=20, 
+       col=rgb(0.7,0.5,0.2,0.5), # semi-transparent orange color
+       main=dummytitle, xlab="D statistic from simulated independent data simmaps", ylab="Frequency",
+       border="white")
+  
   
   realDsimDF = cbind(c(rep("real", length(Real_dsims))), Real_dsims)
   dummyDsimDF = cbind(c(rep("dummy", length(Real_dsims))), Real_dsims)
@@ -348,7 +440,47 @@ calcHuel <- function(dfout, dfDummy, nsims_real, nsims_dummy) {
 }
 
 
-### Plot hists better
+#### cycle calcHuel ---- 
+# After doing the Cycle families processes above
+filelist = list.files("/Users/kate/Desktop/CooperativeBreedingEvolution/Simmap Overlap Outputs")
+trait1 = "MeanCoopTie2Noncoop"
+trait2 = "FemaleSong_Agg01"
+
+## EITHER
+tempFiles = jackknifeFiles = filelist[which(str_detect(filelist, "remove") & str_detect(filelist, trait1) & str_detect(filelist, trait2))]
+tempUniqueFamilies = unique_remove_strings <- unique(gsub(".*remove([^ ]*) .*", "\\1", jackknifeFiles))
+familytreatment = "removed"
+pdf(file = paste0("jackknifed Simmap Overlaps ", trait1, " ", trait2, ".pdf"), width = 12, height = 10)
+
+## OR
+tempFiles = onefamilyFiles = filelist[which(str_detect(filelist, "only") & str_detect(filelist, trait1) & str_detect(filelist, trait2))]
+tempUniqueFamilies = unique_only_strings <- unique(gsub(".*only([^ ]*) .*", "\\1", onefamilyFiles))
+familytreatment = "only"
+pdf(paste0("single family Simmap Overlaps ", trait1, " ", trait2, ".pdf"), width = 12, height = 10)
+
+
+par(mfcol=c(4,3), mai=c(0.8,1.0,0.5,0.3), oma=c(2,3,2,3), 
+    font.main=1, cex.main=1.25, cex.lab=1.1, cex.axis=1.1)
+
+for (i in 1:length(tempUniqueFamilies)) {
+  tempFamily = tempUniqueFamilies[i]
+  tempRealFile = tempFiles[which(str_detect(tempFiles, tempFamily) & str_detect(tempFiles, "REAL"))]
+  tempDummyFile = tempFiles[which(str_detect(tempFiles, tempFamily) & str_detect(tempFiles, "DUMMY"))]
+  
+  RealDF = read.csv(paste0("/Users/kate/Desktop/CooperativeBreedingEvolution/Simmap Overlap Outputs/",tempRealFile))
+  DummyDF = read.csv(paste0("/Users/kate/Desktop/CooperativeBreedingEvolution/Simmap Overlap Outputs/",tempDummyFile))
+  
+  templabel = paste0(familytreatment, tempFamily)
+  
+  calcHuel(dfout = RealDF, dfDummy = DummyDF, newplot = FALSE, otherlabel = templabel)
+}
+dev.off()
+
+
+
+
+
+### Plot hists better - moved into calcHuel
 font_size <- 1.25
 
 # Setting layout for 2 plots
