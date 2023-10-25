@@ -426,7 +426,7 @@ simplebtwDiscrete(columns = columns, newdata = newdata, newtree = treefile, nsim
 
 
 
-#### Cycle Simple BT Discrete ----
+#### Cycle Simple BT Discrete Jackknifed ----
 # Simple bayestraits discrete tests for Female Song and CoopBreed
 
 library(devtools)
@@ -442,9 +442,8 @@ source("btwDiscreteKTS.R")
 dataIn = read.csv(newdata)
 dataIn$X = NULL
 
-CBcolumn = "MeanCoopTie2Coop"
+CBcolumn = "MeanCoopTie2Noncoop"
 columns = c(CBcolumn, "FemaleSong_Agg01")
-currentlabel <- "Hackett-TieNoncoop-FSAgg"
 subset1 <- subsettreedata(columns = columns, newdata = dataIn, newtree = treefile, skinnydata = FALSE)
 subsettree1 <- subset1$subsettree
 subsetdf1 <- subset1$subsetdf
@@ -475,7 +474,7 @@ numSpecies = length(subsetdf$species)
 
 ## Using my altered btw::bayestraits function
 source("btwV2bayestraitsKTS.R")
-seeds = 101:120
+seeds = 121:140
 Version = "V4"
 Method = "ML"
 MLtries = 100
@@ -532,3 +531,570 @@ for (i in seeds[1:length(seeds)]) {
 write.csv(outputdf, paste0("BayesTraitsDiscreteML_", columns[1], "-", columns[2], "_", currentlabel, ".csv"))
 
 } # end cycle through familyvec
+
+
+
+
+#### Cycle Simple BT Discrete Single Family ----
+# Simple bayestraits discrete tests for Female Song and CoopBreed
+
+library(devtools)
+install_github("rgriff23/btw")
+library(btw)
+
+newdata = "2023-09-14_CoopBreed-FemaleSong-Song_Data-wAvoNetFamilies_R.csv"
+treefile <- "/Users/kate/Desktop/CooperativeBreedingEvolution/2022-03-16ConsensusPasserineTreeHackett4_1000.nex"
+
+source("btwDiscreteKTS.R")
+.BayesTraitsPath = "~/Documents/BayesTraitsV4"
+#.BayesTraitsPath = "~/Documents/BayesTraitsV3"
+dataIn = read.csv(newdata)
+dataIn$X = NULL
+
+CBcolumn = "MeanCoopTie2Noncoop"
+columns = c(CBcolumn, "FemaleSong_Agg01")
+subset1 <- subsettreedata(columns = columns, newdata = dataIn, newtree = treefile, skinnydata = FALSE)
+subsettree1 <- subset1$subsettree
+subsetdf1 <- subset1$subsetdf
+subsetdf1[,columns[1]] <- as.character(subsetdf1[,columns[1]])
+subsetdf1[,columns[2]] <- as.character(subsetdf1[,columns[2]])
+
+# unique(subsetdf1$Order3_BirdtreeMatchSpecies2)
+# familyvec = unique(subsetdf1$Family3_BirdtreeMatchSpecies2)
+# familyvec = na.omit(familyvec)
+
+require(dplyr)
+familycounts = subsetdf1 %>% group_by(Family3_BirdtreeMatchSpecies2) %>% count
+familyvec = familycounts$Family3_BirdtreeMatchSpecies2[which(familycounts$n > 4)]
+
+for (j in 1:length(familyvec)) {
+  
+  familyToKeep = familyvec[j]
+  templabel = paste0(columns[1], "_", columns[2], "_", "only",familyToKeep)
+  print(paste(j, templabel))
+  tempdfIn = subsetdf1[which(subsetdf1$Family3_BirdtreeMatchSpecies2 == familyToKeep),]
+  
+  subsetbtw <- subsettreedata(columns = columns, newdata = tempdfIn, newtree = subsettree1, skinnydata = TRUE)
+  subsettree <- subsetbtw$subsettree
+  subsetdf <- subsetbtw$subsetdf
+  subsetdf[,columns[1]] <- as.character(subsetdf[,columns[1]])
+  subsetdf[,columns[2]] <- as.character(subsetdf[,columns[2]])
+  numSpecies = length(subsetdf$species)
+  
+  if ( length(unique(subsetdf[,columns[1]])) == 2 & length(unique(subsetdf[,columns[2]])) == 2 ) {
+    print(paste(familyToKeep, "has both FS/noFS and CB/nonCB"))
+
+  
+  ## Using my altered btw::bayestraits function
+  source("btwV2bayestraitsKTS.R")
+  seeds = 141:190
+  Version = "V4"
+  Method = "ML"
+  MLtries = 100
+  
+  outputdf = set.seed(10)
+  # Do Independent first
+  for (i in seeds) {
+    print(paste("Independent, Seed:", i))
+    tempdf = set.seed(i)
+    Seed = i
+    Model = "Independent"
+    commandVector = c("2", "1", paste("mlt", MLtries), paste("Se", i)) # mlt number of tries
+    
+    outInd <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, BTversionNum = Version, remove_files = T, BTdirpath = "~/Documents")
+    resultsInd = outInd$Log$results
+    temprow = cbind(Seed, Version, Model, Method, MLtries, numSpecies, resultsInd)
+    tempdf = rbind(tempdf, temprow)
+    
+    outdf = tempdf[,c("Seed","Version","Model","Method","MLtries", "numSpecies", "Tree.No", "Lh")]
+    outdf$q12 = tempdf$alpha2
+    outdf$q13 = tempdf$alpha1
+    outdf$q21 = tempdf$beta2
+    outdf$q24 = tempdf$alpha1
+    outdf$q31 = tempdf$beta1
+    outdf$q34 = tempdf$alpha2
+    outdf$q42 = tempdf$beta1
+    outdf$q43 = tempdf$beta2
+    outdf = cbind(outdf, tempdf[,c("Root...P.0.0.", "Root...P.0.1.", "Root...P.1.0.", "Root...P.1.1.")])
+    
+    outputdf = rbind(outputdf,outdf)
+  }
+  write.csv(outputdf, paste0("BayesTraitsDiscreteML_", columns[1], "-", columns[2], "_", templabel, ".csv"))
+  
+  # Then do dependent
+  for (i in seeds[1:length(seeds)]) {
+    print(paste("Dependent, Seed:", i))
+    tempdf = set.seed(i)
+    Seed = i
+    Model = "Dependent"
+    
+    commandVector = c("3", "1", paste("mlt", MLtries), paste("Se", i))
+    
+    outDep <- bayestraitsKTS(data = subsetdf, tree = subsettree, commands = commandVector, BTversionNum = Version, remove_files = T, BTdirpath = "~/Documents")
+    resultsDep = outDep$Log$results
+    temprow = cbind(Seed, Version, Model, Method, MLtries, numSpecies, resultsDep)
+    tempdf = rbind(tempdf, temprow)
+    
+    outputdf = rbind(outputdf, tempdf)
+    
+    if (Seed %in% c(110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 240, 260, 280, 300, 350, 400, 450, 500)) {
+      write.csv(outputdf, paste0("BayesTraitsDiscreteML_", columns[1], "-", columns[2], "_", templabel, ".csv"))
+    }
+  }
+  write.csv(outputdf, paste0("BayesTraitsDiscreteML_", columns[1], "-", columns[2], "_", templabel, ".csv"))
+  
+  } # end if family has instances of CB = 0,1 and FS = 0,1
+  
+} # end cycle through familyvec for single family tests
+
+
+#### Cycle plot simple bayestraits ----
+# use plotSimpleDiscreteBayes from plotSimpleDiscreteBayes.R
+
+trait1 = "MeanCoopTie2Noncoop"
+trait2 = "FemaleSong_Agg01"
+
+# EITHER
+tempfolder = paste0("BayesTraitsDiscreteML_", trait1, "-", trait2, " Jackknife Outputs")
+filelist = list.files(tempfolder)
+filelist = filelist[which(str_detect(filelist, "remove") & str_detect(filelist, trait1) & str_detect(filelist, trait2))]
+familytreatment = "removed"
+pdf(file = paste0("jackknifed BayesTraitsDiscrete ", trait1, " ", trait2, ".pdf"), width = 12, height = 10)
+
+# OR
+# (single family)
+tempfolder = paste0("BayesTraitsDiscreteML_", trait1, "-", trait2, " SingleFamily Outputs")
+filelist = list.files(tempfolder)
+filelist = filelist[which(str_detect(filelist, "only") & str_detect(filelist, trait1) & str_detect(filelist, trait2))]
+familytreatment = "only"
+pdf(file = paste0("SingleFamily BayesTraitsDiscrete ", trait1, " ", trait2, ".pdf"), width = 12, height = 10)
+
+par(mfrow=c(3,3), mai=c(0.8,1.0,0.5,0.3), oma=c(2,3,2,3), 
+    font.main=1, cex.main=1.25, cex.lab=1.1, cex.axis=1.1)
+
+for (j in 1:length(filelist)) {
+tempfile = filelist[j]
+
+if (str_detect(tempfile, "remove")) {
+  tempFamily <- unique(gsub(".*remove([A-Za-z]+)\\.csv", "\\1", tempfile))
+} else if (str_detect(tempfile, "only")) {
+  tempFamily <- unique(gsub(".*only([A-Za-z]+)\\.csv", "\\1", tempfile))
+}
+
+tempfilepath = paste(tempfolder, tempfile, sep = "/")
+
+dfIn = read.csv(tempfilepath)
+dfInDep = dfIn[which(dfIn$Model == "Dependent"),]
+dfInInd = dfIn[which(dfIn$Model == "Independent"),]
+
+Nspecies = dfIn[1,"numSpecies"]
+
+templabel = paste0(familytreatment, tempFamily, " Nspecies=", Nspecies)
+
+tryCatch(
+  {
+plotSimpleDiscreteBayes(columns = c(trait1,trait2), df = dfInDep, nocorrDdf = dfInInd, LhCol = "Lh", nsim = NULL, treelabel = NULL, newpdf = FALSE, otherlabel = "", ylabel = templabel, arrowmod = 1, roundDigits = 3)
+  }, error=function(e) {
+    message(paste("An Error occurred, could not plot", templabel))
+  }) # end trycatch
+
+}
+dev.off()
+
+
+#### Cycle plot simple bayestraits AND simmap overlap ----
+# For each family, plot 1) Simmap overlap Real D hist, 2) dummy D hist, 3) Observed state boxplots, 4) bayestraits Dependent plot, 5) BayesTraits Pval plot, 6) family tree with CB tips, 7) family tree with FS tips, 8?) whole tree with family indicated w simmap
+
+newdata = "2023-09-14_CoopBreed-FemaleSong-Song_Data-wAvoNetFamilies_R.csv"
+newdatadf = read.csv(newdata)
+newdatadf$X = NULL
+treefile <- "/Users/kate/Desktop/CooperativeBreedingEvolution/2022-03-16ConsensusPasserineTreeHackett4_1000.nex"
+
+# get which tests were done per family
+alltestdf = set.seed(10)
+
+# BayesTraits jackknife
+trait1 = "MeanCoopTie2Noncoop"
+trait2 = "FemaleSong_Agg01"
+trait1 = "MeanCoopTie2Coop"
+trait2 = "FemaleSong_Agg01"
+tempfolder = paste0("BayesTraitsDiscreteML_", trait1, "-", trait2, " Jackknife Outputs")
+filelist = list.files(tempfolder)
+filelist = filelist[which(str_detect(filelist, "remove") & str_detect(filelist, trait1) & str_detect(filelist, trait2))]
+tempFamily <- unique(gsub(".*remove([A-Za-z]+)\\.csv", "\\1", filelist))
+test = "BayesTraits Jackknife"
+famdf <- cbind(test, trait1, trait2, tempFamily)
+alltestdf <- rbind(alltestdf, famdf)
+alltestdf <- as.data.frame(alltestdf)
+
+# BayesTraits single family
+trait1 = "MeanCoopTie2Noncoop"
+trait2 = "FemaleSong_Agg01"
+tempfolder = paste0("BayesTraitsDiscreteML_", trait1, "-", trait2, " SingleFamily Outputs")
+filelist = list.files(tempfolder)
+filelist = filelist[which(str_detect(filelist, "only") & str_detect(filelist, trait1) & str_detect(filelist, trait2))]
+tempFamily <- unique(gsub(".*only([A-Za-z]+)\\.csv", "\\1", filelist))
+test = "BayesTraits SingleFamily"
+famdf <- cbind(test, trait1, trait2, tempFamily)
+alltestdf <- rbind(alltestdf, famdf)
+
+# Simmap Overlap jackknife
+trait1 = "MeanCoopTie2Coop"
+trait2 = "FemaleSong_Agg01"
+require(reshape2)
+trait1 = "MeanCoopTie2Noncoop"
+trait2 = "FemaleSong_Agg01"
+
+trait1 = "MeanCoopTie2Coop"
+trait2 = "HighConfidence_FemaleSong"
+filelist = list.files(paste0("/Users/kate/Desktop/CooperativeBreedingEvolution/Simmap Overlap Outputs/Jackknife ", trait1, " ", trait2), recursive = T, pattern = ".csv", full.names = T)
+tempFiles = jackknifeFiles = filelist[which(str_detect(filelist, "remove") & str_detect(filelist, trait1) & str_detect(filelist, trait2))]
+tempFamily <- tempUniqueFamilies <- unique_remove_strings <- unique(gsub(".*remove([^ ]*) .*", "\\1", jackknifeFiles))
+test = "SimmapOverlap Jackknife"
+famdf <- cbind(test, trait1, trait2, tempFamily)
+alltestdf <- rbind(alltestdf, famdf)
+familytreatment = "removed"
+
+## Simmap overlap single family
+trait1 = "MeanCoopTie2Noncoop"
+trait2 = "FemaleSong_Agg01"
+
+filelist = list.files(paste0("/Users/kate/Desktop/CooperativeBreedingEvolution/Simmap Overlap Outputs/Single Family ", trait1, " ", trait2), recursive = T, pattern = ".csv", full.names = T)
+tempFiles = onefamilyFiles = filelist[which(str_detect(filelist, "only") & str_detect(filelist, trait1) & str_detect(filelist, trait2))]
+tempFamily <- tempUniqueFamilies <- unique_only_strings <- unique(gsub(".*only([^ ]*) .*", "\\1", onefamilyFiles))
+test = "SimmapOverlap SingleFamily"
+famdf <- cbind(test, trait1, trait2, tempFamily)
+alltestdf <- rbind(alltestdf, famdf)
+familytreatment = "only"
+#write.csv(alltestdf, "summary of jackknife singlefamily BayesTraits SimmapOverlap tests.csv")
+
+famcounts = alltestdf %>% group_by(tempFamily) %>% count
+famcounts %>% group_by(n) %>% count
+testcounts = alltestdf %>% group_by(test, trait1, trait2) %>% count
+
+
+require(reshape2)
+tempcount = 1
+if (tempcount == 7) {
+  pdf(file = "plots by family - SimmapOverlap BayesTraits Jackknife SingleFamily - 7tests.pdf", height = 12, width = 30)
+  par(mfcol=c(3,8), mai=c(1,1,0.8,0.3), oma=c(3,2,3,2),
+    font.main=1, cex.main=1.25, cex.lab=1.1, cex.axis=1.1)
+  families = famcounts$tempFamily[which(famcounts$n == tempcount)]
+  
+  for (i in 1:length(families)) {
+    tempfamily = families[i]
+    
+    # plot single-family trees
+    subsetout = subsettreedata(columns = c(temprow$trait1, temprow$trait2), cladesubsetcolumn = "Family3_BirdtreeMatchSpecies2", cladesubsetvalue = tempfamily, newdata = newdatadf, newtree = treefile)
+    subsettree = subsetout$subsettree
+    subsetdf = subsetout$subsetdf
+    
+    # no tips
+    plot.phylo(subsettree, type = "f", show.tip.label = TRUE, cex = 0.2)
+    title(main = paste(tempfamily))
+    
+    # trait1 tips
+    plot.phylo(subsettree, type = "f", show.tip.label = FALSE, align.tip.label = TRUE, cex = 0.01)
+    py = c("blue","red")
+    treetiplabels = subsettree$tip.label %in% subsetdf$species[which(subsetdf[,temprow$trait1] == 1)]
+    tiplabels(pch=21,bg=py[as.numeric(treetiplabels)+1], col = py[as.numeric(treetiplabels)+1], cex=1)
+    legend("bottomleft", legend = c("Noncooperative", "Cooperative"), cex = 0.9, fill=py, bty="n")
+    
+    # trait2 tips
+    plot.phylo(subsettree, type = "f", show.tip.label = FALSE, align.tip.label = TRUE, cex = 0.01)
+    py2 = c("black","orange")
+    treetiplabels2 = subsettree$tip.label %in% subsetdf$species[which(subsetdf[,temprow$trait2] == 1)]
+    tiplabels(pch=21,bg=py2[as.numeric(treetiplabels2)+1], col = py2[as.numeric(treetiplabels2)+1], cex=1)
+    legend("bottomleft", legend = c("Female Song Absent", "Female Song Present"), cex = 0.9, fill=py2, bty="n")
+    
+    
+    for (j in 1:7) {
+      temprow = testcounts[j,]
+      
+      if (str_detect(temprow$test, "BayesTraits")) {
+        if (str_detect(temprow$test, "Jackknife")) {
+          tempfolder = paste0("BayesTraitsDiscreteML_", temprow$trait1, "-", temprow$trait2, " Jackknife Outputs")
+          familytreatment = "remove"
+        } else {
+          tempfolder = paste0("BayesTraitsDiscreteML_", temprow$trait1, "-", temprow$trait2, " SingleFamily Outputs")
+          familytreatment = "only"
+        }
+        tempfile = list.files(tempfolder, pattern = tempfamily)
+        # bayestraits plots
+        dfIn = read.csv(paste0(tempfolder,"/",tempfile))
+        dfInDep = dfIn[which(dfIn$Model == "Dependent"),]
+        dfInInd = dfIn[which(dfIn$Model == "Independent"),]
+        
+        Nspecies = dfIn[1,"numSpecies"]
+        
+        templabel = paste0(familytreatment, tempfamily, " Nspecies=", Nspecies)
+        
+        tryCatch(
+          {
+            plotSimpleDiscreteBayes(columns = c(temprow$trait1, temprow$trait2), df = dfInDep, nocorrDdf = dfInInd, LhCol = "Lh", nsim = NULL, treelabel = NULL, newpdf = FALSE, otherlabel = "", ylabel = templabel, arrowmod = 1, roundDigits = 3)
+          }, error=function(e) {
+            plot(x = 1, y = 1)
+            plot(x = 1, y = 1)
+            plot(x = 1, y = 1)
+            message(paste("An Error occurred, could not plot", templabel))
+          }) # end trycatch
+      } # end if BayesTraits
+      
+      
+      
+      if (str_detect(temprow$test, "SimmapOverlap")) {
+        if (str_detect(temprow$test, "Jackknife")) {
+          tempfolder = paste("Simmap Overlap Outputs/Jackknife", temprow$trait1, temprow$trait2)
+          familytreatment = "remove"
+        } else {
+          tempfolder = paste("Simmap Overlap Outputs/Single Family", temprow$trait1, temprow$trait2)
+          familytreatment = "only"
+        }
+        tempfiles = list.files(tempfolder, pattern = tempfamily)
+        tempRealFile = tempfiles[which(str_detect(tempfiles, "REAL"))]
+        tempDummyFile = tempfiles[which(str_detect(tempfiles, "DUMMY"))]
+        RealDF = read.csv(paste0(tempfolder,"/",tempRealFile))
+        DummyDF = read.csv(paste0(tempfolder,"/",tempDummyFile))
+        
+        # plot simmap overlap plots
+        templabel = paste0(familytreatment, tempfamily)
+        
+        calcHuel(dfout = RealDF, dfDummy = DummyDF, newplot = FALSE, otherlabel = templabel)
+        
+        # Third plot: observed state proportions
+        dfDummyMelt <- melt(RealDF, measure.vars = c("ObsProp0Absent", "ObsProp0Present", "ObsProp1Absent", "ObsProp1Present"), variable.name = "ObservedState", value.name = "ObservedState.prop")
+        
+        # Create the basic boxplot without x-axis labels (xaxt = "n") and without outlines
+        boxplot(ObservedState.prop ~ ObservedState, data = dfDummyMelt, xlab = "", ylab = "Observed State Proportion", xaxt = "n", outline = FALSE, boxwex = 0.5, col = "lightgray")
+        
+        # Add points to the plot
+        points(jitter(as.numeric(dfDummyMelt$ObservedState), amount = 0.05), dfDummyMelt$ObservedState.prop, pch = 16, col = "darkred", cex = 0.6)
+        
+        # Add rotated x-axis labels
+        axis(1, at = 1:length(unique(dfDummyMelt$ObservedState)), 
+             labels = FALSE)
+        text(1:length(unique(dfDummyMelt$ObservedState)), 
+             par("usr")[3] - 0.001, srt = 45, adj = 1.2, 
+             labels = as.character(unique(dfDummyMelt$ObservedState)), xpd = TRUE, cex=0.8)
+      } # end if SimmapOverlap
+      
+    } # end for j in 1:7
+    
+  } # end for i in 1: length(families)
+  dev.off()
+} else if (tempcount == 5) {
+  pdf(file = "plots by family - SimmapOverlap BayesTraits Jackknife SingleFamily - 5tests.pdf", height = 12, width = 25)
+  par(mfcol=c(3,6), mai=c(1,1,0.8,0.3), oma=c(3,2,3,2),
+      font.main=1, cex.main=1.25, cex.lab=1.1, cex.axis=1.1)
+  families = famcounts$tempFamily[which(famcounts$n == tempcount)]
+  for (i in 1:length(families)) {
+    tempfamily = families[i]
+    
+    # plot single-family trees
+    subsetout = subsettreedata(columns = c(temprow$trait1, temprow$trait2), cladesubsetcolumn = "Family3_BirdtreeMatchSpecies2", cladesubsetvalue = tempfamily, newdata = newdatadf, newtree = treefile)
+    subsettree = subsetout$subsettree
+    subsetdf = subsetout$subsetdf
+    
+    # no tips
+    plot.phylo(subsettree, type = "f", show.tip.label = TRUE, cex = 0.2)
+    title(main = paste(tempfamily))
+    
+    # trait1 tips
+    plot.phylo(subsettree, type = "f", show.tip.label = FALSE, align.tip.label = TRUE, cex = 0.01)
+    py = c("blue","red")
+    treetiplabels = subsettree$tip.label %in% subsetdf$species[which(subsetdf[,temprow$trait1] == 1)]
+    tiplabels(pch=21,bg=py[as.numeric(treetiplabels)+1], col = py[as.numeric(treetiplabels)+1], cex=1)
+    legend("bottomleft", legend = c("Noncooperative", "Cooperative"), cex = 0.9, fill=py, bty="n")
+    
+    # trait2 tips
+    plot.phylo(subsettree, type = "f", show.tip.label = FALSE, align.tip.label = TRUE, cex = 0.01)
+    py2 = c("black","orange")
+    treetiplabels2 = subsettree$tip.label %in% subsetdf$species[which(subsetdf[,temprow$trait2] == 1)]
+    tiplabels(pch=21,bg=py2[as.numeric(treetiplabels2)+1], col = py2[as.numeric(treetiplabels2)+1], cex=1)
+    legend("bottomleft", legend = c("Female Song Absent", "Female Song Present"), cex = 0.9, fill=py2, bty="n")
+    
+    
+    for (j in 1:5) {
+      testcounts5 = testcounts[which(testcounts$n > 30),]
+      temprow = testcounts5[j,]
+      
+      if (str_detect(temprow$test, "BayesTraits")) {
+        if (str_detect(temprow$test, "Jackknife")) {
+          tempfolder = paste0("BayesTraitsDiscreteML_", temprow$trait1, "-", temprow$trait2, " Jackknife Outputs")
+          familytreatment = "remove"
+        } else {
+          tempfolder = paste0("BayesTraitsDiscreteML_", temprow$trait1, "-", temprow$trait2, " SingleFamily Outputs")
+          familytreatment = "only"
+        }
+        tempfile = list.files(tempfolder, pattern = tempfamily)
+        # bayestraits plots
+        dfIn = read.csv(paste0(tempfolder,"/",tempfile))
+        dfInDep = dfIn[which(dfIn$Model == "Dependent"),]
+        dfInInd = dfIn[which(dfIn$Model == "Independent"),]
+        
+        Nspecies = dfIn[1,"numSpecies"]
+        
+        templabel = paste0(familytreatment, tempfamily, " Nspecies=", Nspecies)
+        
+        tryCatch(
+          {
+            plotSimpleDiscreteBayes(columns = c(temprow$trait1, temprow$trait2), df = dfInDep, nocorrDdf = dfInInd, LhCol = "Lh", nsim = NULL, treelabel = NULL, newpdf = FALSE, otherlabel = "", ylabel = templabel, arrowmod = 1, roundDigits = 3)
+          }, error=function(e) {
+            plot(x = 1, y = 1)
+            plot(x = 1, y = 1)
+            plot(x = 1, y = 1)
+            message(paste("An Error occurred, could not plot", templabel))
+          }) # end trycatch
+      } # end if BayesTraits
+      
+      
+      
+      if (str_detect(temprow$test, "SimmapOverlap")) {
+        if (str_detect(temprow$test, "Jackknife")) {
+          tempfolder = paste("Simmap Overlap Outputs/Jackknife", temprow$trait1, temprow$trait2)
+          familytreatment = "remove"
+        } else {
+          tempfolder = paste("Simmap Overlap Outputs/Single Family", temprow$trait1, temprow$trait2)
+          familytreatment = "only"
+        }
+        tempfiles = list.files(tempfolder, pattern = tempfamily)
+        tempRealFile = tempfiles[which(str_detect(tempfiles, "REAL"))]
+        tempDummyFile = tempfiles[which(str_detect(tempfiles, "DUMMY"))]
+        RealDF = read.csv(paste0(tempfolder,"/",tempRealFile))
+        DummyDF = read.csv(paste0(tempfolder,"/",tempDummyFile))
+        
+        # plot simmap overlap plots
+        templabel = paste0(familytreatment, tempfamily)
+        
+        calcHuel(dfout = RealDF, dfDummy = DummyDF, newplot = FALSE, otherlabel = templabel)
+        
+        # Third plot: observed state proportions
+        dfDummyMelt <- melt(RealDF, measure.vars = c("ObsProp0Absent", "ObsProp0Present", "ObsProp1Absent", "ObsProp1Present"), variable.name = "ObservedState", value.name = "ObservedState.prop")
+        
+        # Create the basic boxplot without x-axis labels (xaxt = "n") and without outlines
+        boxplot(ObservedState.prop ~ ObservedState, data = dfDummyMelt, xlab = "", ylab = "Observed State Proportion", xaxt = "n", outline = FALSE, boxwex = 0.5, col = "lightgray")
+        
+        # Add points to the plot
+        points(jitter(as.numeric(dfDummyMelt$ObservedState), amount = 0.05), dfDummyMelt$ObservedState.prop, pch = 16, col = "darkred", cex = 0.6)
+        
+        # Add rotated x-axis labels
+        axis(1, at = 1:length(unique(dfDummyMelt$ObservedState)), 
+             labels = FALSE)
+        text(1:length(unique(dfDummyMelt$ObservedState)), 
+             par("usr")[3] - 0.001, srt = 45, adj = 1.2, 
+             labels = as.character(unique(dfDummyMelt$ObservedState)), xpd = TRUE, cex=0.8)
+      } # end if SimmapOverlap
+      
+    } # end for j in 1:7
+    
+  } # end for i in 1: length(families)
+  dev.off()
+  
+} else if (tempcount == 1) {
+  pdf(file = "plots by family - SimmapOverlap BayesTraits Jackknife SingleFamily - 1test.pdf", height = 12, width = 8)
+  par(mfcol=c(3,2), mai=c(1,1,0.8,0.3), oma=c(3,2,3,2),
+      font.main=1, cex.main=1.25, cex.lab=1.1, cex.axis=1.1)
+  families = famcounts$tempFamily[which(famcounts$n == tempcount)]
+  for (i in 1:length(families)) {
+    tempfamily = families[i]
+    
+    # plot single-family trees
+    subsetout = subsettreedata(columns = c(temprow$trait1, temprow$trait2), cladesubsetcolumn = "Family3_BirdtreeMatchSpecies2", cladesubsetvalue = tempfamily, newdata = newdatadf, newtree = treefile)
+    subsettree = subsetout$subsettree
+    subsetdf = subsetout$subsetdf
+    
+    # no tips
+    plot.phylo(subsettree, type = "f", show.tip.label = TRUE, cex = 0.2)
+    title(main = paste(tempfamily))
+    
+    # trait1 tips
+    plot.phylo(subsettree, type = "f", show.tip.label = FALSE, align.tip.label = TRUE, cex = 0.01)
+    py = c("blue","red")
+    treetiplabels = subsettree$tip.label %in% subsetdf$species[which(subsetdf[,temprow$trait1] == 1)]
+    tiplabels(pch=21,bg=py[as.numeric(treetiplabels)+1], col = py[as.numeric(treetiplabels)+1], cex=1)
+    legend("bottomleft", legend = c("Noncooperative", "Cooperative"), cex = 0.9, fill=py, bty="n")
+    
+    # trait2 tips
+    plot.phylo(subsettree, type = "f", show.tip.label = FALSE, align.tip.label = TRUE, cex = 0.01)
+    py2 = c("black","orange")
+    treetiplabels2 = subsettree$tip.label %in% subsetdf$species[which(subsetdf[,temprow$trait2] == 1)]
+    tiplabels(pch=21,bg=py2[as.numeric(treetiplabels2)+1], col = py2[as.numeric(treetiplabels2)+1], cex=1)
+    legend("bottomleft", legend = c("Female Song Absent", "Female Song Present"), cex = 0.9, fill=py2, bty="n")
+    
+    
+    for (j in 1:1) {
+      testcounts1 = testcounts[which(testcounts$n > 60),]
+      temprow = testcounts1[j,]
+      
+      if (str_detect(temprow$test, "BayesTraits")) {
+        if (str_detect(temprow$test, "Jackknife")) {
+          tempfolder = paste0("BayesTraitsDiscreteML_", temprow$trait1, "-", temprow$trait2, " Jackknife Outputs")
+          familytreatment = "remove"
+        } else {
+          tempfolder = paste0("BayesTraitsDiscreteML_", temprow$trait1, "-", temprow$trait2, " SingleFamily Outputs")
+          familytreatment = "only"
+        }
+        tempfile = list.files(tempfolder, pattern = tempfamily)
+        # bayestraits plots
+        dfIn = read.csv(paste0(tempfolder,"/",tempfile))
+        dfInDep = dfIn[which(dfIn$Model == "Dependent"),]
+        dfInInd = dfIn[which(dfIn$Model == "Independent"),]
+        
+        Nspecies = dfIn[1,"numSpecies"]
+        
+        templabel = paste0(familytreatment, tempfamily, " Nspecies=", Nspecies)
+        
+        tryCatch(
+          {
+            plotSimpleDiscreteBayes(columns = c(temprow$trait1, temprow$trait2), df = dfInDep, nocorrDdf = dfInInd, LhCol = "Lh", nsim = NULL, treelabel = NULL, newpdf = FALSE, otherlabel = "", ylabel = templabel, arrowmod = 1, roundDigits = 3)
+          }, error=function(e) {
+            plot(x = 1, y = 1)
+            plot(x = 1, y = 1)
+            plot(x = 1, y = 1)
+            message(paste("An Error occurred, could not plot", templabel))
+          }) # end trycatch
+      } # end if BayesTraits
+      
+      
+      
+      if (str_detect(temprow$test, "SimmapOverlap")) {
+        if (str_detect(temprow$test, "Jackknife")) {
+          tempfolder = paste("Simmap Overlap Outputs/Jackknife", temprow$trait1, temprow$trait2)
+          familytreatment = "remove"
+        } else {
+          tempfolder = paste("Simmap Overlap Outputs/Single Family", temprow$trait1, temprow$trait2)
+          familytreatment = "only"
+        }
+        tempfiles = list.files(tempfolder, pattern = tempfamily)
+        tempRealFile = tempfiles[which(str_detect(tempfiles, "REAL"))]
+        tempDummyFile = tempfiles[which(str_detect(tempfiles, "DUMMY"))]
+        RealDF = read.csv(paste0(tempfolder,"/",tempRealFile))
+        DummyDF = read.csv(paste0(tempfolder,"/",tempDummyFile))
+        
+        # plot simmap overlap plots
+        templabel = paste0(familytreatment, tempfamily)
+        
+        calcHuel(dfout = RealDF, dfDummy = DummyDF, newplot = FALSE, otherlabel = templabel)
+        
+        # Third plot: observed state proportions
+        dfDummyMelt <- melt(RealDF, measure.vars = c("ObsProp0Absent", "ObsProp0Present", "ObsProp1Absent", "ObsProp1Present"), variable.name = "ObservedState", value.name = "ObservedState.prop")
+        
+        # Create the basic boxplot without x-axis labels (xaxt = "n") and without outlines
+        boxplot(ObservedState.prop ~ ObservedState, data = dfDummyMelt, xlab = "", ylab = "Observed State Proportion", xaxt = "n", outline = FALSE, boxwex = 0.5, col = "lightgray")
+        
+        # Add points to the plot
+        points(jitter(as.numeric(dfDummyMelt$ObservedState), amount = 0.05), dfDummyMelt$ObservedState.prop, pch = 16, col = "darkred", cex = 0.6)
+        
+        # Add rotated x-axis labels
+        axis(1, at = 1:length(unique(dfDummyMelt$ObservedState)), 
+             labels = FALSE)
+        text(1:length(unique(dfDummyMelt$ObservedState)), 
+             par("usr")[3] - 0.001, srt = 45, adj = 1.2, 
+             labels = as.character(unique(dfDummyMelt$ObservedState)), xpd = TRUE, cex=0.8)
+      } # end if SimmapOverlap
+      
+    } # end for j in 1:1
+    
+  } # end for i in 1: length(families)
+  dev.off()
+}
