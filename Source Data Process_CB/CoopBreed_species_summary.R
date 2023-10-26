@@ -9,6 +9,7 @@
 ## 6/14/2023 - added Mikula and Dale columns to output
 ## 6/20/2023 - included Dale in MeanCoop calculation
 ## 9/13/2023 - added Cornwallis et al data handling
+## 10/25/2023 - just made subsetlabel NULL for non-subsetted data
 
 setwd("~/Desktop/CooperativeBreedingEvolution/Source Data Process_CB")
 
@@ -280,10 +281,10 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
   if (allcoop == FALSE) {
     subsetlabel <- "_NatCommsSubset"
   } else if (allcoop == TRUE) {
-    subsetlabel <- "_All"
+    subsetlabel <- ""   # "_All" # changed from _All 10/26/2023
   }
   
   
-  write.csv(coopsongdf, file = paste0(Sys.Date(),"CoopSong", subsetlabel, ".csv"), row.names = FALSE)
+  write.csv(coopsongdf, file = paste0(Sys.Date(),"CoopSong", subsetlabel, "_R.csv"), row.names = FALSE)
   
 } # end function

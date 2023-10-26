@@ -5,10 +5,12 @@
 ## 3/7/2022 - add in Griesser 2017 data, female song (Odom 2014) data
 ## 3/8/2022 - add in BOW data
 ## 9/7/2022 - female song dataset
-## Last edited 9/13/2023 - cornwallis data
+## 9/13/2023 - cornwallis data
+## 10/26/2023 - Griesser et al 2023 PNAS data, also added OC data in initial source compilation, also AVONET data; sociality data binarized
 
 require(ape)
 require(phytools)
+library(readxl)
 
 setwd("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/")
 
@@ -27,7 +29,7 @@ JetzData <- read.csv("Jetz_data_BirdTreeNames_nodups.csv", check.names = FALSE)
 RiehlData <- read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/Riehl_data_BirdTreeNames.csv", stringsAsFactors = FALSE)
 RubensteinLovetteData <- read.csv("RubensteinLovette_data_BirdTreeNames.csv", stringsAsFactors = FALSE)
 #OdomFSData <- read.csv("FemaleSongData_OdomEtal2014_PresentAbsentSubset_BirdTreeNames.csv")
-Griesser2017Data <- read.csv("Griesser2017 matched species names.csv")
+Griesser2017Data <- read.csv("Griesser2017 matched species names.csv", stringsAsFactors = FALSE)
 Griesser2017Data$BirdtreeFormat[which(Griesser2017Data$Griesser2017_speciesnames == "finchyellowthighed")] <- "Pselliophorus_tibialis"
 BOWData <- read.csv("BOW Cooperative Breeding Data.csv")
 library(readxl)
@@ -47,6 +49,8 @@ DaleData = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Dat
 #MikulaDaleCoopSub = MikulaDale[which(!is.na(MikulaDale$Coop_breed) | !(is.na(MikulaDale$Cooperative_breeding_ppca))),]
 #MikulaDaleCoopMikulaSub = MikulaDale[which(!is.na(MikulaDale$Coop_breed)),]
 
+
+#### start merge ----
 # merge Jetz + Downing
 DowningSubset <- DowningData #[,c(1,2,4,11,12,13,14)]
 JetzSubset <- JetzData #[, c(1,2,3,4,7,8)]
@@ -55,7 +59,11 @@ colnames(newdf)[which(colnames(newdf) == "Species")] <- "Species_Jetz"
 colnames(newdf)[which(colnames(newdf) == "promiscuity....")] <- "Promiscuity_Downing"
 
 # merge newdf + ourdatabase
-newdf_wOurs <- merge(x = ourdatabaserefs, y = newdf, by = "BirdtreeSpecies", all = TRUE)
+newdf_wOurs1 <- merge(x = ourdatabaserefs, y = newdf, by = "BirdtreeSpecies", all = TRUE)
+
+# merge newdf_wOurs
+OCin = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/OCPaperData.csv")
+newdf_wOurs <- merge(newdf_wOurs1, OCin, by.x = "BirdtreeSpecies", by.y = "BirdtreeFormat", all = TRUE, suffixes = c("", "_RobinsonSnyderCreanza"))
 
 
 # merge newdf_wOurs and Cockburn
@@ -130,23 +138,84 @@ cornwallisData = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Sour
 cornwallisDataNoDups = cornwallisData[which(!duplicated(cornwallisData$Species)),] # all species that have 2+ rows have the same breeding system in both/all rows, so duplicates removed 
 newdf17b = merge(newdf17, cornwallisDataNoDups, by.x = "BirdtreeSpecies", by.y = "Species", all = T, suffixes = c("", "_Cornwallis"))
 
+# Merge Griesser et al 2023 PNAS
+Griesser2023 <- read.csv("Griesser et al 2023 pnas.csv")
+Griesser2023$X = NULL
+newdf17c = merge(newdf17b, Griesser2023, by.x = "BirdtreeSpecies", by.y = "tip_label", all = T, suffixes = c("", "_Griesser2023"))
+
+# Merge Female Song aggregated data
+FSdata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-09-13_Female Song Data_GSheetDownload_withHighConfFS01.csv")
+colnames(FSdata)[which(colnames(FSdata) == "Song_data_source_Webb..NOTE..appears.to.be.reversed...ones.marked..del.Hoyo..were.actually.from.Odom..ones.marked..del.Hoyo..actually.from.HBW.")] = "Song_data_source_Webb"
+FSdata$Odom_FemaleSong[which(FSdata$Odom_FemaleSong == "")] <- NA
+FSdata$Webb_FemaleSong[which(FSdata$Webb_FemaleSong == "")] <- NA
+newdf17d = merge(newdf17c, FSdata, by.x = "BirdtreeSpecies", by.y = "BirdtreeSpecies", all = T, suffixes = c("", "_FSgsheet"))
+
+# Merge AVONET
+AVONET = read_excel("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/AVONET Supplementary dataset 1.xlsx", sheet = 4)
+colnames(AVONET)[which(colnames(AVONET) == "Family3")] <- "Family3_BirdtreeMatchSpecies2"
+colnames(AVONET)[which(colnames(AVONET) == "Order3")] <- "Order_AVONET"
+AVONET$Species3 = str_replace(AVONET$Species3, " ", "_")
+newdf17e = merge(newdf17d, AVONET, by.x = "BirdtreeSpecies", by.y = "Species3", all = T, suffixes = c("", "_AVONET"))
 
 # remove non-birdtrees
-sum(!newdf17b$BirdtreeSpecies %in% birdtree$tip.label)
-newdf18 = newdf17b[which(newdf17b$BirdtreeSpecies %in% birdtree$tip.label),]
+sum(!newdf17e$BirdtreeSpecies %in% birdtree$tip.label)
+newdf18 = newdf17e[which(newdf17e$BirdtreeSpecies %in% birdtree$tip.label),]
 
 # remove duplicated rows
 newdf19 = newdf18[which(!duplicated(newdf18$BirdtreeSpecies)),]
 
 # write file - then use file in CoopBreed_species_summary.R
-write.csv(newdf19, file = paste0(Sys.Date(),"_Aggregate_CBSource_Data_AllCoopBreedColumns.csv"), row.names = FALSE)
 source("CoopBreed_species_summary.R")
-CoopBreed_species_summary(paste0(Sys.Date(),"_Aggregate_CBSource_Data_AllCoopBreedColumns.csv"), songfile = "SongData_R_Update.csv", allcoop = TRUE, OCdatafile = TRUE)
-cbSong = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-09-14CoopSong_All.csv") # created with above line
+#write.csv(newdf19, file = paste0(Sys.Date(),"_Aggregate_CBSource_Data_AllCoopBreedColumns.csv"), row.names = FALSE)
+#CoopBreed_species_summary(paste0(Sys.Date(),"_Aggregate_CBSource_Data_AllCoopBreedColumns.csv"), songfile = "SongData_R_Update.csv", allcoop = TRUE, OCdatafile = TRUE)
+write.csv(newdf19, file = paste0(Sys.Date(),"_Aggregate_CBSource_Data_AllColumns.csv"), row.names = FALSE)
+CoopBreed_species_summary(paste0(Sys.Date(),"_Aggregate_CBSource_Data_AllColumns.csv"), songfile = "SongData_R_Update.csv", allcoop = TRUE, OCdatafile = FALSE)
+cbSong = read.csv(paste0("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/", Sys.Date(),"CoopSong_R.csv")) # created with above line
 
+# Finally, merge classified species with rest of relevant data
+colnames(newdf19)
+relevant_cols = c("BirdtreeSpecies", "di_OC", "tri_OC", "cont_OC", "O.C", "Region", "Cover", "MaleCareYg", "Cavity01", "Habitat", "Predictability..P.", "Constancy..C.", "Contingency..M.", "engage.in.misdirected.parental.care",	"family.time..in.days.", "social_system_assessment", "longevity",	"zoological_record_hits", "movements",	"food_specialisation",	"nest_type", "Reported.latitude",	"Reported.longitude",	"Corrected.latitude",	"Corrected.longitude", "Mean.precipitation",	"Variation.in.precipitation",	"Colwell.s.predictability.in.precipitation","Mean.temperature",	"Variation.in.temperature",	"Colwell.s.predictability.in.temperature", "time_fed",	"clutch_size",	"caretakers", "social_bonds", "sedentariness",	"insularity",	"colonial",	"grouping", "FemaleSong_Agg01",	"HighConfidence_FemaleSong", "Family3_BirdtreeMatchSpecies2", "Order_AVONET", "Habitat_AVONET",	"Habitat.Density",	"Migration",	"Trophic.Level",	"Trophic.Niche",	"Primary.Lifestyle",	"Min.Latitude",	"Max.Latitude",	"Centroid.Latitude",	"Centroid.Longitude",	"Range.Size")
+relevant_cols %in% colnames(newdf19)
+relevant_newdf19 = newdf19[,relevant_cols]
+cbSongEtc = merge(cbSong, relevant_newdf19, by.x = "species", by.y = "BirdtreeSpecies", all = T)
+write.csv(cbSongEtc, paste0(Sys.Date(),"_CoopBreed-FemaleSong-Song-Sociality_Data_R.csv"), row.names = FALSE)
+
+# subset to Passeriformes and binarize sociality data
+ordercounts = cbSongEtc %>% group_by(Order_AVONET) %>% count
+allPass = cbSongEtc[which(cbSongEtc$Order_AVONET == "Passeriformes"),]
+
+unique(allPass$colonial)
+allPass$Griesser2023.Colonial01 = NA
+allPass$Griesser2023.Colonial01[which(allPass$colonial == "acolonial")] <- 0
+allPass$Griesser2023.Colonial01[which(allPass$colonial == "colonial")] <- 1
+
+unique(allPass$caretakers)
+allPass$Griesser2023.MoreThanTwoCaretakers = NA
+allPass$Griesser2023.MoreThanTwoCaretakers[which(allPass$caretakers <= 2 )] <- 0
+allPass$Griesser2023.MoreThanTwoCaretakers[which(allPass$caretakers > 2 )] <- 1
+
+unique(allPass$social_bonds)
+allPass %>% group_by(social_bonds) %>% count
+allPass$Griesser2023.LongSocialBonds = NA
+allPass$Griesser2023.LongSocialBonds[which(allPass$social_bonds %in% c("a-short", "b-season"))] <- 0
+allPass$Griesser2023.LongSocialBonds[which(allPass$social_bonds == "c-long")] <- 1
+
+unique(allPass$grouping)
+allPass %>% group_by(grouping) %>% count
+allPass$Griesser2023.GroupsLargerThanPair = NA
+allPass$Griesser2023.GroupsLargerThanPair[which(allPass$grouping %in% c("asocial", "pair"))] <- 0
+allPass$Griesser2023.GroupsLargerThanPair[which(allPass$grouping %in% c("small_groups", "large_groups"))] <- 1
+
+write.csv(allPass, paste0(Sys.Date(),"_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv"), row.names = FALSE)
+
+
+allPass %>% group_by(Griesser2023.GroupsLargerThanPair) %>% count
+
+
+#### scratch/misc ----
+# moved up to above workflow 10/26/2023
 FSdata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-09-13_Female Song Data_GSheetDownload_withHighConfFS01.csv")
 colnames(FSdata)[which(colnames(FSdata) == "Song_data_source_Webb..NOTE..appears.to.be.reversed...ones.marked..del.Hoyo..were.actually.from.Odom..ones.marked..del.Hoyo..actually.from.HBW.")] = "Song_data_source_Webb"
-
 
 FSdata$BirdtreeSpecies[which(!FSdata$BirdtreeSpecies %in% birdtree$tip.label)]
 FSdata = FSdata[which(FSdata$BirdtreeSpecies %in% birdtree$tip.label),]
@@ -166,7 +235,7 @@ dfIn = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Pr
 dfFS = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-06-20_Female Song Data_GSheetDownload.csv")
 dfFSR = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/2023-06-20_CoopBreed-FemaleSong01HighConf-Song_Data_R.csv")
 FSbin = merge(dfFS, dfFSR[,c("species", "FemaleSong_Agg01", "HighConfidence_FemaleSong")], all.x = T, by.x = "BirdtreeSpecies", by.y = "species")
-write.csv(FSbin, "2023-06-20_Female Song Data_GSheetDownload_withHighConfFS01.csv")
+#write.csv(FSbin, "2023-06-20_Female Song Data_GSheetDownload_withHighConfFS01.csv")
 
 # read OC data
 OCin = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/OCPaperData.csv")
