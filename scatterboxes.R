@@ -1,6 +1,6 @@
 ########
 #Coded by Kate T. Snyder
-#Last Modified 9-12-2023 - outline
+#Last Modified 11/15/2023
 #Built using RStudio Version 1.1.453
 #R Version 4.0
 #
@@ -11,6 +11,8 @@
 ########
 
 # 8/18/2021 - change MateParam to DiscreteTrait, $species_in_birdtree to $species
+# 9-12-2023 - outline
+# 11/15/2023 - trycatch around wilcox test
 
 #Plots merged boxplot/scatterplot for each song characteristic for each mating classification
 
@@ -74,7 +76,19 @@ scatterboxes <- function(DiscreteTrait = "CoopBreed", newdata = FALSE, newtree =
       names(datalist) <- datalistnames
  #   } #end else if DiscreteTrait == "EPP"
     
-    wilcoxresults <- wilcox.test(datalist[[1]],datalist[[2]])
+      wilcoxresults <- tryCatch({wilcox.test(datalist[[1]],datalist[[2]])}, error=function(e) {
+        message('An Error Occurred')
+        print(e)
+        return(NULL)
+      })
+      
+      #wilcoxresults <- wilcox.test(datalist[[1]],datalist[[2]])
+      
+      if (is.null(wilcoxresults)) {
+        wilcoxresults = NULL
+        wilcoxresults$p.value = NA
+      }
+
     labels <- c(paste(datalistnames[1]," \nN =",length(datalist[[1]])), paste(datalistnames[2]," \nN =",length(datalist[[2]])))
     main <- paste("Wilcoxon rank-sum p =",round(wilcoxresults$p.value,6) ," \nphylANOVA p =" , phylanovaresults$Pf)
     

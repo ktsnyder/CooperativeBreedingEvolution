@@ -52,9 +52,23 @@ for (j in 1:3) {
 }
 dev.off()
 
+files = list.files("/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/BayesTraitsDiscrete", pattern = "seeds1001-1500", full.names = T)
+
+for (i in 1:length(files)) {
+  tempfile = files[i]
+  tempcols = str_remove(tempfile, "/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/BayesTraitsDiscrete/BayesTraitsDiscrete_")
+  tempcols = str_remove(tempcols, " mlt100_noRes_seeds1001-1500.csv")
+  tempcols = str_split(tempcols, " ")
+  tempcols = tempcols[[1]]
+  tempdf = read.csv(tempfile)
+  tempdf$X = NULL
+  plotSimpleDiscreteBayes(columns = tempcols, df = tempdf, nocorrDdf = NULL, LhCol = "Lh", nsim = 500, treelabel = "HackettOscine", newpdf = TRUE, cladesubsetvalue = NULL, ylabel = NULL, arrowmod = 1, otherlabel = NULL, roundDigits = 2)
+}
+
 
 #### Top ----
 plotSimpleDiscreteBayes <- function(columns, df, nocorrDdf = NULL, LhCol = NULL, nsim = NULL, treelabel = NULL, newpdf = TRUE, cladesubsetvalue = NULL, ylabel = NULL, arrowmod = 1, otherlabel = NULL, roundDigits = 2) {
+  require(stringr)
   
   traitColsLabel <- paste(columns[1], columns[2])
   currentlabel <- paste(treelabel,traitColsLabel)
@@ -170,7 +184,7 @@ plotSimpleDiscreteBayes <- function(columns, df, nocorrDdf = NULL, LhCol = NULL,
       tempdfInd$q42 = tempdfInd$beta1
       tempdfInd$q43 = tempdfInd$beta2
       qColumns <- c("q12", "q13", "q21", "q24", "q31", "q34", "q42", "q43")
-    } else if ("q12" %in% colnames(nocorrDf)) {
+    } else if ("q12" %in% colnames(nocorrDdf)) {
       qColumns <- c("q12", "q13", "q21", "q24", "q31", "q34", "q42", "q43")
     }
   }  else if ("Model" %in% colnames(df)) {
@@ -292,7 +306,19 @@ plotSimpleDiscreteBayes <- function(columns, df, nocorrDdf = NULL, LhCol = NULL,
   } else if (str_detect(trait1, "Familial")) {
     lab0x = paste("Non-Familial Living")
     lab1x = paste("Familial Living")
-  }
+  } else if (str_detect(trait1, "Colonial")) {
+    lab0x = paste("Non-Colonial")
+    lab1x = paste("Colonial") 
+  } else if (str_detect(trait1, "GroupsLargerThanPair")) {
+    lab0x = paste("Asocial or pair")
+    lab1x = paste("Small or large groups") 
+  } else if (str_detect(trait1, "LongSocialBonds")) {
+    lab0x = paste("Bonds last one season or less")
+    lab1x = paste("Multi-year bonds") 
+  } else if (str_detect(trait1, "MoreThanTwoCaretakers")) {
+    lab0x = paste("Two or fewer caretakers")
+    lab1x = paste("More than two caretakers") 
+  } 
   
   ## nocorrD rates
   mat <- meanratesmat_nocorr
