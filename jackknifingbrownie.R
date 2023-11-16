@@ -1,7 +1,7 @@
 
 ########
 #Coded by Kate T. Snyder
-#Last Modified 6-22-2018
+#Last Modified 11-15-2023
 #Built using RStudio Version 1.1.453
 #R Version 3.4.2
 #
@@ -12,10 +12,17 @@
 ########
 # Modified 3/11/2022 - attempt to make it work with all the new code?
 # Modified 3/16/2022 - reinstate ability to jackknife by all unique values in cladesubsetcolumn
+# Modified 11/15/2023 - global Q rates now from just column 1 subset; changed column names in output to be DiscreteTrait and ContinuousTrait; add number of species to output; new output folder; more informative message on progress in loop
 
 #Jackknifing brownie
+# Do need to set cladesubsetcolumn to the column in the dataframe. cladeJackvalues can either be NULL, which will cause it to jackknife by each unique value in that column; otherwise, can specify which values to jack
+# Must either set output to something (e.g. jackout <- jackbrowniefunction(...) or have allcsvs = TRUE)
+# islog should be true or false, will apply to the continuous variable
+# otherlabel should probably be the tree label
 
-jackbrowniefunction <- function(columns, islog = TRUE, matemodel = "ARD", matensim = 10, allcsvs = FALSE, plotsimmaps = FALSE, newtree, newdata, cladesubsetcolumn = NULL, cladeJackvalues = NULL, otherlabel = NULL) {
+# e.g. jackbrowniefunction(columns = c("MeanCoopTie2Noncoop", "Song.rep.final"), islog = TRUE, matemodel = "ARD", matensim = 100, allcsvs = TRUE, plotsimmaps = FALSE, newtree = treefile, newdata = newdata, cladesubsetcolumn = "Family3_BirdtreeMatchSpecies2", cladeJackvalues = "Mimidae", otherlabel = "HackettOscine")
+
+jackbrowniefunction <- function(columns, islog = FALSE, matemodel = "ARD", matensim = 10, allcsvs = FALSE, plotsimmaps = FALSE, newtree, newdata, cladesubsetcolumn = NULL, cladeJackvalues = NULL, otherlabel = NULL) {
   require(ape)
   require(phytools)
   require(base)
@@ -30,13 +37,13 @@ jackbrowniefunction <- function(columns, islog = TRUE, matemodel = "ARD", matens
   MateParam = columns[1]
   SongParam = columns[2]
   
-  subsetout <- subsettreedata(columns=columns, newtree = newtree, newdata = newdata, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, islog = islog)  # these should be cladesubset__ = NULL since jackknifing happens later
+  subsetout <- subsettreedata(columns=columns, newtree = newtree, newdata = newdata, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, islog = FALSE)  # these should be cladesubset__ = NULL since jackknifing happens later
   bothtree <- tree <- subsetout$subsettree
   songdf <- df <- subsetout$subsetdf
-  discretetraitvec <- df[,columns[1]]
-  names(discretetraitvec) <- df[,1]
-  continuoustraitvec <- df[,columns[2]]
-  names(continuoustraitvec) <- df[,1]  #species names 
+  #discretetraitvec <- df[,columns[1]]
+  #names(discretetraitvec) <- df[,1]
+  #continuoustraitvec <- df[,columns[2]]
+  #names(continuoustraitvec) <- df[,1]  #species names 
   matecol <- MateParam
   songcol <- SongParam
   # subset <- subsetbirddata(MateParam = MateParam,SongParam = SongParam)
@@ -54,7 +61,7 @@ jackbrowniefunction <- function(columns, islog = TRUE, matemodel = "ARD", matens
   familyvec <- c("None",cladeJackvalues)
   brownielist <- list()
   
-  Qoutput <- findQrates(columns = columns, plot=FALSE, newtree = newtree, newdata = newdata, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, otherlabel = otherlabel)
+  Qoutput <- findQrates(columns = columns[1], plot=FALSE, newtree = newtree, newdata = newdata, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, otherlabel = otherlabel)
   qrates <- Qoutput$qrates
   #print(qrates)
   # Qoutput <- findQrates(MateParam = MateParam, SongParam = "none")
@@ -63,6 +70,8 @@ jackbrowniefunction <- function(columns, islog = TRUE, matemodel = "ARD", matens
   for (k in 1:length(familyvec)) {
     jackedsongdf <- songdf  #have to do this so songdf doesn't get whittled down every time the for loop loops
     jackedsongdf <- jackedsongdf[which(jackedsongdf[, cladesubsetcolumn] != familyvec[k]),]
+    
+    numSpecies = length(jackedsongdf[,1])
     
     print(familyvec[k])
     
@@ -75,6 +84,12 @@ jackbrowniefunction <- function(columns, islog = TRUE, matemodel = "ARD", matens
     names(matevec) <- jackedsongdf$species
     songcontvec <- jackedsongdf[,songcol]
     names(songcontvec) <- jackedsongdf$species
+    if (islog) {
+      songcontvec = log(songcontvec)
+      loglabel = "log"
+    } else {
+      loglabel = NULL
+    }
     
     set.seed(10)
     print(paste("Beginning simmap for brownie",MateParam,SongParam)) 
@@ -89,9 +104,9 @@ jackbrowniefunction <- function(columns, islog = TRUE, matemodel = "ARD", matens
     print(class(simmappy))
     simmapsdone <- Sys.time()
     simmaptime <- simmapsdone - starttimebrownie
-    print(paste("Simmaps generated. That step took this much time: ", simmaptime, ".  Starting for loop with ", matensim, " loops.", MateParam, SongParam, familyvec[k]))
+    print(paste("Simmaps generated. That step took this much time: ", simmaptime, ".  Starting for loop with ", matensim, " loops.", MateParam, SongParam, familyvec[k], k, "out of", length(familyvec), "jacks. ", numSpecies, "species in this jackknifed tree."))
     
-    browniedata <- data.frame(MatePar=character(matensim),SongPar=character(matensim),Pval=numeric(matensim),ERRate=numeric(matensim),ERloglik=numeric(matensim),ERace=numeric(matensim),ARDRate0=numeric(matensim),ARDRate1=numeric(matensim),ARDloglik=numeric(matensim),ARDace=numeric(matensim),k2=numeric(matensim),convergence=character(matensim),simmapnumber=integer(matensim),jackedfam=character(matensim), stringsAsFactors = FALSE)
+    browniedata <- data.frame(DiscreteTrait=character(matensim),ContinuousTrait=character(matensim),Pval=numeric(matensim),ERRate=numeric(matensim),ERloglik=numeric(matensim),ERace=numeric(matensim),ARDRate0=numeric(matensim),ARDRate1=numeric(matensim),ARDloglik=numeric(matensim),ARDace=numeric(matensim),k2=numeric(matensim),convergence=character(matensim),simmapnumber=integer(matensim),jackedfam=character(matensim), stringsAsFactors = FALSE)
     
     
     for (i in 1:matensim) {
@@ -122,13 +137,18 @@ jackbrowniefunction <- function(columns, islog = TRUE, matemodel = "ARD", matens
       browniedata[i,1] <- MateParam
       browniedata[i,2] <- SongParam
       browniedata[i,14] <- paste(familyvec[k])
+      browniedata$numSpecies = numSpecies
       
       if (i %in% seq(0,2000,by=45)) {
         print(paste("End brownie loop iteration",i,Sys.time()))
       }
     }  #end for loop 1:matensim
     if (allcsvs == TRUE) {
-      write.csv(file = paste(Sys.Date(),"BrownieJack",MateParam,SongParam,familyvec[k],".csv"), browniedata)
+      if (!dir.exists("BrownieJackknifeOutputs")) {
+        dir.create("BrownieJackknifeOutputs")
+      }
+      outfile = paste0("BrownieJackknifeOutputs/", Sys.Date(), otherlabel, " Brownie", matensim, "sims ", MateParam, " ", loglabel, SongParam, " jacked", familyvec[k], ".csv")
+      write.csv(file = outfile, x = browniedata, row.names = FALSE)
     }
     brownielist[[k]] <- browniedata
     
