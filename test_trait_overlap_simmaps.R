@@ -6,6 +6,7 @@
 ## Edited 6/1/23 - added checkpoint save to CharacterSimmaps
 ## Edited 9/27/23 - changed "Dummy" simmap generation to use sim.history() with Q rates, ancestral character estimation instead of randomizing tip states; but seems to have gotten totally weird - output values odd
 ## Edited 9/29/23
+## 10/30/2023 - added boxplot to calcHuel function; 3 ggplots now returned from calcHuel
 
 setwd("/Users/kate/Desktop/CooperativeBreedingEvolution/")
 library(phytools)
@@ -78,32 +79,116 @@ calcHuel(dfout6,dfDummy6, nsims_real = nsims_real, nsims_dummy = nsims_dummy)
 # dfDummy5 <- CharacterSimmaps(columns = c("Final.polygyny","HighConfidence_FemaleSong"), df = df, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Polygyny FSHighConf")
 
 
-df$Kin_NK[which(df$Kin_NK == "Mixed")] <- NA
-df$Kin_NK[which(df$Kin_NK == "NonKin")] <- 0
-df$Kin_NK[which(df$Kin_NK == "Kin")] <- 1
-dfout4 <- CharacterSimmaps(columns = c("Kin_NK","FemaleSong_Agg01"), df = df, tree =  Hacktree, dummy = FALSE, nsims = nsims_real, treelabel = "Hackett", datalabel = "Kin_NK FSAgg")
-dfDummy4 <- CharacterSimmaps(columns = c("Kin_NK","FemaleSong_Agg01"), df = df, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Kin_NK FSAgg")
-KinFSreal = read.csv("Kin_NK FSAgg simmap overlap output nsim 1000 Hackett .csv")
-KinFSdummy = read.csv("Kin_NK FSAgg DUMMYResampledCoopFS simmap overlap output nsim 1000 Hackett .csv")
-nsims_real = length(KinFSreal$treenum)
-nsims_dummy = length(KinFSdummy$treenum)
-calcHuel(KinFSreal, KinFSdummy, nsims_real = nsims_real, nsims_dummy = nsims_dummy)
+# df$Kin_NK[which(df$Kin_NK == "Mixed")] <- NA
+# df$Kin_NK[which(df$Kin_NK == "NonKin")] <- 0
+# df$Kin_NK[which(df$Kin_NK == "Kin")] <- 1
+# dfout4 <- CharacterSimmaps(columns = c("Kin_NK","FemaleSong_Agg01"), df = df, tree =  Hacktree, dummy = FALSE, nsims = nsims_real, treelabel = "Hackett", datalabel = "Kin_NK FSAgg")
+# dfDummy4 <- CharacterSimmaps(columns = c("Kin_NK","FemaleSong_Agg01"), df = df, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Kin_NK FSAgg")
+# KinFSreal = read.csv("Kin_NK FSAgg simmap overlap output nsim 1000 Hackett .csv")
+# KinFSdummy = read.csv("Kin_NK FSAgg DUMMYResampledCoopFS simmap overlap output nsim 1000 Hackett .csv")
+# nsims_real = length(KinFSreal$treenum)
+# nsims_dummy = length(KinFSdummy$treenum)
+# calcHuel(KinFSreal, KinFSdummy, nsims_real = nsims_real, nsims_dummy = nsims_dummy)
 
-dfout4 <- CharacterSimmaps(columns = c("Griesser2017FamilialLiving","FemaleSong_Agg01"), df = df, tree =  Hacktree, dummy = FALSE, nsims = nsims_real, treelabel = "Hackett", datalabel = "Familial FSAgg")
-dfDummy4 <- CharacterSimmaps(columns = c("Griesser2017FamilialLiving","FemaleSong_Agg01"), df = df, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Familial FSAgg")
-FamFSreal = read.csv("Familial FSAgg simmap overlap output nsim 1000 Hackett .csv")
-FamFSdummy = read.csv("Familial FSAgg DUMMYResampledCoopFS simmap overlap output nsim 5000 Hackett .csv")
-nsims_real = length(FamFSreal$treenum)
-nsims_dummy = length(FamFSdummy$treenum)
-calcHuel(FamFSreal, FamFSdummy, nsims_real = nsims_real, nsims_dummy = nsims_dummy)
+# dfout4 <- CharacterSimmaps(columns = c("Griesser2017FamilialLiving","FemaleSong_Agg01"), df = df, tree =  Hacktree, dummy = FALSE, nsims = nsims_real, treelabel = "Hackett", datalabel = "Familial FSAgg")
+# dfDummy4 <- CharacterSimmaps(columns = c("Griesser2017FamilialLiving","FemaleSong_Agg01"), df = df, tree =  Hacktree, dummy = TRUE, nsims = nsims_dummy, treelabel = "Hackett", datalabel = "Familial FSAgg")
+# FamFSreal = read.csv("Familial FSAgg simmap overlap output nsim 1000 Hackett .csv")
+# FamFSdummy = read.csv("Familial FSAgg DUMMYResampledCoopFS simmap overlap output nsim 5000 Hackett .csv")
+# nsims_real = length(FamFSreal$treenum)
+# nsims_dummy = length(FamFSdummy$treenum)
+# calcHuel(FamFSreal, FamFSdummy, nsims_real = nsims_real, nsims_dummy = nsims_dummy)
+
+# 10/25/2023
+nsims_real = 500
+nsims_dummy = 2000
+OscineTree = read.nexus("/Users/kate/Desktop/CooperativeBreedingEvolution/2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex")
+newdata = "2023-09-14_CoopBreed-FemaleSong-Song_Data-wAvoNetFamilies_R.csv"
+
+dfout4 <- CharacterSimmaps(columns = c("MeanCoopTie2Coop","HighConfidence_FemaleSong"), df = newdata, tree =  OscineTree, dummy = FALSE, nsims = nsims_real, treelabel = "HackettOscine", datalabel = NULL)
+dfDummy4 <- CharacterSimmaps(columns = c("MeanCoopTie2Coop","HighConfidence_FemaleSong"), df = newdata, tree =  OscineTree, dummy = TRUE, nsims = nsims_dummy, treelabel = "HackettOscine", datalabel = NULL, dummyMethod = "makeSimmap")
+calcHuel(dfout4, dfDummy4)
+
+# 10/26/2023
+nsims_real = 500
+nsims_dummy = 2000
+newdata = "2023-10-26_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv"
+OscineTree = read.nexus("/Users/kate/Desktop/CooperativeBreedingEvolution/2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex")
+otherlabel = "HackettOscine"
+dataIn = read.csv(newdata)
+dataIn$X = NULL
+
+CBcolumns = c("Griesser2023.Colonial01", "Griesser2023.GroupsLargerThanPair", "Griesser2023.LongSocialBonds", "Griesser2023.MoreThanTwoCaretakers", "Griesser2017FamilialLiving")
+FScolumn = "FemaleSong_Agg01"
+filelist = list.files("/Users/kate/Desktop/CooperativeBreedingEvolution/Simmap Overlap Outputs", full.names = T)
+
+for (i in 1:5) {
+  CBcolumn = CBcolumns[i]
+  #RealDF = CharacterSimmaps(columns = c(CBcolumn,FScolumn), df = newdata, tree =  OscineTree, dummy = FALSE, nsims = nsims_real, treelabel = "HackettOscine", datalabel = NULL)
+  #DummyDF = CharacterSimmaps(columns = c(CBcolumn,FScolumn), df = newdata, tree =  OscineTree, dummy = TRUE, nsims = nsims_dummy, treelabel = "HackettOscine", datalabel = NULL, dummyMethod = "makeSimmap")
+  
+  RealFile <- filelist[which(str_detect(filelist, pattern = CBcolumn) & str_detect(filelist, pattern = FScolumn) & str_detect(filelist, pattern = "REAL"))]
+  DummyFile <- filelist[which(str_detect(filelist, pattern = CBcolumn) & str_detect(filelist, pattern = FScolumn) & str_detect(filelist, pattern = "DUMMY"))]
+  RealDF = read.csv(RealFile)
+  DummyDF = read.csv(DummyFile)
+
+  HuelOut = calcHuel(dfout = RealDF, dfDummy = DummyDF, newplot = FALSE, otherlabel = otherlabel, plot_ggplots_pdf = TRUE)
+  
+  # pdf(paste("Simmap Overlap Outputs/SimmapOverlap", CBcolumn, FScolumn, "HackettOscine.pdf"), width = 6, height = 14)
+  # require(cowplot)
+  # print(plot_grid(HuelOut[[1]], HuelOut[[2]], HuelOut[[3]], ncol = 1))
+  
+  dev.off()
+}
 
 
-# dfout <- read.csv("CoopBreed FSWebb simmap overlap output nsim1000 Hackett .csv")
-# calcHuel(dfout, dfDummy, nsims_real = 1000, nsims_dummy = 10000)
+# Get Q rates
+source(findQrates.R)
+for (i in 1:5) {
+  columns = c(CBcolumns[i], "FemaleSong_Agg01")
+  subset = subsettreedata(columns = columns, newdata = dataIn, newtree = OscineTree)
+  subsettree = subset$subsettree
+  subsetdf = subset$subsetdf
+  #Qout <- findQrates(columns, plot = T, newtree = OscineTree, newdata = dataIn)
+  whichnodes = "no"  #"FS" # "Coop" # "no"
+  tipsize = 0.1
+  filename = paste(columns[1], columns[2], "fan phylo double tips", whichnodes, "nodes.pdf")
+  pdf(filename, height = 8, width = 9)
+  plot.phylo(subsettree, type = "f", show.tip.label = FALSE, align.tip.label = TRUE, cex = 0.01)
+  py = c("black","orange")
+  treetiplabels = subsettree$tip.label %in% subsetdf$species[which(subsetdf[,columns[1]] == 1)]
+  tiplabels(pch=21,bg=py[as.numeric(treetiplabels)+1], col = py[as.numeric(treetiplabels)+1], cex=tipsize, offset = 1)
+  py2 = c("blue","red")
+  treetiplabels2 = subsettree$tip.label %in% subsetdf$species[which(subsetdf[,columns[2]] == 1)]
+  tiplabels(pch=21,bg=py2[as.numeric(treetiplabels2)+1], col = py2[as.numeric(treetiplabels2)+1], cex=tipsize, offset = 2)
+  if (whichnodes == "Coop") {
+    discretetraitvec <- subsetdf[,columns[1]]
+    names(discretetraitvec) <- subsetdf[,1]
+    pynodes = py
+    circles=ace(x=discretetraitvec,phy=subsettree,type="discrete",model="ARD")
+    nodelabels(thermo=circles$lik.anc,piecol=pynodes, height = 1.2, width = 1.2, horiz = TRUE, frame = "circle")
+  } else if (whichnodes == "FS") {
+    discretetraitvec <- subsetdf[,columns[2]]
+    names(discretetraitvec) <- subsetdf[,1]
+    pynodes = py2
+    circles=ace(x=discretetraitvec,phy=subsettree,type="discrete",model="ARD")
+    nodelabels(thermo=circles$lik.anc,piecol=pynodes, height = 1.2, width = 1.2, horiz = TRUE, frame = "circle")
+  } 
+  allpy = c(py, py2)
+  alllabs = c(paste("Not", columns[1]), columns[1], "Female Song Absent", "Female Song Present")
+  legend("bottomleft", legend = alllabs, cex = 0.9, fill=allpy, bty="n")
+  dev.off()
+  
+  print(columns)
+}
+
 
 
 #### CharacterSimmaps fxn ----
-CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalabel, dummyMethod = c("simHistory", "makeSimmap")) {
+CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalabel = NULL, dummyMethod = c("simHistory", "makeSimmap")) {
+  
+  if (is.null(datalabel)) {
+    datalabel = paste(columns[1], columns[2])
+  }
   
   require(stringr)
   source("findQrates.R")
@@ -226,13 +311,13 @@ CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalab
       dir.create("Simmap Overlap Outputs")
     }
     if (i %in% c(100, 200, 250,500,1000,2000,3000,4000,5000)) {
-      write.csv(dfout, file = paste("Simmap Overlap Outputs/", datalabel, "simmap overlap output nsim", nsims, treelabel,".csv"))
+      write.csv(dfout, file = paste("Simmap Overlap Outputs/", datalabel, "simmap overlap output nsim", nsims, treelabel,".csv"), row.names = FALSE)
     }
   }
   dfout <- as.data.frame(dfout)
   #colnames(dfout) <- c("treenum", "column1", "column2", "coopQ01", "coopQ10", "FSQAbsPres", "FSQPresAbs", "Nspecies", "propFSabsent", "propFSpresent", "propNoncoop", "propCoop", "ObsProp0Absent", "ObsProp0Present", "ObsProp1Absent", "ObsProp1Present", "totaltime", "chiStat", "chiPval", "chiStatSim", "chiPvalSim")
   colnames(dfout) <- c("treenum", "column1", "column2", "coopQ01", "coopQ10", "FSQAbsPres", "FSQPresAbs", "Nspecies", "propFSabsent", "propFSpresent", "propNoncoop", "propCoop", "ObsProp0Absent", "ObsProp0Present", "ObsProp1Absent", "ObsProp1Present", "totaltime")
-  write.csv(dfout, file = paste("Simmap Overlap Outputs/", datalabel, "simmap overlap output nsim", nsims, treelabel,".csv"))
+  write.csv(dfout, file = paste("Simmap Overlap Outputs/", datalabel, "simmap overlap output nsim", nsims, treelabel,".csv"), row.names = FALSE)
   return(dfout)
 } # end function
 
@@ -246,7 +331,7 @@ dataIn$X = NULL
 
 CBcolumn = "MeanCoopTie2Coop"
 #columns = c(CBcolumn, "FemaleSong_Agg01")
-columns = c(CBcolumn, "HighConfidence_FemaleSong")
+columns = c(CBcolumn, "FemaleSong_Agg01")
 
 subset1 <- subsettreedata(columns = columns, newdata = dataIn, newtree = treefile, skinnydata = FALSE)
 subsettree1 <- subset1$subsettree
@@ -345,7 +430,9 @@ for (j in 1:length(familyvec)) {
 
 
 #### calcHuel fxn ----
-calcHuel <- function(dfout, dfDummy, nsims_real = NULL, nsims_dummy = NULL, otherlabel = NULL, newplot = TRUE) {
+calcHuel <- function(dfout, dfDummy, nsims_real = NULL, nsims_dummy = NULL, otherlabel = NULL, newplot = TRUE, plot_ggplots_pdf = FALSE) {
+  require(tidyverse)
+  require(ggplot2)
   if (is.null(nsims_real)) {
     nsims_real = length(dfout[,1])
   }
@@ -433,6 +520,60 @@ if (newplot == TRUE) {
        main=dummytitle, xlab="D statistic from simulated independent data simmaps", ylab="Frequency",
        border="white")
   
+  real_data <- data.frame(value = Real_dsims)
+  dummy_data <- data.frame(value = Dummy_dsums)
+  
+  # ggplot histograms to return
+  p1 <- ggplot(real_data, aes(x = value)) +
+    geom_histogram(binwidth = xmax/20, fill = rgb(0.2, 0.5, 0.7, 0.5), color = "white") +
+    geom_vline(xintercept = D_real, color = "red") +
+    xlim(c(0, xmax)) +
+    labs(title = plotlabel, x = "D statistic from real data simmaps", y = "Frequency") +
+    theme_minimal(base_size = 10)
+
+  # Create the histogram for Dummy_dsums
+  p2 <- ggplot(dummy_data, aes(x = value)) +
+    geom_histogram(binwidth = xmax/20, fill = rgb(0.7, 0.5, 0.2, 0.5), color = "white") +
+    xlim(c(0, xmax)) +
+    labs(title = dummytitle, x = "D statistic from simulated independent data simmaps", y = "Frequency") +
+    theme_minimal(base_size = 10)
+  
+  # Create mutated dataframes for boxplot
+  dfRealMelt <- dfout %>%
+    gather("ObservedState", "ObservedState.prop", ObsProp0Absent:ObsProp1Present) %>%
+    mutate(Which = "Real")
+  
+  dfDummyMelt <- dfDummy %>%
+    gather("ObservedState", "ObservedState.prop", ObsProp0Absent:ObsProp1Present) %>%
+    mutate(Which = "Dummy")
+  
+  dfCombined <- rbind(dfRealMelt, dfDummyMelt)
+  
+  dfCombined$ObservedState.prop = as.numeric(dfCombined$ObservedState.prop)
+  
+  # Create a combined label for x-axis
+  dfCombined <- dfCombined %>%
+    mutate(Label = paste(ObservedState, Which, sep = "\n"))
+  
+  # Create the boxplot
+  p3 <-  ggplot(dfCombined, aes(x = Label, y = ObservedState.prop, fill = Which)) +
+    geom_boxplot(outlier.shape = NA) + # Exclude outliers
+    theme_minimal() +
+    labs(y = "Observed State Proportion", x = "", fill = "Simulation Data") +
+    scale_fill_manual(values = c("Real" = "blue", "Dummy" = "red")) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    ggtitle(paste(trait1, trait2))
+  
+  if (plot_ggplots_pdf == TRUE) {
+    require(cowplot)
+    pdf(file = paste("Simmap Overlap Outputs/Simmap Overlap",trait1, trait2, nsims_real, nsims_dummy, otherlabel, ".pdf"), height = 14, width = 6)
+    print(plot_grid(p1, p2, p3, ncol = 1))
+    dev.off()
+  }
+  #require(cowplot)
+  #print(plot_grid(p1, p2, p3, ncol = 1))
+  
+  return(list(p1, p2, p3))
   
   realDsimDF = cbind(c(rep("real", length(Real_dsims))), Real_dsims)
   dummyDsimDF = cbind(c(rep("dummy", length(Real_dsims))), Real_dsims)
@@ -442,24 +583,26 @@ if (newplot == TRUE) {
 
 #### cycle calcHuel ---- 
 # After doing the Cycle families processes above
-filelist = list.files("/Users/kate/Desktop/CooperativeBreedingEvolution/Simmap Overlap Outputs")
+require(reshape2)
 trait1 = "MeanCoopTie2Noncoop"
 trait2 = "FemaleSong_Agg01"
 
 ## EITHER
+filelist = list.files(paste0("/Users/kate/Desktop/CooperativeBreedingEvolution/Simmap Overlap Outputs/Jackknife ", trait1, " ", trait2), recursive = T, pattern = ".csv", full.names = T)
 tempFiles = jackknifeFiles = filelist[which(str_detect(filelist, "remove") & str_detect(filelist, trait1) & str_detect(filelist, trait2))]
 tempUniqueFamilies = unique_remove_strings <- unique(gsub(".*remove([^ ]*) .*", "\\1", jackknifeFiles))
 familytreatment = "removed"
 pdf(file = paste0("jackknifed Simmap Overlaps ", trait1, " ", trait2, ".pdf"), width = 12, height = 10)
 
 ## OR
+filelist = list.files(paste0("/Users/kate/Desktop/CooperativeBreedingEvolution/Simmap Overlap Outputs/Single Family ", trait1, " ", trait2), recursive = T, pattern = ".csv", full.names = T)
 tempFiles = onefamilyFiles = filelist[which(str_detect(filelist, "only") & str_detect(filelist, trait1) & str_detect(filelist, trait2))]
 tempUniqueFamilies = unique_only_strings <- unique(gsub(".*only([^ ]*) .*", "\\1", onefamilyFiles))
 familytreatment = "only"
 pdf(paste0("single family Simmap Overlaps ", trait1, " ", trait2, ".pdf"), width = 12, height = 10)
 
 
-par(mfcol=c(4,3), mai=c(0.8,1.0,0.5,0.3), oma=c(2,3,2,3), 
+par(mfcol=c(3,3), mai=c(0.8,1.0,0.5,0.3), oma=c(2,3,2,3), 
     font.main=1, cex.main=1.25, cex.lab=1.1, cex.axis=1.1)
 
 for (i in 1:length(tempUniqueFamilies)) {
@@ -467,18 +610,35 @@ for (i in 1:length(tempUniqueFamilies)) {
   tempRealFile = tempFiles[which(str_detect(tempFiles, tempFamily) & str_detect(tempFiles, "REAL"))]
   tempDummyFile = tempFiles[which(str_detect(tempFiles, tempFamily) & str_detect(tempFiles, "DUMMY"))]
   
-  RealDF = read.csv(paste0("/Users/kate/Desktop/CooperativeBreedingEvolution/Simmap Overlap Outputs/",tempRealFile))
-  DummyDF = read.csv(paste0("/Users/kate/Desktop/CooperativeBreedingEvolution/Simmap Overlap Outputs/",tempDummyFile))
+  # RealDF = read.csv(paste0("/Users/kate/Desktop/CooperativeBreedingEvolution/Simmap Overlap Outputs/",tempRealFile))
+  # DummyDF = read.csv(paste0("/Users/kate/Desktop/CooperativeBreedingEvolution/Simmap Overlap Outputs/",tempDummyFile))
+  RealDF = read.csv(tempRealFile)
+  DummyDF = read.csv(tempDummyFile)
   
   templabel = paste0(familytreatment, tempFamily)
   
   calcHuel(dfout = RealDF, dfDummy = DummyDF, newplot = FALSE, otherlabel = templabel)
+  
+  # Third plot: observed state proportions
+  dfDummyMelt <- melt(RealDF, measure.vars = c("ObsProp0Absent", "ObsProp0Present", "ObsProp1Absent", "ObsProp1Present"), variable.name = "ObservedState", value.name = "ObservedState.prop")
+  
+  # Create the basic boxplot without x-axis labels (xaxt = "n") and without outlines
+  boxplot(ObservedState.prop ~ ObservedState, data = dfDummyMelt, xlab = "", ylab = "Observed State Proportion", xaxt = "n", outline = FALSE, boxwex = 0.5, col = "lightgray")
+  
+  # Add points to the plot
+  points(jitter(as.numeric(dfDummyMelt$ObservedState), amount = 0.05), dfDummyMelt$ObservedState.prop, pch = 16, col = "darkred", cex = 0.6)
+  
+  # Add rotated x-axis labels
+  axis(1, at = 1:length(unique(dfDummyMelt$ObservedState)), 
+       labels = FALSE)
+  text(1:length(unique(dfDummyMelt$ObservedState)), 
+       par("usr")[3] - 0.001, srt = 45, adj = 1.2, 
+       labels = as.character(unique(dfDummyMelt$ObservedState)), xpd = TRUE, cex=0.8)
 }
 dev.off()
 
 
-
-
+#### Misc ----
 
 ### Plot hists better - moved into calcHuel
 font_size <- 1.25
