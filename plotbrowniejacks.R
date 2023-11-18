@@ -1,6 +1,6 @@
 ########
 #Coded by Kate T. Snyder
-#Last Modified 3-11-2022
+#Last Modified 11-16-2023
 #Built using RStudio Version 1.1.453
 #R Version 3.4.2
 #
@@ -15,7 +15,7 @@
 #Brownie Jack Plot
 
 
-plotbrowniejacks <- function(columns, browniejacks = NA, allcsvs = FALSE, nsim = NULL, otherlabel = NULL) {   #browniejacks is a list of dataframes, all the same Mate/Song combo, but each dataframe the test with one family removed
+plotbrowniejacks <- function(columns, browniejacks = NA, allcsvs = FALSE, nsim = NULL, islog = NULL, otherlabel = NULL, csvFolder = "BrownieJackknifeOutputs") {   #browniejacks is a list of dataframes, all the same Mate/Song combo, but each dataframe the test with one family removed
 require(ape)
 require(phytools)
   
@@ -23,19 +23,36 @@ require(phytools)
   SongParam <- columns[2]
   if (allcsvs != FALSE) {
     require(stringr)
-    filelist <- list.files(getwd())
+    filelist <- list.files(csvFolder)
+    print(filelist)
     # 2022-03-11 BrownieJack MeanCoopTie2Noncoop Syllable.rep.final Wilsonia_canadensis .csv
-    csvPatterns <- c(allcsvs, "BrownieJack", MateParam, SongParam, ".csv")
-    #filelist[which(str_detect(filelist, paste(csvPatterns, collapse = "&") ) )]
-    browniejacksfiles <- filelist[which(str_detect(filelist, paste(allcsvs,"BrownieJack",MateParam,SongParam)))]
+    #csvPatterns <- c(allcsvs, "BrownieJack", MateParam, SongParam, ".csv")
+    filelist <- filelist[which(str_detect(filelist, columns[1]) )]
+    filelist <- filelist[which(str_detect(filelist, columns[2]) )]
+    filelist <- filelist[which(str_detect(filelist, ".csv") )]
+    browniejacksfiles <- filelist[which(str_detect(filelist, "Brownie"))]
+    NoneFile = filelist[which(str_detect(filelist, "None"))]
+    browniejacksfiles = browniejacksfiles[which(browniejacksfiles != NoneFile)]
+    browniejacksfiles = c(NoneFile, browniejacksfiles)
     browniejacks = list()
     for (l in 1:length(browniejacksfiles)) {
-      tempfile <- browniejacksfiles[l]
+      tempfile <- file.path(csvFolder, browniejacksfiles[l])
       browniejacks[[l]] <- read.csv(tempfile)
     }
   }
   
-    pdf(paste(Sys.Date(),"PlotBrownieJacks",otherlabel,MateParam, SongParam,nsim,"sim.pdf"), height = 10, width = 8)
+  if (is.null(nsim)) {
+    nsim = length(browniejacks[[1]][,1])
+  }
+  
+  if (islog == TRUE) {
+    islogLab = "log"
+  } else {
+    islogLab = NULL
+  }
+  
+  
+    pdf(paste0(Sys.Date()," PlotBrownieJacks ", otherlabel, " ",MateParam, " ", islogLab,SongParam, " ",nsim,"sim.pdf"), height = 10, width = 8)
   par(mfrow = c(6,4), cex = 0.3, mar=rep(2,4))
 
   if (MateParam == "Polygyny") {
@@ -45,13 +62,19 @@ require(phytools)
     state0 <- "Low EPP"
     state1 <- "High EPP"
   } else {
-    state0 <- "NonCooperative"
+    state0 <- "Noncooperative"
     state1 <- "Cooperative"
   }
 
   for (k in 1:length(browniejacks)) {
     dftempNotConv <- browniejacks[[k]] 
     tempfamily = dftempNotConv[1,"jackedfam"]
+    tempNspecies = dftempNotConv[1,"numSpecies"]
+    if (is.null(nsim)) {
+      numsimsLabel = length(dftempNotConv[,1])
+    } else {
+      numsimsLabel = nsim
+    }
     dftemp <- dftempNotConv[dftempNotConv$convergence == "Optimization has converged.",]
     dftemp <- dftemp[!is.na(dftemp$convergence),]
 
@@ -70,7 +93,7 @@ require(phytools)
     P.chisq1over0=pchisq(2*(ARDloglikmean1over0-as.numeric(ERloglikmean1over0)),1,lower.tail=FALSE)
     
 
-    familylabel = paste(tempfamily)
+    familylabel = paste(tempfamily, "Nspecies =", tempNspecies)
 
     D0 <- density(dftemp$ARDRate0)
     D1 <- density(dftemp$ARDRate1)
@@ -93,14 +116,14 @@ require(phytools)
       #if (SongParam == "Syllrep") {
       legend("topright",legend = c(paste(state0),paste(state1),"Equal Rates"), lwd=1,col=c("blue","red", "black"), lty = c(1,1,2), cex=1.9)
       pval = round(P.chisqAll,4)
-      text(x = min(c(D0$x,D1$x)) + (max(c(D0$x,D1$x))-min(c(D0$x,D1$x)))*0.15, y=max(c(D0$y,D1$y))*0.65, labels = bquote(italic(p) == .(pval)), cex=2)
-      title(xlab=paste("Rate of evolution of syllable repertoire"),line = 2.5, cex.lab = 1.8)
+      #text(x = min(c(D0$x,D1$x)) + (max(c(D0$x,D1$x))-min(c(D0$x,D1$x)))*0.15, y=max(c(D0$y,D1$y))*0.65, labels = bquote(italic(p) == .(pval)), cex=2)
+      title(xlab=paste0("Rate of evolution of ", islogLab, SongParam),line = 2.5, cex.lab = 1.8)
 
     } else {  # end if k == 1 (i.e. the "None" removed test)
       # if (SongParam == "Syllrep") {
         pval = round(P.chisqAll,4)
-        text(x = min(c(D0$x,D1$x)) + (max(c(D0$x,D1$x))-min(c(D0$x,D1$x)))*0.25, y=max(c(D0$y,D1$y))*0.65,labels = bquote(italic(p) == .(pval)), cex=2)
-        title(xlab=paste("Rate of evolution of", SongParam),line = 2.5, cex.lab = 1.8)
+        #text(x = min(c(D0$x,D1$x)) + (max(c(D0$x,D1$x))-min(c(D0$x,D1$x)))*0.25, y=max(c(D0$y,D1$y))*0.65,labels = bquote(italic(p) == .(pval)), cex=2)
+        title(xlab=paste0("Rate of evolution of ", islogLab, SongParam),line = 2.5, cex.lab = 1.8)
         
 
     } # end else (i.e. k =/= 1)
@@ -114,7 +137,7 @@ require(phytools)
                 max(D0$x)),
          ylim=c(min(D0$y),
                 max(D0$y)),
-         main=paste(columns[1], columns[2], "Brownie pvals", ", # sims =", nsim, " \nMean =", round(meanphy,4), "/ StdDev =", round(sdev,4), otherlabel), cex.main = 0.85, xlab="Pval" ,ylab="Frequency") 
+         main=paste(columns[1], islogLab, columns[2], "Brownie pvals", ", # sims =", nsim, " \nMean =", round(meanphy,4), "/ StdDev =", round(sdev,4), otherlabel), cex.main = 0.85, xlab="Pval" ,ylab="Frequency") 
     abline(v=0.05, col = "gray")
     
     rm(dftemp)

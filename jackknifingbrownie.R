@@ -20,7 +20,7 @@
 # islog should be true or false, will apply to the continuous variable
 # otherlabel should probably be the tree label
 
-# e.g. jackbrowniefunction(columns = c("MeanCoopTie2Noncoop", "Song.rep.final"), islog = TRUE, matemodel = "ARD", matensim = 100, allcsvs = TRUE, plotsimmaps = FALSE, newtree = treefile, newdata = newdata, cladesubsetcolumn = "Family3_BirdtreeMatchSpecies2", cladeJackvalues = "Mimidae", otherlabel = "HackettOscine")
+# e.g. jackbrowniefunction(columns = c("MeanCoopTie2Noncoop", "Song.rep.final"), islog = TRUE, matemodel = "ARD", matensim = 100, allcsvs = TRUE, plotsimmaps = FALSE, newtree = treefile, newdata = newdata, cladesubsetcolumn = "Family3_BirdtreeMatchSpecies2", cladeJackvalues = NULL, otherlabel = "HackettOscine")
 
 jackbrowniefunction <- function(columns, islog = FALSE, matemodel = "ARD", matensim = 10, allcsvs = FALSE, plotsimmaps = FALSE, newtree, newdata, cladesubsetcolumn = NULL, cladeJackvalues = NULL, otherlabel = NULL) {
   require(ape)

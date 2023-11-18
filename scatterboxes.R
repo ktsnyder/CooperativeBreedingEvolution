@@ -31,10 +31,11 @@
 
 scatterboxes <- function(DiscreteTrait = "CoopBreed", newdata = FALSE, newtree = FALSE, discreteCategoryLabels = c("Non-cooperative","Cooperative"), otherlabel = NULL) {
   require(phytools)
+  require(dplyr)
   source(file = "subsettreedata.R")
   
 
-  pdf(file=paste(Sys.Date(),DiscreteTrait,otherlabel,"Scatterbox.pdf",sep=""),width = 8, height = 4)
+  pdf(file=paste(Sys.Date(),DiscreteTrait,otherlabel,"Scatterbox.pdf",sep=""),width = 10, height = 4)
   
   
   layout(mat=matrix(1:4,nrow=1,ncol=4, byrow=TRUE))
@@ -54,10 +55,20 @@ scatterboxes <- function(DiscreteTrait = "CoopBreed", newdata = FALSE, newtree =
     names(songdatavec) <- subsetdf$species
     names(matingdatavec) <- subsetdf$species
     tree <- subset$subsettree
-    print(songdatavec)
+    print(SongParam)
     
-    set.seed(10)
-    phylanovaresults <- phylANOVA(tree,matingdatavec,songdatavec,nsim=50000)
+    
+    nPerGroup = subsetdf %>% group_by(get(DiscreteTrait)) %>% count
+    
+    if (nrow(nPerGroup) == 1) {
+      print(nPerGroup)
+      phylanovaresults = NULL
+      phylanovaresults$Pf = NULL
+    } else {
+      set.seed(10)
+      phylanovaresults <- phylANOVA(tree,matingdatavec,songdatavec,nsim=50000) 
+    }
+    
     df <- dfwilcox <- subsetdf[,c(matecol,songcol)]
     datalist <- list()
     
@@ -76,11 +87,11 @@ scatterboxes <- function(DiscreteTrait = "CoopBreed", newdata = FALSE, newtree =
       names(datalist) <- datalistnames
  #   } #end else if DiscreteTrait == "EPP"
     
-      wilcoxresults <- tryCatch({wilcox.test(datalist[[1]],datalist[[2]])}, error=function(e) {
-        message('An Error Occurred')
-        print(e)
-        return(NULL)
-      })
+      wilcoxresults = NULL
+      # wilcoxresults <- tryCatch({wilcox.test(datalist[[1]],datalist[[2]])}, error=function(e) {
+      #   message('An Error Occurred in wilcox test')
+      #   print(e)
+      # })
       
       #wilcoxresults <- wilcox.test(datalist[[1]],datalist[[2]])
       
@@ -109,7 +120,8 @@ ScatterBox <- function(data,main="",sub="",xlab="",ylab="",labels=FALSE,col1=NA,
   offset <- 1:length(data)-1
   plot(1,type='n',xlim=c(0,2),ylim=c(0,max(unlist(data))),xaxt='n',
        xlab=xlab, ylab=ylab, main=main, sub=sub, cex.main = 0.8) #,log="y",cex.main = 1)
-  axis(1, at=.5+offset, labels = labels, las = 1, cex.axis = 0.6)
+  axis(1, at=.5+offset, labels = labels, las = 1, cex.axis = 0.6) 
+  #text(x = .5+offset, y = par("usr")[3] - offset, labels = labels, srt = 45, adj = 1, cex = 0.6, xpd = TRUE) # added 11/17/2023
   quan <- sapply(data, quantile, c(.25,.5,.75),type=8)
   #box
   rect(.25+offset,quan[1,],.5+offset,quan[3,],col = col1)
