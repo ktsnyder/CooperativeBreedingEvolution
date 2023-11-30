@@ -2,68 +2,69 @@
 ## From simplebtwDiscrete.R
 ## Kate Snyder
 ## 7/13/2023
-## Last edited: 7/21/2023 - add parameter roundDigits (labeling arrow rates)
+## Edited: 7/21/2023 - add parameter roundDigits (labeling arrow rates)
+## Last edited: 11/27/2023 - if applicable, change rate columns to q## from e.g. "Coop0to1inFS0"
 
 
 #bayesIndFiles <- list.files(pattern = "FemaleSong_Independent", recursive = T)
 #bayesDepFiles <- list.files(pattern = "FemaleSong_Dependent", recursive = T
-bayesIndFiles <- list.files(pattern = "Independent_2023-", recursive = T)
-bayesDepFiles <- list.files(pattern = "Dependent_2023-", recursive = T)
-bayesIndFiles <- bayesIndFiles[5:19]
-bayesDepFiles <- bayesDepFiles[5:19]
-
-
-bayesIndSplit = as.data.frame(str_split(bayesIndFiles, "/", simplify = T))
-bayesDepSplit = as.data.frame(str_split(bayesDepFiles, "/", simplify = T))
-colnames(bayesIndSplit) <- colnames(bayesDepSplit) <- c("Folder", "Filename")
-
-loglikType <- "StonesLh"
-loglikType <- "SamplingMeanLh"
-
-
-pdf(file = paste0(Sys.Date(), " bayestraits AceQrates etc ", loglikType,"_scaledArrows.pdf"), width = 15, height = 5)
-par(mfrow=c(1,3))
-par(mar = c(4,3,3,1))
-for (j in 1:length(bayesIndFiles)) {
-  tempfolder = bayesIndSplit$Folder[j]
-  outInddf = read.csv(bayesIndFiles[j])
-  if (length(bayesDepFiles[which(bayesDepSplit$Folder == tempfolder)]) == 1) {
-    outDepdf = read.csv(bayesDepFiles[which(bayesDepSplit$Folder == tempfolder)])
-  } else {
-    outDepdf = read.csv(bayesDepFiles[which(bayesDepSplit$Folder == tempfolder)][2])
-  }
-  if (length(outDepdf$Sim) > 1 & length(outInddf$Sim) > 1 &   sum(!is.na(outDepdf[,loglikType])) > 2  ) {
-    plotSimpleDiscreteBayes(columns = c("Kin_NK","FemaleSong_Agg01"), df = outDepdf, nocorrDdf = outInddf, LhCol = loglikType, nsim = NULL, treelabel = NULL, newpdf = FALSE, otherlabel = tempfolder, ylabel = tempfolder, arrowmod = 1, roundDigits = 3)
-  }
-}
-dev.off()
-
-bayesIndFiles <- list.files("Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01", pattern = "Independent_2023-", recursive = T)
-bayesDepFiles <- list.files("Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01", pattern = "Dependent_2023-", recursive = T)
-otherlabels = c("Mixed2Kin", "Mixed2NA", "Mixed2NonKin")
-pdf(file = paste0(Sys.Date(), "KinNK FSAgg bayestraits AceQrates etc ", loglikType,"_scaledArrows.pdf"), width = 15, height = 5)
-par(mfrow=c(1,3))
-par(mar = c(4,3,3,1))
-for (j in 1:3) {
-  outInddf = read.csv(paste0("Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/", bayesIndFiles[j]))
-  outDepdf = read.csv(paste0("Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/", bayesDepFiles[j]))
-  otherlabel = otherlabels[j]
-  plotSimpleDiscreteBayes(columns = c("Kin_NK","FemaleSong_Agg01"), df = outDepdf, nocorrDdf = outInddf, LhCol = loglikType, nsim = NULL, treelabel = NULL, newpdf = FALSE, otherlabel = otherlabel, ylabel = otherlabel, arrowmod = 1, roundDigits = 3)
-}
-dev.off()
-
-files = list.files("/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/BayesTraitsDiscrete", pattern = "seeds1001-1500", full.names = T)
-
-for (i in 1:length(files)) {
-  tempfile = files[i]
-  tempcols = str_remove(tempfile, "/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/BayesTraitsDiscrete/BayesTraitsDiscrete_")
-  tempcols = str_remove(tempcols, " mlt100_noRes_seeds1001-1500.csv")
-  tempcols = str_split(tempcols, " ")
-  tempcols = tempcols[[1]]
-  tempdf = read.csv(tempfile)
-  tempdf$X = NULL
-  plotSimpleDiscreteBayes(columns = tempcols, df = tempdf, nocorrDdf = NULL, LhCol = "Lh", nsim = 500, treelabel = "HackettOscine", newpdf = TRUE, cladesubsetvalue = NULL, ylabel = NULL, arrowmod = 1, otherlabel = NULL, roundDigits = 2)
-}
+# bayesIndFiles <- list.files(pattern = "Independent_2023-", recursive = T)
+# bayesDepFiles <- list.files(pattern = "Dependent_2023-", recursive = T)
+# bayesIndFiles <- bayesIndFiles[5:19]
+# bayesDepFiles <- bayesDepFiles[5:19]
+# 
+# 
+# bayesIndSplit = as.data.frame(str_split(bayesIndFiles, "/", simplify = T))
+# bayesDepSplit = as.data.frame(str_split(bayesDepFiles, "/", simplify = T))
+# colnames(bayesIndSplit) <- colnames(bayesDepSplit) <- c("Folder", "Filename")
+# 
+# loglikType <- "StonesLh"
+# loglikType <- "SamplingMeanLh"
+# 
+# 
+# pdf(file = paste0(Sys.Date(), " bayestraits AceQrates etc ", loglikType,"_scaledArrows.pdf"), width = 15, height = 5)
+# par(mfrow=c(1,3))
+# par(mar = c(4,3,3,1))
+# for (j in 1:length(bayesIndFiles)) {
+#   tempfolder = bayesIndSplit$Folder[j]
+#   outInddf = read.csv(bayesIndFiles[j])
+#   if (length(bayesDepFiles[which(bayesDepSplit$Folder == tempfolder)]) == 1) {
+#     outDepdf = read.csv(bayesDepFiles[which(bayesDepSplit$Folder == tempfolder)])
+#   } else {
+#     outDepdf = read.csv(bayesDepFiles[which(bayesDepSplit$Folder == tempfolder)][2])
+#   }
+#   if (length(outDepdf$Sim) > 1 & length(outInddf$Sim) > 1 &   sum(!is.na(outDepdf[,loglikType])) > 2  ) {
+#     plotSimpleDiscreteBayes(columns = c("Kin_NK","FemaleSong_Agg01"), df = outDepdf, nocorrDdf = outInddf, LhCol = loglikType, nsim = NULL, treelabel = NULL, newpdf = FALSE, otherlabel = tempfolder, ylabel = tempfolder, arrowmod = 1, roundDigits = 3)
+#   }
+# }
+# dev.off()
+# 
+# bayesIndFiles <- list.files("Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01", pattern = "Independent_2023-", recursive = T)
+# bayesDepFiles <- list.files("Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01", pattern = "Dependent_2023-", recursive = T)
+# otherlabels = c("Mixed2Kin", "Mixed2NA", "Mixed2NonKin")
+# pdf(file = paste0(Sys.Date(), "KinNK FSAgg bayestraits AceQrates etc ", loglikType,"_scaledArrows.pdf"), width = 15, height = 5)
+# par(mfrow=c(1,3))
+# par(mar = c(4,3,3,1))
+# for (j in 1:3) {
+#   outInddf = read.csv(paste0("Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/", bayesIndFiles[j]))
+#   outDepdf = read.csv(paste0("Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/", bayesDepFiles[j]))
+#   otherlabel = otherlabels[j]
+#   plotSimpleDiscreteBayes(columns = c("Kin_NK","FemaleSong_Agg01"), df = outDepdf, nocorrDdf = outInddf, LhCol = loglikType, nsim = NULL, treelabel = NULL, newpdf = FALSE, otherlabel = otherlabel, ylabel = otherlabel, arrowmod = 1, roundDigits = 3)
+# }
+# dev.off()
+# 
+# files = list.files("/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/BayesTraitsDiscrete", pattern = "seeds1001-1500", full.names = T)
+# 
+# for (i in 1:length(files)) {
+#   tempfile = files[i]
+#   tempcols = str_remove(tempfile, "/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/BayesTraitsDiscrete/BayesTraitsDiscrete_")
+#   tempcols = str_remove(tempcols, " mlt100_noRes_seeds1001-1500.csv")
+#   tempcols = str_split(tempcols, " ")
+#   tempcols = tempcols[[1]]
+#   tempdf = read.csv(tempfile)
+#   tempdf$X = NULL
+#   plotSimpleDiscreteBayes(columns = tempcols, df = tempdf, nocorrDdf = NULL, LhCol = "Lh", nsim = 500, treelabel = "HackettOscine", newpdf = TRUE, cladesubsetvalue = NULL, ylabel = NULL, arrowmod = 1, otherlabel = NULL, roundDigits = 2)
+# }
 
 
 #### Top ----
@@ -73,8 +74,40 @@ plotSimpleDiscreteBayes <- function(columns, df, nocorrDdf = NULL, LhCol = NULL,
   traitColsLabel <- paste(columns[1], columns[2])
   currentlabel <- paste(treelabel,traitColsLabel)
   
+  TestLabel = "BayesTraits"
+  IntermediateFolder = "BayesTraitsDiscrete"
+  
+  
+  if (!"q12" %in% colnames(df) & "Coop0to1inFS0" %in% colnames(df)) {
+    colnames(df)[which(colnames(df) == "FS0to1inCoop0")] <- "q12"
+    colnames(df)[which(colnames(df) == "Coop0to1inFS0")] <- "q13"
+    colnames(df)[which(colnames(df) == "FS1to0inCoop0")] <- "q21"
+    colnames(df)[which(colnames(df) == "Coop0to1inFS1")] <- "q24"
+    colnames(df)[which(colnames(df) == "Coop1to0inFS0")] <- "q31"
+    colnames(df)[which(colnames(df) == "FS0to1inCoop1")] <- "q34"
+    colnames(df)[which(colnames(df) == "Coop1to0inFS1")] <- "q42"
+    colnames(df)[which(colnames(df) == "FS1to0inCoop1")] <- "q43"
+  }
+  
+  if (!is.null(nocorrDdf)) {
+    print("nocorrDdf is not NULL")
+      if ("Coop0to1inFS0" %in% colnames(nocorrDdf)) {
+      colnames(nocorrDdf)[which(colnames(nocorrDdf) == "FS0to1inCoop0")] <- "q12"
+      colnames(nocorrDdf)[which(colnames(nocorrDdf) == "Coop0to1inFS0")] <- "q13"
+      colnames(nocorrDdf)[which(colnames(nocorrDdf) == "FS1to0inCoop0")] <- "q21"
+      colnames(nocorrDdf)[which(colnames(nocorrDdf) == "Coop0to1inFS1")] <- "q24"
+      colnames(nocorrDdf)[which(colnames(nocorrDdf) == "Coop1to0inFS0")] <- "q31"
+      colnames(nocorrDdf)[which(colnames(nocorrDdf) == "FS0to1inCoop1")] <- "q34"
+      colnames(nocorrDdf)[which(colnames(nocorrDdf) == "Coop1to0inFS1")] <- "q42"
+      colnames(nocorrDdf)[which(colnames(nocorrDdf) == "FS1to0inCoop1")] <- "q43"
+      }
+      
+      TestLabel = "SimmapTransitionCount"
+      IntermediateFolder = "SimmapOverlap"
+  } 
+  
   if (newpdf == TRUE) {
-    pdf(file = paste0(getwd(),"/OutputFiles/BayesTraitsDiscrete/",Sys.Date(),"BayesTraits_",currentlabel, "_", nsim, "sims", cladesubsetvalue, otherlabel, ".pdf"), width = 14, height = 5) 
+    pdf(file = paste0(getwd(),"/OutputFiles/",IntermediateFolder,"/",Sys.Date(), TestLabel,"_",currentlabel, "_", nsim, "sims", cladesubsetvalue, otherlabel, ".pdf"), width = 14, height = 5) 
   }
   
   tempdfDep <- df
@@ -193,8 +226,22 @@ plotSimpleDiscreteBayes <- function(columns, df, nocorrDdf = NULL, LhCol = NULL,
       qColumns <- c("q12", "q13", "q21", "q24", "q31", "q34", "q42", "q43")
     }
   } else if (is.null(nocorrDdf)) {
-    tempdfInd = df
-    qColumns = 21:28
+    if ("TotalFS0to1" %in% colnames(df)) {
+      print("Independent method: half of total transition counts from simmaps")
+      qColumns = c("q12", "q13", "q21", "q24", "q31", "q34", "q42", "q43")
+      tempdfInd = df
+      tempdfInd$q12 = tempdfInd$TotalFS0to1 * 0.5
+      tempdfInd$q13 = tempdfInd$TotalCoop0to1 * 0.5
+      tempdfInd$q21 = tempdfInd$TotalFS1to0 * 0.5
+      tempdfInd$q24 = tempdfInd$TotalCoop0to1 * 0.5
+      tempdfInd$q31 = tempdfInd$TotalCoop1to0 * 0.5
+      tempdfInd$q34 = tempdfInd$TotalFS0to1 * 0.5
+      tempdfInd$q42 = tempdfInd$TotalCoop1to0 * 0.5
+      tempdfInd$q43 = tempdfInd$TotalFS1to0 * 0.5
+    } else {
+      tempdfInd = df
+      qColumns = 21:28
+    }
   } else {
     qColumns = c("q12", "q13", "q21", "q24", "q31", "q34", "q42", "q43")
     tempdfInd = nocorrDdf
@@ -232,7 +279,7 @@ plotSimpleDiscreteBayes <- function(columns, df, nocorrDdf = NULL, LhCol = NULL,
     arrowmod = 20
   } else if (max(allrates) < 20) {
     arrowmod = 5
-  }
+  } 
   
   
   arrowcols = c("red","blue","green","purple")
@@ -274,8 +321,12 @@ plotSimpleDiscreteBayes <- function(columns, df, nocorrDdf = NULL, LhCol = NULL,
     dfrangesig <- df[which(df$pval < 0.05),]
     meannumbersig <- length(dfrangesig$Tree.No)
     LRplot = FALSE
-  } else if (!is.null(LhCol)) {
+  } else if (is.null(LhCol)) {
+    LRplot = FALSE
+  } else if (LhCol %in% colnames(df)) {
     LRplot = TRUE
+  } else {
+    LRplot = FALSE
   }
   
   if (newpdf == TRUE) {  #used when not plotting jackknifes
@@ -333,75 +384,75 @@ plotSimpleDiscreteBayes <- function(columns, df, nocorrDdf = NULL, LhCol = NULL,
   }
   arrowcolvec <- rep(arrowcols[2],times=8)
   arrowcolvec[which(rates == 0)] <- "gray"
-    arrows(x0=c(35, 65, 85, 75, 65, 35, 15, 25), y0=c(85, 75, 65, 35, 15, 25, 35, 65), x1=c(65, 35, 85, 75, 35, 65, 15, 25), y1=c(85, 75, 35, 65, 15, 25, 65, 35), lwd=rates*arrowmod, col=arrowcolvec, length = 0.3) 
+  arrows(x0=c(35, 65, 85, 75, 65, 35, 15, 25), y0=c(85, 75, 65, 35, 15, 25, 35, 65), x1=c(65, 35, 85, 75, 35, 65, 15, 25), y1=c(85, 75, 35, 65, 15, 25, 65, 35), lwd=rates*arrowmod, col=arrowcolvec, length = 0.3) 
+  
+  mat <- maxratesmat_nocorr
+  maxlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),roundDigits) 
+  mat <- minratesmat_nocorr
+  minlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),roundDigits) 
+  
+  labs = set.seed(10)
+  for (y in 1:8) {
+    labs[y] <- paste(meanlabs[y],"\n(",minlabs[y],", ",maxlabs[y],")", sep = "")} #end for y in 1:8
+  
+  text(x=c(50, 50, 94, 66, 50, 50, 6, 34), y=c(93, 67, 50, 50, 7,33, 50, 50), labels=labs, cex=0.85)
+  #end plot nocorrD
+  
+  
+  ## corrD rates
+  mat <- meanratesmat
+  rates <- meanlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),roundDigits)  
+  
+  ## corrD plot
+  plot(c(0,100), c(0,100), type = "n", xaxt = "n", yaxt = "n", xlab = "", main = paste(columns[1], columns[2], "Dependent Model"), cex.main=1, ylab = "")
+  #main=paste(currentlabel,"\n# Runs significant: ", round(meannumbersig, digits = 1), runsperthresh, sep = ""), cex.main=1, ylab = "")
+  title(ylab = yfamilylabel, line = 1)
+  text(x=c(15, 85, 15, 85), y=c(80, 80, 20, 20), labels=c(paste(lab0x,"\n",labx0,sep=""), paste(lab0x,"\n",labx1,sep=""), paste(lab1x,"\n",labx0,sep=""), paste(lab1x,"\n",labx1,sep="")), cex=0.8)
+  if (trait1 == "EPP") {
+    rates <- rates/2
+  }
+  arrowcolvec <- rep(arrowcols[m],times=8)
+  arrowcolvec[which(rates == 0)] <- "gray"
+  arrows(x0=c(35, 65, 85, 75, 65, 35, 15, 25), y0=c(85, 75, 65, 35, 15, 25, 35, 65), x1=c(65, 35, 85, 75, 35, 65, 15, 25), y1=c(85, 75, 35, 65, 15, 25, 65, 35), lwd=rates*arrowmod, col=arrowcolvec, length = 0.3) 
+  
+  mat <- maxratesmat
+  maxlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),roundDigits) 
+  mat <- minratesmat
+  minlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),roundDigits) 
+  
+  labs = set.seed(10)
+  for (y in 1:8) {
+    labs[y] <- paste(meanlabs[y],"\n(",minlabs[y],", ",maxlabs[y],")", sep = "")} #end for y in 1:8
+  
+  text(x=c(50, 50, 94, 66, 50, 50, 6, 34), y=c(93, 67, 50, 50, 7,33, 50, 50), labels=labs, cex=0.85)
+  #end plot corrD
+  
+  if (!is.null(df$pval)) {
+    D0 <- density(df$pval)
     
-    mat <- maxratesmat_nocorr
-    maxlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),roundDigits) 
-    mat <- minratesmat_nocorr
-    minlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),roundDigits) 
-    
-    labs = set.seed(10)
-    for (y in 1:8) {
-      labs[y] <- paste(meanlabs[y],"\n(",minlabs[y],", ",maxlabs[y],")", sep = "")} #end for y in 1:8
-    
-    text(x=c(50, 50, 94, 66, 50, 50, 6, 34), y=c(93, 67, 50, 50, 7,33, 50, 50), labels=labs, cex=0.85)
-    #end plot nocorrD
-    
-    
-    ## corrD rates
-    mat <- meanratesmat
-    rates <- meanlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),roundDigits)  
-    
-    ## corrD plot
-    plot(c(0,100), c(0,100), type = "n", xaxt = "n", yaxt = "n", xlab = "", main = paste(columns[1], columns[2], "Dependent Model"), cex.main=1, ylab = "")
-         #main=paste(currentlabel,"\n# Runs significant: ", round(meannumbersig, digits = 1), runsperthresh, sep = ""), cex.main=1, ylab = "")
-    title(ylab = yfamilylabel, line = 1)
-    text(x=c(15, 85, 15, 85), y=c(80, 80, 20, 20), labels=c(paste(lab0x,"\n",labx0,sep=""), paste(lab0x,"\n",labx1,sep=""), paste(lab1x,"\n",labx0,sep=""), paste(lab1x,"\n",labx1,sep="")), cex=0.8)
-    if (trait1 == "EPP") {
-      rates <- rates/2
-    }
-    arrowcolvec <- rep(arrowcols[m],times=8)
-    arrowcolvec[which(rates == 0)] <- "gray"
-      arrows(x0=c(35, 65, 85, 75, 65, 35, 15, 25), y0=c(85, 75, 65, 35, 15, 25, 35, 65), x1=c(65, 35, 85, 75, 35, 65, 15, 25), y1=c(85, 75, 35, 65, 15, 25, 65, 35), lwd=rates*arrowmod, col=arrowcolvec, length = 0.3) 
-      
-      mat <- maxratesmat
-      maxlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),roundDigits) 
-      mat <- minratesmat
-      minlabs <- round(c(mat[1,2],mat[2,1],mat[2,4],mat[4,2],mat[4,3],mat[3,4],mat[3,1],mat[1,3]),roundDigits) 
-      
-      labs = set.seed(10)
-      for (y in 1:8) {
-        labs[y] <- paste(meanlabs[y],"\n(",minlabs[y],", ",maxlabs[y],")", sep = "")} #end for y in 1:8
-      
-      text(x=c(50, 50, 94, 66, 50, 50, 6, 34), y=c(93, 67, 50, 50, 7,33, 50, 50), labels=labs, cex=0.85)
-      #end plot corrD
-      
-      if (!is.null(df$pval)) {
-        D0 <- density(df$pval)
-        
-        plot(D0,col="black",
-             xlim=c(min(D0$x),
-                    max(D0$x)),
-             ylim=c(min(D0$y),
-                    max(D0$y)),
-             main=paste(columns[1], columns[2], "BayesTraits pvals", ", # sims =", nsim, " \n", otherlabel), cex.main = 0.85, xlab="Pval" ,ylab="Frequency") 
-        abline(v=0.05, col = "gray")
-      } else if (LRplot == TRUE) {
-        D0 <- density(as.numeric(tempdfDep[,LhCol]), na.rm = T)
-        D1 <- density(as.numeric(tempdfInd[,LhCol]), na.rm = T)
-        MeanLhDep = round(mean(as.numeric(tempdfDep[,LhCol]), na.rm = T),2)
-        MeanLhInd = round(mean(as.numeric(tempdfInd[,LhCol]), na.rm = T),2)
-        BayesFactor = round(2*(MeanLhDep-MeanLhInd),2)
-        plot(D0,col=arrowcols[m],
-             xlim=c(min(c(D0$x,D1$x)),
-                    max(c(D0$x,D1$x))),
-             ylim=c(min(c(D0$y,D1$y)),
-                    max(c(D0$y,D1$y))),
-             main=paste(columns[1], columns[2], "BayesTraits", LhCol, ", # sims =", nsim, " \nMean Independent:", MeanLhInd, "Mean Dependent:", MeanLhDep, "BayesFactor:", BayesFactor, otherlabel), cex.main = 0.85, xlab=LhCol ,ylab="Frequency") 
-        lines(D1, col = arrowcols[2])
-      }
-      
-      if (newpdf == TRUE) {
-        dev.off()
-      }
+    plot(D0,col="black",
+         xlim=c(min(D0$x),
+                max(D0$x)),
+         ylim=c(min(D0$y),
+                max(D0$y)),
+         main=paste(columns[1], columns[2], "BayesTraits pvals", ", # sims =", nsim, " \n", otherlabel), cex.main = 0.85, xlab="Pval" ,ylab="Frequency") 
+    abline(v=0.05, col = "gray")
+  } else if (LRplot == TRUE) {
+    D0 <- density(as.numeric(tempdfDep[,LhCol]), na.rm = T)
+    D1 <- density(as.numeric(tempdfInd[,LhCol]), na.rm = T)
+    MeanLhDep = round(mean(as.numeric(tempdfDep[,LhCol]), na.rm = T),2)
+    MeanLhInd = round(mean(as.numeric(tempdfInd[,LhCol]), na.rm = T),2)
+    BayesFactor = round(2*(MeanLhDep-MeanLhInd),2)
+    plot(D0,col=arrowcols[m],
+         xlim=c(min(c(D0$x,D1$x)),
+                max(c(D0$x,D1$x))),
+         ylim=c(min(c(D0$y,D1$y)),
+                max(c(D0$y,D1$y))),
+         main=paste(columns[1], columns[2], "BayesTraits", LhCol, ", # sims =", nsim, " \nMean Independent:", MeanLhInd, "Mean Dependent:", MeanLhDep, "BayesFactor:", BayesFactor, otherlabel), cex.main = 0.85, xlab=LhCol ,ylab="Frequency") 
+    lines(D1, col = arrowcols[2])
+  }
+  
+  if (newpdf == TRUE) {
+    dev.off()
+  }
 } # end function
