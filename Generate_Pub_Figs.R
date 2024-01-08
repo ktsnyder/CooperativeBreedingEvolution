@@ -215,6 +215,17 @@ for (i in 1:length(socialityMetrics)) {
   nsims = nsims_real = length(tempdfDep[,1])
   nsims_dummy = length(tempdfInd[,1])
   
+  transitioncols = colnames(tempdfDep)[18:25]
+  ExpectedCols = paste0(transitioncols, "Expected")
+  ChiSqStat = rowSums((tempdfDep[,transitioncols] - tempdfDep[,ExpectedCols])^2/tempdfDep[,ExpectedCols])
+  ChiSqPvals = pchisq(ChiSqStat, df = 7)
+  tempdfDep = cbind(tempdfDep, ChiSqStat, ChiSqPvals)
+  
+  #plot(density(tempdfDep$ChiSqPvals, na.rm = TRUE), main = tempMetric)
+  hist(tempdfDep$ChiSqPvals, main = tempMetric, breaks = 20)
+  abline(v = 0.05, col = "red")
+  next
+  
   calcHuelout = calcHuel(tempdfDep, tempdfInd)
   Transitions = calcHuelout$TransitionStats$logPairwisePostHoc[2]
   pvals = calcHuelout$TransitionStats$logPairwisePostHoc[7]
@@ -273,12 +284,19 @@ for (i in 1:length(socialityMetrics)) {
   } else if (str_detect(trait1, "Asocial")) {
     lab0x = paste("Asocial")
     lab1x = paste("Pair or group sociality") 
-  } 
+  } else if (str_detect(trait1,"SeasonOrLonger")) {
+    lab0x = paste("Bonds last less than one season")
+    lab1x = paste("Season or longer social bonds") 
+  } else if (str_detect(trait1, "LargestGroupSizes")) {
+    lab0x = paste("Asocial, pair, or small groups")
+    lab1x = paste("Large groups") 
+  }
   
   #plotSimpleDiscreteBayes(columns = columns, df = tempdfDep, nocorrDdf = NULL, LhCol = "Lh", nsim = nsims, treelabel = "HackettOscine", newpdf = TRUE, cladesubsetvalue = NULL, ylabel = "Transition Counts", arrowmod = 0.5, otherlabel = "TransitionCountArrows_halfTotalTransIndependent", roundDigits = 3)
   trait1StateLabels = c(lab0x, lab1x)
   trait2StateLabels = c(labx0, labx1)
-  outlist[[i]] = transition_plot(df = tempdfDep, trait1StateLabels = trait1StateLabels, trait2StateLabels = trait2StateLabels, scale_area_by = 0.1, offset = 0.15, lengthen = 0.3, ratePvals = ratePvals)
+  plottitle = paste(trait1, trait2, "nsims:", nsims)
+  outlist[[i]] = transition_plot(df = tempdfDep, trait1StateLabels = trait1StateLabels, trait2StateLabels = trait2StateLabels, scale_area_by = 1, offset = 0.2, lengthen = 0.2, ratePvals = ratePvals, plottitle = plottitle)
   names(outlist)[i] <- paste(trait1, trait2, sep = "_")
   templist = outlist[[i]]
   plotlist[[i]] = templist$transition_plot
@@ -298,9 +316,21 @@ for (i in 1:length(socialityMetrics)) {
 }
 #plotlist[[i]]$transition_plot
 #plotlist[[i]]$transition_df
+
 require(gridExtra)
+require(grid)
 nTransPlots= length(plotlist)
-mSoc <- marrangeGrob(plotlist[1:nTransPlots], ncol = 2, nrow = round(nTransPlots/2))
+#mSoc <- marrangeGrob(plotlist[1:nTransPlots], ncol = 2, nrow = 2)
+grobs_with_margins <- lapply(plotlist, function(plot) {
+  plot_with_margin <- plot + 
+    theme(plot.margin = margin(t = 50, r = 50, b = 50, l = 50, unit = "pt")) # Adjust margins as needed
+  ggplotGrob(plot_with_margin)
+})
+# Arrange the grobs on a single page
+single_page_plot <- grid.arrange(grobs = grobs_with_margins, ncol = 2, nrow = 6) # Adjust ncol and nrow as needed
+
+# Save the arranged plot to a file
+ggsave("transition plots sociality FS_onepage.pdf", single_page_plot, width = 18, height = 38, units = "in")
 #ggsave("transition plots sociality FS.pdf", mSoc, width = 24.5, height = 7.9*(round(nTransPlots/2)), units = "in", limitsize = FALSE)
 
 
@@ -446,4 +476,42 @@ m1 <- marrangeGrob(plotlist2, ncol = 1, nrow = 3)
 ggsave("jackknifed Simmap Overlaps MeanCoopTie2Noncoop FemaleSong_Agg01 HackettOscine.pdf", m1, width = 8, height = 9, units = "in")
 
 
+#### Generate Counts Table ----
 
+dfIn = read.csv(newdata)
+OscineSubset = subsettreedata(newdata = dfIn, newtree = treefile)
+df = OscineSubset$subsetdf
+columnsToSummarize = c("Griesser2023.Colonial01", "Griesser2023.Asocial0vsSocial1", "Griesser2023.GroupsLargerThanPair", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2023.LongSocialBonds", "Griesser2023.MoreThanTwoCaretakers", "Griesser2023.TwoOrMoreCaretakers", "Griesser2017FamilialLiving", "Final.polygyny", "MeanCoopTie2Noncoop") 
+otheraxiscolumns = c("FemaleSong_Agg01", "MeanCoopTie2Noncoop")
+
+fulltable = c(0,1)
+for (i in 1:length(columnsToSummarize)) {
+  tablesegment = c(0,1)
+  for (j in 1: length(otheraxiscolumns)) {
+  tempCol = columnsToSummarize[i]
+  othertempCol = otheraxiscolumns[j]
+  
+  if (tempCol != othertempCol) {
+grouped_df <- df %>%
+  group_by(.data[[othertempCol]], .data[[tempCol]]) %>%
+  summarize(Count = n(), .groups='drop')
+filtered_df = grouped_df %>% filter(!is.na(.data[[othertempCol]]) & !is.na(.data[[tempCol]]))
+
+wide_df <- filtered_df %>%
+  spread(key = .data[[tempCol]], value = Count)
+wide_df[is.na(wide_df)] <- 0
+wide_df = as.data.frame(wide_df)
+  } else {
+    wide_df = as.data.frame(matrix(data = NA, nrow = 2, ncol = 2))
+  }
+rownames(wide_df) = paste(othertempCol, c(0,1), sep = "_")
+wide_df = wide_df[,which(colnames(wide_df) != othertempCol)]
+colnames(wide_df) = paste(tempCol, c(0,1), sep = "_")
+tablesegment = rbind(tablesegment, wide_df)
+  }
+  tablesegment = tablesegment[which(rownames(tablesegment) != 1),]
+  fulltable = cbind(fulltable, tablesegment)
+}
+fulltable = fulltable[,which(colnames(fulltable) != "fulltable")]
+fulltable
+#write.csv(fulltable, "SuppTable_binary traits state intersections NumSpecies.csv", row.names = T)

@@ -220,7 +220,7 @@ CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalab
   
   source("find transition counts by state for 2 Discrete traits.R")
   transStateCounts = getTransitionStateCounts(Coopsimtrees = Coopsimtrees, FSsimtrees = FSsimtrees)
-  dfout = merge(dfout, transStateCounts, by.x = "treenum", by.y = "TreeNum", )
+  dfout = merge(dfout, transStateCounts, by.x = "treenum", by.y = "TreeNum")
   
   write.csv(dfout, file = paste("Simmap Overlap Outputs/", datalabel, "simmap overlap_counts output nsim", nsims, treelabel,".csv"), row.names = FALSE)
   return(dfout)
@@ -230,6 +230,7 @@ CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalab
 calcHuel <- function(dfout, dfDummy, nsims_real = NULL, nsims_dummy = NULL, otherlabel = NULL, newplot = TRUE, plot_ggplots_pdf = FALSE) {
   require(tidyverse)
   require(ggplot2)
+
   if (is.null(nsims_real)) {
     nsims_real = length(dfout[,1])
   }
@@ -421,6 +422,7 @@ if (newplot == TRUE) {
         pvalInteractionLabel = paste("p =", round(pvalInteraction, digits = 5))
       }
       require(emmeans)
+      require(ggpubr)
       emm <- emmeans(lmMult, pairwise ~ ObservedVsExpected | Transition)
       contrast <- emm$contrasts
       PairwisePostHoc = summary(contrast, adjust = "tukey")
