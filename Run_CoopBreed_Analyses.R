@@ -12,7 +12,8 @@ songfeatures <- c("Syllable.rep.final", "Syll.song.final", "Song.rep.final", "Du
 #newdata = "/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-06-01_CoopSongFS_RColumns.csv"
 olddata = read.csv("2023-06-20_CoopBreed-FemaleSong01HighConf-Song_Data_R.csv") # pre-cornwallis
 #newdata = "2023-09-14_CoopBreed-FemaleSong-Song_Data_R.csv"
-newdata = "2023-10-26_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv"
+#newdata = "2023-10-26_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv"
+newdata = "2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv"
 dataNoSongless = read.csv(newdata)
 dataNoSongless$X = NULL
 #treefile <- "2021-08-31ConsensusPasserineTreeEricson10_1000.nex" # 3/8/2022
@@ -24,6 +25,16 @@ currentlabel <- "HackettOscine-Tie2Noncoop"
 CBcolumn = "MeanCoopTie2Noncoop"
 #columns = c("HighConfidence_FemaleSong", CBcolumn)
 columns = c("FemaleSong_Agg01", CBcolumn)
+
+
+### Add Griesser social_system columns to R-ready df - done 1/8/2024
+# data = read.csv("2023-10-26_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv")
+# fulldata = read.csv("2023-10-26_Aggregate_CBSource_Data_AllColumns.csv")
+# griessercols = fulldata[,c("BirdtreeSpecies", "social_system",	"social_system_incl_nk_coop",	"social_system_assessment")]
+# colnames(griessercols)[2:4] = paste0(colnames(griessercols)[2:4], "_Griesser2017")
+# newdata = merge(data, griessercols, by.x="species", by.y = "BirdtreeSpecies", all.x = T, all.y = F)
+# newdata %>% group_by(social_system_incl_nk_coop_Griesser2017) %>% count
+# write.csv(newdata,"2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv", row.names = FALSE)
 
 
 # test ER/ARD brownie
