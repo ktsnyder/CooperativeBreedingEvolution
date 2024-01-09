@@ -1,5 +1,6 @@
 # multistate brownie scratch
 # 
+# Building function in 2nd section - status: update plot to allow nGroups != 4
 
 newdata = "2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv"
 treefile = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
@@ -161,46 +162,47 @@ title(xlab=paste0("Rate of evolution of ", "log Song rep"),line = 2.5, cex.lab =
 
 
 #### Griesser 2017 social_system (coop x fam) ----
+#### Now being reworked for flex/functionality
 df =  read.csv("2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv")
-dfOs = df[which(df$species %in% tree$tip.label),]
-dfOs %>% group_by(social_system_incl_nk_coop_Griesser2017) %>% count
+treefile = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
+DiscreteTrait = "social_system_Griesser2017"
+ContinuousTrait = "Song.rep.final"
+nsim = 500
 
-subsetout = subsettreedata(columns = "social_system_incl_nk_coop_Griesser2017", newdata = dfOs, newtree = tree)
+subsetout = subsettreedata(columns = DiscreteTrait, newdata = df, newtree = treefile)
 subsetDisctree = subsetout$subsettree
 subsetDiscdf = subsetout$subsetdf
-subsetDiscdf %>% group_by(social_system_incl_nk_coop_Griesser2017) %>% count
-# songrepsubset = subsetdf[which(!is.na(subsetdf$Song.rep.final)), ]
-# songrepsubset %>% group_by(social_system_incl_nk_coop_Griesser2017) %>% count
-# songrepsubset %>% group_by(social_system_Griesser2017) %>% count
+#subsetDiscdf %>% group_by(social_system_incl_nk_coop_Griesser2017) %>% count
 
-unique(subsetDiscdf$social_system_incl_nk_coop_Griesser2017)
-discretetraitvecDisc = subsetDiscdf$social_system_incl_nk_coop_Griesser2017
+discretetraitvecDisc = subsetDiscdf[,DiscreteTrait]
 names(discretetraitvecDisc) = subsetDiscdf$species
 
-simmapER <- make.simmap(subsetDisctree,discretetraitvecDisc,nsim=1,model = "ER") 
+#simmapER <- make.simmap(subsetDisctree,discretetraitvecDisc,nsim=1,model = "ER") 
 
 ERmodel <- ace(discretetraitvecDisc,subsetDisctree, type="discrete",model = "ER")
 ARDmodel <- ace(discretetraitvecDisc,subsetDisctree, type="discrete",model = "ARD")
 anovaERARD <- anova(ERmodel,ARDmodel)
-anovaERARD
 SYMmodel <- ace(discretetraitvecDisc,subsetDisctree, type="discrete",model = "SYM")
-anova(ERmodel,SYMmodel)
+anovaERSYM = anova(ERmodel,SYMmodel)
 anovaSYMARD <- anova(SYMmodel,ARDmodel)
-anovaSYMARD
+
+print(anovaERSYM)
+print(anovaSYMARD)
+
 
 # get rates from ace() output
-aceARDrates = ARDmodel$rates
-aceARDrates = cbind(1:12, aceARDrates)
+aceARDratesVec = ARDmodel$rates
+aceARDrates = cbind(1:length(aceARDratesVec), aceARDratesVec)
 aceARDrates = as.data.frame(aceARDrates)
 colnames(aceARDrates) <- c("rate_index", "rates")
 rate_index_matrix = ARDmodel$index.matrix
 groupnames = colnames(ARDmodel$lik.anc)
-
-rate_matrix = matrix(rep(NA,16), nrow = 4)
+nGroups = length(groupnames)
+rate_matrix = matrix(rep(NA,nGroups^2), nrow = nGroups)
 rownames(rate_matrix) = colnames(rate_matrix) = groupnames
 
-for (i in 1:4) {
-  for (j in 1:4) {
+for (i in 1:nGroups) {
+  for (j in 1:nGroups) {
     index = rate_index_matrix[i,j]
     if (!is.na(index)) {
       rate_matrix[i,j] = aceARDrates$rates[which(aceARDrates$rate_index == index)]
@@ -209,40 +211,47 @@ for (i in 1:4) {
 }
 diagvals = rowSums(rate_matrix, na.rm = T)*-1
 diag(rate_matrix) <- diagvals
-rate_matrix
+print(rate_matrix)
 
 # get rates from make.simmap
-simmapARD = make.simmap(subsettree,discretetraitvec, nsim = 1, model = "ARD")
-makesimmapARDrates = simmapARD$Q
+#simmapARD = make.simmap(subsettree,discretetraitvec, nsim = 1, model = "ARD")
+#makesimmapARDrates = simmapARD$Q
 
 # Make simmaps from data subsetted to those with song reps
-subsetSong = subsettreedata(columns = c("social_system_incl_nk_coop_Griesser2017", "Song.rep.final"), newdata = df, newtree = tree, islog = "Song.rep.final")
+subsetSong = subsettreedata(columns = c(DiscreteTrait, ContinuousTrait), newdata = df, newtree = treefile, islog = ContinuousTrait)
 subsetdf = subsetSong$subsetdf
 subsettree = subsetSong$subsettree
 
-unique(subsetdf$social_system_incl_nk_coop_Griesser2017)
-discretetraitvec = subsetdf$social_system_incl_nk_coop_Griesser2017
+discretetraitvec = subsetdf[,DiscreteTrait]
 names(discretetraitvec) = subsetdf$species
 
-continuoustraitvec = subsetdf$Song.rep.final
+continuoustraitvec = subsetdf[ContinuousTrait]
 names(continuoustraitvec) = subsetdf$species
 
-simmappy = make.simmap(subsettree, discretetraitvec, nsim = 100, Q= rate_matrix, type = "discrete") 
+simmappy = make.simmap(subsettree, discretetraitvec, nsim = nsim, Q= rate_matrix, type = "discrete") 
 
 plotSimmap(simmappy[[2]])
 
-simmapfor = simmappy[[1]]
+simmapfor = simmappy[[4]]
 brownieliteresults <- brownie.lite(simmapfor,continuoustraitvec,maxit=75000)
 statenames = names(brownieliteresults$sig2.multiple)
 
-browniedata <- data.frame(DiscreteTrait=character(nsim),ContinuousTrait=character(nsim),Pval=numeric(nsim),ERRate=numeric(nsim),ERloglik=numeric(nsim),ERace=numeric(nsim),ARDRateCoopFam=numeric(nsim),ARDRateNoncoopFam=numeric(nsim),ARDRateCoopNonkin=numeric(nsim),ARDRateNoncoopNonkin=numeric(nsim),ARDloglik=numeric(nsim),ARDace=numeric(nsim),k2=numeric(nsim),convergence=character(nsim),simmapnumber=integer(nsim),phylanovaP=numeric(nsim),stringsAsFactors = FALSE)
+ARDRateColNames = paste0("ARDRate_", statenames)
+
+browniedata <- data.frame(DiscreteTrait=character(nsim),ContinuousTrait=character(nsim),Pval=numeric(nsim),ERRate=numeric(nsim),ERloglik=numeric(nsim),ERace=numeric(nsim),ARDloglik=numeric(nsim),ARDace=numeric(nsim),k2=numeric(nsim),convergence=character(nsim),simmapnumber=integer(nsim),phylanovaP=numeric(nsim),stringsAsFactors = FALSE)
+browniedata[,ARDRateColNames] = NA
+ncolsBrownieData = length(colnames(browniedata))
 brownied <- set.seed(10)
 browniedf <- set.seed(10)
 
-browniedata$DiscreteTrait = "social_system_incl_nk_coop_Griesser2017"
-browniedata$ContinuousTrait = "logSong.rep.final"
+browniedata$DiscreteTrait = DiscreteTrait
+browniedata$ContinuousTrait = paste0("log",ContinuousTrait)
+
 
 for (i in 1:nsim) {
+  if (i %in% seq(0,2500,by=50)) {
+    print(i)
+  }
   simmapfor <- simmappy[[i]]
   brownieliteresults <- set.seed(10)
   
@@ -255,32 +264,32 @@ for (i in 1:nsim) {
   browniedata[i,4] <- brownieliteresults$sig2.single
   browniedata[i,5] <- brownieliteresults$logL1
   browniedata[i,6] <- brownieliteresults$a.single
-  browniedata[i,7] <- brownieliteresults$sig2.multiple[1]
-  browniedata[i,8] <- brownieliteresults$sig2.multiple[2]
-  browniedata[i,9] <- brownieliteresults$sig2.multiple[3]
-  browniedata[i,10] <- brownieliteresults$sig2.multiple[4]
-  browniedata[i,11] <- brownieliteresults$logL.multiple
-  browniedata[i,12] <- brownieliteresults$a.multiple
-  browniedata[i,13] <- brownieliteresults$k2
-  browniedata[i,14] <- as.character(brownieliteresults$convergence)
-  browniedata[i,15] <- i #}, timeout = 16, cpu=Inf, onTimeout = "error")
+  browniedata[i,7] <- brownieliteresults$logL.multiple
+  browniedata[i,8] <- brownieliteresults$a.multiple
+  browniedata[i,9] <- brownieliteresults$k2
+  browniedata[i,10] <- as.character(brownieliteresults$convergence)
+  browniedata[i,11] <- i 
+  browniedata[i,12] <- NA 
+  for (ARDcolumn in 1:length(ARDRateColNames)) {
+    browniedata[i,ARDRateColNames[ARDcolumn]] <- brownieliteresults$sig2.multiple[ARDcolumn]
+  }
+      #}, timeout = 16, cpu=Inf, onTimeout = "error")
   # },
-  # TimeoutException = function(ex) {browniedata[i,2:15]<-c(NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,"timeout",i);
+  # TimeoutException = function(ex) {browniedata[i,3:ncolsBrownieData]<-c(NA,NA,NA,NA,NA,NA,NA,NA,i,"timeout", rep(NA,times = length(ARDRateColNames)));
   # print(paste("timeout",i));
   # },
-  # error = function(e) {browniedata[i,2:15]<-c(NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,"error",i);
+  # error = function(e) {browniedata[i,3:ncolsBrownieData]<-c(NA,NA,NA,NA,NA,NA,NA,NA,i,"error", rep(NA,times = length(ARDRateColNames)));
   # print(paste("compute error",i));
   # })
 }
 
-write.csv(browniedata, paste(Sys.Date(), "test brownie multistate social_system_with_nk_Griesser2017 _ARD rates from ace2.csv"), row.names = FALSE)
+csvname = paste(Sys.Date(), DiscreteTrait, ContinuousTrait, "multistate aceARD Brownie", nsim, "sims.csv")
 
+write.csv(browniedata, csvname, row.names = FALSE)
 
-
-D0 <- density(browniedata$ARDRateCoopFam)
-D1 <- density(browniedata$ARDRateNoncoopFam)
-D2 <- density(browniedata$ARDRateCoopNonkin)
-D3 <- density(browniedata$ARDRateNoncoopNonkin)
+for (ARDcolumn in 1:length(ARDRateColNames)) {
+  assign(x = paste0("D",ARDcolumn-1), value = density(browniedata[,ARDRateColNames[ARDcolumn]]))
+}
 
 par(mar = c(3.8,3.5,4,1))
 plot(D0,col="blue",
