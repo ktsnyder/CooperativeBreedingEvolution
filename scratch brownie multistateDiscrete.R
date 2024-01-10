@@ -165,9 +165,10 @@ title(xlab=paste0("Rate of evolution of ", "log Song rep"),line = 2.5, cex.lab =
 #### Now being reworked for flex/functionality
 df =  read.csv("2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv")
 treefile = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
-DiscreteTrait = "social_system_Griesser2017"
+DiscreteTrait = "grouping"
 ContinuousTrait = "Song.rep.final"
 nsim = 500
+plotsimmaps = TRUE
 
 subsetout = subsettreedata(columns = DiscreteTrait, newdata = df, newtree = treefile)
 subsetDisctree = subsetout$subsettree
@@ -225,15 +226,60 @@ subsettree = subsetSong$subsettree
 discretetraitvec = subsetdf[,DiscreteTrait]
 names(discretetraitvec) = subsetdf$species
 
-continuoustraitvec = subsetdf[ContinuousTrait]
+continuoustraitvec = subsetdf[,ContinuousTrait]
 names(continuoustraitvec) = subsetdf$species
 
 simmappy = make.simmap(subsettree, discretetraitvec, nsim = nsim, Q= rate_matrix, type = "discrete") 
 
-plotSimmap(simmappy[[2]])
+plotSimmap(simmappy[[1]])
 
-simmapfor = simmappy[[4]]
-brownieliteresults <- brownie.lite(simmapfor,continuoustraitvec,maxit=75000)
+if (plotsimmaps) { 
+  simmapFileName = paste0(DiscreteTrait, " multistate simmap plots ", ContinuousTrait, " subset", Sys.Date(),".pdf")
+  pdf(simmapFileName, height = 9, width = 12)
+  par(mfrow = c(2,3))
+  par(mar = c(3.8,3.8,3,1))
+  for (simmapNum in 1:5) {
+    simmap = simmappy[[simmapNum]]
+    simmapQ = simmap$Q
+    SimmapStates = colnames(simmap$Q)
+    py = c("orange", "#009E73", "blue", "#CC79A7")
+    pynamed <- py[1:length(SimmapStates)]
+    names(pynamed) <- SimmapStates
+    tipcols = rep(NA, length(simmap$tip.label))
+    for (stateNum in 1:length(SimmapStates)) { # get color vector of tips
+      tempstate = SimmapStates[stateNum]
+      tipcols[which(simmap$tip.label %in% names(which(discretetraitvec==tempstate)))] <- pynamed[tempstate]
+    }
+    # Plot simmap 
+    plotSimmap(simmap, fsize=0.2, lwd = 0.8, colors = pynamed)
+    tiplabels(pch=21,bg=tipcols, col = tipcols, cex=0.3)
+    legend("bottomleft",legend = names(pynamed), lwd=1,col=pynamed, lty = c(rep(1,length(SimmapStates)),2), cex=1) 
+  }
+  # plot to add rate matrix
+  # Create an empty plot
+  par(mar = c(5,5,4,1))
+  plot(1, type = "n", xlim = c(0, ncol(simmapQ)+1), ylim = c(0, nrow(simmapQ)+1), 
+       xaxt = 'n', yaxt = 'n', xlab = "", ylab = "", xaxs = "i", yaxs = "i")
+  
+  # Add column and row names
+  axis(1, at = 1:ncol(simmapQ), labels = colnames(simmapQ), las = 2, tick = FALSE)
+  axis(2, at = 1:nrow(simmapQ), labels = rev(rownames(simmapQ)), las = 2, tick = FALSE)
+  # Add the matrix values
+  for (i in 1:nrow(simmapQ)) {
+    for (j in 1:ncol(simmapQ)) {
+      text(j, nrow(simmapQ) - i + 1, round(simmapQ[i, j], 6))
+    }
+  }
+  # Add label re transitions
+  axis(1, at = 0.1, labels = "To:", las = 1, tick = FALSE, font = 2)
+  axis(2, at = nrow(simmapQ)+0.9, labels = "From:", las = 2, tick = FALSE, font = 2)
+  title("Transition Rates")
+  dev.off()
+}
+
+
+egSimmap = simmappy[[1]]
+brownieliteresults <- brownie.lite(egSimmap,continuoustraitvec,maxit=75000)
 statenames = names(brownieliteresults$sig2.multiple)
 
 ARDRateColNames = paste0("ARDRate_", statenames)
@@ -284,6 +330,7 @@ for (i in 1:nsim) {
 }
 
 csvname = paste(Sys.Date(), DiscreteTrait, ContinuousTrait, "multistate aceARD Brownie", nsim, "sims.csv")
+pdfname = paste0(DiscreteTrait, " ", ContinuousTrait, " multistate aceARD Brownie ", nsim, " sims ", Sys.Date(), ".pdf")
 
 write.csv(browniedata, csvname, row.names = FALSE)
 
@@ -291,26 +338,48 @@ for (ARDcolumn in 1:length(ARDRateColNames)) {
   assign(x = paste0("D",ARDcolumn-1), value = density(browniedata[,ARDRateColNames[ARDcolumn]]))
 }
 
-par(mar = c(3.8,3.5,4,1))
-plot(D0,col="blue",
-     xlim=c(min(c(D0$x,D1$x, D2$x, D3$x)),
-            max(c(D0$x,D1$x, D2$x, D3$x))),
-     ylim=c(min(c(D0$y,D1$y, D2$y, D3$y)),
-            max(c(D0$y,D1$y, D2$y, D3$y))),
-     main="", xlab="",ylab="", cex.axis=1.5)     
-title(main="", cex.main = 2, line = 1)
-title(ylab = "Frequency",line=2.5, cex.lab=1.15)
-#   axis(1, cex.axis=1.2)
-#    axis(2, cex.axis=1.2)
-lines(D1, col="red")
-lines(D2, col="green")
-lines(D3, col="purple")
-abline(v=browniedata$ERRate[1], lty = 2)
-
-legend("topright",legend = c("Coop/Familial","Noncoop/Familial", "Coop/Nonkin", "Noncoop/Nonfamilial","Equal Rates"), lwd=1,col=c("blue","red", "green", "purple", "black"), lty = c(1,1,1,1,2), cex=1.2) # check order
-pval = round(P.chisqAll,4)
-#text(x = min(c(D0$x,D1$x)) + (max(c(D0$x,D1$x))-min(c(D0$x,D1$x)))*0.15, y=max(c(D0$y,D1$y))*0.65, labels = bquote(italic(p) == .(pval)), cex=2)
-title(xlab=paste0("Rate of evolution of ", "log Song rep"),line = 2.5, cex.lab = 1.8)
-
+pdf(pdfname, width = 8, height = 7)
+par(mar = c(3.8,3.5,3,1))
+par(mfrow = c(2,1))
+if (length(ARDRateColNames) == 4) {
+  plot(D0,col="orange",
+       xlim=c(min(c(D0$x,D1$x, D2$x, D3$x)),
+              max(c(D0$x,D1$x, D2$x, D3$x))),
+       ylim=c(min(c(D0$y,D1$y, D2$y, D3$y)),
+              max(c(D0$y,D1$y, D2$y, D3$y))),
+       main="", xlab="",ylab="", cex.axis=1.5)     
+  title(main="", cex.main = 2, line = 1)
+  title(ylab = "Frequency",line=2.5, cex.lab=1.15)
+  #   axis(1, cex.axis=1.2)
+  #    axis(2, cex.axis=1.2)
+  lines(D1, col="#009E73")
+  lines(D2, col="blue")
+  lines(D3, col="#CC79A7")
+  abline(v=browniedata$ERRate[1], lty = 2)
+  
+  legend("topright",legend = c(ARDRateColNames,"Equal Rates"), lwd=1,col=c("orange", "#009E73", "blue", "#CC79A7", "black"), lty = c(1,1,1,1,2), cex=1) # check order
+  title(xlab=paste0("Rate of evolution of ", "log ", ContinuousTrait),line = 2.5, cex.lab = 1)
+  
+} else if (length(ARDRateColNames) == 3) {
+  plot(D0,col="orange",
+       xlim=c(min(c(D0$x,D1$x, D2$x)),
+              max(c(D0$x,D1$x, D2$x))),
+       ylim=c(min(c(D0$y,D1$y, D2$y)),
+              max(c(D0$y,D1$y, D2$y))),
+       main="", xlab="",ylab="", cex.axis=1.5)     
+  title(main="", cex.main = 2, line = 1)
+  title(ylab = "Frequency",line=2.5, cex.lab=1.15)
+  #   axis(1, cex.axis=1.2)
+  #    axis(2, cex.axis=1.2)
+  lines(D1, col="#009E73")
+  lines(D2, col="blue")
+  abline(v=browniedata$ERRate[1], lty = 2)
+  
+  legend("topright",legend = c(ARDRateColNames,"Equal Rates"), lwd=1,col=c("orange", "#009E73", "blue", "black"), lty = c(1,1,1,2), cex=1) # check order
+  title(xlab=paste0("Rate of evolution of ", "log ", ContinuousTrait),line = 2.5, cex.lab = 1)
+  
+}
 pdens = density(browniedata$Pval)
 plot(pdens)
+abline(v=0.05, col = "gray")
+dev.off()
