@@ -1,18 +1,28 @@
 # from chatGPT4 11/29/2023
 # Kate Snyder
-# Last edited: 12/04/2023 - fixed arrow identifiers/dataframe combination per "test simmap overlap weirdness.R", fixed right side arrow adjustments
-# May still need to troubleshoot scale_area_by
+# Edited: 12/04/2023 - fixed arrow identifiers/dataframe combination per "test simmap overlap weirdness.R", fixed right side arrow adjustments
+# Last edited 1/10/2024 - add transition_medians
+# 1/17/2024 - option in args to use median value instead of mean to determine arrow color, added median time spent in each state as text label (state_medians); added code to calculate the median transition count for each transition arrow and weight arrows by this value (only added to center == "mean" plot)
+
 
 library(ggplot2)
 
 # Read the data
 #df <- read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/BayesTraitsDiscreteML_MeanCoopTie2Coop-FemaleSong_Agg01 Jackknife Outputs/BayesTraitsDiscreteML_MeanCoopTie2Coop-FemaleSong_Agg01_removeAlaudidae.csv")
+#changing the rates from absolute counts to Observed-Expected also occurs in Generate_Pub_Figs.R
+#ratePvals - a data frame produced in Generate_Pub_Figs with columns: Transitions qRate       p.value SignificanceLabel
 
 
 
-transition_plot <- function(df, trait1StateLabels = c("0","1"), trait2StateLabels = c("0","1"), scale_area_by = 0.5, offset = 0.15, lengthen = 0.4, ratePvals = NULL, plottitle = NULL) {
+transition_plot <- function(df, trait1StateLabels = c("0","1"), trait2StateLabels = c("0","1"), scale_area_by = 0.5, offset = 0.15, lengthen = 0.4, ratePvals = NULL, plottitle = NULL, center = "mean") {
 # Calculate the mean of each q__ column
 transition_means <- colMeans(df[, grepl("^q[0-9]{2}$", names(df))])
+transition_medians <- apply(df[, grepl("^q[0-9]{2}$", names(df))], 2, FUN = median)
+if (!is.null(ratePvals)) {
+  transition_counts_medians <- apply(df[,ratePvals$Transitions], 2, FUN = median)
+  transition_counts_medians = data.frame(Transitions = names(transition_counts_medians), TransitionCountMedian = transition_counts_medians)
+}
+
 
 # set beginning and end points for each arrow
 q12 = c(2,4,3,4)
@@ -33,9 +43,9 @@ colnames(transition_df) = c("from_x", "from_y", "to_x", "to_y")
 #transition_df = cbind(qColumns,from_state, to_state, transition_means,transition_df)
 
 # these 9 lines replace above 4 to correct arrow labeling
-transition_means = cbind(names(transition_means), transition_means)
+transition_means = cbind(names(transition_means), transition_means, transition_medians)
 transition_means = as.data.frame(transition_means)
-colnames(transition_means) = c("qRates", "transition_means")
+colnames(transition_means) = c("qRates", "transition_means", "transition_medians")
 transition_means
 from_state = c(rep(1, 2), rep(2, 2), rep(3, 2), rep(4, 2))
 to_state = c(2, 3, 1, 4, 1, 4, 2, 3)
@@ -59,6 +69,10 @@ point11 = c(4,1)
 statePoints = as.data.frame(rbind(point00, point01, point10, point11))
 colnames(statePoints) <- c("x", "y")
 stateTextDF = cbind(stateNum = c(1,2,3,4), stateLabel = c(label00, label01, label10, label11), statePoints)
+state_medians <- apply(df[, grepl("^ObsProp", names(df))], 2, FUN = median)
+state_medians_df = data.frame(state = names(state_medians), state_median_time = state_medians)
+stateTextDF = cbind(stateTextDF, state_medians_df)
+stateTextDF$StateTimeLabel = paste0(round(stateTextDF$state_median_time*100, 1), "%")
 
 transitions = merge(transition_df, stateTextDF, by.x = "from_state", by.y = "stateNum")
 
@@ -70,23 +84,32 @@ verticalRates = c("q13", "q31", "q24", "q42")
 transitions2list <- adjust_coordinates(transitions, horizontalRates, verticalRates, scale_area_by = scale_area_by, offset = offset, lengthen = lengthen)
 transitions2 = transitions2list$dfTransition
 transitions2$transition_means = as.numeric(transitions2$transition_means)
+transitions2$transition_medians = as.numeric(transitions2$transition_medians)
 
+if (!is.null(ratePvals)) {
 if ("p.value" %in% colnames(ratePvals)) {
   transitions2 = merge(ratePvals, transitions2, by.x = "qRate", by.y = "qColumns")
   transitions2$SignificanceLabel = paste(transitions2$SignificanceLabel) #, transitions2$qRate, sep="_")
 }
-
+  transitions2= merge(transitions2, transition_counts_medians, by = "Transitions")
+  transitions2$logMedianTransitionCount = log(transitions2$TransitionCountMedian)
+}
 
 # Define the color gradient
 my_color_gradient <- scale_color_gradient2(low = "#2166ac", mid = "#f0f0f0", high = "#b2182b", midpoint = 0) #mid = "white", high = "#b2182b")
 
 # Plot with corrected arrow orientations and offsets
+if (center == "mean") {
 transitionplot <- ggplot(data = transitions2) +
-  geom_segment(aes(x = from_x, y = from_y, xend = to_x, yend = to_y, color = transition_means), 
-               arrow = arrow(type = "closed", length = unit(0.01, "inches")), size = 7, linejoin = "mitre") +
+#  geom_segment(aes(x = from_x, y = from_y, xend = to_x, yend = to_y, color = transition_means), 
+#               arrow = arrow(type = "closed", length = unit(0.01, "inches")), size = 7, linejoin = "mitre") +
+  geom_segment(aes(x = from_x, y = from_y, xend = to_x, yend = to_y, color = transition_means, size = logMedianTransitionCount), 
+               arrow = arrow(type = "closed", length = unit(0.01, "inches")), linejoin = "mitre") +           
   my_color_gradient +
+  scale_size_continuous(range = c(4,9)) +
   labs(y = "Transition Counts", x = "", color = "Mean Difference \nFrom Expected \nNumber of \nTransitions") +
-  geom_text(aes(label = stateLabel, x = x, y = y), size = 4) +
+  geom_text(aes(label = stateLabel, x = x, y = y), size = 4, vjust = 0.5) +
+  geom_text(aes(label = StateTimeLabel, x = x, y = y), size = 3, vjust = 4) +
   geom_text(aes(label = SignificanceLabel, x = to_x, y = to_y), size = 3) +
   theme_minimal() +
   xlim(c(0,5)) + 
@@ -100,7 +123,32 @@ transitionplot <- ggplot(data = transitions2) +
     panel.grid = element_blank(),
     legend.position = "right"
   )
+} else {
+  transitionplot <- ggplot(data = transitions2) +
+    geom_segment(aes(x = from_x, y = from_y, xend = to_x, yend = to_y, color = transition_medians), 
+                 arrow = arrow(type = "closed", length = unit(0.01, "inches")), size = 7, linejoin = "mitre") +
+    my_color_gradient +
+    labs(y = "Transition Counts", x = "", color = "Median Difference \nFrom Expected \nNumber of \nTransitions") +
+    geom_text(aes(label = stateLabel, x = x, y = y), size = 4, vjust = 0.5) +
+    geom_text(aes(label = StateTimeLabel, x = x, y = y), size = 3, vjust = 4) +
+    #geom_text(aes(label = stateLabel, x = x, y = y), size = 4) +
+    geom_text(aes(label = SignificanceLabel, x = to_x, y = to_y), size = 3) +
+    theme_minimal() +
+    xlim(c(0,5)) + 
+    ylim(c(0.5,4.5)) + 
+    ggtitle(label = plottitle) +
+    theme(
+      axis.title = element_blank(),
+      axis.text = element_blank(),
+      axis.ticks = element_blank(),
+      panel.background = element_blank(),
+      panel.grid = element_blank(),
+      legend.position = "right"
+    )
+}
 transitionplot
+
+
 
 output = list(transition_df = transitions2, transition_plot = transitionplot)
 

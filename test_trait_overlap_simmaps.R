@@ -10,7 +10,8 @@
 ## 11/22/2023 - added transition counts by state to CharacterSimmaps output
 ## 11/27/2023 - added boxplots of transition counts (real vs dummy, real vs expected) to calcHuel function; removed all non-function sections (Cycle families - jackknife, Cycle families - single family, cycle calcHuel, Misc, as well as many executions at top) - can be found in test_trait_overlap_simmaps_2023-11-27ArchiveInclNonfunctions.R
 ## 11/28/2023  - calcHuel: stats on real vs expected transition counts, removed "Expected" from x-axis labels in plots 5-6, named elements in returned list; CharacterSimmaps: added plotSampleSimmaps to args
-## 1/9/2024 - added calculation of Nsims Actual greater than Expected to calcHuel - transition counts
+## 1/9/2024 - added calculation of Nsims Actual greater than Expected to calcHuel - transition counts; added cladesubsetvalue=NULL to CharacterSimmap inputs just to avoid an error
+## 1/17/2024 - outputted dfMeltCounts from calcHuel but probably didn't need to
 
 setwd("/Users/kate/Desktop/CooperativeBreedingEvolution/")
 library(phytools)
@@ -58,7 +59,7 @@ source("findQrates.R")
 
 
 #### CharacterSimmaps fxn ----
-CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalabel = NULL, dummyMethod = c("simHistory", "makeSimmap"), plotSampleSimmaps = FALSE) {
+CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalabel = NULL, dummyMethod = c("simHistory", "makeSimmap"), plotSampleSimmaps = FALSE, cladesubsetvalue = NULL) {
   
   if (is.null(datalabel)) {
     datalabel = paste(columns[1], columns[2])
@@ -448,8 +449,7 @@ if (newplot == TRUE) {
         scale_fill_manual(values = c("Observed" = "blue", "Expected" = "red")) +
         theme(axis.text.x = element_text(angle = 45, hjust = 1), title = element_text(size = 8)) +
         ggtitle(paste(trait1, trait2, "\nnSimsObserved =", nsims_real, "    nSimsExpected =", nsims_real, "    Obs/Exp:TransCounts", pvalInteractionLabel)) +
-        stat_compare_means(aes(label = after_stat(p.signif)), method = "t.test") +
-        scale_x_discrete(labels = groupLabels)
+        stat_compare_means(aes(label = after_stat(p.signif)), method = "t.test") 
       #ns: p > 0.05
       # *: p <= 0.05
       # **: p <= 0.01
@@ -461,12 +461,12 @@ if (newplot == TRUE) {
         theme_minimal() +
         labs(y = "log(Transition Counts)", x = "", fill = "Observed/Expected") +
         scale_fill_manual(values = c("Observed" = "blue", "Expected" = "red")) +
-        theme(axis.text.x = element_text(angle = 45, hjust = 1), title = element_text(size = 8)) +
+        theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 6), title = element_text(size = 8)) +
         ggtitle(paste(trait1, trait2, "\nnSimsObserved =", nsims_real, "    nSimsExpected =", nsims_real, "    Obs/Exp:TransCounts", pvalInteractionLogLabel)) +
         stat_compare_means(aes(label = after_stat(p.signif)), method = "t.test") +
         scale_x_discrete(labels = groupLabels)
       
-      return(list(p1 = p1, p2 = p2, p3 = p3, p4 = p4, p5 = p5, p6 = p6, filename = PDFname, TransitionStats = TransitionStats))
+      return(list(p1 = p1, p2 = p2, p3 = p3, p4 = p4, p5 = p5, p6 = p6, filename = PDFname, TransitionStats = TransitionStats, dfMeltCounts = dfMeltCounts))
       
     } else {
       return(list(p1 = p1, p2 = p2, p3 = p3, p4 = p4, filename = PDFname))

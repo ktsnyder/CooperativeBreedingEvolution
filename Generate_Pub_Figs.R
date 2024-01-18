@@ -165,9 +165,10 @@ tempdfGather = tempdfSub %>% gather("Rate", "RateValue", c(q12:q43, q12.1:q43.1)
 #### Simmap Overlap Sociality metrics ----
 
 socialityMetrics = c("Griesser2023.Colonial01", "Griesser2023.GroupsLargerThanPair", "Griesser2023.LongSocialBonds", "Griesser2023.MoreThanTwoCaretakers", "Griesser2017FamilialLiving", "Final.polygyny", "Griesser2023.TwoOrMoreCaretakers", "Griesser2023.Asocial0vsSocial1", "Griesser2023.LargestGroupSizes",   "Griesser2023.SeasonOrLongerSocialBonds", "MeanCoopTie2Noncoop")
+socialityMetrics = c("MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop")
 treelabel = "HackettOscine"
-nsims_real = 500
-nsims_dummy = 500
+nsims_real = 1000
+nsims_dummy = 1000
 
 source("test_trait_overlap_simmaps.R")
 socialityPlots = list()
@@ -177,16 +178,47 @@ for (i in 1: length(socialityMetrics)) {
   print(i)
   print(tempMetric)
 dfout4 <- CharacterSimmaps(columns = c(tempMetric,"FemaleSong_Agg01"), df = newdata, tree =  treefile, dummy = FALSE, nsims = nsims_real, treelabel = "HackettOscine", datalabel = NULL, plotSampleSimmaps = TRUE)
-#dfDummy4 <- CharacterSimmaps(columns = c(tempMetric,"FemaleSong_Agg01"), df = newdata, tree =  treefile, dummy = TRUE, nsims = nsims_dummy, treelabel = "HackettOscine", datalabel = NULL, dummyMethod = "makeSimmap")
-#calcHuelout = calcHuel(dfout4, dfDummy4)
-#require(gridExtra)
+dfDummy4 <- CharacterSimmaps(columns = c(tempMetric,"FemaleSong_Agg01"), df = newdata, tree =  treefile, dummy = TRUE, nsims = nsims_dummy, treelabel = "HackettOscine", datalabel = NULL, dummyMethod = "makeSimmap")
+  
+calcHuelout = calcHuel(dfout4, dfDummy4)
+require(gridExtra)
 plotname = paste0("Simmap Overlap Outputs/",tempMetric, " FemaleSong_Agg01 ", nsims_real, " ", nsims_dummy, " ", treelabel, " withTransCounts.pdf")
-nPlots = length(calcHuelout)
-#m3 <- marrangeGrob(calcHuelout, ncol = 1, nrow = nPlots)
-#ggsave(plotname, m3, width = 7.5, height = 3.5*nPlots, units = "in")
+nPlots = length(calcHuelout)-2
+m3 <- marrangeGrob(calcHuelout, ncol = 1, nrow = nPlots)
+ggsave(plotname, m3, width = 7.5, height = 3.8*nPlots, units = "in")
 #socialityPlots[[i]] <- calcHuelout
 }
 
+#### Simmap overlap and counts ----
+# Using already-generated data from CharacterSimmaps
+
+for (i in 1:length(socialityMetrics)) {
+  tempMetric = socialityMetrics[i]
+  print(tempMetric)
+  
+  columns = c(tempMetric, "FemaleSong_Agg01")
+  trait1 = tempMetric
+  trait2 = columns[2]
+  
+  filelist = list.files(path = "Simmap Overlap Outputs", pattern = "overlap_counts", full.names = T)
+  filelist = filelist[which(str_detect(filelist,paste(tempMetric, "FemaleSong_Agg01")))]
+  filelist = filelist[which(str_detect(filelist,".csv"))]
+  IndFile = filelist[which(str_detect(filelist,"DUMMY"))]
+  DepFile = filelist[which(str_detect(filelist,"REAL"))]
+  
+  tempdfDep = read.csv(DepFile)
+  tempdfInd = read.csv(IndFile)
+  
+  nsims_real = length(tempdfDep[,1])
+    nsims_dummy = length(tempdfInd[,1])
+  
+  calcHuelout = calcHuel(dfout = tempdfDep, dfDummy = tempdfInd, otherlabel = "ExpObsCompare")
+  require(gridExtra)
+  plotname = paste0("Simmap Overlap Outputs/",tempMetric, " FemaleSong_Agg01 ", nsims_real, " ", nsims_dummy, " ", treelabel, " withTransCounts-ExpObsCompare.pdf")
+  nPlots = length(calcHuelout)-2
+  m3 <- marrangeGrob(calcHuelout[1:nPlots], ncol = 1, nrow = nPlots) # nrow can be nPlots if no "filename" or "TransitionStats" in calcHuelout
+  ggsave(plotname, m3, width = 7.5, height = 3.8*nPlots, units = "in")
+}
 
 # plot transition counts as if BayesTraits
 source("plotSimpleDiscreteBayes.R")
@@ -227,6 +259,7 @@ for (i in 1:length(socialityMetrics)) {
   next
   
   calcHuelout = calcHuel(tempdfDep, tempdfInd)
+  
   Transitions = calcHuelout$TransitionStats$logPairwisePostHoc[2]
   pvals = calcHuelout$TransitionStats$logPairwisePostHoc[7]
   pvaldf = as.data.frame(cbind(Transitions, pvals))
@@ -236,10 +269,24 @@ for (i in 1:length(socialityMetrics)) {
   pvaldf$SignificanceLabel[which(pvaldf$p.value < 0.001)] = "p < 0.001"
   pvaldf$SignificanceLabel[which(pvaldf$p.value < 0.0001)] = "p < 0.0001"
   
+  NtimesActualGreaterThanExpected = calcHuelout$TransitionStats$NtimesActualGreaterThanExpected
+  NtimesActualGreaterThanExpecteddf = cbind(names(NtimesActualGreaterThanExpected), NtimesActualGreaterThanExpected)
+  NtimesActualGreaterThanExpecteddf = as.data.frame(NtimesActualGreaterThanExpecteddf)
+  colnames(NtimesActualGreaterThanExpecteddf) = c("Transition", "CountNActualGreaterThanExpected")
+  NtimesActualGreaterThanExpecteddf$CountNActualGreaterThanExpected = as.integer(NtimesActualGreaterThanExpecteddf$CountNActualGreaterThanExpected)
+  pvaldf = merge(pvaldf, NtimesActualGreaterThanExpecteddf, by = "Transition")
+  pvaldf$FractionActualGreaterThanExpected = pvaldf$CountNActualGreaterThanExpected/nsims
+  
   RateRef = as.data.frame(rbind(c("FS0to1inCoop0", "q12"),c("Coop0to1inFS0", "q13"),c("FS1to0inCoop0", "q21"), c("Coop0to1inFS1", "q24"),c("Coop1to0inFS0", "q31"), c("FS0to1inCoop1", "q34"), c("Coop1to0inFS1", "q42"),c("FS1to0inCoop1", "q43")))
   colnames(RateRef) <- c("Transitions", "qRate")
   ratePvals = merge(RateRef, pvaldf, by.x = "Transitions", by.y = "Transition")
   
+  # remove these lines if want to use ChiSq pval labels instead
+  ratePvals$SignificanceLabel = "<80%"
+  ratePvals$SignificanceLabel[which(ratePvals$FractionActualGreaterThanExpected > .8 | ratePvals$FractionActualGreaterThanExpected < .2)] <- ">80%"
+  ratePvals$SignificanceLabel[which(ratePvals$FractionActualGreaterThanExpected > .9 | ratePvals$FractionActualGreaterThanExpected < .1)] <- ">90%"
+  ratePvals$SignificanceLabel[which(ratePvals$FractionActualGreaterThanExpected > .95 | ratePvals$FractionActualGreaterThanExpected < .05)] <- ">95%"
+  ratePvals$SignificanceLabel[which(ratePvals$FractionActualGreaterThanExpected > .99 | ratePvals$FractionActualGreaterThanExpected < .01)] <- ">99%"
   
   tempdfDep[,paste0(colnames(tempdfDep)[18:25],"DifferenceFromExpected")] = tempdfDep[,colnames(tempdfDep)[18:25]] - tempdfDep[,paste0(colnames(tempdfDep)[18:25],"Expected")]
   colnames(tempdfDep)[which(colnames(tempdfDep) == "FS0to1inCoop0DifferenceFromExpected")] <- "q12"
