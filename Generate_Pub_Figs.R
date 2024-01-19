@@ -164,7 +164,7 @@ tempdfGather = tempdfSub %>% gather("Rate", "RateValue", c(q12:q43, q12.1:q43.1)
 
 #### Simmap Overlap Sociality metrics ----
 
-socialityMetrics = c("Griesser2023.Colonial01", "Griesser2023.GroupsLargerThanPair", "Griesser2023.LongSocialBonds", "Griesser2023.MoreThanTwoCaretakers", "Griesser2017FamilialLiving", "Final.polygyny", "Griesser2023.TwoOrMoreCaretakers", "Griesser2023.Asocial0vsSocial1", "Griesser2023.LargestGroupSizes",   "Griesser2023.SeasonOrLongerSocialBonds", "MeanCoopTie2Noncoop")
+socialityMetrics = c("Griesser2023.Asocial0vsSocial1", "Griesser2023.GroupsLargerThanPair", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2023.LongSocialBonds", "Griesser2017FamilialLiving", "Griesser2023.Colonial01", "Final.polygyny", "Griesser2023.TwoOrMoreCaretakers", "Griesser2023.MoreThanTwoCaretakers", "MeanCoopTie2Noncoop", "MeanCoopTie2Coop")
 socialityMetrics = c("MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop")
 treelabel = "HackettOscine"
 nsims_real = 1000
@@ -226,6 +226,7 @@ source("test_trait_overlap_simmaps.R")
 source("transition_plot.R")
 require(stringr)
 plotlist = list()
+plotlistGray = list()
 transitionList = list()
 outlist = list()
 for (i in 1:length(socialityMetrics)) {
@@ -256,7 +257,7 @@ for (i in 1:length(socialityMetrics)) {
   #plot(density(tempdfDep$ChiSqPvals, na.rm = TRUE), main = tempMetric)
   hist(tempdfDep$ChiSqPvals, main = tempMetric, breaks = 20)
   abline(v = 0.05, col = "red")
-  next
+  #next
   
   calcHuelout = calcHuel(tempdfDep, tempdfInd)
   
@@ -281,12 +282,12 @@ for (i in 1:length(socialityMetrics)) {
   colnames(RateRef) <- c("Transitions", "qRate")
   ratePvals = merge(RateRef, pvaldf, by.x = "Transitions", by.y = "Transition")
   
-  # remove these lines if want to use ChiSq pval labels instead
-  ratePvals$SignificanceLabel = "<80%"
-  ratePvals$SignificanceLabel[which(ratePvals$FractionActualGreaterThanExpected > .8 | ratePvals$FractionActualGreaterThanExpected < .2)] <- ">80%"
-  ratePvals$SignificanceLabel[which(ratePvals$FractionActualGreaterThanExpected > .9 | ratePvals$FractionActualGreaterThanExpected < .1)] <- ">90%"
-  ratePvals$SignificanceLabel[which(ratePvals$FractionActualGreaterThanExpected > .95 | ratePvals$FractionActualGreaterThanExpected < .05)] <- ">95%"
-  ratePvals$SignificanceLabel[which(ratePvals$FractionActualGreaterThanExpected > .99 | ratePvals$FractionActualGreaterThanExpected < .01)] <- ">99%"
+  # remove these lines if want to use ANOVA pval labels instead
+  ratePvals$PercentTrendingLabel = "<80%"
+  ratePvals$PercentTrendingLabel[which(ratePvals$FractionActualGreaterThanExpected > .8 | ratePvals$FractionActualGreaterThanExpected < .2)] <- ">80%"
+  ratePvals$PercentTrendingLabel[which(ratePvals$FractionActualGreaterThanExpected > .9 | ratePvals$FractionActualGreaterThanExpected < .1)] <- ">90%"
+  ratePvals$PercentTrendingLabel[which(ratePvals$FractionActualGreaterThanExpected > .95 | ratePvals$FractionActualGreaterThanExpected < .05)] <- ">95%"
+  ratePvals$PercentTrendingLabel[which(ratePvals$FractionActualGreaterThanExpected > .99 | ratePvals$FractionActualGreaterThanExpected < .01)] <- ">99%"
   
   tempdfDep[,paste0(colnames(tempdfDep)[18:25],"DifferenceFromExpected")] = tempdfDep[,colnames(tempdfDep)[18:25]] - tempdfDep[,paste0(colnames(tempdfDep)[18:25],"Expected")]
   colnames(tempdfDep)[which(colnames(tempdfDep) == "FS0to1inCoop0DifferenceFromExpected")] <- "q12"
@@ -343,10 +344,11 @@ for (i in 1:length(socialityMetrics)) {
   trait1StateLabels = c(lab0x, lab1x)
   trait2StateLabels = c(labx0, labx1)
   plottitle = paste(trait1, trait2, "nsims:", nsims)
-  outlist[[i]] = transition_plot(df = tempdfDep, trait1StateLabels = trait1StateLabels, trait2StateLabels = trait2StateLabels, scale_area_by = 1, offset = 0.2, lengthen = 0.2, ratePvals = ratePvals, plottitle = plottitle)
+  outlist[[i]] = transition_plot(df = tempdfDep, trait1StateLabels = trait1StateLabels, trait2StateLabels = trait2StateLabels, scale_area_by = 1, offset = 0.2, lengthen = 0.2, ratePvals = ratePvals, plottitle = plottitle, center="median")
   names(outlist)[i] <- paste(trait1, trait2, sep = "_")
   templist = outlist[[i]]
   plotlist[[i]] = templist$transition_plot
+  plotlistGray[[i]] = templist$transitionplot_GrayNS
   
   # calcHuelout = calcHuel(tempdfDep, tempdfInd)
   # require(gridExtra)
@@ -377,10 +379,33 @@ grobs_with_margins <- lapply(plotlist, function(plot) {
 single_page_plot <- grid.arrange(grobs = grobs_with_margins, ncol = 2, nrow = 6) # Adjust ncol and nrow as needed
 
 # Save the arranged plot to a file
-ggsave("transition plots sociality FS_onepage.pdf", single_page_plot, width = 18, height = 38, units = "in")
-#ggsave("transition plots sociality FS.pdf", mSoc, width = 24.5, height = 7.9*(round(nTransPlots/2)), units = "in", limitsize = FALSE)
+ggsave("transition plots sociality FS_onepage_median_percentStates_percentTrending.pdf", single_page_plot, width = 18, height = 38, units = "in")
 
+# With gray nonsig arrows
+nTransPlots= length(plotlistGray)
+#mSoc <- marrangeGrob(plotlist[1:nTransPlots], ncol = 2, nrow = 2)
+grobs_with_marginsGray <- lapply(plotlistGray, function(plot) {
+  plot_with_margin <- plot + 
+    theme(plot.margin = margin(t = 50, r = 50, b = 50, l = 50, unit = "pt")) # Adjust margins as needed
+  ggplotGrob(plot_with_margin)
+})
+# Arrange the grobs on a single page
+single_page_plotGray <- grid.arrange(grobs = grobs_with_marginsGray, ncol = 2, nrow = 6) # Adjust ncol and nrow as needed
 
+# Save the arranged plot to a file
+ggsave("transition plots sociality FS_onepage_median_percentStates_weightsNumTransitions_GrayNonsig.pdf", single_page_plotGray, width = 18, height = 38, units = "in")
+
+# just Coop-FS plot
+ggsave("transition plot Tie2Noncoop FSAgg median_percentStates_weightsNumTransitions_labsPercentTrending_GrayNonsig.png", plotlistGray[[11]], width = 9, height = 5, units = "in", device = "png")
+
+# just target 4 plots
+grobs_with_marginsGray4 <- lapply(plotlistGray[c(3,5,6,10)], function(plot) {
+  plot_with_margin <- plot + 
+    theme(plot.margin = margin(t = 40, r = 30, b = 10, l = 20, unit = "pt")) # Adjust margins as needed
+  ggplotGrob(plot_with_margin)
+})
+single_page_plotGray4 <- grid.arrange(grobs = grobs_with_marginsGray4, ncol = 2, nrow = 2)
+ggsave("transition plots 4TargetSociality FS_median_percentStates_weightsNumTransitions_labsPercentTrending_GrayNonsig.png", single_page_plotGray4, width = 20, height = 13, units = "in", device = "png")
 
 
 

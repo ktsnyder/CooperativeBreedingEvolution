@@ -3,6 +3,7 @@
 # Edited: 12/04/2023 - fixed arrow identifiers/dataframe combination per "test simmap overlap weirdness.R", fixed right side arrow adjustments
 # Last edited 1/10/2024 - add transition_medians
 # 1/17/2024 - option in args to use median value instead of mean to determine arrow color, added median time spent in each state as text label (state_medians); added code to calculate the median transition count for each transition arrow and weight arrows by this value (only added to center == "mean" plot)
+# 1/18/2024 - added method to make non-sig arrows gray, outputs separate plot with those arrows
 
 
 library(ggplot2)
@@ -72,7 +73,7 @@ stateTextDF = cbind(stateNum = c(1,2,3,4), stateLabel = c(label00, label01, labe
 state_medians <- apply(df[, grepl("^ObsProp", names(df))], 2, FUN = median)
 state_medians_df = data.frame(state = names(state_medians), state_median_time = state_medians)
 stateTextDF = cbind(stateTextDF, state_medians_df)
-stateTextDF$StateTimeLabel = paste0(round(stateTextDF$state_median_time*100, 1), "%")
+stateTextDF$StateTimeLabel = paste0(round(stateTextDF$state_median_time*100, 1), "% of tree")
 
 transitions = merge(transition_df, stateTextDF, by.x = "from_state", by.y = "stateNum")
 
@@ -90,6 +91,10 @@ if (!is.null(ratePvals)) {
 if ("p.value" %in% colnames(ratePvals)) {
   transitions2 = merge(ratePvals, transitions2, by.x = "qRate", by.y = "qColumns")
   transitions2$SignificanceLabel = paste(transitions2$SignificanceLabel) #, transitions2$qRate, sep="_")
+  transitions2$Significant = ifelse(transitions2$p.value < 0.05, "sig", "nonsig")
+  nonsigGray = TRUE
+} else {
+  nonsigGray = FALSE
 }
   transitions2= merge(transitions2, transition_counts_medians, by = "Transitions")
   transitions2$logMedianTransitionCount = log(transitions2$TransitionCountMedian)
@@ -103,14 +108,18 @@ if (center == "mean") {
 transitionplot <- ggplot(data = transitions2) +
 #  geom_segment(aes(x = from_x, y = from_y, xend = to_x, yend = to_y, color = transition_means), 
 #               arrow = arrow(type = "closed", length = unit(0.01, "inches")), size = 7, linejoin = "mitre") +
-  geom_segment(aes(x = from_x, y = from_y, xend = to_x, yend = to_y, color = transition_means, size = logMedianTransitionCount), 
-               arrow = arrow(type = "closed", length = unit(0.01, "inches")), linejoin = "mitre") +           
+  geom_segment(aes(x = from_x, y = from_y, xend = to_x, yend = to_y, color = transition_means, size = TransitionCountMedian), 
+               arrow = arrow(type = "closed", length = unit(0.01, "inches")), linejoin = "mitre") +    
   my_color_gradient +
   scale_size_continuous(range = c(4,9)) +
   labs(y = "Transition Counts", x = "", color = "Mean Difference \nFrom Expected \nNumber of \nTransitions") +
+  guides(size = FALSE) +
   geom_text(aes(label = stateLabel, x = x, y = y), size = 4, vjust = 0.5) +
   geom_text(aes(label = StateTimeLabel, x = x, y = y), size = 3, vjust = 4) +
   geom_text(aes(label = SignificanceLabel, x = to_x, y = to_y), size = 3) +
+  # testing positions of side/tip labels - 2 lines
+  geom_text(aes(label = TransitionCountMedian, x = arrowlabel_side_x, y = arrowlabel_side_y), size = 3) +
+  geom_text(aes(label = qRate, x = arrowlabel_tip_x, y = arrowlabel_tip_y), size = 3) +
   theme_minimal() +
   xlim(c(0,5)) + 
   ylim(c(0.5,4.5)) + 
@@ -148,9 +157,39 @@ transitionplot <- ggplot(data = transitions2) +
 }
 transitionplot
 
+if (nonsigGray) {
+  transitionplotGray <- ggplot() +
+    # gray/non-significant arrows
+    geom_segment(data = subset(transitions2, p.value >= 0.05), aes(x = from_x, y = from_y, xend = to_x, yend = to_y, size = TransitionCountMedian), arrow = arrow(type = "closed", length = unit(0.01, "inches")), color = "gray", fill = "gray", linejoin = "mitre") +
+    # significant arrows
+    geom_segment(data = subset(transitions2, p.value < 0.05), aes(x = from_x, y = from_y, xend = to_x, yend = to_y, color = transition_medians, size = TransitionCountMedian), arrow = arrow(type = "closed", length = unit(0.01, "inches")), linejoin = "mitre") +
+    my_color_gradient +
+    scale_size_continuous(range = c(4,9)) +
+    labs(y = "Transition Counts", x = "", color = "Median Difference \nFrom Expected \nNumber of \nTransitions") +
+    geom_text(data = transitions2, aes(label = stateLabel, x = x, y = y), size = 4, vjust = 0.5) +
+    geom_text(data = transitions2, aes(label = StateTimeLabel, x = x, y = y), size = 3, vjust = 4) +
+    geom_text(data = transitions2, aes(label = PercentTrendingLabel, x = to_x, y = to_y), size = 3) +
+    #geom_text(data = transitions2, aes(label = TransitionCountMedian, x = to_x, y = to_y), size = 3) +
+    guides(size = FALSE) +
+    theme_minimal() +
+    xlim(c(0,5)) + 
+    ylim(c(0.5,4.5)) + 
+    ggtitle(label = plottitle) +
+    theme(
+      axis.title = element_blank(),
+      axis.text = element_blank(),
+      axis.ticks = element_blank(),
+      panel.background = element_blank(),
+      panel.grid = element_blank(),
+      legend.position = "right"
+    )
+} else {
+  transitionplotGray = NULL
+}
 
 
-output = list(transition_df = transitions2, transition_plot = transitionplot)
+
+output = list(transition_df = transitions2, transition_plot = transitionplot, transitionplot_GrayNS = transitionplotGray)
 
 return(output)
 
@@ -164,6 +203,11 @@ adjust_coordinates <- function(dfTransition, horizontalRates, verticalRates, off
   lengthenTo = lengthen*0.5
   lengthenFrom = lengthen*1.3
   
+  dfTransition$arrowlabel_side_x = NA
+  dfTransition$arrowlabel_side_y = NA
+  dfTransition$arrowlabel_tip_x = NA
+  dfTransition$arrowlabel_tip_y = NA
+  
   # Offset for parallel arrows
   
   # Offset the horizontal rates that need to be parallel
@@ -174,6 +218,12 @@ adjust_coordinates <- function(dfTransition, horizontalRates, verticalRates, off
       dfTransition$to_y[dfTransition$qColumns == rate] <- dfTransition$to_y[dfTransition$qColumns == rate] - offset
       dfTransition$from_x[dfTransition$qColumns == rate] <- dfTransition$from_x[dfTransition$qColumns == rate] - lengthenFrom
       dfTransition$to_x[dfTransition$qColumns == rate] <- dfTransition$to_x[dfTransition$qColumns == rate] + lengthenTo
+      
+      dfTransition$arrowlabel_side_x[dfTransition$qColumns == rate] = (dfTransition$to_x[dfTransition$qColumns == rate] + dfTransition$from_x[dfTransition$qColumns == rate])/2
+      dfTransition$arrowlabel_side_y[dfTransition$qColumns == rate] = dfTransition$to_y[dfTransition$qColumns == rate] - offset
+      dfTransition$arrowlabel_tip_x[dfTransition$qColumns == rate] = dfTransition$to_x[dfTransition$qColumns == rate] + lengthenTo
+      dfTransition$arrowlabel_tip_y[dfTransition$qColumns == rate] = dfTransition$to_y[dfTransition$qColumns == rate] - offset
+      
     } else if (rate %in% c("q43", "q21")) {
       dfTransition$from_y[dfTransition$qColumns == rate] <- dfTransition$from_y[dfTransition$qColumns == rate] + offset
       dfTransition$to_y[dfTransition$qColumns == rate] <- dfTransition$to_y[dfTransition$qColumns == rate] + offset
@@ -204,9 +254,7 @@ adjust_coordinates <- function(dfTransition, horizontalRates, verticalRates, off
     # }
   } # end for rate in VerticalRates
   
-  # Move state labels inwards a little
-  #dfTransition$x[which(dfTransition$x == 1)] <- 1.2
-  #dfTransition$x[which(dfTransition$x == 4)] <- 3.8
+
   
   dfTransitionUnscaled = dfTransition
   dfTransition[,c("from_x", "from_y", "to_x", "to_y", "x", "y")] <- dfTransition[,c("from_x", "from_y", "to_x", "to_y", "x", "y")]*scale_area_by
