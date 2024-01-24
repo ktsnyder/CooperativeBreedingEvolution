@@ -165,8 +165,8 @@ title(xlab=paste0("Rate of evolution of ", "log Song rep"),line = 2.5, cex.lab =
 #### Now being reworked for flex/functionality
 df =  read.csv("2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv")
 treefile = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
-DiscreteTrait = "grouping"
-ContinuousTrait = "Song.rep.final"
+DiscreteTrait = "social_system_incl_nk_coop_Griesser2017"
+ContinuousTrait = "Song.rep.max"
 nsim = 500
 plotsimmaps = TRUE
 
@@ -319,6 +319,7 @@ for (i in 1:nsim) {
   for (ARDcolumn in 1:length(ARDRateColNames)) {
     browniedata[i,ARDRateColNames[ARDcolumn]] <- brownieliteresults$sig2.multiple[ARDcolumn]
   }
+  
       #}, timeout = 16, cpu=Inf, onTimeout = "error")
   # },
   # TimeoutException = function(ex) {browniedata[i,3:ncolsBrownieData]<-c(NA,NA,NA,NA,NA,NA,NA,NA,i,"timeout", rep(NA,times = length(ARDRateColNames)));
@@ -328,6 +329,28 @@ for (i in 1:nsim) {
   # print(paste("compute error",i));
   # })
 }
+
+# add columns that say which rates are higher in each sim - added 1/10/2024
+for (ARDcolumn1Num in 1:length(ARDRateColNames)) {
+  ARDcolumn = ARDRateColNames[ARDcolumn1Num]
+  if (ARDcolumn1Num != length(ARDRateColNames)) {
+    for (ARDcolumn2Num in (ARDcolumn1Num+1):length(ARDRateColNames)) {
+      ARDcolumn2 = ARDRateColNames[ARDcolumn2Num] 
+      newcolname = paste0(ARDcolumn,"_greater_than_", ARDcolumn2)
+      browniedata[,newcolname] = browniedata[,ARDcolumn] > browniedata[,ARDcolumn2]
+    }
+  }
+}
+
+nsim = length(browniedata[,1])
+CompareColNames = colnames(browniedata)[grep("_greater_than_", colnames(browniedata))]
+CompareColSums = data.frame(DiscreteTrait = rep(DiscreteTrait, length(CompareColNames)), ContinuousTrait = rep(ContinuousTrait, length(CompareColNames)), nsims = rep(nsim, length(CompareColNames)))
+CompareColSums$RateComparison = CompareColNames
+CompareColSums$Sums = colSums(browniedata[,CompareColNames])
+compareCSVname = paste(Sys.Date(), DiscreteTrait, ContinuousTrait, "multistate aceARD Brownie", nsim, "sims COMPARE RATES.csv")
+write.csv(CompareColSums, compareCSVname)
+# end added 1/10/2024
+
 
 csvname = paste(Sys.Date(), DiscreteTrait, ContinuousTrait, "multistate aceARD Brownie", nsim, "sims.csv")
 pdfname = paste0(DiscreteTrait, " ", ContinuousTrait, " multistate aceARD Brownie ", nsim, " sims ", Sys.Date(), ".pdf")
@@ -339,7 +362,7 @@ for (ARDcolumn in 1:length(ARDRateColNames)) {
 }
 
 pdf(pdfname, width = 8, height = 7)
-par(mar = c(3.8,3.5,3,1))
+par(mar = c(3.8,3.8,3,1))
 par(mfrow = c(2,1))
 if (length(ARDRateColNames) == 4) {
   plot(D0,col="orange",
@@ -347,7 +370,7 @@ if (length(ARDRateColNames) == 4) {
               max(c(D0$x,D1$x, D2$x, D3$x))),
        ylim=c(min(c(D0$y,D1$y, D2$y, D3$y)),
               max(c(D0$y,D1$y, D2$y, D3$y))),
-       main="", xlab="",ylab="", cex.axis=1.5)     
+       main="", xlab="",ylab="", cex.axis=1)     
   title(main="", cex.main = 2, line = 1)
   title(ylab = "Frequency",line=2.5, cex.lab=1.15)
   #   axis(1, cex.axis=1.2)
@@ -366,7 +389,7 @@ if (length(ARDRateColNames) == 4) {
               max(c(D0$x,D1$x, D2$x))),
        ylim=c(min(c(D0$y,D1$y, D2$y)),
               max(c(D0$y,D1$y, D2$y))),
-       main="", xlab="",ylab="", cex.axis=1.5)     
+       main="", xlab="",ylab="", cex.axis=1)     
   title(main="", cex.main = 2, line = 1)
   title(ylab = "Frequency",line=2.5, cex.lab=1.15)
   #   axis(1, cex.axis=1.2)
@@ -380,6 +403,8 @@ if (length(ARDRateColNames) == 4) {
   
 }
 pdens = density(browniedata$Pval)
-plot(pdens)
+plot(pdens, main = paste("N =", nsim), ylab = "", xlab = "")
+title(ylab = "Frequency",line=2.5, cex.lab=1.15)
+title(xlab = "p-value", line = 2.5, cex.lab = 1)
 abline(v=0.05, col = "gray")
 dev.off()

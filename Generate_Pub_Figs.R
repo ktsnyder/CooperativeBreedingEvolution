@@ -22,7 +22,8 @@ setwd("/Users/kate/Desktop/CooperativeBreedingEvolution/")
 #df = read.csv(newdata)
 #df[,c("Griesser2023.TwoOrMoreCaretakers", "Griesser2023.Asocial0vsSocial1", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds")] <- sapply(df[,c("Griesser2023.TwoOrMoreCaretakers", "Griesser2023.Asocial0vsSocial1", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds")], FUN = as.integer)
 #write.csv(df, file = "2023-11-17_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv", row.names = F)
-newdata = "2023-11-17_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv"
+#newdata = "2023-11-17_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv"
+newdata = "/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv"
 treefile = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
 
 
@@ -128,8 +129,10 @@ for (i in 5:length(SocialColumns)) {
 
 # phylANOVA for multi-group traits - Table
 multigrouptraits = c("grouping", "social_bonds", "Griesser2023.Colonial01" , "Griesser2023.MoreThanTwoCaretakers" ,"Griesser2023.LongSocialBonds","Griesser2023.GroupsLargerThanPair", "Griesser2023.TwoOrMoreCaretakers", "Griesser2023.Asocial0vsSocial1", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2017FamilialLiving", "MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop")
-songtrait = "Song.rep.final"
+songtraits = c("Song.rep.final","Syllable.rep.final", "Syll.song.final", "Duration.final", "Interval.final")
 phynovaDF = set.seed(10)
+for (j in 1:length(songtraits)) {
+  songtrait = songtraits[j]
 for (i in 1:length(multigrouptraits)) {
 tempgrouptrait = multigrouptraits[i]
 subsets = subsettreedata(columns = c(tempgrouptrait, songtrait), newdata = newdata, newtree = treefile)
@@ -140,16 +143,19 @@ contvec = subsetdf[,songtrait]
 contvec = log(contvec)
 names(contvec) = subsetdf$species
 subsettree = subsets$subsettree
+Nspecies = length(subsettree$tip.label)
+Ngroups = length(unique(discvec))
 phylANOVAout= phylANOVA(subsettree, x = discvec, y = contvec, nsim = 50000, posthoc = TRUE)
 phylANOVAp=phylANOVAout$Pf
-temprow = c(tempgrouptrait, songtrait, phylANOVAp)
+temprow = c(tempgrouptrait, Ngroups, songtrait, Nspecies, phylANOVAp)
 phynovaDF = rbind(phynovaDF, temprow)
 phynovaDF = as.data.frame(phynovaDF)
-colnames(phynovaDF) <- c("DiscreteTrait", "ContinuousTrait", "PhylANOVApval")
-write.csv(phynovaDF, file = "phylANOVA outputs Song.rep.final w Coops.csv", row.names = F)
+colnames(phynovaDF) <- c("DiscreteTrait", "DiscreteNumGroups", "ContinuousTrait", "n_Species", "PhylANOVApval")
 print(paste(tempgrouptrait, songtrait))
 print(phylANOVAout)
 }
+}
+write.csv(phynovaDF, file = "phylANOVA outputs FinalSongs_Sociality w Coops.csv", row.names = F)
 
 #### Simmap Overlap CoopBreed/FS ----
 dfout4 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Agg01"), df = newdata, tree =  treefile, dummy = FALSE, nsims = 1000, treelabel = "HackettOscine", datalabel = NULL)
