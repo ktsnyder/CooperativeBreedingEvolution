@@ -166,9 +166,12 @@ title(xlab=paste0("Rate of evolution of ", "log Song rep"),line = 2.5, cex.lab =
 df =  read.csv("2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv")
 treefile = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
 DiscreteTrait = "social_system_incl_nk_coop_Griesser2017"
-ContinuousTrait = "Song.rep.max"
+ContinuousTrait = "Song.rep.final"
 nsim = 500
 plotsimmaps = TRUE
+unique(df$social_system_incl_nk_coop_Griesser2017)
+df$social_system_incl_nk_coop_Griesser2017[which(df$social_system_incl_nk_coop_Griesser2017 == "nk-coop")] <- "nk.coop"
+
 
 subsetout = subsettreedata(columns = DiscreteTrait, newdata = df, newtree = treefile)
 subsetDisctree = subsetout$subsettree
@@ -347,8 +350,25 @@ CompareColNames = colnames(browniedata)[grep("_greater_than_", colnames(brownied
 CompareColSums = data.frame(DiscreteTrait = rep(DiscreteTrait, length(CompareColNames)), ContinuousTrait = rep(ContinuousTrait, length(CompareColNames)), nsims = rep(nsim, length(CompareColNames)))
 CompareColSums$RateComparison = CompareColNames
 CompareColSums$Sums = colSums(browniedata[,CompareColNames])
+CompareColSums$Fraction1 = CompareColSums$Sums/CompareColSums$nsims
+SplitRates = str_remove_all(CompareColSums$RateComparison, "ARDRate_")
+SplitRates = str_split(SplitRates, "_greater_than_")
+CompareColSums$HigherRate = NA
+CompareColSums$LowerRate = NA
+CompareColSums$Fraction = NA
+for (i in 1:length(SplitRates)) { # added 1/24/2024
+  if (CompareColSums$Fraction1[i] >= 0.5) {
+    CompareColSums$HigherRate[i] = SplitRates[[i]][1]
+    CompareColSums$LowerRate[i] = SplitRates[[i]][2]
+    CompareColSums$Fraction[i] = CompareColSums$Fraction1[i]
+  } else {
+    CompareColSums$HigherRate[i] = SplitRates[[i]][2]
+    CompareColSums$LowerRate[i] = SplitRates[[i]][1]
+    CompareColSums$Fraction[i] = 1-CompareColSums$Fraction1[i]
+  }
+}
 compareCSVname = paste(Sys.Date(), DiscreteTrait, ContinuousTrait, "multistate aceARD Brownie", nsim, "sims COMPARE RATES.csv")
-write.csv(CompareColSums, compareCSVname)
+write.csv(CompareColSums, compareCSVname, row.names = F)
 # end added 1/10/2024
 
 
