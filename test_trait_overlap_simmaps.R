@@ -12,6 +12,7 @@
 ## 11/28/2023  - calcHuel: stats on real vs expected transition counts, removed "Expected" from x-axis labels in plots 5-6, named elements in returned list; CharacterSimmaps: added plotSampleSimmaps to args
 ## 1/9/2024 - added calculation of Nsims Actual greater than Expected to calcHuel - transition counts; added cladesubsetvalue=NULL to CharacterSimmap inputs just to avoid an error
 ## 1/17/2024 - outputted dfMeltCounts from calcHuel but probably didn't need to
+## 1/30/2024 - calcHuel: outputs a 1-row dataframe with medians of simmap overlap values for Real and Dummy sims, p-value, and post-hoc test p-values
 
 setwd("/Users/kate/Desktop/CooperativeBreedingEvolution/")
 library(phytools)
@@ -332,6 +333,7 @@ if (newplot == TRUE) {
     labs(title = dummytitle, x = "D statistic from simulated independent data simmaps", y = "Frequency") +
     theme_minimal(base_size = 10)
   
+  
   # Create mutated dataframes for boxplot
   dfRealMelt <- dfout[,which(colnames(dfout) %in% colnames(dfDummy))] %>%
     gather("ObservedState", "ObservedState.prop", ObsProp0Absent:ObsProp1Present) %>%
@@ -349,6 +351,34 @@ if (newplot == TRUE) {
   dfCombined <- dfCombined %>%
     mutate(Label = paste(ObservedState, Which, sep = "\n"))
   
+  
+  # Create outputs for overall multi-comparison table
+  medians = dfout %>% select(coopQ01:ObsProp1Present) %>% summarise_all(median, na.rm = TRUE)
+  names(medians)[6:13] <- paste0(names(medians)[6:13],"_MedianReal")
+  
+  # quartiles <- dfout %>%
+  #   select(ObsProp0Absent:ObsProp1Present) %>%
+  #   summarise_all(function(x) list(quantile(x, probs = c(0.25, 0.5, 0.75), na.rm = TRUE)))
+  # quartiles <- unnest(quartiles, cols = everything())
+  
+  
+  mediansReal <- cbind(trait1, trait2, Nspecies, nsims_real, nsims_dummy, pval, medians)
+  mediansDummy = dfDummy %>% select(propFSabsent:ObsProp1Present) %>% summarise_all(median, na.rm = TRUE) 
+  names(mediansDummy) <- paste0(names(mediansDummy), "_MedianDummy")
+  mediansRow = cbind(mediansReal, mediansDummy)
+  
+  require(emmeans)
+  #require(ggpubr)
+  lmStates = lm(ObservedState.prop ~ Which*ObservedState, data = dfCombined)
+  emm <- emmeans(lmStates, pairwise ~ Which | ObservedState)
+  contrast <- emm$contrasts
+  PairwisePostHoc = summary(contrast, adjust = "tukey")
+  PairwisePvals = PairwisePostHoc$p.value
+  PairwisePvals = as.data.frame(t(as.data.frame(PairwisePvals)))
+  colnames(PairwisePvals) <- paste0(PairwisePostHoc$ObservedState, "_DummyVsRealPval")
+  mediansRow = cbind(mediansRow, PairwisePvals)
+  
+  
   # Create the boxplot
   p3 <-  ggplot(dfCombined, aes(x = Label, y = ObservedState.prop, fill = Which)) +
     geom_boxplot(outlier.shape = NA) + # Exclude outliers
@@ -356,7 +386,7 @@ if (newplot == TRUE) {
     labs(y = "Observed State Proportion", x = "", fill = "Simulation Data") +
     scale_fill_manual(values = c("Real" = "blue", "Dummy" = "red")) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    ggtitle(paste(trait1, trait2))
+    ggtitle(paste(trait1, trait2, "p =", pval))
   
   if ("Coop0to1inFS0" %in% colnames(dfout) & "Coop0to1inFS0" %in% colnames(dfDummy)) { # compared rates are from Dummy data simmaps
     dfRealMeltCounts <- dfout[,which(colnames(dfout) %in% colnames(dfDummy))] %>%
@@ -466,15 +496,15 @@ if (newplot == TRUE) {
         stat_compare_means(aes(label = after_stat(p.signif)), method = "t.test") +
         scale_x_discrete(labels = groupLabels)
       
-      return(list(p1 = p1, p2 = p2, p3 = p3, p4 = p4, p5 = p5, p6 = p6, filename = PDFname, TransitionStats = TransitionStats, dfMeltCounts = dfMeltCounts))
+      return(list(p1 = p1, p2 = p2, p3 = p3, p4 = p4, p5 = p5, p6 = p6, filename = PDFname, TransitionStats = TransitionStats, dfMeltCounts = dfMeltCounts, mediansRow = mediansRow))
       
     } else {
-      return(list(p1 = p1, p2 = p2, p3 = p3, p4 = p4, filename = PDFname))
+      return(list(p1 = p1, p2 = p2, p3 = p3, p4 = p4, filename = PDFname, mediansRow = mediansRow))
     }
     
   } else {
     p4 = NULL
-    return(list(p1 = p1, p2 = p2, p3 = p3, filename = PDFname))
+    return(list(p1 = p1, p2 = p2, p3 = p3, filename = PDFname, mediansRow = mediansRow))
   }
   
   
@@ -487,6 +517,6 @@ if (newplot == TRUE) {
   #require(cowplot)
   #print(plot_grid(p1, p2, p3, ncol = 1))
   
-  return(list(p1 = p1, p2 = p2, p3 = p3, p4 = p4, filename = PDFname))
+  return(list(p1 = p1, p2 = p2, p3 = p3, p4 = p4, filename = PDFname, mediansRow = mediansRow))
   
 }
