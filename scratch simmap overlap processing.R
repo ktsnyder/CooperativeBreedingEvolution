@@ -27,7 +27,7 @@ plotname = paste0("Simmap Overlap Outputs/sociality Coop - Simmap Overlap Hists.
 ggsave(plotname, histsArranged, height = 7.5, width = 4.8*length(socialityPlots), units = "in")
 
 
-
+#### transition plots ----
 source("test_trait_overlap_simmaps.R")
 source("transition_plot.R")
 for (i in 1:length(socialityPlots)) {
@@ -144,15 +144,17 @@ single_page_plotGray <- grid.arrange(grobs = grobs_with_marginsGray, ncol = 2, n
 ggsave("transition plots sociality Coop_onepage_median_percentStates_weightsNumTransitions_GrayNonsig.pdf", single_page_plotGray, width = 18, height = 38, units = "in")
 
 
-## make tables of simmap overlap
-socTraits = c("Griesser2023.Asocial0vsSocial1", "Griesser2023.GroupsLargerThanPair", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2023.LongSocialBonds", "Griesser2017FamilialLiving", "Griesser2023.Colonial01", "Final.polygyny", "Griesser2023.TwoOrMoreCaretakers", "Griesser2023.MoreThanTwoCaretakers", "MeanCoopTie2Coop") 
+## make tables of simmap overlap AND make state boxplots and transition plots
+socTraits = c("Griesser2023.Asocial0vsSocial1", "Griesser2023.GroupsLargerThanPair", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2023.LongSocialBonds", "Griesser2017FamilialLiving", "Griesser2023.Colonial01", "Final.polygyny", "Griesser2023.MoreThanTwoCaretakers", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop", "MeanCoopTie2Noncoop") # , "Griesser2023.TwoOrMoreCaretakers" - removed because too few species in lower group
+# transition plots not in main text: socTraits = c("Griesser2023.Asocial0vsSocial1", "Griesser2023.GroupsLargerThanPair", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2023.Colonial01", "Final.polygyny", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop")
 otherTraits = c("FemaleSong_Agg01","MeanCoopTie2Noncoop")
 
 outlist = list()
 boxplotlist = list()
+transplotlist = list()
 outdf = set.seed(10)
 for (i in 1:length(socTraits)) {
-  for (j in 1:2) {
+  for (j in 1:length(otherTraits)) {
   temptrait1 = socTraits[i]
   temptrait2 = otherTraits[j]
   
@@ -166,13 +168,18 @@ for (i in 1:length(socTraits)) {
       dfDummy1 = read.csv(paste0("Simmap Overlap Outputs/",dummyfile))
       dfout1 = read.csv(paste0("Simmap Overlap Outputs/",realfile))
     } else {
+      dummyfile = dummyfile[which(str_detect(dummyfile, "00") & str_detect(dummyfile, "counts") & str_detect(dummyfile, "removed", negate = T))]
+      realfile = realfile[which(str_detect(realfile, "00") & str_detect(realfile, "counts") & str_detect(realfile, "removed", negate = T))]
       print(dummyfile)
       print(realfile)
-      dummyfile = dummyfile[which(str_detect(dummyfile, "2000"))]
-      realfile = realfile[which(str_detect(realfile, "counts"))]
-      dfDummy1 = read.csv(paste0("Simmap Overlap Outputs/",dummyfile))
-      dfout1 = read.csv(paste0("Simmap Overlap Outputs/",realfile))
-      #next
+      
+      if (length(dummyfile) > 1 | length(realfile) > 1) {
+        print("skipped")
+        next
+      } else {
+        dfDummy1 = read.csv(paste0("Simmap Overlap Outputs/",dummyfile))
+        dfout1 = read.csv(paste0("Simmap Overlap Outputs/",realfile))
+      }
     }
   } else {
     print(paste("no files found", temptrait1, temptrait2))
@@ -183,12 +190,130 @@ for (i in 1:length(socTraits)) {
   outlist[[length(outlist)+1]] <- calcHuelout
   boxplotlist[[length(boxplotlist)+1]] <- calcHuelout$p3
   
-  temprow = calcHuelout$mediansRow
+  ObsProp0Absent_FractionDummyLessThanMedianReal = sum(dfDummy1$ObsProp0Absent <= median(dfout1$ObsProp0Absent))/length(dfDummy1$treenum)
+  ObsProp0Present_FractionDummyLessThanMedianReal = sum(dfDummy1$ObsProp0Present <= median(dfout1$ObsProp0Present))/length(dfDummy1$treenum)
+  ObsProp1Absent_FractionDummyLessThanMedianReal = sum(dfDummy1$ObsProp1Absent <= median(dfout1$ObsProp1Absent))/length(dfDummy1$treenum)
+  ObsProp1Present_FractionDummyLessThanMedianReal = sum(dfDummy1$ObsProp1Present <= median(dfout1$ObsProp1Present))/length(dfDummy1$treenum)
+  
+  temprow = cbind(calcHuelout$mediansRow, ObsProp0Absent_FractionDummyLessThanMedianReal, ObsProp0Present_FractionDummyLessThanMedianReal, ObsProp1Absent_FractionDummyLessThanMedianReal, ObsProp1Present_FractionDummyLessThanMedianReal)
   outdf = rbind(outdf, temprow)
+  
+  # Transition plots
+  trait1 = temptrait1
+  trait2 = temptrait2
+  
+  tempdfDep = dfout1
+  
+  Transitions = calcHuelout$TransitionStats$logPairwisePostHoc[2]
+  pvals = calcHuelout$TransitionStats$logPairwisePostHoc[7]
+  pvaldf = as.data.frame(cbind(Transitions, pvals))
+  pvaldf$SignificanceLabel = "n.s."
+  pvaldf$SignificanceLabel[which(pvaldf$p.value < 0.05)] = "p < 0.05"
+  pvaldf$SignificanceLabel[which(pvaldf$p.value < 0.01)] = "p < 0.01"
+  pvaldf$SignificanceLabel[which(pvaldf$p.value < 0.001)] = "p < 0.001"
+  pvaldf$SignificanceLabel[which(pvaldf$p.value < 0.0001)] = "p < 0.0001"
+  
+  NtimesActualGreaterThanExpected = calcHuelout$TransitionStats$NtimesActualGreaterThanExpected
+  NtimesActualGreaterThanExpecteddf = cbind(names(NtimesActualGreaterThanExpected), NtimesActualGreaterThanExpected)
+  NtimesActualGreaterThanExpecteddf = as.data.frame(NtimesActualGreaterThanExpecteddf)
+  colnames(NtimesActualGreaterThanExpecteddf) = c("Transition", "CountNActualGreaterThanExpected")
+  NtimesActualGreaterThanExpecteddf$CountNActualGreaterThanExpected = as.integer(NtimesActualGreaterThanExpecteddf$CountNActualGreaterThanExpected)
+  pvaldf = merge(pvaldf, NtimesActualGreaterThanExpecteddf, by = "Transition")
+  pvaldf$FractionActualGreaterThanExpected = pvaldf$CountNActualGreaterThanExpected/nsims
+  
+  RateRef = as.data.frame(rbind(c("FS0to1inCoop0", "q12"),c("Coop0to1inFS0", "q13"),c("FS1to0inCoop0", "q21"), c("Coop0to1inFS1", "q24"),c("Coop1to0inFS0", "q31"), c("FS0to1inCoop1", "q34"), c("Coop1to0inFS1", "q42"),c("FS1to0inCoop1", "q43")))
+  colnames(RateRef) <- c("Transitions", "qRate")
+  ratePvals = merge(RateRef, pvaldf, by.x = "Transitions", by.y = "Transition")
+  
+  # remove these lines if want to use ANOVA pval labels instead
+  ratePvals$PercentTrendingLabel = "<80%"
+  ratePvals$PercentTrendingLabel[which(ratePvals$FractionActualGreaterThanExpected > .8 | ratePvals$FractionActualGreaterThanExpected < .2)] <- ">80%"
+  ratePvals$PercentTrendingLabel[which(ratePvals$FractionActualGreaterThanExpected > .9 | ratePvals$FractionActualGreaterThanExpected < .1)] <- ">90%"
+  ratePvals$PercentTrendingLabel[which(ratePvals$FractionActualGreaterThanExpected > .95 | ratePvals$FractionActualGreaterThanExpected < .05)] <- ">95%"
+  ratePvals$PercentTrendingLabel[which(ratePvals$FractionActualGreaterThanExpected > .99 | ratePvals$FractionActualGreaterThanExpected < .01)] <- ">99%"
+  
+  tempdfDep[,paste0(colnames(tempdfDep)[18:25],"DifferenceFromExpected")] = tempdfDep[,colnames(tempdfDep)[18:25]] - tempdfDep[,paste0(colnames(tempdfDep)[18:25],"Expected")]
+  colnames(tempdfDep)[which(colnames(tempdfDep) == "FS0to1inCoop0DifferenceFromExpected")] <- "q12"
+  colnames(tempdfDep)[which(colnames(tempdfDep) == "Coop0to1inFS0DifferenceFromExpected")] <- "q13"
+  colnames(tempdfDep)[which(colnames(tempdfDep) == "FS1to0inCoop0DifferenceFromExpected")] <- "q21"
+  colnames(tempdfDep)[which(colnames(tempdfDep) == "Coop0to1inFS1DifferenceFromExpected")] <- "q24"
+  colnames(tempdfDep)[which(colnames(tempdfDep) == "Coop1to0inFS0DifferenceFromExpected")] <- "q31"
+  colnames(tempdfDep)[which(colnames(tempdfDep) == "FS0to1inCoop1DifferenceFromExpected")] <- "q34"
+  colnames(tempdfDep)[which(colnames(tempdfDep) == "Coop1to0inFS1DifferenceFromExpected")] <- "q42"
+  colnames(tempdfDep)[which(colnames(tempdfDep) == "FS1to0inCoop1DifferenceFromExpected")] <- "q43"
+  
+  if (trait2 == "MeanCoopTie2Noncoop") {
+    labx0 = paste("Non-Cooperative")
+    labx1 = paste("Cooperative")
+  } else if (trait2 == "FemaleSong_Agg01") {
+    labx0 = paste("Female Song Absent")
+    labx1 = paste("Female Song Present")
+  }
+  
+  if (trait1 == "Final.polygyny") {
+    lab0x = paste("Monogamy")
+    lab1x = paste("Polygyny")
+  } else if (grepl("coop", trait1, ignore.case = T)) {  #(str_detect(trait1, "coop")) {
+    lab0x = paste("Non-Cooperative")
+    lab1x = paste("Cooperative")
+  } else if (str_detect(trait1, "Kin")) {
+    lab0x = paste("Non-kin")
+    lab1x = paste("Kin")
+  } else if (str_detect(trait1, "Familial")) {
+    lab0x = paste("Non-Familial Living")
+    lab1x = paste("Familial Living")
+  } else if (str_detect(trait1, "Colonial")) {
+    lab0x = paste("Non-Colonial")
+    lab1x = paste("Colonial") 
+  } else if (str_detect(trait1, "GroupsLargerThanPair")) {
+    lab0x = paste("Asocial or pair")
+    lab1x = paste("Small or large groups") 
+  } else if (str_detect(trait1, "LongSocialBonds")) {
+    lab0x = paste("Bonds last one season or less")
+    lab1x = paste("Multi-year bonds") 
+  } else if (str_detect(trait1, "MoreThanTwoCaretakers")) {
+    lab0x = paste("Two or fewer caretakers")
+    lab1x = paste("More than two caretakers") 
+  } else if (str_detect(trait1, "TwoOrMoreCaretakers")) {
+    lab0x = paste("Fewer than two caretakers")
+    lab1x = paste("Two or more caretakers") 
+  } else if (str_detect(trait1, "Asocial")) {
+    lab0x = paste("Asocial")
+    lab1x = paste("Pair or group sociality") 
+  } else if (str_detect(trait1,"SeasonOrLonger")) {
+    lab0x = paste("Bonds last less than one season")
+    lab1x = paste("Season or longer social bonds") 
+  } else if (str_detect(trait1, "LargestGroupSizes")) {
+    lab0x = paste("Asocial, pair, or small groups")
+    lab1x = paste("Large groups") 
+  }
 
+  print("ratePvals:")
+  print(ratePvals)
+  
+  trait1StateLabels = c(lab0x, lab1x)
+  trait2StateLabels = c(labx0, labx1)
+  plottitle = paste(trait1, trait2, "nsims:", nsims)
+  transplotout = transition_plot(df = tempdfDep, trait1StateLabels = trait1StateLabels, trait2StateLabels = trait2StateLabels, scale_area_by = 1, offset = 0.2, lengthen = 0.2, ratePvals = ratePvals, plottitle = plottitle, center="median")
+  transplotlist[[length(transplotlist) + 1]] = transplotout$transitionplot_GrayNS
   }
 }
-write.csv(outdf, file = "simmap overlap summary table.csv", row.names = FALSE)
+#write.csv(outdf, file = "simmap overlap summary table_StateCompare. .csv", row.names = FALSE)
 nplotrows = ceiling(length(boxplotlist)/2)
 single_page_plotBox <- grid.arrange(grobs = boxplotlist, ncol = 2, nrow = nplotrows)
-ggsave("simmap overlap all boxplots_onepage.pdf", single_page_plotBox, width = 14, height = 38, units = "in")
+ggsave("simmap overlap all boxplots_onepage_500dummySims_testFactorLabs.pdf", single_page_plotBox, width = 14, height = 56, units = "in", limitsize = FALSE)
+
+nplotrows = ceiling(length(transplotlist)/2)
+single_page_plotTrans <- grid.arrange(grobs = transplotlist, ncol = 2, nrow = nplotrows)
+ggsave("simmap overlap counts All transition plots_onepage.pdf", single_page_plotTrans, width = 18, height = 45, units = "in")
+
+length(transplotlist)
+length(boxplotlist)
+bothlist = list()
+for (i in 1:20) {
+  bothlist[[length(bothlist)+1]] = boxplotlist[[i]]
+  bothlist[[length(bothlist)+1]] = transplotlist[[i]]
+}
+
+single_page_plotTransBox = grid.arrange(grobs = bothlist, ncol = 4, nrow = 10)
+ggsave("simmap overlap all boxplots-transitionplots_onepage_500dummySims_testFactorLabs.pdf", single_page_plotTransBox, width = 30, height = 50, units = "in", limitsize = FALSE)
