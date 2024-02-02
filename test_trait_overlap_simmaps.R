@@ -13,6 +13,7 @@
 ## 1/9/2024 - added calculation of Nsims Actual greater than Expected to calcHuel - transition counts; added cladesubsetvalue=NULL to CharacterSimmap inputs just to avoid an error
 ## 1/17/2024 - outputted dfMeltCounts from calcHuel but probably didn't need to
 ## 1/30/2024 - calcHuel: outputs a 1-row dataframe with medians of simmap overlap values for Real and Dummy sims, p-value, and post-hoc test p-values
+## 2/1/2024 - calcHuel: Observed State boxplot organized and labeled with actual states (e.g. "Asocial", "Pair, small group, large group"), made ordered factor to have one label per pair of boxplots (Real and Dummy)
 
 setwd("/Users/kate/Desktop/CooperativeBreedingEvolution/")
 library(phytools)
@@ -348,8 +349,29 @@ if (newplot == TRUE) {
   dfCombined$ObservedState.prop = as.numeric(dfCombined$ObservedState.prop)
   
   # Create a combined label for x-axis
+  trait1StateLabels = getLabels(trait1)
+  trait2StateLabels = getLabels(trait2)
+  
+  dfCombined$trait1StateLabel = NA
+  dfCombined$trait2StateLabel = NA
+  
+  dfCombined$trait1StateLabel[which(dfCombined$ObservedState %in% c("ObsProp0Absent", "ObsProp0Present"))] = trait1StateLabels[1]
+  dfCombined$trait1StateLabel[which(dfCombined$ObservedState %in% c("ObsProp1Absent", "ObsProp1Present"))] = trait1StateLabels[2]
+  dfCombined$trait2StateLabel[which(dfCombined$ObservedState %in% c("ObsProp0Absent", "ObsProp1Absent"))] = trait2StateLabels[1]
+  dfCombined$trait2StateLabel[which(dfCombined$ObservedState %in% c("ObsProp0Present", "ObsProp1Present"))] = trait2StateLabels[2]
+  
+ # dfCombined <- dfCombined %>%
+ #  mutate(Label = paste(ObservedState, Which, sep = "\n"))
   dfCombined <- dfCombined %>%
-    mutate(Label = paste(ObservedState, Which, sep = "\n"))
+    mutate(Label = paste(trait1StateLabel, trait2StateLabel, sep = "\n"))
+  #dfCombined$Label[which(dfCombined$Which == "Real")] <- paste0(dfCombined$Label[which(dfCombined$Which == "Real")], " ") 
+  levels_ordered = c(
+    paste(trait1StateLabels[1], trait2StateLabels[1], sep = "\n"),
+    paste(trait1StateLabels[1], trait2StateLabels[2], sep = "\n"),
+    paste(trait1StateLabels[2], trait2StateLabels[1], sep = "\n"),
+    paste(trait1StateLabels[2], trait2StateLabels[2], sep = "\n")
+  )
+  dfCombined$Label <- factor(dfCombined$Label, levels = levels_ordered, ordered = TRUE)
   
   
   # Create outputs for overall multi-comparison table
@@ -519,4 +541,38 @@ if (newplot == TRUE) {
   
   return(list(p1 = p1, p2 = p2, p3 = p3, p4 = p4, filename = PDFname, mediansRow = mediansRow))
   
+}
+
+#### getLabels ----
+getLabels <- function(trait) {
+  require(stringr)
+  if (trait == "Final.polygyny") {
+    return(c("Monogamy", "Polygyny"))
+  } else if (grepl("coop", trait, ignore.case = TRUE)) {
+    return(c("Non-Cooperative", "Cooperative"))
+  } else if (str_detect(trait, "Kin")) {
+    return(c("Non-kin", "Kin"))
+  } else if (str_detect(trait, "Familial")) {
+    return(c("Non-Familial Living", "Familial Living"))
+  } else if (str_detect(trait, "Colonial")) {
+    return(c("Non-Colonial", "Colonial"))
+  } else if (str_detect(trait, "GroupsLargerThanPair")) {
+    return(c("Asocial or pair", "Small or large groups"))
+  } else if (str_detect(trait, "LongSocialBonds")) {
+    return(c("Bonds last one season or less", "Multi-year bonds"))
+  } else if (str_detect(trait, "MoreThanTwoCaretakers")) {
+    return(c("Two or fewer caretakers", "More than two caretakers"))
+  } else if (str_detect(trait, "TwoOrMoreCaretakers")) {
+    return(c("Fewer than two caretakers", "Two or more caretakers"))
+  } else if (str_detect(trait, "Asocial")) {
+    return(c("Asocial", "Pair or group sociality"))
+  } else if (str_detect(trait, "SeasonOrLonger")) {
+    return(c("Bonds last less than one season", "Season or longer social bonds"))
+  } else if (str_detect(trait, "LargestGroupSizes")) {
+    return(c("Asocial, pair, or small groups", "Large groups"))
+  } else if (str_detect(trait, "FemaleSong")) {
+    return(c("Female Song Absent", "Female Song Present"))  
+  } else {
+    return(c(paste(trait, "0"), paste(trait, "1")))  # Return NA if no condition matches
+  }
 }
