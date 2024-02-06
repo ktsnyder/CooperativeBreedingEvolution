@@ -324,7 +324,7 @@ ggsave("simmap overlap all boxplots-transitionplots_onepage_500dummySims_testFac
 multistateTraits = c("social_system_incl_nk_coop_Griesser2017", "social_system_Griesser2017", "grouping")
 df =  read.csv("2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv")
 treefile = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
-nsims = 1000
+nsims = 100
 
 for (i in 1:length(multistateTraits)) {
   multistateTrait = multistateTraits[i]
@@ -346,10 +346,6 @@ for (i in 1:length(multistateTraits)) {
   #SYMmodel <- ace(discretetraitvecDisc,subsetDisctree, type="discrete",model = "SYM")
   #anovaERSYM = anova(ERmodel,SYMmodel)
   #anovaSYMARD <- anova(SYMmodel,ARDmodel)
-  
-  #print(anovaERSYM)
-  #print(anovaSYMARD)
-  
   
   # get rates from ace() output
   aceARDratesVec = ARDmodel$rates
@@ -395,36 +391,42 @@ for (i in 1:length(multistateTraits)) {
   names(othertraitvec) = subsetdf$species
   
   simmapMultistate = make.simmap(subsettree, discretetraitvec, nsim = nsims, Q= rate_matrix, type = "discrete") 
-  plotSimmap(simmapMultistate[[1]])
+  realDiscreteTraitVecList = list(discretetraitvec,discretetraitvec,discretetraitvec,discretetraitvec,discretetraitvec)
+  plot_my_simmaps(thistrait = trait1, subsettrait = trait2, simmappy = simmapMultistate, otherlabel = "REAL", discretetraitvecList = realDiscreteTraitVecList)
   write.simmap(simmapMultistate, file = paste("multistateTrait simmaps", multistateTrait, othertrait, nsims, "sims REAL.nex"), format = "nexus", version = 1.5)
   
-  simmapTrait2 = make.simmap(subsettree, othertraitvec, nsim = nsims, Q= FSQ, type = "discrete") 
-  plotSimmap(simmapTrait2[[1]])
+  simmapTrait2 = make.simmap(subsettree, othertraitvec, nsim = nsims, Q= FSQ, type = "discrete")
+  realTrait2vecList = list(othertraitvec,othertraitvec,othertraitvec,othertraitvec,othertraitvec)
+  
+  plot_my_simmaps(thistrait = trait2, subsettrait = trait1, simmappy = simmapTrait2, otherlabel = "REAL", discretetraitvecList = realTrait2vecList)
   write.simmap(simmapTrait2, file = paste("FemaleSong simmaps", multistateTrait, othertrait, nsims, "sims REAL.nex"), format = "nexus", version = 1.5)
   
   ## DUMMY
   
   CoopsimtreesRand <- list()
+  RanddiscretetraitvecList <- list()
   for (j in 1:nsims) { 
     Coopvec <- subsetdf[,columns[1]]
     CoopvecRandom <- sample(Coopvec)
     names(CoopvecRandom) <- subsetdf$species
     Coopsimtree <- make.simmap(tree = subsettree, x = CoopvecRandom, model = "ARD", nsim = 1, Q = rate_matrix)
     CoopsimtreesRand[[j]] <- Coopsimtree
+    RanddiscretetraitvecList[[j]] <- CoopvecRandom
     if (j == 1) {
       CoopsimtreesMulti = Coopsimtree
     } else {
       CoopsimtreesMulti = c(CoopsimtreesMulti, Coopsimtree)
     }
-   # write.simmap(Coopsimtree, file = paste("multistateTrait simmaps", multistateTrait, othertrait, "500sims DUMMY.nex"), format = "nexus", version = 1.5, append = TRUE)
     print(paste(j, Sys.time()))
   } # end for j in 1:nsims (Coop)
   Coopsimtrees <- CoopsimtreesRand
-  #class(Coopsimtrees) <- c("multiSimmap", "list")
+  
+  plot_my_simmaps(thistrait = trait1, subsettrait = trait2, simmappy = CoopsimtreesMulti, otherlabel = "DUMMY", discretetraitvecList = RanddiscretetraitvecList)
   write.simmap(CoopsimtreesMulti, file = paste("multistateTrait simmaps", multistateTrait, othertrait, nsims, "sims DUMMY.nex"), format = "nexus", version = 1.5)
   
   # Make randomized versions of FemaleSong simmaps / DUMMY data
   FSsimtreesRand <- list()
+  RandTrait2vecList <- list()
   print(paste("starting Dummy FemSong simmaps", Sys.time()))
   for (j in 1:nsims) {
     FSvec <- subsetdf[,columns[2]]
@@ -432,6 +434,7 @@ for (i in 1:length(multistateTraits)) {
     names(FSvecRandom) <- subsetdf$species
     FSsimtree <- make.simmap(tree = subsettree, x = FSvecRandom, model = "ARD", nsim = 1, Q = FSQ)
     FSsimtreesRand[[j]] <- FSsimtree
+    RandTrait2vecList[[j]] <- FSvecRandom
     if (j == 1) {
       FSsimtreesMulti = FSsimtree
     } else {
@@ -442,6 +445,7 @@ for (i in 1:length(multistateTraits)) {
     
   } # end for j in 1:nsims (FS)
   FSsimtrees<- FSsimtreesRand
+  plot_my_simmaps(thistrait = trait2, subsettrait = trait1, simmappy = FSsimtreesMulti, otherlabel = "DUMMY", discretetraitvecList = RandTrait2vecList)
   write.simmap(FSsimtreesMulti, file = paste("FemaleSong simmaps", multistateTrait, othertrait, nsims, "sims DUMMY.nex"), format = "nexus", version = 1.5)
   
   overlapdf = set.seed(10)
@@ -470,14 +474,30 @@ for (i in 1:length(multistateTraits)) {
   }
   write.csv(overlapdf, file = paste("simmap overlap", multistateTrait, othertrait, nsims, "sims.csv"))
   
-  calcHuelflex(overlapdf)
+  calcHuelout = calcHuelflex(overlapdf)
+  pdfname = paste("simmap overlap", multistateTrait, othertrait, nsims, "sims.pdf")
+  single_page_plotBox <- grid.arrange(grobs = calcHuelout[1:3], ncol = 1)
+  ggsave(pdfname, single_page_plotBox, width = 8, height = 12, units = "in", limitsize = FALSE)
   
+  write.csv(calcHuelout$fraction_dummy_less_than_median_real, file = paste("simmap overlap FractionDummyLessThanMedianReal", multistateTrait, othertrait, nsims,"sims.csv"))
 }
+
 
 ## Using prior run data
 overlapdf = read.csv("simmap overlap social_system_incl_nk_coop_Griesser2017 FemaleSong_Agg01 500sims.csv")
 overlapdf = read.csv("simmap overlap social_system_Griesser2017 FemaleSong_Agg01 500sims.csv")
 overlapdf = read.csv("simmap overlap grouping FemaleSong_Agg01 500sims.csv")
+
+files = c("simmap overlap grouping FemaleSong_Agg01 1000 sims.csv", "simmap overlap social_system_Griesser2017 FemaleSong_Agg01 1000 sims.csv", "simmap overlap social_system_incl_nk_coop_Griesser2017 FemaleSong_Agg01 1000 sims.csv")
+
+for (i in 1:length(files)) {
+  tempfile = files[i]
+  overlapdf = read.csv(tempfile)
+  calcHuelout = calcHuelflex(overlapdf)
+  pdfname = gsub(".csv", ".pdf", tempfile)
+  single_page_plotBox <- grid.arrange(grobs = calcHuelout, ncol = 1)
+  ggsave(pdfname, single_page_plotBox, width = 8, height = 12, units = "in", limitsize = FALSE)
+}
 
 
 calcHuelflex = function(overlapdf) {
@@ -545,22 +565,113 @@ Dummy_dsums <- df_dummy %>%
   group_by(tree, trait1, trait2) %>%
   summarize(Dummy_dsum = sum(abs_diff), .groups = "drop")
 
-hist(Real_dsims$Real_dsim)
-hist(Dummy_dsums$Dummy_dsum)
-abline(v = D_real)
+#hist(Real_dsims$Real_dsim)
+#hist(Dummy_dsums$Dummy_dsum)
+#abline(v = D_real)
+numGreater = sum(Dummy_dsums$Dummy_dsum > D_real)
 pval = sum(Dummy_dsums$Dummy_dsum > D_real)/nsims
+
+## Get num Dummy greater than median real
+# Calculate medians for "Real" data
+medians_real <- df_long %>%
+  filter(Which == "Real") %>%
+  group_by(trait_state, FS) %>%
+  summarize(median_real = median(proportion), .groups = "drop")
+
+# Filter for "Dummy" data
+df_dummy <- df_long %>%
+  filter(Which == "Dummy")
+
+# Join the medians back to the "Dummy" data
+df_dummy <- df_dummy %>%
+  left_join(medians_real, by = c("trait_state", "FS"))
+
+# Calculate the fraction for each state in "Dummy" data
+fraction_dummy_less_than_median_real <- df_dummy %>%
+  group_by(trait_state, FS) %>%
+  summarize(fraction = sum(proportion <= median_real) / n(), .groups = "drop")
+
 
 trait1 = overlaplonger$trait1[1]
 trait2 = overlaplonger$trait2[1]
 
-pdf(paste("simmap overlap Real Dummy multiState Proportions Boxplot -", trait1, trait2, nsims, "sims.pdf"))
-ggplot(overlaplonger, aes(x = state, y = proportion, fill = Which)) +
+plotlabel = paste(trait1, trait2)
+dummytitle = paste("Nsims =", nsims, "\nnum Dummy dsums > D_real:", numGreater, ", pval =", pval)
+
+xmax = max(c(Real_dsims$Real_dsim, Dummy_dsums$Dummy_dsum))*1.1
+
+# ggplot histograms to return
+p1 <- ggplot(Real_dsims, aes(x = Real_dsim)) +
+  geom_histogram(binwidth = xmax/20, fill = rgb(0.2, 0.5, 0.7, 0.5), color = "white") +
+  geom_vline(xintercept = D_real, color = "red") +
+  xlim(c(0, xmax)) +
+  labs(title = plotlabel, x = "D statistic from real data simmaps", y = "Frequency") +
+  theme_minimal(base_size = 10)
+
+# Create the histogram for Dummy_dsums
+p2 <- ggplot(Dummy_dsums, aes(x = Dummy_dsum)) +
+  geom_histogram(binwidth = xmax/20, fill = rgb(0.7, 0.5, 0.2, 0.5), color = "white") +
+  xlim(c(0, xmax)) +
+  labs(title = dummytitle, x = "D statistic from simulated independent data simmaps", y = "Frequency") +
+  theme_minimal(base_size = 10)
+
+#pdf(paste("simmap overlap Real Dummy multiState Proportions Boxplot -", trait1, trait2, nsims, "sims.pdf"))
+boxplotStates <- ggplot(overlaplonger, aes(x = state, y = proportion, fill = Which)) +
   geom_boxplot(outlier.shape = NA) + # Exclude outliers
   theme_minimal() +
   labs(y = "Observed State Proportion", x = "", fill = "Simulation Data") +
   scale_fill_manual(values = c("Real" = "blue", "Dummy" = "red")) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   ggtitle(paste(trait1, trait2, "p =", pval))
-dev.off()
+#dev.off()
+  
+  return(list(p1=p1, p2=p2, boxplotStates = boxplotStates, fraction_dummy_less_than_median_real = fraction_dummy_less_than_median_real))
 
+}
+
+
+plot_my_simmaps <- function(thistrait, subsettrait, simmappy, otherlabel, discretetraitvecList) {
+    simmapFileName = paste0(thistrait, " multistate simmap plots ", subsettrait, " subset ", otherlabel, Sys.Date(),".pdf")
+    pdf(simmapFileName, height = 9, width = 12)
+    par(mfrow = c(2,3))
+    par(mar = c(3.8,3.8,3,1))
+    for (simmapNum in 1:5) {
+      simmap = simmappy[[simmapNum]]
+      discretetraitvec = discretetraitvecList[[simmapNum]]
+      simmapQ = simmap$Q
+      SimmapStates = colnames(simmap$Q)
+      py = c("orange", "#009E73", "blue", "#CC79A7")
+      pynamed <- py[1:length(SimmapStates)]
+      names(pynamed) <- SimmapStates
+      tipcols = rep(NA, length(simmap$tip.label))
+      for (stateNum in 1:length(SimmapStates)) { # get color vector of tips
+        tempstate = SimmapStates[stateNum]
+        tipcols[which(simmap$tip.label %in% names(which(discretetraitvec==tempstate)))] <- pynamed[tempstate]
+      }
+      # Plot simmap 
+      plotSimmap(simmap, fsize=0.2, lwd = 0.8, colors = pynamed)
+      tiplabels(pch=21,bg=tipcols, col = tipcols, cex=0.3)
+      legend("bottomleft",legend = names(pynamed), lwd=1,col=pynamed, lty = c(rep(1,length(SimmapStates)),2), cex=1) 
+    }
+    # plot to add rate matrix
+    # Create an empty plot
+    par(mar = c(5,5,4,1))
+    plot(1, type = "n", xlim = c(0, ncol(simmapQ)+1), ylim = c(0, nrow(simmapQ)+1), 
+         xaxt = 'n', yaxt = 'n', xlab = "", ylab = "", xaxs = "i", yaxs = "i")
+    
+    # Add column and row names
+    axis(1, at = 1:ncol(simmapQ), labels = colnames(simmapQ), las = 2, tick = FALSE)
+    axis(2, at = 1:nrow(simmapQ), labels = rev(rownames(simmapQ)), las = 2, tick = FALSE)
+    # Add the matrix values
+    for (i in 1:nrow(simmapQ)) {
+      for (j in 1:ncol(simmapQ)) {
+        text(j, nrow(simmapQ) - i + 1, round(simmapQ[i, j], 6))
+      }
+    }
+    # Add label re transitions
+    axis(1, at = 0.1, labels = "To:", las = 1, tick = FALSE, font = 2)
+    axis(2, at = nrow(simmapQ)+0.9, labels = "From:", las = 2, tick = FALSE, font = 2)
+    title("Transition Rates")
+    dev.off()
+  
 }
