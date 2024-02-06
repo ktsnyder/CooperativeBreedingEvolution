@@ -317,3 +317,250 @@ for (i in 1:20) {
 
 single_page_plotTransBox = grid.arrange(grobs = bothlist, ncol = 4, nrow = 10)
 ggsave("simmap overlap all boxplots-transitionplots_onepage_500dummySims_testFactorLabs.pdf", single_page_plotTransBox, width = 30, height = 50, units = "in", limitsize = FALSE)
+
+
+
+#### multistate ----
+multistateTraits = c("social_system_incl_nk_coop_Griesser2017", "social_system_Griesser2017", "grouping")
+df =  read.csv("2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv")
+treefile = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
+nsims = 1000
+
+for (i in 1:length(multistateTraits)) {
+  multistateTrait = multistateTraits[i]
+  othertrait = "FemaleSong_Agg01"
+  columns = c(multistateTrait, othertrait)
+  subsetout = subsettreedata(columns = multistateTrait, newdata = df, newtree = treefile)
+  subsetDisctree = subsetout$subsettree
+  subsetDiscdf = subsetout$subsetdf
+  #subsetDiscdf %>% group_by(social_system_incl_nk_coop_Griesser2017) %>% count
+  
+  discretetraitvecDisc = subsetDiscdf[,multistateTrait]
+  names(discretetraitvecDisc) = subsetDiscdf$species
+  
+  #simmapER <- make.simmap(subsetDisctree,discretetraitvecDisc,nsim=1,model = "ER") 
+  
+  #ERmodel <- ace(discretetraitvecDisc,subsetDisctree, type="discrete",model = "ER")
+  ARDmodel <- ace(discretetraitvecDisc,subsetDisctree, type="discrete",model = "ARD")
+  #anovaERARD <- anova(ERmodel,ARDmodel)
+  #SYMmodel <- ace(discretetraitvecDisc,subsetDisctree, type="discrete",model = "SYM")
+  #anovaERSYM = anova(ERmodel,SYMmodel)
+  #anovaSYMARD <- anova(SYMmodel,ARDmodel)
+  
+  #print(anovaERSYM)
+  #print(anovaSYMARD)
+  
+  
+  # get rates from ace() output
+  aceARDratesVec = ARDmodel$rates
+  aceARDrates = cbind(1:length(aceARDratesVec), aceARDratesVec)
+  aceARDrates = as.data.frame(aceARDrates)
+  colnames(aceARDrates) <- c("rate_index", "rates")
+  rate_index_matrix = ARDmodel$index.matrix
+  groupnames = colnames(ARDmodel$lik.anc)
+  nGroups = length(groupnames)
+  rate_matrix = matrix(rep(NA,nGroups^2), nrow = nGroups)
+  rownames(rate_matrix) = colnames(rate_matrix) = groupnames
+  
+  for (i in 1:nGroups) {
+    for (j in 1:nGroups) {
+      index = rate_index_matrix[i,j]
+      if (!is.na(index)) {
+        rate_matrix[i,j] = aceARDrates$rates[which(aceARDrates$rate_index == index)]
+      }
+    }
+  }
+  diagvals = rowSums(rate_matrix, na.rm = T)*-1
+  diag(rate_matrix) <- diagvals
+  print(rate_matrix)
+  
+  source("findQrates.R")
+  FSrates <- findQrates(columns = othertrait, newdata = df, newtree = treefile)
+  FSQ <- FSrates$qrates
+  FSQAbsPres <- FSQ[3]
+  FSQPresAbs <- FSQ[2]
+  
+  # get rates from make.simmap
+  #simmapARD = make.simmap(subsettree,discretetraitvec, nsim = 1, model = "ARD")
+  #makesimmapARDrates = simmapARD$Q
+  
+  # Make simmaps from data subsetted to those with song reps
+  subsetSong = subsettreedata(columns = c(multistateTrait, othertrait), newdata = df, newtree = treefile)
+  subsetdf = subsetSong$subsetdf
+  subsettree = subsetSong$subsettree
+  
+  discretetraitvec = subsetdf[,multistateTrait]
+  names(discretetraitvec) = subsetdf$species
+  othertraitvec = subsetdf[,othertrait]
+  names(othertraitvec) = subsetdf$species
+  
+  simmapMultistate = make.simmap(subsettree, discretetraitvec, nsim = nsims, Q= rate_matrix, type = "discrete") 
+  plotSimmap(simmapMultistate[[1]])
+  write.simmap(simmapMultistate, file = paste("multistateTrait simmaps", multistateTrait, othertrait, nsims, "sims REAL.nex"), format = "nexus", version = 1.5)
+  
+  simmapTrait2 = make.simmap(subsettree, othertraitvec, nsim = nsims, Q= FSQ, type = "discrete") 
+  plotSimmap(simmapTrait2[[1]])
+  write.simmap(simmapTrait2, file = paste("FemaleSong simmaps", multistateTrait, othertrait, nsims, "sims REAL.nex"), format = "nexus", version = 1.5)
+  
+  ## DUMMY
+  
+  CoopsimtreesRand <- list()
+  for (j in 1:nsims) { 
+    Coopvec <- subsetdf[,columns[1]]
+    CoopvecRandom <- sample(Coopvec)
+    names(CoopvecRandom) <- subsetdf$species
+    Coopsimtree <- make.simmap(tree = subsettree, x = CoopvecRandom, model = "ARD", nsim = 1, Q = rate_matrix)
+    CoopsimtreesRand[[j]] <- Coopsimtree
+    if (j == 1) {
+      CoopsimtreesMulti = Coopsimtree
+    } else {
+      CoopsimtreesMulti = c(CoopsimtreesMulti, Coopsimtree)
+    }
+   # write.simmap(Coopsimtree, file = paste("multistateTrait simmaps", multistateTrait, othertrait, "500sims DUMMY.nex"), format = "nexus", version = 1.5, append = TRUE)
+    print(paste(j, Sys.time()))
+  } # end for j in 1:nsims (Coop)
+  Coopsimtrees <- CoopsimtreesRand
+  #class(Coopsimtrees) <- c("multiSimmap", "list")
+  write.simmap(CoopsimtreesMulti, file = paste("multistateTrait simmaps", multistateTrait, othertrait, nsims, "sims DUMMY.nex"), format = "nexus", version = 1.5)
+  
+  # Make randomized versions of FemaleSong simmaps / DUMMY data
+  FSsimtreesRand <- list()
+  print(paste("starting Dummy FemSong simmaps", Sys.time()))
+  for (j in 1:nsims) {
+    FSvec <- subsetdf[,columns[2]]
+    FSvecRandom <- sample(FSvec)
+    names(FSvecRandom) <- subsetdf$species
+    FSsimtree <- make.simmap(tree = subsettree, x = FSvecRandom, model = "ARD", nsim = 1, Q = FSQ)
+    FSsimtreesRand[[j]] <- FSsimtree
+    if (j == 1) {
+      FSsimtreesMulti = FSsimtree
+    } else {
+      FSsimtreesMulti = c(FSsimtreesMulti, FSsimtree)
+    }
+    #write.simmap(FSsimtree, file = paste("FemaleSong simmaps", multistateTrait, othertrait, "500sims DUMMY.nex"), format = "nexus", version = 1.5, append = TRUE)
+    print(j)
+    
+  } # end for j in 1:nsims (FS)
+  FSsimtrees<- FSsimtreesRand
+  write.simmap(FSsimtreesMulti, file = paste("FemaleSong simmaps", multistateTrait, othertrait, nsims, "sims DUMMY.nex"), format = "nexus", version = 1.5)
+  
+  overlapdf = set.seed(10)
+  for (k in 1:nsims) {
+  # calculate overlap - real
+  realOverlap = Map.Overlap(simmapMultistate[[k]], simmapTrait2[[k]])
+  overlapVec = as.vector(realOverlap)
+  new_names <- outer(rownames(realOverlap), colnames(realOverlap), paste, sep = "_FS")
+  new_names <- as.vector(new_names)
+  names(overlapVec) = paste0(new_names, "_REAL")
+  overlapVec
+  
+  # calculate overlap - dummy
+  dummyOverlap = Map.Overlap(Coopsimtrees[[k]], FSsimtrees[[k]])
+  overlapVecDummy = as.vector(dummyOverlap)
+  new_names2 <- outer(rownames(dummyOverlap), colnames(dummyOverlap), paste, sep = "_FS")
+  new_names2 <- as.vector(new_names2)
+  names(overlapVecDummy) = paste0(new_names2, "_DUMMY")
+  overlapVecDummy
+  
+  temprow = c(k, multistateTrait, othertrait, overlapVec, overlapVecDummy)
+  
+  overlapdf = rbind(overlapdf, temprow)
+  overlapdf = as.data.frame(overlapdf)
+  colnames(overlapdf) = c("tree", "trait1", "trait2", names(overlapVec), names(overlapVecDummy))
+  }
+  write.csv(overlapdf, file = paste("simmap overlap", multistateTrait, othertrait, nsims, "sims.csv"))
+  
+  calcHuelflex(overlapdf)
+  
+}
+
+## Using prior run data
+overlapdf = read.csv("simmap overlap social_system_incl_nk_coop_Griesser2017 FemaleSong_Agg01 500sims.csv")
+overlapdf = read.csv("simmap overlap social_system_Griesser2017 FemaleSong_Agg01 500sims.csv")
+overlapdf = read.csv("simmap overlap grouping FemaleSong_Agg01 500sims.csv")
+
+
+calcHuelflex = function(overlapdf) {
+  require(dplyr)
+overlapdf$X=NULL
+colnames(overlapdf)
+
+nsims = length(overlapdf[,1])
+
+overlapdf[,4:length(colnames(overlapdf))] = apply(overlapdf[,4:length(colnames(overlapdf))], MARGIN = 2, FUN = as.numeric) 
+overlaplonger = overlapdf %>%   pivot_longer(
+  cols = !c(tree, trait1, trait2),  
+  names_to = "state",  
+  values_to = "proportion"          # The name of the new column for the values
+)
+overlaplonger$Which = NA
+overlaplonger$Which[which(str_detect(overlaplonger$state, "DUMMY"))] = "Dummy"
+overlaplonger$Which[which(str_detect(overlaplonger$state, "REAL"))] = "Real"
+overlaplonger$state <- gsub( "_DUMMY", "", overlaplonger$state)
+overlaplonger$state <- gsub( "_REAL", "", overlaplonger$state)
+
+df_long <- overlaplonger %>%
+  separate(state, into = c("trait_state", "FS"), sep = "_FS") 
+
+total_times_trait <- df_long %>%
+  group_by(tree, trait1, trait2, trait_state, Which) %>%
+  summarize(total_trait = sum(proportion), .groups = "drop")
+
+total_times_FS <- df_long %>%
+  group_by(tree, trait1, trait2, FS, Which) %>%
+  summarize(total_FS = sum(proportion), .groups = "drop")
+
+df_long <- df_long %>%
+  left_join(total_times_trait, by = c("tree", "trait1", "trait2", "trait_state", "Which")) %>%
+  left_join(total_times_FS, by = c("tree", "trait1", "trait2", "FS", "Which"))
+
+df_long <- df_long %>%
+  mutate(expected_proportion = total_trait * total_FS)
+
+df_real <- df_long %>%
+  filter(Which == "Real")
+df_real <- df_real %>%
+  mutate(abs_diff = abs(proportion - expected_proportion))
+
+D_real <- df_real %>%
+  summarize(total_abs_diff = sum(abs_diff)) %>%
+  pull(total_abs_diff) / nsims
+
+Real_dsims <- df_real %>%
+  select(tree, trait1, trait2, trait_state, FS, abs_diff) %>%
+  group_by(tree, trait1, trait2) %>%
+  summarize(Real_dsim = sum(abs_diff), .groups = "drop")
+
+# Dummy data
+# Step 1: Filter for "Dummy" data
+df_dummy <- df_long %>%
+  filter(Which == "Dummy")
+
+# Step 2: Calculate the absolute differences
+df_dummy <- df_dummy %>%
+  mutate(abs_diff = abs(proportion - expected_proportion))
+
+# Step 3: Calculate Dummy_dsums (row-wise sums of the absolute differences)
+Dummy_dsums <- df_dummy %>%
+  group_by(tree, trait1, trait2) %>%
+  summarize(Dummy_dsum = sum(abs_diff), .groups = "drop")
+
+hist(Real_dsims$Real_dsim)
+hist(Dummy_dsums$Dummy_dsum)
+abline(v = D_real)
+pval = sum(Dummy_dsums$Dummy_dsum > D_real)/nsims
+
+trait1 = overlaplonger$trait1[1]
+trait2 = overlaplonger$trait2[1]
+
+pdf(paste("simmap overlap Real Dummy multiState Proportions Boxplot -", trait1, trait2, nsims, "sims.pdf"))
+ggplot(overlaplonger, aes(x = state, y = proportion, fill = Which)) +
+  geom_boxplot(outlier.shape = NA) + # Exclude outliers
+  theme_minimal() +
+  labs(y = "Observed State Proportion", x = "", fill = "Simulation Data") +
+  scale_fill_manual(values = c("Real" = "blue", "Dummy" = "red")) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ggtitle(paste(trait1, trait2, "p =", pval))
+dev.off()
+
+}
