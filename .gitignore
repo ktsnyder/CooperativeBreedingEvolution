@@ -1,6 +1,13 @@
 # Ignore OutputFiles
 OutputFiles
-
+Simmap*Overlap*Outputs/
+BayesTraitsDiscreteML_MeanCoopTie2Coop-FemaleSong_Agg01*Jackknife*Outputs/
+BayesTraitsDiscreteML_MeanCoopTie2Noncoop-FemaleSong_Agg01*Jackknife*Outputs/
+BayesTraitsDiscreteML_MeanCoopTie2Noncoop-FemaleSong_Agg01*SingleFamily*Outputs/
+BrownieJackknifeOutputs/
+Misc*Song*Features*BayesTraits/
+Simmap*Overlap*Multistate/
+Misc*Tree*Plots/
 
 # Ignore Mac system files
 .DS_Store
