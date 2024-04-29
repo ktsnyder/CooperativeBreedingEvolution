@@ -145,9 +145,11 @@ ggsave("transition plots sociality Coop_onepage_median_percentStates_weightsNumT
 
 
 ## make tables of simmap overlap AND make state boxplots and transition plots
-socTraits = c("Griesser2023.Asocial0vsSocial1", "Griesser2023.GroupsLargerThanPair", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2023.LongSocialBonds", "Griesser2017FamilialLiving", "Griesser2023.Colonial01", "Final.polygyny", "Griesser2023.MoreThanTwoCaretakers", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop", "MeanCoopTie2Noncoop") # , "Griesser2023.TwoOrMoreCaretakers" - removed because too few species in lower group
+source("transition_plot.R")
+socTraits = c("Griesser2023.Asocial0vsSocial1", "Griesser2023.GroupsLargerThanPair", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2023.LongSocialBonds", "Griesser2017FamilialLiving", "Griesser2023.Colonial01", "Final.polygyny", "Griesser2023.MoreThanTwoCaretakers", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop", "MeanCoopTie2Noncoop", "AnyNoncoopEqualsNoncoop", "HighConfidence_Coop") # , "Griesser2023.TwoOrMoreCaretakers" - removed because too few species in lower group
 # transition plots not in main text: socTraits = c("Griesser2023.Asocial0vsSocial1", "Griesser2023.GroupsLargerThanPair", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2023.Colonial01", "Final.polygyny", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop")
-otherTraits = c("FemaleSong_Agg01","MeanCoopTie2Noncoop")
+socTraits = c("HighConfidence_Coop", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop", "AnyNoncoopEqualsNoncoop", "MeanCoopTie2Noncoop", "Griesser2017Coop", "CornwallisCoop", "CockburnCoop", "JetzCoop", "DaleCoop", "DowningCoop", "BiagoliniCoop")
+otherTraits = c("FemaleSong_Agg01")
 
 outlist = list()
 boxplotlist = list()
@@ -186,6 +188,7 @@ for (i in 1:length(socTraits)) {
     next
   }
   
+  nsims = length(dfDummy1[,1])
   calcHuelout = calcHuel(dfout = dfout1, dfDummy = dfDummy1)
   outlist[[length(outlist)+1]] <- calcHuelout
   boxplotlist[[length(boxplotlist)+1]] <- calcHuelout$p3
@@ -242,12 +245,23 @@ for (i in 1:length(socTraits)) {
   colnames(tempdfDep)[which(colnames(tempdfDep) == "Coop1to0inFS1DifferenceFromExpected")] <- "q42"
   colnames(tempdfDep)[which(colnames(tempdfDep) == "FS1to0inCoop1DifferenceFromExpected")] <- "q43"
   
+  meanObservedRateCounts = sapply(tempdfDep[,colnames(tempdfDep)[18:25]], mean) # added 4/26/2024
+  meanExpectedRateCounts = sapply(tempdfDep[,paste0(colnames(tempdfDep)[18:25],"Expected")], mean)
+  meanRateCounts = cbind(names(meanObservedRateCounts), meanObservedRateCounts, meanExpectedRateCounts)
+  colnames(meanRateCounts) = c("Transitions", "meanObservedRateCounts", "meanExpectedRateCounts")
+  meanRateCounts = as.data.frame(meanRateCounts)
+  ratePvals = merge(ratePvals, meanRateCounts)
+  
+  
   if (trait2 == "MeanCoopTie2Noncoop") {
     labx0 = paste("Non-Cooperative")
     labx1 = paste("Cooperative")
   } else if (trait2 == "FemaleSong_Agg01") {
     labx0 = paste("Female Song Absent")
     labx1 = paste("Female Song Present")
+  } else if (trait2 == "HighConfidence_Coop") {
+    labx0 = paste("Non-Cooperative")
+    labx1 = paste("Cooperative")
   }
   
   if (trait1 == "Final.polygyny") {
@@ -290,6 +304,7 @@ for (i in 1:length(socTraits)) {
 
   print("ratePvals:")
   print(ratePvals)
+  write.csv(ratePvals, paste0("simmap overlap counts output - ratePvals - ", trait1, trait2, nsims, ".csv"), row.names = F) # added 4/26/2024
   
   trait1StateLabels = c(lab0x, lab1x)
   trait2StateLabels = c(labx0, labx1)
@@ -298,7 +313,7 @@ for (i in 1:length(socTraits)) {
   transplotlist[[length(transplotlist) + 1]] = transplotout$transitionplot_GrayNS
   }
 }
-#write.csv(outdf, file = "simmap overlap summary table_StateCompare. .csv", row.names = FALSE)
+#write.csv(outdf, file = "AllCoops simmap overlap summary table_StateCompare. .csv", row.names = FALSE)
 nplotrows = ceiling(length(boxplotlist)/2)
 single_page_plotBox <- grid.arrange(grobs = boxplotlist, ncol = 2, nrow = nplotrows)
 ggsave("simmap overlap all boxplots_onepage_500dummySims_testFactorLabs.pdf", single_page_plotBox, width = 14, height = 56, units = "in", limitsize = FALSE)
@@ -323,12 +338,32 @@ ggsave("simmap overlap all boxplots-transitionplots_onepage_500dummySims_testFac
 #### multistate ----
 multistateTraits = c("social_system_incl_nk_coop_Griesser2017", "social_system_Griesser2017", "grouping")
 df =  read.csv("2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv")
+df$Griesser2017SocialSystem_w_Tie2Noncoop_KinNK = df$social_system_incl_nk_coop_Griesser2017
+df$Griesser2017SocialSystem_w_Tie2Noncoop_KinNK[which(is.na(df$Griesser2017SocialSystem_w_Tie2Noncoop_KinNK) & df$MeanCoopTie2Noncoop == 1 & df$Kin_NK == "Kin")] = "coop_families"
+df$Griesser2017SocialSystem_w_Tie2Noncoop_KinNK[which(is.na(df$Griesser2017SocialSystem_w_Tie2Noncoop_KinNK) & df$MeanCoopTie2Noncoop == 1 & df$Kin_NK == "NonKin")] = "nk-coop"
+df$Griesser2017SocialSystem_w_Tie2Noncoop_KinNK[which(df$species %in% c("Prunella_modularis", "Parus_caeruleus"))] = NA # two species with contradicting Griesser 2017 data
+# make species counts of these coop/fam classifications
+SocCounts= df %>% group_by(social_system_incl_nk_coop_Griesser2017, social_system_Griesser2017, Griesser2017SocialSystem_w_Tie2Noncoop_KinNK, Griesser2017FamilialLiving, FemaleSong_Agg01) %>% count
+write.csv(SocCounts, file = "Intersecting species counts - FemaleSong and Griesser multistates CoopFam.csv", row.names = FALSE)
+
+df$Griesser2017SocialSystem_w_Tie2Coop_KinNK = df$social_system_incl_nk_coop_Griesser2017
+df$Griesser2017SocialSystem_w_Tie2Coop_KinNK[which(is.na(df$Griesser2017SocialSystem_w_Tie2Coop_KinNK) & df$MeanCoopTie2Coop == 1 & df$Kin_NK == "Kin")] = "coop_families"
+df$Griesser2017SocialSystem_w_Tie2Coop_KinNK[which(is.na(df$Griesser2017SocialSystem_w_Tie2Coop_KinNK) & df$MeanCoopTie2Coop == 1 & df$Kin_NK == "NonKin")] = "nk-coop"
+df$Griesser2017SocialSystem_w_Tie2Coop_KinNK[which(df$species %in% c("Prunella_modularis", "Parus_caeruleus"))] = NA # two species with contradicting Griesser 2017 data
+
+df$social_system_incl_nk_coop_Griesser2017_noBlTiAlpAcc = df$social_system_incl_nk_coop_Griesser2017
+df$social_system_incl_nk_coop_Griesser2017_noBlTiAlpAcc[which(df$species %in% c("Prunella_modularis", "Parus_caeruleus"))] = NA # two species with contradicting Griesser 2017 data
+multistateTraits = "social_system_incl_nk_coop_Griesser2017_noBlTiAlpAcc"
+
+multistateTraits = "Griesser2017SocialSystem_w_Tie2Noncoop_KinNK"
+multistateTraits = "Griesser2017SocialSystem_w_Tie2Coop_KinNK"
+multistateTraits = "grouping"
 treefile = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
-nsims = 100
+nsims = 500
 
 for (i in 1:length(multistateTraits)) {
-  multistateTrait = multistateTraits[i]
-  othertrait = "FemaleSong_Agg01"
+  trait1 = multistateTrait = multistateTraits[i]
+  trait2 = othertrait = "MeanCoopTie2Noncoop" #"FemaleSong_Agg01"
   columns = c(multistateTrait, othertrait)
   subsetout = subsettreedata(columns = multistateTrait, newdata = df, newtree = treefile)
   subsetDisctree = subsetout$subsettree
@@ -499,8 +534,11 @@ for (i in 1:length(files)) {
   ggsave(pdfname, single_page_plotBox, width = 8, height = 12, units = "in", limitsize = FALSE)
 }
 
+overlapdf = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Simmap Overlap Outputs/simmap overlap social_system_incl_nk_coop_Griesser2017 FemaleSong_Agg01 500sims.csv")
+calcHuelout = calcHuelflex(overlapdf)
+#
 
-calcHuelflex = function(overlapdf) {
+calcHuelflex = function(overlapdf) { # currently not good bc it requires
   require(dplyr)
 overlapdf$X=NULL
 colnames(overlapdf)

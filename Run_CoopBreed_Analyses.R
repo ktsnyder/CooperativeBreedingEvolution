@@ -28,13 +28,13 @@ columns = c("FemaleSong_Agg01", CBcolumn)
 
 
 ### Add Griesser social_system columns to R-ready df - done 1/8/2024
-data = read.csv("2023-11-17_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv")
-fulldata = read.csv("2023-10-26_Aggregate_CBSource_Data_AllColumns.csv")
-griessercols = fulldata[,c("BirdtreeSpecies", "social_system",	"social_system_incl_nk_coop",	"social_system_assessment")]
-colnames(griessercols)[2:4] = paste0(colnames(griessercols)[2:4], "_Griesser2017")
-newdata = merge(data, griessercols, by.x="species", by.y = "BirdtreeSpecies", all.x = T, all.y = F)
-newdata %>% group_by(social_system_incl_nk_coop_Griesser2017) %>% count
-write.csv(newdata,"2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv", row.names = FALSE)
+# data = read.csv("2023-11-17_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv")
+# fulldata = read.csv("2023-10-26_Aggregate_CBSource_Data_AllColumns.csv")
+# griessercols = fulldata[,c("BirdtreeSpecies", "social_system",	"social_system_incl_nk_coop",	"social_system_assessment")]
+# colnames(griessercols)[2:4] = paste0(colnames(griessercols)[2:4], "_Griesser2017")
+# newdata = merge(data, griessercols, by.x="species", by.y = "BirdtreeSpecies", all.x = T, all.y = F)
+# newdata %>% group_by(social_system_incl_nk_coop_Griesser2017) %>% count
+# write.csv(newdata,"2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv", row.names = FALSE)
 
 
 # test ER/ARD brownie
@@ -58,8 +58,8 @@ songfeatures <- c("Syllable.rep.final", "Syllable.rep.max", "Syllable.rep.min", 
 CBcolumn = "Griesser2017FamilialLiving"
 discreteCatLabels = c("Nonfamilial", "Familial")
 
-CBcolumns = c("Griesser2017KinCoop", "Griesser2023.Colonial01", "Griesser2023.GroupsLargerThanPair", "Griesser2023.LongSocialBonds", "Griesser2023.MoreThanTwoCaretakers")
-discLabelList = list(c("Non-Kin Coop", "Kin Coop"), c("Non-Colonial", "Colonial"), c("Groups Pair or Smaller", "Groups Larger than Pair"), c("Short Social Bonds", "Long Social Bonds"), c("Two or fewer caretakers", "More than two caretakers"))
+CBcolumns = c("Griesser2017KinCoop", "Griesser2023.Colonial01", "Griesser2023.GroupsLargerThanPair", "Griesser2023.LongSocialBonds", "Griesser2023.MoreThanTwoCaretakers", "Griesser2017FamilialLiving")
+discLabelList = list(c("Non-Kin Coop", "Kin Coop"), c("Non-Colonial", "Colonial"), c("Groups Pair or Smaller", "Groups Larger than Pair"), c("Short Social Bonds", "Long Social Bonds"), c("Two or fewer caretakers", "More than two caretakers"), c("Nonfamilial", "Familial"))
 
 #discreteCatLabels = c("Female Song Absent", "Female Song Present")
 #discreteCatLabels = c("Noncooperative", "Cooperative")
@@ -68,14 +68,14 @@ nsim = 500
 for (p in 1:length(CBcolumns)) {
   CBcolumn = CBcolumns[p]
   discreteCatLabels = discLabelList[[p]]
-for (k in c(7)) {
+for (k in c(1)) {
   print(Sys.time())
   newdata = newdata
   treefile = treefile
   currentlabel <- currentlabel
   feature <- songfeatures[k]
   print(feature)
-  browniefunction(columns = c(CBcolumn, feature), newdata = newdata, newtree = treefile, nsim = nsim, islog = feature, plotsimmaps = TRUE, otherlabel = currentlabel)
+  browniefunction(columns = c(CBcolumn, feature), newdata = newdata, newtree = treefile, nsim = nsim, islog = feature, plotsimmaps = FALSE, otherlabel = currentlabel)
   
   if (file.exists(paste0("OutputFiles/",Sys.Date(),CBcolumn,feature, currentlabel, "_brownie",nsim,"sim.csv"))) {
     print("file exists")

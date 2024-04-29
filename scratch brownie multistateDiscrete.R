@@ -3,6 +3,7 @@
 # Building function in 2nd section - status: update plot to allow nGroups != 4
 
 newdata = "2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv"
+newdata = "/Users/kate/Desktop/CooperativeBreedingEvolution/2024-02-24_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
 treefile = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
 
 df = read.csv(newdata)
@@ -60,9 +61,6 @@ rate_matrix
 # get rates from make.simmap
 simmapARD = make.simmap(subsettree,discretetraitvec, nsim = 1, model = "ARD")
 ARDoscineQ = simmapARD$Q
-
-
-
 
 
 ## use the above ARDoscineQ rates to make simmaps on subset 
@@ -163,10 +161,13 @@ title(xlab=paste0("Rate of evolution of ", "log Song rep"),line = 2.5, cex.lab =
 
 #### Griesser 2017 social_system (coop x fam) ----
 #### Now being reworked for flex/functionality
-df =  read.csv("2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv")
+#df =  read.csv("2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv")
+df = read.csv("2024-02-24_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv")
 treefile = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
 DiscreteTrait = "social_system_incl_nk_coop_Griesser2017"
+DiscreteTrait = "grouping"
 ContinuousTrait = "Song.rep.final"
+ContinuousTrait = "Syllable.rep.final"
 nsim = 500
 plotsimmaps = TRUE
 unique(df$social_system_incl_nk_coop_Griesser2017)
@@ -377,6 +378,13 @@ pdfname = paste0(DiscreteTrait, " ", ContinuousTrait, " multistate aceARD Browni
 
 write.csv(browniedata, csvname, row.names = FALSE)
 
+browniedata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/MultistateBrownie/2024-01-08 social_system_incl_nk_coop_Griesser2017 Song.rep.final multistate aceARD Brownie 500 sims.csv")
+browniedata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/MultistateBrownie/2024-01-09 grouping Song.rep.final multistate aceARD Brownie 500 sims.csv")
+browniedata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/2024-04-02 social_system_incl_nk_coop_Griesser2017 Syllable.rep.final multistate aceARD Brownie 500 sims.csv")
+browniedata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/2024-04-02 grouping_Griesser2023 Syllable.rep.final multistate aceARD Brownie 500 sims.csv")
+sum(browniedata$Pval < 0.05)/500
+
+# make rate distribution plots
 for (ARDcolumn in 1:length(ARDRateColNames)) {
   assign(x = paste0("D",ARDcolumn-1), value = density(browniedata[,ARDRateColNames[ARDcolumn]]))
 }

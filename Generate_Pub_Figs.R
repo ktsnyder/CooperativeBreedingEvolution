@@ -23,9 +23,14 @@ setwd("/Users/kate/Desktop/CooperativeBreedingEvolution/")
 #df[,c("Griesser2023.TwoOrMoreCaretakers", "Griesser2023.Asocial0vsSocial1", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds")] <- sapply(df[,c("Griesser2023.TwoOrMoreCaretakers", "Griesser2023.Asocial0vsSocial1", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds")], FUN = as.integer)
 #write.csv(df, file = "2023-11-17_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv", row.names = F)
 #newdata = "2023-11-17_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv"
-newdata = "/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv"
+#newdata = "/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv"
+newdata = "2024-02-24_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
 treefile = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
-
+subsetout =subsettreedata(newdata = newdata, newtree = treefile)
+subsetdf= subsetout$subsetdf
+subsetdf$AnyNoncoopEqualsNoncoop = subsetdf$MeanCoopTie2Noncoop
+subsetdf$AnyNoncoopEqualsNoncoop[which(subsetdf$SourceDiscrepancy == 1)] = 0
+subsetdf %>% group_by(AnyNoncoopEqualsNoncoop) %>% count
 
 #### Brownie ---- 
 # Brownie - Cooperative Breeding and all song features, with song repertoire min/max
@@ -33,8 +38,8 @@ source("subsettreedata.R")
 source("browniefunction.R")
 source("plotbrownie.R")
 
-songfeatures <- c("Song.rep.min", "Song.rep.max", "Song.rep.final", "Syllable.rep.final", "Syll.song.final", "Duration.final", "Interval.final")
-CBcolumn <- "MeanCoopTie2Noncoop"
+songfeatures <- c("Song.rep.final", "Syllable.rep.final", "Syll.song.final", "Duration.final", "Interval.final", "Song.rep.min", "Song.rep.max")
+CBcolumn <- "HighConfidence_Coop"
 discreteCatLabels = c("Non-cooperative", "Cooperative")
 nsim = 500
 currentlabel <- "HackettOscine"
@@ -59,9 +64,13 @@ for (k in 1:length(songfeatures)) {
 
 
 # Brownie - All other cooperative breeding classification methods with Song repertoire
-CBcolumns <- c("MeanCoopTie2Coop", "AnyCoopEqualsCoop", "MeanCoopOmitTies")
+dfIn = read.csv(newdata)
+dfIn$AnyNoncoopEqualsNoncoop = dfIn$MeanCoopTie2Noncoop
+dfIn$AnyNoncoopEqualsNoncoop[which(dfIn$SourceDiscrepancy == 1)] = 0
+newdata = dfIn
+CBcolumns <- c("MeanCoopTie2Noncoop","MeanCoopTie2Coop", "AnyCoopEqualsCoop", "AnyNoncoopEqualsNoncoop", "MeanCoopOmitTies")
 discreteCatLabels = c("Non-cooperative", "Cooperative")
-feature <- "Song.rep.final"
+feature <- "Syll.song.final"
 nsim = 500
 currentlabel <- "HackettOscine"
 
@@ -128,13 +137,22 @@ for (i in 5:length(SocialColumns)) {
 }
 
 # phylANOVA for multi-group traits - Table
-multigrouptraits = c("grouping", "social_bonds", "Griesser2023.Colonial01" , "Griesser2023.MoreThanTwoCaretakers" ,"Griesser2023.LongSocialBonds","Griesser2023.GroupsLargerThanPair", "Griesser2023.TwoOrMoreCaretakers", "Griesser2023.Asocial0vsSocial1", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2017FamilialLiving", "MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop")
-songtraits = c("Song.rep.final","Syllable.rep.final", "Syll.song.final", "Duration.final", "Interval.final")
+#multigrouptraits = c("grouping", "social_bonds", "Griesser2023.Colonial01" , "Griesser2023.MoreThanTwoCaretakers" ,"Griesser2023.LongSocialBonds","Griesser2023.GroupsLargerThanPair", "Griesser2023.TwoOrMoreCaretakers", "Griesser2023.Asocial0vsSocial1", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2017FamilialLiving", "MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop")
+multigrouptraits = c("HighConfidence_Coop","MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop")
+#songtraits = c("Song.rep.final","Syllable.rep.final", "Syll.song.final", "Duration.final", "Interval.final")
+songtraits = c("Song.rep.max", "Song.rep.min","Syllable.rep.max", "Syllable.rep.min", "Song.rep.final","Syllable.rep.final")
+multigrouptraits = c("HighConfidence_Coop","HighConfidence_Coop", "HighConfidence_Coop", "HighConfidence_Coop", "AnyNoncoopEqualsNoncoop", "AnyNoncoopEqualsNoncoop")
+newdata = "2024-02-24_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
+dfIn = read.csv(newdata)
+dfIn$AnyNoncoopEqualsNoncoop = dfIn$MeanCoopTie2Noncoop
+dfIn$AnyNoncoopEqualsNoncoop[which(dfIn$SourceDiscrepancy == 1)] = 0
+newdata = dfIn
+
 phynovaDF = set.seed(10)
 for (j in 1:length(songtraits)) {
   songtrait = songtraits[j]
-for (i in 1:length(multigrouptraits)) {
-tempgrouptrait = multigrouptraits[i]
+for (i in 1) { #:length(multigrouptraits)) {
+tempgrouptrait = multigrouptraits[j]
 subsets = subsettreedata(columns = c(tempgrouptrait, songtrait), newdata = newdata, newtree = treefile)
 subsetdf = subsets$subsetdf
 discvec = subsetdf[,tempgrouptrait]
@@ -145,7 +163,7 @@ names(contvec) = subsetdf$species
 subsettree = subsets$subsettree
 Nspecies = length(subsettree$tip.label)
 Ngroups = length(unique(discvec))
-phylANOVAout= phylANOVA(subsettree, x = discvec, y = contvec, nsim = 50000, posthoc = TRUE)
+phylANOVAout= phylANOVA(subsettree, x = discvec, y = contvec, nsim = 20000, posthoc = TRUE)
 phylANOVAp=phylANOVAout$Pf
 temprow = c(tempgrouptrait, Ngroups, songtrait, Nspecies, phylANOVAp)
 phynovaDF = rbind(phynovaDF, temprow)
@@ -155,11 +173,13 @@ print(paste(tempgrouptrait, songtrait))
 print(phylANOVAout)
 }
 }
-write.csv(phynovaDF, file = "phylANOVA outputs FinalSongs_Sociality w Coops.csv", row.names = F)
+write.csv(phynovaDF, file = paste(Sys.Date(), "phylANOVA outputs Songs_Coops(partial).csv"), row.names = F)
+
 
 #### Simmap Overlap CoopBreed/FS ----
-dfout4 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Agg01"), df = newdata, tree =  treefile, dummy = FALSE, nsims = 1000, treelabel = "HackettOscine", datalabel = NULL)
-dfDummy4 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Agg01"), df = newdata, tree =  treefile, dummy = TRUE, nsims = 2500, treelabel = "HackettOscine", datalabel = NULL, dummyMethod = "makeSimmap")
+source("test_trait_overlap_simmaps.R")
+dfout4 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Agg01"), df = newdata, tree =  treefile, dummy = FALSE, nsims = 100, treelabel = "HackettOscine", datalabel = NULL)
+dfDummy4 <- CharacterSimmaps(columns = c("MeanCoopTie2Noncoop","FemaleSong_Agg01"), df = newdata, tree =  treefile, dummy = TRUE, nsims = 200, treelabel = "HackettOscine", datalabel = NULL, dummyMethod = "makeSimmap")
 calcHuel(dfout4, dfDummy4)
 
 dfout4 = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Simmap Overlap Outputs/ MeanCoopTie2Noncoop FemaleSong_Agg01 REAL simmap overlap_counts output nsim 1000 HackettOscine .csv")
@@ -170,16 +190,33 @@ tempdfGather = tempdfSub %>% gather("Rate", "RateValue", c(q12:q43, q12.1:q43.1)
 
 #### Simmap Overlap Sociality metrics ----
 
-socialityMetrics = c("Griesser2023.Asocial0vsSocial1", "Griesser2023.GroupsLargerThanPair", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2023.LongSocialBonds", "Griesser2017FamilialLiving", "Griesser2023.Colonial01", "Final.polygyny", "Griesser2023.TwoOrMoreCaretakers", "Griesser2023.MoreThanTwoCaretakers", "MeanCoopTie2Noncoop", "MeanCoopTie2Coop")
+dfIn = read.csv(newdata)
+dfIn$NonkinNoncoop0_FamAndOrCoop1 = NA
+dfIn$NonkinNoncoop0_FamAndOrCoop1[dfIn$social_system_incl_nk_coop_Griesser2017 == "no_fam"] <- 0
+dfIn$NonkinNoncoop0_FamAndOrCoop1[dfIn$social_system_incl_nk_coop_Griesser2017 %in% c("coop_families", "family", "nk-coop")] = 1
+
+unique(dfIn$grouping)
+dfIn$AsocPairLarge0_SmallGroup1 = NA
+dfIn$AsocPairLarge0_SmallGroup1[which(dfIn$grouping %in% c("asocial","pair","large_groups"))] = 0
+dfIn$AsocPairLarge0_SmallGroup1[which(dfIn$grouping == "small_groups")] = 1
+dfIn$AsocSmallLarge0_Pair1 = NA
+dfIn$AsocSmallLarge0_Pair1[which(dfIn$grouping %in% c("asocial","small_groups","large_groups"))] = 0
+dfIn$AsocSmallLarge0_Pair1[which(dfIn$grouping == "pair")] = 1
+newdata = dfIn
+sum(!is.na(dfIn$AsocPairLarge0_SmallGroup1))
+sum(!is.na(dfIn$AsocSmallLarge0_Pair1))
+
+socialityMetrics = c("Griesser2023.Asocial0vsSocial1", "Griesser2023.GroupsLargerThanPair", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2023.LongSocialBonds", "Griesser2017FamilialLiving", "Griesser2023.Colonial01", "Final.polygyny", "Griesser2023.TwoOrMoreCaretakers", "Griesser2023.MoreThanTwoCaretakers")#, "MeanCoopTie2Noncoop", "MeanCoopTie2Coop")
 socialityMetrics = c("MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop")
+socialityMetrics = c("NonkinNoncoop0_FamAndOrCoop1", "AsocPairLarge0_SmallGroup1", "AsocSmallLarge0_Pair1")
 treelabel = "HackettOscine"
-nsims_real = 1000
-nsims_dummy = 1000
+nsims_real = 500
+nsims_dummy = 500
 
 source("test_trait_overlap_simmaps.R")
 socialityPlots = list()
 socialityStats = list()
-for (i in 1: length(socialityMetrics)) {
+for (i in 3: length(socialityMetrics)) {
   tempMetric = socialityMetrics[i]
   print(i)
   print(tempMetric)
@@ -189,7 +226,7 @@ dfDummy4 <- CharacterSimmaps(columns = c(tempMetric,"FemaleSong_Agg01"), df = ne
 calcHuelout = calcHuel(dfout4, dfDummy4)
 require(gridExtra)
 plotname = paste0("Simmap Overlap Outputs/",tempMetric, " FemaleSong_Agg01 ", nsims_real, " ", nsims_dummy, " ", treelabel, " withTransCounts.pdf")
-nPlots = length(calcHuelout)-2
+nPlots = length(calcHuelout)-5
 m3 <- marrangeGrob(calcHuelout, ncol = 1, nrow = nPlots)
 ggsave(plotname, m3, width = 7.5, height = 3.8*nPlots, units = "in")
 #socialityPlots[[i]] <- calcHuelout
@@ -221,10 +258,39 @@ for (i in 1:length(socialityMetrics)) {
   calcHuelout = calcHuel(dfout = tempdfDep, dfDummy = tempdfInd, otherlabel = "ExpObsCompare")
   require(gridExtra)
   plotname = paste0("Simmap Overlap Outputs/",tempMetric, " FemaleSong_Agg01 ", nsims_real, " ", nsims_dummy, " ", treelabel, " withTransCounts-ExpObsCompare.pdf")
-  nPlots = length(calcHuelout)-2
+  nPlots = length(calcHuelout)-4
+  print(calcHuelout$mediansRow)
   m3 <- marrangeGrob(calcHuelout[1:nPlots], ncol = 1, nrow = nPlots) # nrow can be nPlots if no "filename" or "TransitionStats" in calcHuelout
-  ggsave(plotname, m3, width = 7.5, height = 3.8*nPlots, units = "in")
+  ggsave(plotname, m3, width = 7.5, height = 4.2*nPlots, units = "in")
 }
+
+
+# use previously-generated data to make specific panels for figure (boxplots simmap overlap - HighConf Coop and Fem Song)
+DepFile = "Simmap Overlap Outputs/ HighConfidence_Coop FemaleSong_Agg01 REAL simmap overlap_counts output nsim 500 HackettOscine .csv"
+IndFile = "Simmap Overlap Outputs/ HighConfidence_Coop FemaleSong_Agg01 DUMMYResampledMkSimmap-CoopFS simmap overlap_counts output nsim 500 HackettOscine .csv"
+tempdfDep = read.csv(DepFile)
+tempdfInd = read.csv(IndFile)
+calcHuelout = calcHuel(dfout = tempdfDep, dfDummy = tempdfInd)
+filename1 = "simmap overlap HighConfidence_Coop FemaleSong_Agg01 ObservedStates boxplot.pdf"
+calcHuelout$p3
+#ggsave(filename1, calcHuelout$p3, width = 6, height = 5, units = "in", device = "pdf")
+
+DepFile = "Simmap Overlap Outputs/ Griesser2017FamilialLiving FemaleSong_Agg01 REAL simmap overlap_counts output nsim 500 HackettOscine .csv"
+IndFile = "Simmap Overlap Outputs/ Griesser2017FamilialLiving FemaleSong_Agg01 DUMMYResampledMkSimmap-CoopFS simmap overlap_counts output nsim 500 HackettOscine .csv"
+tempdfDep = read.csv(DepFile)
+tempdfInd = read.csv(IndFile)
+calcHuelout = calcHuel(dfout = tempdfDep, dfDummy = tempdfInd)
+filename2 = "simmap overlap Griesser2017FamilialLiving FemaleSong_Agg01 ObservedStates boxplot.pdf"
+#ggsave(filename2, calcHuelout$p3, width = 6, height = 5, units = "in", device = "pdf")
+
+# multistate 
+multiFile = "/Users/kate/Desktop/CooperativeBreedingEvolution/Simmap Overlap Multistate/Sim Output CSVs/simmap overlap social_system_incl_nk_coop_Griesser2017 FemaleSong_Agg01 1500 sims.csv"
+overlapdf = read.csv(multiFile)
+calcHuelout3 = calcHuelflex(overlapdf) # from scratch simmap overlap processing
+calcHuelout3$boxplotStates
+filename3 = "simmap overlap social_system_incl_nk_coop_Griesser2017 FemaleSong_Agg01 ObservedStates boxplot.pdf"
+#ggsave(filename3, calcHuelout3$boxplotStates, width = 9, height = 5, units = "in", device = "pdf")
+
 
 # plot transition counts as if BayesTraits
 source("plotSimpleDiscreteBayes.R")
@@ -404,6 +470,9 @@ ggsave("transition plots sociality FS_onepage_median_percentStates_weightsNumTra
 # just Coop-FS plot
 ggsave("transition plot Tie2Noncoop FSAgg median_percentStates_weightsNumTransitions_labsPercentTrending_GrayNonsig.png", plotlistGray[[11]], width = 9, height = 5, units = "in", device = "png")
 
+# just Coop-FS plot
+ggsave("transition plot HighConf_Coop FSAgg median_percentStates_weightsNumTransitions_labsPercentTrending_GrayNonsig.pdf", plotlistGray[[1]], width = 9, height = 5, units = "in", device = "pdf")
+
 # just target 4 plots
 grobs_with_marginsGray4 <- lapply(plotlistGray[c(3,5,6,10)], function(plot) {
   plot_with_margin <- plot + 
@@ -415,7 +484,7 @@ ggsave("transition plots 4TargetSociality FS_median_percentStates_weightsNumTran
 
 
 
-#### Jackknife CoopBreed/FS ----
+#### Jackknife BayesTraits CoopBreed/FS ----
 
 # BayesTraits
 source("simplebtwDiscrete.R")
@@ -423,11 +492,13 @@ source(file = "subsettreedata.R")
 .BayesTraitsPath = "~/Documents/BayesTraitsV4.0.0-OSX/BayesTraitsV4"
 
 trait1 = "MeanCoopTie2Noncoop"
+trait1 = "HighConfidence_Coop"
 trait2 = "FemaleSong_Agg01"
 subset = subsettreedata(columns = c(trait1, trait2), newdata = newdata, newtree = treefile)
 subsetdf = subset$subsetdf
 subsettree = subset$subsettree
 familyvec = unique(subsetdf$Family3_BirdtreeMatchSpecies2)
+cladesubsetcolumn = "Family3_BirdtreeMatchSpecies2"
 familyvec = c("None", familyvec)
 
 for (i in 1:length(familyvec)) {
@@ -455,16 +526,16 @@ bayesbarplots = list()
 for (i in 1:length(filelist)) {
   tempfile = filelist[i]
   splitfile = str_split(tempfile, "_removed", simplify = F)
-  splitfile2 = str_split(splitfile[[1]][2], "MeanCoop")
+  splitfile2 = str_split(splitfile[[1]][2], "Coop")
   removedFam = splitfile2[[1]][1]
   splitfile3 = str_split(splitfile2[[1]][2], " ")
-  trait1 = paste0("MeanCoop", splitfile3[[1]][1])
+  trait1 = paste0("Coop", splitfile3[[1]][1])
   trait2 = splitfile3[[1]][2]
   nSims = str_remove(splitfile3[[1]][3], "sims.csv")
   tempdf = read.csv(tempfile)
   tempdf$CalcBFLh = 2*(tempdf$Lh - tempdf$Lh.1)
   tempdf$CalcBFModelLhs = 2*(tempdf$model1.Lh - tempdf$model2.Lh)
-  write.csv(tempdf, paste0("/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/BayesTraitsDiscrete/", Sys.Date(), "_2023-11-18BayesTraitsDiscrete_HackettOscine_removed", removedFam, "MeanCoopTie2Noncoop FemaleSong_Agg01 100sims_WithCalcBFs.csv"), row.names = FALSE)
+  write.csv(tempdf, paste0("/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/BayesTraitsDiscrete/", Sys.Date(), "_BayesTraitsDiscrete_HackettOscine_removed", removedFam, " Coop FemaleSong_Agg01 100sims.csv"), row.names = FALSE)
   
   tempdfSub = tempdf[which(tempdf$CalcBFLh > 2),]
   nSig = length(tempdfSub[,1])
@@ -496,11 +567,12 @@ write.csv(mediandf, paste("jackknifed BayesTraitsDiscrete MeanMedianResults SigO
 # Plot jackknife BayesTraitsDiscrete output rates as boxplots
 require(gridExtra)
 mBayes <- marrangeGrob(bayesbarplots, ncol = 2, nrow = 4)
-ggsave("jackknifed BayesTraitsDiscrete RateScatterBarplots MeanCoopTie2Noncoop FemaleSong_Agg01 HackettOscine.pdf", mBayes, width = 8, height = 10, units = "in")
+ggsave("jackknifed BayesTraitsDiscrete RateScatterBarplots Coop FemaleSong_Agg01 HackettOscine.pdf", mBayes, width = 8, height = 10, units = "in")
 
 
-# Simmap Overlap
+#### Jackknife Coop/FS Simmap Overlap ----
 trait1 = "MeanCoopTie2Noncoop"
+trait1 = "HighConfidence_Coop"
 trait2 = "FemaleSong_Agg01"
 columns = c(trait1, trait2)
 
@@ -508,8 +580,8 @@ subset1 <- subsettreedata(columns = columns, newdata = newdata, newtree = treefi
 subsettree1 <- subset1$subsettree
 subsetdf1 <- subset1$subsetdf
 
-familycounts = subsetdf1 %>% group_by(Family3_BirdtreeMatchSpecies2) %>% count
-familyvec = familycounts$Family3_BirdtreeMatchSpecies2[which(familycounts$n > 2)]
+familycounts = subsetdf1 %>% group_by(Family3_BirdtreeMatchSpecies2_AVONET) %>% count
+familyvec = familycounts$Family3_BirdtreeMatchSpecies2_AVONET[which(familycounts$n > 2)]
 familyvec = c("None", familyvec)
 
 nsims_real = 50
@@ -520,7 +592,7 @@ for (j in 1:length(familyvec)) {
   
   familyToRemove = familyvec[j]
   templabel = paste0(columns[1], " ", columns[2], " ", "removed",familyToRemove)
-  tempdfIn = subsetdf1[which(subsetdf1$Family3_BirdtreeMatchSpecies2 != familyToRemove),]
+  tempdfIn = subsetdf1[which(subsetdf1$Family3_BirdtreeMatchSpecies2_AVONET != familyToRemove),]
   
   subsetbtw <- subsettreedata(columns = columns, newdata = tempdfIn, newtree = subsettree1, skinnydata = TRUE)
   subsettree <- subsetbtw$subsettree
@@ -551,16 +623,30 @@ for (i in 1:54) {
   }
 }
 m1 <- marrangeGrob(plotlist2, ncol = 1, nrow = 3)
-ggsave("jackknifed Simmap Overlaps MeanCoopTie2Noncoop FemaleSong_Agg01 HackettOscine.pdf", m1, width = 8, height = 9, units = "in")
+ggsave(paste(Sys.Date(), "jackknifed Simmap Overlaps Coop FemaleSong_Agg01 HackettOscine.pdf"), m1, width = 8, height = 9, units = "in")
 
+
+
+#### Jackknife CoopBreed/Song features Brownie ----
+source("jackknifingbrownie.R")
+songfeatures = c("Song.rep.final", "Syllable.rep.final")
+
+for (i in 1:2) {
+  tempfeature = songfeatures[i]
+  print(tempfeature)
+  subset = subsettreedata(columns = c("HighConfidence_Coop", tempfeature), newtree = treefile, newdata = newdata)
+  familycounts = subset$subsetdf %>% group_by(Family3_BirdtreeMatchSpecies2_AVONET) %>% count
+  familysubset = familycounts$Family3_BirdtreeMatchSpecies2_AVONET[which(familycounts$n > 1)]
+jackbrowniefunction(columns = c("HighConfidence_Coop", tempfeature), islog = T, matemodel = "ARD", matensim = 100, allcsvs = T, plotsimmaps = F, newtree = treefile, newdata = newdata, cladesubsetcolumn = "Family3_BirdtreeMatchSpecies2_AVONET", otherlabel = "HackettOscine", cladeJackvalues = familysubset)
+}
 
 #### Generate Counts Table ----
 
 dfIn = read.csv(newdata)
 OscineSubset = subsettreedata(newdata = dfIn, newtree = treefile)
 df = OscineSubset$subsetdf
-columnsToSummarize = c("Griesser2023.Colonial01", "Griesser2023.Asocial0vsSocial1", "Griesser2023.GroupsLargerThanPair", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2023.LongSocialBonds", "Griesser2023.MoreThanTwoCaretakers", "Griesser2023.TwoOrMoreCaretakers", "Griesser2017FamilialLiving", "Final.polygyny", "MeanCoopTie2Noncoop") 
-otheraxiscolumns = c("FemaleSong_Agg01", "MeanCoopTie2Noncoop")
+columnsToSummarize = c("Griesser2023.Colonial01", "Griesser2023.Asocial0VsSocial1", "Griesser2023.GroupsLargerThanPair", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2023.LongSocialBonds", "Griesser2023.MoreThanTwoCaretakers", "Griesser2023.TwoOrMoreCaretakers", "Griesser2017FamilialLiving", "Final.polygyny", "MeanCoopTie2Noncoop") 
+otheraxiscolumns = c("FemaleSong_Agg01", "HighConfidence_Coop") # "MeanCoopTie2Noncoop")
 
 fulltable = c(0,1)
 for (i in 1:length(columnsToSummarize)) {
@@ -592,4 +678,32 @@ tablesegment = rbind(tablesegment, wide_df)
 }
 fulltable = fulltable[,which(colnames(fulltable) != "fulltable")]
 fulltable
-#write.csv(fulltable, "SuppTable_binary traits state intersections NumSpecies.csv", row.names = T)
+#write.csv(fulltable, "SuppTable_binary traits state intersections NumSpecies - HighConfidence_Coop.csv", row.names = T)
+
+
+# Multistate counts table
+dfIn = read.csv(newdata)
+OscineSubset = subsettreedata(columns = c("social_system_incl_nk_coop_Griesser2017", "FemaleSong_Agg01"), newdata = dfIn, newtree = treefile)
+df = OscineSubset$subsetdf
+MultistateCBxFS = df %>% group_by(social_system_incl_nk_coop_Griesser2017, FemaleSong_Agg01) %>% count
+write.csv(MultistateCBxFS, file = "SuppTable_multistate CB-Fam FSintersections NumSpecies.csv", row.names = FALSE)
+
+
+# male/female-biased helping
+bigdata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2023-10-26_Aggregate_CBSource_Data_AllColumns.csv")
+bigdataRiehl = bigdata[, c("BirdtreeSpecies", "Dispersal_Riehl", "Frequency", "O.F", "Kin", "Social_breeding_system_when_cooperative", "Category")]
+bigdataRiehl$HelperSexBias = NA
+bigdataRiehl$HelperSexBias[which(str_detect(bigdataRiehl$Social_breeding_system_when_cooperative, "female", negate = T) & str_detect(bigdataRiehl$Social_breeding_system_when_cooperative, "male", negate = T))] <- "NotSpecified"
+bigdataRiehl$HelperSexBias[which(str_detect(bigdataRiehl$Social_breeding_system_when_cooperative, "female", negate = T) & str_detect(bigdataRiehl$Social_breeding_system_when_cooperative, "male", negate = F))] <- "MaleOnly"
+bigdataRiehl$HelperSexBias[which(str_detect(bigdataRiehl$Social_breeding_system_when_cooperative, "female", negate = F) & str_detect(bigdataRiehl$Social_breeding_system_when_cooperative, " male", negate = F))] <- "BothMaleAndFemale"
+bigdataRiehl$HelperSexBias[which(str_detect(bigdataRiehl$Social_breeding_system_when_cooperative, "female", negate = F) & str_detect(bigdataRiehl$Social_breeding_system_when_cooperative, " males", negate = F))] <- "BothMaleAndFemale"
+bigdataRiehl$HelperSexBias[which(str_detect(bigdataRiehl$Social_breeding_system_when_cooperative, "female", negate = F) & str_detect(bigdataRiehl$Social_breeding_system_when_cooperative, " male", negate = T) & str_detect(bigdataRiehl$Social_breeding_system_when_cooperative, " males", negate = T))] <- "FemaleOnly"
+View(bigdataRiehl[which(!is.na(bigdataRiehl$Social_breeding_system_when_cooperative)),])
+
+df = read.csv(newdata)
+df2 = merge(df, bigdataRiehl, by.x = "species", by.y = "BirdtreeSpecies", all.x = T, suffixes = c("","_Riehl"))
+df2 %>% group_by(FemaleSong_Agg01, HelperSexBias) %>% count
+
+df = read.csv(newdata)
+length(which(df$SourceDiscrepancy == 1 & !is.na(df$FemaleSong_Agg01)))
+

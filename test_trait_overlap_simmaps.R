@@ -375,6 +375,8 @@ if (newplot == TRUE) {
   
   
   # Create outputs for overall multi-comparison table
+  dfout <- dfout %>%
+    mutate(across(coopQ01:ObsProp1Present, as.numeric))
   medians = dfout %>% select(coopQ01:ObsProp1Present) %>% summarise_all(median, na.rm = TRUE)
   names(medians)[6:13] <- paste0(names(medians)[6:13],"_MedianReal")
   
@@ -385,6 +387,8 @@ if (newplot == TRUE) {
   
   
   mediansReal <- cbind(trait1, trait2, Nspecies, nsims_real, nsims_dummy, pval, medians)
+  dfDummy <- dfDummy %>%
+    mutate(across(coopQ01:ObsProp1Present, as.numeric))
   mediansDummy = dfDummy %>% select(propFSabsent:ObsProp1Present) %>% summarise_all(median, na.rm = TRUE) 
   names(mediansDummy) <- paste0(names(mediansDummy), "_MedianDummy")
   mediansRow = cbind(mediansReal, mediansDummy)
@@ -481,6 +485,9 @@ if (newplot == TRUE) {
       contrast <- emm$contrasts
       PairwisePostHoc = summary(contrast, adjust = "tukey")
       
+      
+      transitioncols = c("Coop0to1inFS0", "Coop1to0inFS0", "Coop0to1inFS1", "Coop1to0inFS1", "FS0to1inCoop0", "FS1to0inCoop0", "FS0to1inCoop1", "FS1to0inCoop1")  # added 2/3/2024... weren't these supposed to be made already? What happened here? Also ExpectedCols...
+      ExpectedCols = paste0(transitioncols, "Expected")
       # added 1/9/24
       timesActualGreaterThanExpected = dfout[,transitioncols] > dfout[,ExpectedCols]
       colnames(timesActualGreaterThanExpected) <- paste0(transitioncols)
@@ -572,6 +579,8 @@ getLabels <- function(trait) {
     return(c("Asocial, pair, or small groups", "Large groups"))
   } else if (str_detect(trait, "FemaleSong")) {
     return(c("Female Song Absent", "Female Song Present"))  
+  } else if (str_detect(trait, "HighConfidence_Coop")) {
+    return(c("Non-Cooperative", "Cooperative"))
   } else {
     return(c(paste(trait, "0"), paste(trait, "1")))  # Return NA if no condition matches
   }

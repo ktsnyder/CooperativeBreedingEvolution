@@ -160,9 +160,9 @@ transitionplot
 if (nonsigGray) {
   transitionplotGray <- ggplot() +
     # gray/non-significant arrows
-    geom_segment(data = subset(transitions2, p.value >= 0.05), aes(x = from_x, y = from_y, xend = to_x, yend = to_y, size = TransitionCountMedian), arrow = arrow(type = "closed", length = unit(0.01, "inches")), color = "gray", fill = "gray", linejoin = "mitre") +
+    geom_segment(data = subset(transitions2, p.value >= 0.05), aes(x = from_x, y = from_y, xend = to_x, yend = to_y, size = TransitionCountMedian), arrow = arrow(type = "closed", length = unit(0.01, "inches")), arrow.fill=NULL, color = "gray", fill = "gray", linejoin = "mitre") +
     # significant arrows
-    geom_segment(data = subset(transitions2, p.value < 0.05), aes(x = from_x, y = from_y, xend = to_x, yend = to_y, color = transition_medians, size = TransitionCountMedian), arrow = arrow(type = "closed", length = unit(0.01, "inches")), linejoin = "mitre") +
+    geom_segment(data = subset(transitions2, p.value < 0.05), aes(x = from_x, y = from_y, xend = to_x, yend = to_y, color = transition_medians, size = TransitionCountMedian), arrow = arrow(type = "closed", length = unit(0.01, "inches")), arrow.fill = NULL, linejoin = "mitre") +
     my_color_gradient +
     scale_size_continuous(range = c(4,9)) +
     labs(y = "Transition Counts", x = "", color = "Median Difference \nFrom Expected \nNumber of \nTransitions") +
@@ -186,8 +186,6 @@ if (nonsigGray) {
 } else {
   transitionplotGray = NULL
 }
-
-
 
 output = list(transition_df = transitions2, transition_plot = transitionplot, transitionplot_GrayNS = transitionplotGray)
 
