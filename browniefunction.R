@@ -13,6 +13,8 @@
 # 5/12/2020: matensim--> nsim, remove plot arg, added args
 # 8/18/2021: add arg plotsimmaps (TRUE/FALSE) to go into findQrates; add to tryCatch ability to accommadate compute error; changed default arg "cladesubsetcolumn = FALSE" to "= NULL"
 # 8/26/2021: added otherlabel arg - for csv output and to feed into findQrates
+# 4/26/2024: changed object returned from browniedf (no longer used) to browniedata
+# 4/27/2024: added findQrates outputs to browniedata columns
 # 
 # e.g.
 # brownieout <- browniefunction(c("Final.polygyny", "Syllable.rep.final"), islog = "Syllable.rep.final", nsim = 500)
@@ -24,7 +26,7 @@ browniefunction <- function(columns, newtree = FALSE, newdata = FALSE, cladesubs
 #  require(base)
   
   source(file = "findQrates.R")
- # source(file = "~/Desktop/PhyloBiology/subsettreedata.R")
+ 
   print("Beginning simmaps for brownie") 
   starttimebrownie <- Sys.time()
   
@@ -94,8 +96,8 @@ browniefunction <- function(columns, newtree = FALSE, newdata = FALSE, cladesubs
     browniedata[i,2] <- columns[2] #column name of Continuous trait
     browniedata[i,14] <- phylanovaP
     
-    if (i %in% c(20,100,160,200,400,600,800,1000,1200,1400)) {
-      write.csv(browniedata, file = paste(getwd(),"/OutputFiles/",Sys.Date(),columns[1], columns[2],otherlabel, "_brownie",nsim,"sim", cladesubsetvalue,".csv",sep="")) #cumulative brownie data results, saved during long process
+    if (i %in% c(50,100,160,200,400,600,800,1000,1200,1400)) {
+      write.csv(browniedata, file = paste(getwd(),"/OutputFiles/",Sys.Date(),columns[1], columns[2],otherlabel, "_brownie",nsim,"sim", cladesubsetvalue,".csv",sep=""), row.names = F) #cumulative brownie data results, saved during long process
       print(paste("Saved data - Loop", i))
     }
     if (i %in% seq(0,2000,by=50)) {
@@ -106,7 +108,15 @@ browniefunction <- function(columns, newtree = FALSE, newdata = FALSE, cladesubs
   print("End brownie loop")
   endtimebrownie <- Sys.time()
   looptime = endtimebrownie-starttimebrownie
-  write.csv(browniedata, file = paste(getwd(),"/OutputFiles/",Sys.Date(),columns[1], columns[2],otherlabel,"_brownie",nsim,"sim",cladesubsetvalue,".csv",sep=""))
   
-  return(browniedf[,1:14])
+  browniedata$ERsimmapQ = gsub("ERrates ", "", Qoutput$ERrates)
+  browniedata$ARDsimmapQ0to1 = gsub("ARDrates ", "", Qoutput$ARDrates[2])
+  browniedata$ARDsimmapQ1to0 = gsub("ARDrates ", "", Qoutput$ARDrates[1])
+  browniedata$ERsimmapQ.LogLik = Qoutput$anovaERARD$`Log lik.`[1]
+  browniedata$ARDsimmapQ.LogLik = Qoutput$anovaERARD$`Log lik.`[2]
+  browniedata$ARDvERsimmapQ.LRtestPval = Qoutput$anovaERARD$`Pr(>|Chi|)`[2]
+  
+  write.csv(browniedata, file = paste(getwd(),"/OutputFiles/",Sys.Date(),columns[1], columns[2],otherlabel,"_brownie",nsim,"sim",cladesubsetvalue,".csv",sep=""), row.names = F)
+  
+  return(browniedata)
 }
