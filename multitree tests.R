@@ -4,6 +4,7 @@
 
 require(phytools)
 
+setwd("/Users/kate/Desktop/CooperativeBreedingEvolution")
 source("subsettreedata.R")
 
 multitree = read.tree("/Users/kate/Library/CloudStorage/Box-Box/Kate_Nicole/Birdsong - Life History Evolution/BirdzillaHackett4_Stage2_1000trees.tre")
@@ -46,10 +47,12 @@ for (f in 1:length(trait1vec)) {
 } # end brownie cycle through traits
 
 
+
+
 #### Simmap overlap ----
 source("test_trait_overlap_simmaps.R")
 otherlabel = "_Hackett4Oscine_multitree"
-nTreesToSample = 200
+nTreesToSample = 100
 nSimsPerTree = 50
 trait1 = "HighConfidence_Coop"
 trait2 = "FemaleSong_Agg01"
@@ -61,19 +64,43 @@ multitrees = multitree[1:nTreesToSample]
 alldfout = set.seed(10)
 alldummy = set.seed(10)
 for (i in 1:nTreesToSample) {
-temptree = multitrees[[i]]
+  temptree = multitrees[[i]]
+  print(paste(Sys.time(), "tree #", i))
+  dfout4 <- CharacterSimmaps(columns = c(trait1,trait2), df = df, tree =  temptree, dummy = FALSE, nsims = nSimsPerTree, treelabel = otherlabel, datalabel = NULL)
+  dfDummy4 <- CharacterSimmaps(columns = c(trait1,trait2), df = df, tree =  temptree, dummy = TRUE, nsims = nSimsPerTree, treelabel = otherlabel, datalabel = NULL, dummyMethod = "makeSimmap")
+  colnames(dfout4)[which(colnames(dfout4) == "treenum")] <- "simmapNum"
+  dfout4$treenum = i
+  colnames(dfDummy4)[which(colnames(dfDummy4) == "treenum")] <- "simmapNum"
+  dfDummy4$treenum = i
+  
+  alldfout = rbind(alldfout, dfout4)
+  alldummy = rbind(alldummy, dfDummy4)
+  
+  if (i %in% c(2,25,50,75,100, 125, 150, 175)) {
+    write.csv(alldfout, paste0("Simmap Overlap Outputs/", trait1, " ", trait2, " ", nTreesToSample, "trees ", nSimsPerTree, "simsPerTree", otherlabel, "_All REAL.csv"), row.names = FALSE)
+    write.csv(alldummy, paste0("Simmap Overlap Outputs/", trait1, " ", trait2, " ", nTreesToSample, "trees ", nSimsPerTree, "simsPerTree", otherlabel, "_All DUMMY.csv"), row.names = FALSE)
+    print(paste("Wrote csvs at tree number", i, "--- Simmap Overlap Outputs/", trait1, " ", trait2, " ", nTreesToSample, "trees ", nSimsPerTree, "simsPerTree", otherlabel, "_All REAL.csv"))
 
-dfout4 <- CharacterSimmaps(columns = c(trait1,trait2), df = df, tree =  temptree, dummy = FALSE, nsims = nSimsPerTree, treelabel = otherlabel, datalabel = NULL)
-dfDummy4 <- CharacterSimmaps(columns = c(trait1,trait2), df = df, tree =  temptree, dummy = TRUE, nsims = nSimsPerTree, treelabel = otherlabel, datalabel = NULL, dummyMethod = "makeSimmap")
-colnames(dfout4)[which(colnames(dfout4) == "treenum")] <- "simmapNum"
-dfout4$treenum = i
-colnames(dfDummy4)[which(colnames(dfDummy4) == "treenum")] <- "simmapNum"
-dfDummy4$treenum = i
-
-alldfout = rbind(alldfout, dfout4)
-alldummy = rbind(alldummy, dfDummy4)
+  }
 }
 write.csv(alldfout, paste0("Simmap Overlap Outputs/", trait1, " ", trait2, " ", nTreesToSample, "trees ", nSimsPerTree, "simsPerTree", otherlabel, "_All REAL.csv"), row.names = FALSE)
 write.csv(alldummy, paste0("Simmap Overlap Outputs/", trait1, " ", trait2, " ", nTreesToSample, "trees ", nSimsPerTree, "simsPerTree", otherlabel, "_All DUMMY.csv"), row.names = FALSE)
 print(Sys.time())
-Huelout = calcHuel(alldfout, alldfdummy)
+Huelout = calcHuel(alldfout, alldummy)
+Huelout$p2
+
+
+
+
+#### Visualize different trees ----
+newdata = "2024-02-24_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
+df = read.csv(newdata)
+subsetdf = df[which(!is.na(df$FemaleSong_Agg01)),]
+
+tree1 = multitree[[1]]
+tree2 = multitree[[2]]
+
+subtree1 = drop.tip(tree1, tip = which(!tree1$tip.label %in% subsetdf$species))
+subtree2 = drop.tip(tree2, tip = which(!tree2$tip.label %in% subsetdf$species))
+comparePhylo(subtree1, subtree2, plot=T, cex = 0.1)
+

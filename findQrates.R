@@ -17,6 +17,7 @@
 #8/27/2021 - findQrates seems to calculate Q for the data subsetted by both columns, rather than just the discrete column... it should be computing Q based on whole set of discrete data! Granted, this is the case if columns input is only the discrete column... but we still want to plot simmaps of double-subsetted trees probably. Solution: add another subset within the plotting statement, make original subset only subset based on columns[1]. Done.
 # 3/8/2022 - this version does not contain the setmodel parameter added in ~/Desktop/Phylobiology/findQrates.R
 # 3/11/2022 - add GlobalQrates - import qrates from elsewhere, for use in jackknifing brownie
+# 5/4/2024 - now chooses ER or ARD for output based on anova
 
 
 #findQrates - to be used within matingfunction to set the rates of transition between states for the building of simmaps for brownie
@@ -58,10 +59,17 @@ subsetoutput <- subsettreedata(columns[1], cladesubsetcolumn = cladesubsetcolumn
     #create matrix of correct size; make diag negative; multiply by rates
     blankqrates <- matrix(rep(1,matsize^2),matsize,matsize)
     diag(blankqrates) <- -1
-    qrates <- c(ARDmodel$rates[2],ARDmodel$rates[1])*blankqrates  #kts reversed 2/21/2020
+    if (anovaERARD$`Pr(>|Chi|)`[2] < 0.05) {
+      qrates <- c(ARDmodel$rates[2],ARDmodel$rates[1])*blankqrates  #kts reversed 2/21/2020
+      qratesModel = "ARD"
+    } else {
+      qrates <- c(ERmodel$rates)*blankqrates
+      qratesModel = "ER"
+    }
     #pulls the state names and sets as col and row names
     rownames(qrates) <- dimnames(ARDmodel$lik.anc)[[2]]
     colnames(qrates) <- dimnames(ARDmodel$lik.anc)[[2]]
+    output$qratesModel = qratesModel
     
     if (!is.null(GlobalQrates)) {
       qrates <- GlobalQrates
@@ -78,9 +86,9 @@ subsetoutput <- subsettreedata(columns[1], cladesubsetcolumn = cladesubsetcolumn
         dir.create(file.path(mainDir, subDir))
       }
       
-      discretetraitsimmap <- make.simmap(tree,discretetraitvec,model = "ARD", nsim = 3) #makes 3 simmaps for viewing purposes
-      discretetraitsimmapQset <- make.simmap(tree,discretetraitvec,model = "ARD", nsim = 3, Q = qrates)
-      pdf(file = paste0(mainDir,"/OutputFiles/",Sys.Date(),columns[1], columns[2],cladesubsetvalue, otherlabel, " egSimmaps.pdf"),height=12,width=6)
+      discretetraitsimmap <- make.simmap(tree,discretetraitvec,model = qratesModel, nsim = 3) #makes 3 simmaps for viewing purposes
+      discretetraitsimmapQset <- make.simmap(tree,discretetraitvec,model = qratesModel, nsim = 3, Q = qrates)
+      pdf(file = paste0(mainDir,"/OutputFiles/",Sys.Date(),columns[1], columns[2],cladesubsetvalue, otherlabel, qratesModel, " egSimmaps.pdf"),height=12,width=6)
       layout(matrix(1:6,nrow = 2,ncol=3))
       for (i in 1:3) {
         simmap <- discretetraitsimmap[[i]]
@@ -102,7 +110,7 @@ subsetoutput <- subsettreedata(columns[1], cladesubsetcolumn = cladesubsetcolumn
         treetiplabels <- simmapQset$tip.label %in% names(discretetraitvec[discretetraitvec==1]) 
         tiplabels(pch=21,bg=py[as.numeric(treetiplabels)+1], col = py[as.numeric(treetiplabels)+1], cex=0.1)
         numrates <- lapply(qrates,round,digits=9)
-        title(main=paste(" ","\nARDmodel","Qrates (output for Brownie):",numrates[2],numrates[3]),cex.main = 0.5)
+        title(main=paste(" ","\n",qratesModel, "model","Qrates (output for Brownie):",numrates[2],numrates[3]),cex.main = 0.5)
       }
       dev.off()
     }

@@ -376,13 +376,24 @@ write.csv(CompareColSums, compareCSVname, row.names = F)
 csvname = paste(Sys.Date(), DiscreteTrait, ContinuousTrait, "multistate aceARD Brownie", nsim, "sims.csv")
 pdfname = paste0(DiscreteTrait, " ", ContinuousTrait, " multistate aceARD Brownie ", nsim, " sims ", Sys.Date(), ".pdf")
 
-write.csv(browniedata, csvname, row.names = FALSE)
+#write.csv(browniedata, csvname, row.names = FALSE)
+
 
 browniedata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/MultistateBrownie/2024-01-08 social_system_incl_nk_coop_Griesser2017 Song.rep.final multistate aceARD Brownie 500 sims.csv")
 browniedata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/MultistateBrownie/2024-01-09 grouping Song.rep.final multistate aceARD Brownie 500 sims.csv")
-browniedata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/2024-04-02 social_system_incl_nk_coop_Griesser2017 Syllable.rep.final multistate aceARD Brownie 500 sims.csv")
-browniedata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/2024-04-02 grouping_Griesser2023 Syllable.rep.final multistate aceARD Brownie 500 sims.csv")
+browniedata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/MultistateBrownie/2024-04-02 social_system_incl_nk_coop_Griesser2017 Syllable.rep.final multistate aceARD Brownie 500 sims.csv")
+browniedata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/MultistateBrownie/2024-04-02 grouping_Griesser2023 Syllable.rep.final multistate aceARD Brownie 500 sims.csv")
 sum(browniedata$Pval < 0.05)/500
+
+ARDRateColNames = colnames(browniedata)[which(str_detect(colnames(browniedata), "ARDRate") & str_detect(colnames(browniedata), "greater", negate = T))]
+DiscreteTrait = browniedata$DiscreteTrait[1]
+ContinuousTrait = browniedata$ContinuousTrait[1]
+nsim = length(browniedata$DiscreteTrait)
+if (browniedata$DiscreteTrait[1] %in% c("grouping", "grouping_Griesser2023")) {
+  ARDRateColNames = c("ARDRate_asocial", "ARDRate_pair", "ARDRate_small_groups", "ARDRate_large_groups")
+}
+
+pdfname = paste0(DiscreteTrait, " ", ContinuousTrait, " multistate aceARD Brownie ", nsim, " sims ", Sys.Date(), ".pdf")
 
 # make rate distribution plots
 for (ARDcolumn in 1:length(ARDRateColNames)) {
@@ -393,9 +404,11 @@ pdf(pdfname, width = 8, height = 7)
 par(mar = c(3.8,3.8,3,1))
 par(mfrow = c(2,1))
 if (length(ARDRateColNames) == 4) {
+  xmax = max(c(D0$x,D1$x, D2$x, D3$x))
+  if (xmax > 1.5) {xmax = .75}
   plot(D0,col="orange",
        xlim=c(min(c(D0$x,D1$x, D2$x, D3$x)),
-              max(c(D0$x,D1$x, D2$x, D3$x))),
+              xmax),
        ylim=c(min(c(D0$y,D1$y, D2$y, D3$y)),
               max(c(D0$y,D1$y, D2$y, D3$y))),
        main="", xlab="",ylab="", cex.axis=1)     
@@ -409,7 +422,7 @@ if (length(ARDRateColNames) == 4) {
   abline(v=browniedata$ERRate[1], lty = 2)
   
   legend("topright",legend = c(ARDRateColNames,"Equal Rates"), lwd=1,col=c("orange", "#009E73", "blue", "#CC79A7", "black"), lty = c(1,1,1,1,2), cex=1) # check order
-  title(xlab=paste0("Rate of evolution of ", "log ", ContinuousTrait),line = 2.5, cex.lab = 1)
+  title(xlab=paste0("Rate of evolution of ", ContinuousTrait),line = 2.5, cex.lab = 1)
   
 } else if (length(ARDRateColNames) == 3) {
   plot(D0,col="orange",
@@ -427,7 +440,7 @@ if (length(ARDRateColNames) == 4) {
   abline(v=browniedata$ERRate[1], lty = 2)
   
   legend("topright",legend = c(ARDRateColNames,"Equal Rates"), lwd=1,col=c("orange", "#009E73", "blue", "black"), lty = c(1,1,1,2), cex=1) # check order
-  title(xlab=paste0("Rate of evolution of ", "log ", ContinuousTrait),line = 2.5, cex.lab = 1)
+  title(xlab=paste0("Rate of evolution of ", ContinuousTrait),line = 2.5, cex.lab = 1)
   
 }
 pdens = density(browniedata$Pval)

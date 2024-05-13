@@ -94,9 +94,12 @@ for (k in 1:length(CBcolumns)) {
 # Brownie - Song.rep.final and other sociality metrics
 SocialColumns <- c("Griesser2023.Colonial01" , "Griesser2023.MoreThanTwoCaretakers" ,"Griesser2023.LongSocialBonds","Griesser2023.GroupsLargerThanPair", "Griesser2023.TwoOrMoreCaretakers", "Griesser2023.Asocial0vsSocial1", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2017FamilialLiving")
 discLabelList = list(c("Non-Colonial", "Colonial"), c("Two or fewer caretakers", "More than two caretakers"), c("Season or shorter social bonds", "Longest social bonds"), c("Groups Pair or Smaller", "Groups Larger than Pair"), c("One caretaker", "Two or more caretakers"), c("Asocial", "Social"), c("Smaller groups", "Largest group sizes"), c("Shortest social bonds", "Season or longer social bonds"), c("Non-familial", "Familial") )
+SocialColumns <- c("Griesser2023.MoreThanTwoCaretakers", "Griesser2023.TwoOrMoreCaretakers")
+discLabelList = list(c("Two or fewer caretakers", "More than two caretakers"), c("One caretaker", "Two or more caretakers") )
 feature <- "Song.rep.final"
+feature <- "Syllable.rep.final"
 nsim = 500
-currentlabel <- "HackettOscine"
+currentlabel <- "HackettOscineER"
 
 for (k in 1:length(SocialColumns)) {
   print(Sys.time())
@@ -209,14 +212,15 @@ sum(!is.na(dfIn$AsocSmallLarge0_Pair1))
 socialityMetrics = c("Griesser2023.Asocial0vsSocial1", "Griesser2023.GroupsLargerThanPair", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2023.LongSocialBonds", "Griesser2017FamilialLiving", "Griesser2023.Colonial01", "Final.polygyny", "Griesser2023.TwoOrMoreCaretakers", "Griesser2023.MoreThanTwoCaretakers")#, "MeanCoopTie2Noncoop", "MeanCoopTie2Coop")
 socialityMetrics = c("MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop")
 socialityMetrics = c("NonkinNoncoop0_FamAndOrCoop1", "AsocPairLarge0_SmallGroup1", "AsocSmallLarge0_Pair1")
-treelabel = "HackettOscine"
+
+treelabel = "HackettOscineER"
 nsims_real = 500
 nsims_dummy = 500
 
 source("test_trait_overlap_simmaps.R")
 socialityPlots = list()
 socialityStats = list()
-for (i in 3: length(socialityMetrics)) {
+for (i in 1: length(socialityMetrics)) {
   tempMetric = socialityMetrics[i]
   print(i)
   print(tempMetric)
@@ -226,8 +230,12 @@ dfDummy4 <- CharacterSimmaps(columns = c(tempMetric,"FemaleSong_Agg01"), df = ne
 calcHuelout = calcHuel(dfout4, dfDummy4)
 require(gridExtra)
 plotname = paste0("Simmap Overlap Outputs/",tempMetric, " FemaleSong_Agg01 ", nsims_real, " ", nsims_dummy, " ", treelabel, " withTransCounts.pdf")
-nPlots = length(calcHuelout)-5
-m3 <- marrangeGrob(calcHuelout, ncol = 1, nrow = nPlots)
+#nPlots = length(calcHuelout)-5
+#m3 <- marrangeGrob(calcHuelout, ncol = 1, nrow = nPlots)
+#ggsave(plotname, m3, width = 7.5, height = 3.8*nPlots, units = "in")
+calcHuelout2 = calcHuelout[c("p1", "p2", "p3", "p4","p5","p6")]
+nPlots = 6
+m3 <- marrangeGrob(calcHuelout2, ncol = 1, nrow = nPlots)
 ggsave(plotname, m3, width = 7.5, height = 3.8*nPlots, units = "in")
 #socialityPlots[[i]] <- calcHuelout
 }

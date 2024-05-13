@@ -69,6 +69,55 @@ ratePvals$PercentTrendingLabel[which(ratePvals$FractionActualGreaterThanExpected
 ratePvals$PercentTrendingLabel[which(ratePvals$FractionActualGreaterThanExpected > .99 | ratePvals$FractionActualGreaterThanExpected < .01)] <- ">99%"
 
 tempdfDep[,paste0(colnames(tempdfDep)[18:25],"DifferenceFromExpected")] = tempdfDep[,colnames(tempdfDep)[18:25]] - tempdfDep[,paste0(colnames(tempdfDep)[18:25],"Expected")]
+
+# calculate stats on the difference from expected - 4/30/2024
+SummarizeCountsColumns = c(paste0(colnames(tempdfDep)[18:25],"DifferenceFromExpected"), colnames(tempdfDep)[18:25], paste0(colnames(tempdfDep)[18:25],"Expected"))
+RateCountSummary <- tempdfDep %>%
+  summarise(across(all_of(SummarizeCountsColumns), 
+                   list(mean = ~mean(.x, na.rm = TRUE),
+                        p2_5 = ~quantile(.x, probs = 0.025, na.rm = TRUE),
+                        p97_5 = ~quantile(.x, probs = 0.975, na.rm = TRUE),
+                        sd = ~sd(.x, na.rm = TRUE),
+                        ci_lower = ~mean(.x, na.rm = TRUE) - 1.96 * (sd(.x, na.rm = TRUE) / sqrt(n())),
+                        ci_upper = ~mean(.x, na.rm = TRUE) + 1.96 * (sd(.x, na.rm = TRUE) / sqrt(n())),
+                        min = ~min(.x, na.rm = TRUE),
+                        max = ~max(.x, na.rm = TRUE),
+                        median = ~median(.x, na.rm = TRUE)),
+                   .names = "{col}_{fn}")) %>%
+  pivot_longer(
+    cols = everything(),
+    names_to = c("variable", ".value"),
+    names_pattern = "(.*)_(mean|p2_5|p97_5|sd|ci_lower|ci_upper|min|max|median)"
+  )
+write.csv(RateCountSummary, paste0("Simmap Overlap Counts Summary Stats ", tempdfDep$column1[1], " ", tempdfDep$column2[1], " ", nsims, "sims.csv"))
+
+# plot histgrams with CI marks
+DifferenceFromExpectedcolumns <- c("Coop0to1inFS0DifferenceFromExpected", "Coop1to0inFS0DifferenceFromExpected", 
+             "Coop0to1inFS1DifferenceFromExpected", "Coop1to0inFS1DifferenceFromExpected", 
+             "FS0to1inCoop0DifferenceFromExpected", "FS1to0inCoop0DifferenceFromExpected", 
+             "FS0to1inCoop1DifferenceFromExpected", "FS1to0inCoop1DifferenceFromExpected")
+
+# Reshape the dataframe to long format
+longDifferenceFromExpected_df <- tempdfDep %>%
+  pivot_longer(cols = all_of(DifferenceFromExpectedcolumns),
+               names_to = "variable",
+               values_to = "value")
+
+longDifferenceFromExpected_df <- left_join(longDifferenceFromExpected_df, RateCountSummary, by = "variable")
+
+# Plotting histograms with a vertical line at x = 0
+ggplot(longDifferenceFromExpected_df, aes(x = value)) +
+  geom_histogram(bins = 30, fill = "blue", color = "black") +
+  geom_vline(xintercept = 0, color = "red", linetype = "dashed", linewidth = 1) +
+  facet_wrap(~ variable, scales = "free_x") +
+  theme_minimal() +
+  labs(title = "Histograms of Differences from Expected",
+       x = "Difference from Expected",
+       y = "Frequency")
+
+
+
+# prep for transition_plots.R
 colnames(tempdfDep)[which(colnames(tempdfDep) == "FS0to1inCoop0DifferenceFromExpected")] <- "q12"
 colnames(tempdfDep)[which(colnames(tempdfDep) == "Coop0to1inFS0DifferenceFromExpected")] <- "q13"
 colnames(tempdfDep)[which(colnames(tempdfDep) == "FS1to0inCoop0DifferenceFromExpected")] <- "q21"
@@ -236,6 +285,8 @@ for (i in 1:length(socTraits)) {
   ratePvals$PercentTrendingLabel[which(ratePvals$FractionActualGreaterThanExpected > .99 | ratePvals$FractionActualGreaterThanExpected < .01)] <- ">99%"
   
   tempdfDep[,paste0(colnames(tempdfDep)[18:25],"DifferenceFromExpected")] = tempdfDep[,colnames(tempdfDep)[18:25]] - tempdfDep[,paste0(colnames(tempdfDep)[18:25],"Expected")]
+  colnames(tempdfDep)
+  
   colnames(tempdfDep)[which(colnames(tempdfDep) == "FS0to1inCoop0DifferenceFromExpected")] <- "q12"
   colnames(tempdfDep)[which(colnames(tempdfDep) == "Coop0to1inFS0DifferenceFromExpected")] <- "q13"
   colnames(tempdfDep)[which(colnames(tempdfDep) == "FS1to0inCoop0DifferenceFromExpected")] <- "q21"
@@ -337,7 +388,8 @@ ggsave("simmap overlap all boxplots-transitionplots_onepage_500dummySims_testFac
 
 #### multistate ----
 multistateTraits = c("social_system_incl_nk_coop_Griesser2017", "social_system_Griesser2017", "grouping")
-df =  read.csv("2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv")
+#df =  read.csv("2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv")
+df =  read.csv("2024-02-24_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv")
 df$Griesser2017SocialSystem_w_Tie2Noncoop_KinNK = df$social_system_incl_nk_coop_Griesser2017
 df$Griesser2017SocialSystem_w_Tie2Noncoop_KinNK[which(is.na(df$Griesser2017SocialSystem_w_Tie2Noncoop_KinNK) & df$MeanCoopTie2Noncoop == 1 & df$Kin_NK == "Kin")] = "coop_families"
 df$Griesser2017SocialSystem_w_Tie2Noncoop_KinNK[which(is.na(df$Griesser2017SocialSystem_w_Tie2Noncoop_KinNK) & df$MeanCoopTie2Noncoop == 1 & df$Kin_NK == "NonKin")] = "nk-coop"
@@ -713,3 +765,16 @@ plot_my_simmaps <- function(thistrait, subsettrait, simmappy, otherlabel, discre
     dev.off()
   
 }
+
+
+
+#### misc ----
+dfout = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Simmap Overlap Outputs/ HighConfidence_Coop FemaleSong_Agg01 REAL simmap overlap_counts output nsim 500 HackettOscine .csv")
+dfDummy = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Simmap Overlap Outputs/ HighConfidence_Coop FemaleSong_Agg01 DUMMYResampledMkSimmap-CoopFS simmap overlap_counts output nsim 500 HackettOscine .csv")
+calcHuelout = calcHuel(dfout, dfDummy)
+calcHuelout$TransitionStats
+calcHuelout$mediansRow
+dfCounts = calcHuelout$dfMeltCounts
+
+colnames(dfCounts)
+

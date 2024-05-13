@@ -9,7 +9,7 @@ source("transition_plot.R")
 socTraits = c("Griesser2023.Asocial0VsSocial1", "Griesser2023.GroupsLargerThanPair", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2023.LongSocialBonds", "Griesser2017FamilialLiving", "Griesser2023.Colonial01", "Final.polygyny", "Griesser2023.MoreThanTwoCaretakers") # , "Griesser2023.TwoOrMoreCaretakers" - removed because too few species in lower group
 # transition plots not in main text: socTraits = c("Griesser2023.Asocial0vsSocial1", "Griesser2023.GroupsLargerThanPair", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2023.Colonial01", "Final.polygyny", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop")
 otherTraits = c("HighConfidence_Coop")
-groupLabel = "HighConfidence-Coop_Sociality"
+groupLabel = "HighConfidence-Coop_SocialityERrates"
 
 socTraits = c("HighConfidence_Coop", "Griesser2017Coop", "CornwallisCoop", "CockburnCoop", "JetzCoop", "DaleCoop", "DowningCoop", "BiagoliniCoop", "RubensteinCoop")
 otherTraits = "FemaleSong_Agg01"
@@ -19,6 +19,13 @@ socTraits = c("HighConfidence_Coop")
 otherTraits = "FemaleSong_Agg01"
 groupLabel = "Jackknifed_HighConfCoop_FemaleSong"
 jackknife = TRUE
+
+socTraits = c("Griesser2023.MoreThanTwoCaretakers", "Griesser2023.TwoOrMoreCaretakers")
+socTraits = c("Griesser2023.Asocial0VsSocial1", "Griesser2023.GroupsLargerThanPair", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2023.LongSocialBonds", "Griesser2017FamilialLiving", "Griesser2023.Colonial01", "Final.polygyny", "Griesser2023.MoreThanTwoCaretakers","Griesser2023.TwoOrMoreCaretakers") 
+otherTraits = "FemaleSong_Agg01"
+groupLabel = "Sociality_w_GriesserCaretakersERrates FemaleSong"
+jackknife = FALSE
+
 
 outlist = list()
 boxplotlist = list()
@@ -54,8 +61,15 @@ for (i in 1:length(socTraits)) {
           print(realfile)
           
           if (length(dummyfile) > 1 | length(realfile) > 1) {
-            print("skipped")
-            next
+            realfile = realfile[str_detect(realfile,"ER")] 
+            dummyfile = dummyfile[str_detect(dummyfile,"ER")] 
+            if (length(dummyfile) != 1 | length(realfile) != 1) {
+              print("skipped")
+              next
+            } else {
+              dfDummy1 = read.csv(paste0("Simmap Overlap Outputs/",dummyfile))
+              dfout1 = read.csv(paste0("Simmap Overlap Outputs/",realfile))
+            }
           } else {
             dfDummy1 = read.csv(paste0("Simmap Overlap Outputs/",dummyfile))
             dfout1 = read.csv(paste0("Simmap Overlap Outputs/",realfile))
