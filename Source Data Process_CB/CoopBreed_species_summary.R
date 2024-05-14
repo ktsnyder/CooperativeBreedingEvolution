@@ -12,6 +12,7 @@
 ## 10/25/2023 - just made subsetlabel NULL for non-subsetted data
 ## 2/23/2024 - edited to work with new output of merge_data_allcolumns.R
 ## 2/24/2024 - edited to do Griesser et al 2023 binarization
+## 5/13/2024 - added AnyNoncoopEqualsNoncoop, require dplyr
 
 #setwd("~/Desktop/CooperativeBreedingEvolution/Source Data Process_CB")
 
@@ -19,7 +20,7 @@
 #CoopBreed_species_summary(coopbreedfile = coopbreedfile)
 
 CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Update.csv") {
-  
+  require(dplyr)
   ourdf <- read.csv(file = coopbreedfile)
   
   summarydf <- set.seed(10)  #this creates a blank dataframe for the for loop to fill in
@@ -205,6 +206,12 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
       } else if (0 %in% allsourcesvec) {
         AnyCoopEqualsCoop = 0
       } else {AnyCoopEqualsCoop = NA}
+        
+        if (0 %in% allsourcesvec) {
+          AnyNoncoopEqualsNoncoop = 1
+        } else if (0 %in% allsourcesvec) {
+          AnyNoncoopEqualsNoncoop = 0
+        } else {AnyNoncoopEqualsNoncoop = NA}
 
         if (meanclass > 0.5) { # 3/8/2022 changed from >=
           MeanCoopTie2Noncoop <- 1
@@ -240,9 +247,9 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
     
     
     # this comes after all the if...else statements for each column - putting the whole thing together!
-    tempRowOut <- c(species, MeanCoopOmitTies, MeanCoopTie2Noncoop, MeanCoopTie2Coop, AnyCoopEqualsCoop, Kin_NK, numSourcesNonCoop, numSourcesCoop, SourceDiscrepancy, Dunn, Biagolini, DowningCoop, Jetz, Rubenstein, Cockburn, ReihlCoop, Griesser2017_Coop, BOWCoop, Dale, Cornwallis, RiehlKin, DowningKinCoop, Griesser2017_KinCoop, Griesser2017_Familial, numKin, numNonKin, numMixedKinNonKin)  # removed FemaleSong, added Mikula and Dale; on 2/24/2024, removed Mikula
+    tempRowOut <- c(species, MeanCoopOmitTies, MeanCoopTie2Noncoop, MeanCoopTie2Coop, AnyCoopEqualsCoop, AnyNoncoopEqualsNoncoop, Kin_NK, numSourcesNonCoop, numSourcesCoop, SourceDiscrepancy, Dunn, Biagolini, DowningCoop, Jetz, Rubenstein, Cockburn, ReihlCoop, Griesser2017_Coop, BOWCoop, Dale, Cornwallis, RiehlKin, DowningKinCoop, Griesser2017_KinCoop, Griesser2017_Familial, numKin, numNonKin, numMixedKinNonKin)  # removed FemaleSong, added Mikula and Dale; on 2/24/2024, removed Mikula
     summarydf <- rbind(summarydf, tempRowOut)
-    colnames(summarydf) <- c("species","MeanCoopOmitTies", "MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "AnyCoopEqualsCoop", "Kin_NK", "numSourcesNonCoop", "numSourcesCoop", "SourceDiscrepancy", "DunnCoop","BiagoliniCoop", "DowningCoop", "JetzCoop", "RubensteinCoop", "CockburnCoop", "ReihlCoop", "Griesser2017Coop", "BOWCoop", "DaleCoop", "CornwallisCoop", "RiehlKin", "DowningKinNKCoop", "Griesser2017KinCoop", "Griesser2017FamilialLiving", "numKin", "numNonKin", "numMixed") # removed FemaleSong, added Mikula and Dale; 2/24/24 removed Mikula
+    colnames(summarydf) <- c("species","MeanCoopOmitTies", "MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "AnyCoopEqualsCoop", "AnyNoncoopEqualsNoncoop", "Kin_NK", "numSourcesNonCoop", "numSourcesCoop", "SourceDiscrepancy", "DunnCoop","BiagoliniCoop", "DowningCoop", "JetzCoop", "RubensteinCoop", "CockburnCoop", "ReihlCoop", "Griesser2017Coop", "BOWCoop", "DaleCoop", "CornwallisCoop", "RiehlKin", "DowningKinNKCoop", "Griesser2017KinCoop", "Griesser2017FamilialLiving", "numKin", "numNonKin", "numMixed") # removed FemaleSong, added Mikula and Dale; 2/24/24 removed Mikula
     
   }  # end for (i in 1:length(ourdf$species_in_birdtree))
   

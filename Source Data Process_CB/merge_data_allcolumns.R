@@ -9,6 +9,7 @@
 ## 10/26/2023 - Griesser et al 2023 PNAS data, also added OC data in initial source compilation, also AVONET data; sociality data binarized
 ## 2/23/2024 - removed unnecessary code/lines
 ## 2/24/2024 - removed merging Mikula data because the duetting info is in the FS Gsheet
+## 5/13/2024 - changed ourdatabaserefs file from "SupplementDataRefs_Update.csv" to "SupplementDataRefs_Update_2024-05-13.csv"; made output files use current date
 
 require(ape)
 require(phytools)
@@ -19,7 +20,7 @@ library(readxl)
 birdtree = read.nexus("birdzillatreeMaybeConsensus.nex")
 
 ourdatabase <- read.csv("SongData_R_Update.csv", stringsAsFactors = FALSE)
-ourdatabaserefs <- read.csv("SupplementDataRefs_Update.csv")
+ourdatabaserefs <- read.csv("SupplementDataRefs_Update_2024-05-13.csv")
 colnames(ourdatabaserefs)[which(colnames(ourdatabaserefs) == "Family")] <- "Family_SnyderCreanza2019"
 BiagoliniData <- read.csv("Biagolini_data_BirdTreeNames_nodups.csv", stringsAsFactors = FALSE)
 CockburnData <- read.csv("Cockburn2006_data_BirdTreeNames_nodups.csv", stringsAsFactors = FALSE)
@@ -162,20 +163,20 @@ CoopSubset = CoopSubset[,1:63]
 # opened ^ in excel and manually added new column "HighConfidence_Coop"
 CoopSubset = read.csv("2024-02-24_CoopClassesWSourceColumns_subsetPasserineSourceDiscrepancy_HighConfColumn.csv")
 # open big file with all refs and merge in HighConfidence_Coop column
-ourdf = read.csv("2024-02-24_CoopClassesWSourceColumns.csv")
+ourdf = read.csv(paste0(Sys.Date(),"_CoopClassesWSourceColumns.csv"))
 fulldf = merge(ourdf, CoopSubset[,c("species", "HighConfidence_Coop")], by = "species", all =T)
 # in line with disputed species, if Cockburn "KnownParentalCare" is "Suspected" and it is the only cooperative breeding source (which would have meant it was classified as "Noncoop"), will give value "NA" for cooperative breeding. 
 fulldf$HighConfidence_Coop[which(fulldf$SourceDiscrepancy == 0)] <- fulldf$MeanCoopTie2Noncoop[which(fulldf$SourceDiscrepancy == 0)] # give everything not disputed its classification
 # put NAs in where the only source is Cockburn "Suspected"
 fulldf$HighConfidence_Coop[which(fulldf$SourceDiscrepancy == 0 & fulldf$numSourcesNonCoop == 1 & fulldf$KnownParentalCare_Cockburn2006 == "Suspected")] <- NA
 
-#write.csv(fulldf, "2024-02-24_CoopClassesWSourceColumns_HighConfCoopColumn.csv", row.names = F)
+write.csv(fulldf, paste0(Sys.Date(), "_CoopClassesWSourceColumns_HighConfCoopColumn.csv"), row.names = F)
 
 fulldf %>% group_by(MeanCoopTie2Noncoop, FemaleSong_Agg01) %>% count
 fulldf %>% group_by(HighConfidence_Coop, FemaleSong_Agg01) %>% count
 
 # merge fulldf with rest of columns in Song + binarized sociality file from CoopBreed_species_summary()
-CoopSongSoc = read.csv("2024-02-24_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv")
+CoopSongSoc = read.csv(paste0(Sys.Date(), "_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv"))
 SongSocCols = colnames(CoopSongSoc)[which(!colnames(CoopSongSoc) %in% colnames(fulldf))]
 CoopSongSocPasser = merge(fulldf, CoopSongSoc[,c("species", SongSocCols)], by = "species", all.y = T)
 write.csv(CoopSongSocPasser, paste0(Sys.Date(), "_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"), row.names = F)
