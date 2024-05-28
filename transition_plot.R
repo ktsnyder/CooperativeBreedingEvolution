@@ -4,6 +4,7 @@
 # Last edited 1/10/2024 - add transition_medians
 # 1/17/2024 - option in args to use median value instead of mean to determine arrow color, added median time spent in each state as text label (state_medians); added code to calculate the median transition count for each transition arrow and weight arrows by this value (only added to center == "mean" plot)
 # 1/18/2024 - added method to make non-sig arrows gray, outputs separate plot with those arrows
+# 5/23/2024 - added as.numeric() to calculate state medians
 
 
 library(ggplot2)
@@ -70,7 +71,8 @@ point11 = c(4,1)
 statePoints = as.data.frame(rbind(point00, point01, point10, point11))
 colnames(statePoints) <- c("x", "y")
 stateTextDF = cbind(stateNum = c(1,2,3,4), stateLabel = c(label00, label01, label10, label11), statePoints)
-state_medians <- apply(df[, grepl("^ObsProp", names(df))], 2, FUN = median)
+#state_medians <- apply(df[, grepl("^ObsProp", names(df))], 2, FUN = median)
+state_medians <- apply(apply(df[, grepl("^ObsProp", names(df))], 2, FUN = as.numeric), 2, FUN = median)
 state_medians_df = data.frame(state = names(state_medians), state_median_time = state_medians)
 stateTextDF = cbind(stateTextDF, state_medians_df)
 stateTextDF$StateTimeLabel = paste0(round(stateTextDF$state_median_time*100, 1), "% of tree")

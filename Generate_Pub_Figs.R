@@ -24,7 +24,8 @@ setwd("/Users/kate/Desktop/CooperativeBreedingEvolution/")
 #write.csv(df, file = "2023-11-17_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv", row.names = F)
 #newdata = "2023-11-17_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv"
 #newdata = "/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv"
-newdata = "2024-02-24_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
+#newdata = "2024-02-24_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
+newdata = "2024-05-13_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
 treefile = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
 subsetout =subsettreedata(newdata = newdata, newtree = treefile)
 subsetdf= subsetout$subsetdf
@@ -38,17 +39,23 @@ source("subsettreedata.R")
 source("browniefunction.R")
 source("plotbrownie.R")
 
-songfeatures <- c("Song.rep.final", "Syllable.rep.final", "Syll.song.final", "Duration.final", "Interval.final", "Song.rep.min", "Song.rep.max")
+songfeatures <- c("Song.rep.final", "Syllable.rep.final") #, "Syll.song.final", "Duration.final", "Song.rep.min", "Song.rep.max", "Syllable.rep.min", "Syllable.rep.max") # "Interval.final",
 CBcolumn <- "HighConfidence_Coop"
 discreteCatLabels = c("Non-cooperative", "Cooperative")
 nsim = 500
-currentlabel <- "HackettOscine"
+currentlabel <- "UpdatedSongData"
+
+treefile = "2024-05-26ConsensusPasserineTreeHackett4_1000_mean-edge_ignore-absent.nex"
+currentlabel <- "UpdatedSongData_Hackett4Passerine-MeanEdge-IgnoreAbsent"
+
+treeIn = read.nexus(treefile)
+tree = drop.tip(treeIn, tip = which(!treeIn$tip.label %in% OscineTree$tip.label))
 
 for (k in 1:length(songfeatures)) {
   print(Sys.time())
   feature <- songfeatures[k]
   print(feature)
-  browniefunction(columns = c(CBcolumn, feature), newdata = newdata, newtree = treefile, nsim = nsim, islog = feature, plotsimmaps = TRUE, otherlabel = currentlabel)
+  browniefunction(columns = c(CBcolumn, feature), newdata = newdata, newtree = tree, nsim = nsim, islog = feature, plotsimmaps = TRUE, otherlabel = currentlabel)
   
   if (file.exists(paste0("OutputFiles/",Sys.Date(),CBcolumn,feature, currentlabel, "_brownie",nsim,"sim.csv"))) {
     print("file exists")
@@ -92,7 +99,7 @@ for (k in 1:length(CBcolumns)) {
 } # end for k
 
 # Brownie - Song.rep.final and other sociality metrics
-SocialColumns <- c("Griesser2023.Colonial01" , "Griesser2023.MoreThanTwoCaretakers" ,"Griesser2023.LongSocialBonds","Griesser2023.GroupsLargerThanPair", "Griesser2023.TwoOrMoreCaretakers", "Griesser2023.Asocial0vsSocial1", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2017FamilialLiving")
+SocialColumns <- c("Griesser2023.Colonial01" , "Griesser2023.MoreThanTwoCaretakers" ,"Griesser2023.LongSocialBonds","Griesser2023.GroupsLargerThanPair", "Griesser2023.TwoOrMoreCaretakers", "Griesser2023.Asocial0VsSocial1", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2017FamilialLiving")
 discLabelList = list(c("Non-Colonial", "Colonial"), c("Two or fewer caretakers", "More than two caretakers"), c("Season or shorter social bonds", "Longest social bonds"), c("Groups Pair or Smaller", "Groups Larger than Pair"), c("One caretaker", "Two or more caretakers"), c("Asocial", "Social"), c("Smaller groups", "Largest group sizes"), c("Shortest social bonds", "Season or longer social bonds"), c("Non-familial", "Familial") )
 SocialColumns <- c("Griesser2023.MoreThanTwoCaretakers", "Griesser2023.TwoOrMoreCaretakers")
 discLabelList = list(c("Two or fewer caretakers", "More than two caretakers"), c("One caretaker", "Two or more caretakers") )
@@ -130,10 +137,11 @@ plotbrowniejacks(columns = c("MeanCoopTie2Noncoop", "Song.rep.final"), allcsvs =
 
 #### phylANOVA and ScatterBoxes ----
 source("scatterboxes.R")
+source("test_trait_overlap_simmaps.R")
 SocialColumns <- c("Griesser2023.Colonial01" , "Griesser2023.MoreThanTwoCaretakers" ,"Griesser2023.LongSocialBonds","Griesser2023.GroupsLargerThanPair", "Griesser2023.TwoOrMoreCaretakers", "Griesser2023.Asocial0vsSocial1", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2017FamilialLiving")
 discLabelList = list(c("Non-Colonial", "Colonial"), c("Two or fewer caretakers", "More than two caretakers"), c("Season or shorter social bonds", "Longest social bonds"), c("Groups Pair or Smaller", "Groups Larger than Pair"), c("One caretaker", "Two or more caretakers"), c("Asocial", "Social"), c("Smaller groups", "Largest group sizes"), c("Shortest social bonds", "Season or longer social bonds"), c("Non-familial", "Familial") )
 
-for (i in 5:length(SocialColumns)) {
+for (i in 1:length(SocialColumns)) {
   CBcolumn = SocialColumns[i]
   tempLabels = discLabelList[[i]]
   scatterboxes(DiscreteTrait = CBcolumn, newdata = newdata, newtree = treefile, otherlabel = currentlabel, discreteCategoryLabels = tempLabels)
@@ -141,11 +149,12 @@ for (i in 5:length(SocialColumns)) {
 
 # phylANOVA for multi-group traits - Table
 #multigrouptraits = c("grouping", "social_bonds", "Griesser2023.Colonial01" , "Griesser2023.MoreThanTwoCaretakers" ,"Griesser2023.LongSocialBonds","Griesser2023.GroupsLargerThanPair", "Griesser2023.TwoOrMoreCaretakers", "Griesser2023.Asocial0vsSocial1", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2017FamilialLiving", "MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop")
-multigrouptraits = c("HighConfidence_Coop","MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop")
-#songtraits = c("Song.rep.final","Syllable.rep.final", "Syll.song.final", "Duration.final", "Interval.final")
-songtraits = c("Song.rep.max", "Song.rep.min","Syllable.rep.max", "Syllable.rep.min", "Song.rep.final","Syllable.rep.final")
-multigrouptraits = c("HighConfidence_Coop","HighConfidence_Coop", "HighConfidence_Coop", "HighConfidence_Coop", "AnyNoncoopEqualsNoncoop", "AnyNoncoopEqualsNoncoop")
+multigrouptraits = c("Griesser2023.Asocial0VsSocial1", "Griesser2023.Colonial01" , "Griesser2023.MoreThanTwoCaretakers" ,"Griesser2023.LongSocialBonds","Griesser2023.GroupsLargerThanPair", "Griesser2023.TwoOrMoreCaretakers", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2017FamilialLiving","Final.polygyny" , "HighConfidence_Coop","MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop", "AnyNoncoopEqualsNoncoop", "grouping_Griesser2023", "social_system_incl_nk_coop_Griesser2017", "social_system_Griesser2017", "social_bonds_Griesser2023")
+songtraits = c("Song.rep.final","Syllable.rep.final", "Syll.song.final", "Duration.final", "Interval.final", "Song.rep.max", "Song.rep.min","Syllable.rep.max", "Syllable.rep.min")
+#songtraits = c("Song.rep.max", "Song.rep.min","Syllable.rep.max", "Syllable.rep.min", "Song.rep.final","Syllable.rep.final")
+#multigrouptraits = c("HighConfidence_Coop","HighConfidence_Coop", "HighConfidence_Coop", "HighConfidence_Coop", "AnyNoncoopEqualsNoncoop", "AnyNoncoopEqualsNoncoop")
 newdata = "2024-02-24_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
+newdata = "/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2024-05-13_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
 dfIn = read.csv(newdata)
 dfIn$AnyNoncoopEqualsNoncoop = dfIn$MeanCoopTie2Noncoop
 dfIn$AnyNoncoopEqualsNoncoop[which(dfIn$SourceDiscrepancy == 1)] = 0
@@ -154,29 +163,41 @@ newdata = dfIn
 phynovaDF = set.seed(10)
 for (j in 1:length(songtraits)) {
   songtrait = songtraits[j]
-for (i in 1) { #:length(multigrouptraits)) {
-tempgrouptrait = multigrouptraits[j]
-subsets = subsettreedata(columns = c(tempgrouptrait, songtrait), newdata = newdata, newtree = treefile)
-subsetdf = subsets$subsetdf
-discvec = subsetdf[,tempgrouptrait]
-names(discvec) = subsetdf$species
-contvec = subsetdf[,songtrait]
-contvec = log(contvec)
-names(contvec) = subsetdf$species
-subsettree = subsets$subsettree
-Nspecies = length(subsettree$tip.label)
-Ngroups = length(unique(discvec))
-phylANOVAout= phylANOVA(subsettree, x = discvec, y = contvec, nsim = 20000, posthoc = TRUE)
-phylANOVAp=phylANOVAout$Pf
-temprow = c(tempgrouptrait, Ngroups, songtrait, Nspecies, phylANOVAp)
-phynovaDF = rbind(phynovaDF, temprow)
-phynovaDF = as.data.frame(phynovaDF)
-colnames(phynovaDF) <- c("DiscreteTrait", "DiscreteNumGroups", "ContinuousTrait", "n_Species", "PhylANOVApval")
-print(paste(tempgrouptrait, songtrait))
-print(phylANOVAout)
+  for (i in 1:length(multigrouptraits)) {
+    tempgrouptrait = multigrouptraits[i]
+    subsets = subsettreedata(columns = c(tempgrouptrait, songtrait), newdata = newdata, newtree = treefile)
+    subsetdf = subsets$subsetdf
+    discvec = subsetdf[,tempgrouptrait]
+    names(discvec) = subsetdf$species
+    contvec = subsetdf[,songtrait]
+    contvec = log(contvec)
+    names(contvec) = subsetdf$species
+    subsettree = subsets$subsettree
+    Nspecies = length(subsettree$tip.label)
+    Ngroups = length(unique(discvec))
+    
+    tryCatch({
+      # Code that might fail
+      phylANOVAout = phylANOVA(subsettree, x = discvec, y = contvec, nsim = 50000, posthoc = TRUE)
+      phylANOVAp = phylANOVAout$Pf
+      temprow = c(tempgrouptrait, Ngroups, songtrait, Nspecies, phylANOVAp)
+    }, error = function(e) {
+      # Code to run in case of an error
+      temprow = c(tempgrouptrait, Ngroups, songtrait, Nspecies, NA)
+      message("Error in phylANOVA computation: ", e$message)
+    })
+    
+    phynovaDF = rbind(phynovaDF, temprow)
+    phynovaDF = as.data.frame(phynovaDF)
+    colnames(phynovaDF) <- c("DiscreteTrait", "DiscreteNumGroups", "ContinuousTrait", "n_Species", "PhylANOVApval")
+    print(paste(tempgrouptrait, songtrait))
+    print(phylANOVAout)
+  }
+  if (j == 5) {
+    write.csv(phynovaDF, file = paste(Sys.Date(), "phylANOVA outputs FinalSongs_Coops.csv"), row.names = F)
+  }
 }
-}
-write.csv(phynovaDF, file = paste(Sys.Date(), "phylANOVA outputs Songs_Coops(partial).csv"), row.names = F)
+write.csv(phynovaDF, file = paste(Sys.Date(), "phylANOVA outputs Songs_Coops.csv"), row.names = F)
 
 
 #### Simmap Overlap CoopBreed/FS ----
@@ -189,6 +210,18 @@ dfout4 = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Simmap Overl
 dfDummy4 = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Simmap Overlap Outputs/ MeanCoopTie2Noncoop FemaleSong_Agg01 DUMMYResampledMkSimmap-CoopFS simmap overlap_counts output nsim 2500 HackettOscine .csv")
 
 tempdfGather = tempdfSub %>% gather("Rate", "RateValue", c(q12:q43, q12.1:q43.1)) 
+
+# With new consensus tree 5/26/2024
+treeIn = read.nexus("2024-05-26ConsensusPasserineTreeHackett4_1000_mean-edge_ignore-absent.nex")
+newdata = "2024-05-13_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
+tree = drop.tip(treeIn, which(!treeIn$tip.label %in% OscineTree$tip.label ))
+tree <- multi2di(tree)
+tree$edge.length[tree$edge.length == 0] <- 0.000000000000001
+sum(OscineTree$edge.length)
+sum(tree$edge.length)
+dfout4 <- CharacterSimmaps(columns = c("HighConfidence_Coop","FemaleSong_Agg01"), df = newdata, tree =  tree, dummy = FALSE, nsims = 500, treelabel = "HackettPasserineMeanEdgeIgnoreAbsent", datalabel = NULL)
+dfDummy4 <- CharacterSimmaps(columns = c("HighConfidence_Coop","FemaleSong_Agg01"), df = newdata, tree =  tree, dummy = TRUE, nsims = 500, treelabel = "HackettPasserineMeanEdgeIgnoreAbsent", datalabel = NULL, dummyMethod = "makeSimmap")
+calcHuelout = calcHuel(dfout4, dfDummy4, otherlabel = "HackettPasserineMeanEdgeIgnoreAbsent")
 
 
 #### Simmap Overlap Sociality metrics ----
@@ -423,7 +456,7 @@ for (i in 1:length(socialityMetrics)) {
   #plotSimpleDiscreteBayes(columns = columns, df = tempdfDep, nocorrDdf = NULL, LhCol = "Lh", nsim = nsims, treelabel = "HackettOscine", newpdf = TRUE, cladesubsetvalue = NULL, ylabel = "Transition Counts", arrowmod = 0.5, otherlabel = "TransitionCountArrows_halfTotalTransIndependent", roundDigits = 3)
   trait1StateLabels = c(lab0x, lab1x)
   trait2StateLabels = c(labx0, labx1)
-  plottitle = paste(trait1, trait2, "nsims:", nsims)
+  plottitle = paste(trait1, trait2, "nsims:", nsims_real)
   outlist[[i]] = transition_plot(df = tempdfDep, trait1StateLabels = trait1StateLabels, trait2StateLabels = trait2StateLabels, scale_area_by = 1, offset = 0.2, lengthen = 0.2, ratePvals = ratePvals, plottitle = plottitle, center="median")
   names(outlist)[i] <- paste(trait1, trait2, sep = "_")
   templist = outlist[[i]]
@@ -638,6 +671,7 @@ ggsave(paste(Sys.Date(), "jackknifed Simmap Overlaps Coop FemaleSong_Agg01 Hacke
 #### Jackknife CoopBreed/Song features Brownie ----
 source("jackknifingbrownie.R")
 songfeatures = c("Song.rep.final", "Syllable.rep.final")
+currentlabel = "UpdatedSongData"
 
 for (i in 1:2) {
   tempfeature = songfeatures[i]
@@ -645,7 +679,7 @@ for (i in 1:2) {
   subset = subsettreedata(columns = c("HighConfidence_Coop", tempfeature), newtree = treefile, newdata = newdata)
   familycounts = subset$subsetdf %>% group_by(Family3_BirdtreeMatchSpecies2_AVONET) %>% count
   familysubset = familycounts$Family3_BirdtreeMatchSpecies2_AVONET[which(familycounts$n > 1)]
-jackbrowniefunction(columns = c("HighConfidence_Coop", tempfeature), islog = T, matemodel = "ARD", matensim = 100, allcsvs = T, plotsimmaps = F, newtree = treefile, newdata = newdata, cladesubsetcolumn = "Family3_BirdtreeMatchSpecies2_AVONET", otherlabel = "HackettOscine", cladeJackvalues = familysubset)
+jackbrowniefunction(columns = c("HighConfidence_Coop", tempfeature), islog = T, matemodel = "ARD", matensim = 100, allcsvs = T, plotsimmaps = F, newtree = treefile, newdata = newdata, cladesubsetcolumn = "Family3_BirdtreeMatchSpecies2_AVONET", otherlabel = currentlabel, cladeJackvalues = familysubset)
 }
 
 #### Generate Counts Table ----

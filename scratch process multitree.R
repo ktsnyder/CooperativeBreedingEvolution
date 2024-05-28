@@ -1,4 +1,4 @@
-## scratch process multitree
+## scratch process multitree brownie
 
 require(dplyr)
 library(tidyr)
@@ -6,21 +6,25 @@ require(ggplot2)
 
 setwd("/Users/kate/Desktop/CooperativeBreedingEvolution")
 
-files = c("2024-04-28 brownie multitree 400trees 20simsPerTree _Hackett4Oscine_fulltreeQ_ HighConfidence_Coop Syll.song.final.csv", "2024-04-28 brownie multitree 400trees 20simsPerTree _Hackett4Oscine_fulltreeQ_ HighConfidence_Coop Syllable.rep.final.csv", "2024-04-28 brownie multitree 400trees 20simsPerTree _Hackett4Oscine_fulltreeQ_ HighConfidence_Coop Song.rep.final.csv")
+#files = c("2024-04-28 brownie multitree 400trees 20simsPerTree _Hackett4Oscine_fulltreeQ_ HighConfidence_Coop Syll.song.final.csv", "2024-04-28 brownie multitree 400trees 20simsPerTree _Hackett4Oscine_fulltreeQ_ HighConfidence_Coop Syllable.rep.final.csv", "2024-04-28 brownie multitree 400trees 20simsPerTree _Hackett4Oscine_fulltreeQ_ HighConfidence_Coop Song.rep.final.csv")
+files = c("2024-05-16 brownie multitree 300trees 20simsPerTree _Hackett4Oscine_fulltreeQ_UpdatedSongData_ HighConfidence_Coop Song.rep.final.csv", "2024-05-16 brownie multitree 300trees 20simsPerTree _Hackett4Oscine_fulltreeQ_UpdatedSongData_ HighConfidence_Coop Syllable.rep.final.csv")
 
-for (tempfeat in c("Syll.song.final", "Syllable.rep.final", "Song.rep.final")) {
+for (tempfeat in c("Syllable.rep.final", "Song.rep.final")) {
   
-  tempfile1 = list.files(pattern = paste("2024-04-28 brownie multitree 400trees 20simsPerTree _Hackett4Oscine_fulltreeQ_ HighConfidence_Coop", tempfeat))
-  tempfile2 = list.files(pattern = paste("2024-04-27 brownie multitree 100trees 20simsPerTree _Hackett4Oscine_fulltreeQ_ HighConfidence_Coop", tempfeat))
+#  tempfile1 = list.files(pattern = paste("2024-04-28 brownie multitree 400trees 20simsPerTree _Hackett4Oscine_fulltreeQ_ HighConfidence_Coop", tempfeat))
+#  tempfile2 = list.files(pattern = paste("2024-04-27 brownie multitree 100trees 20simsPerTree _Hackett4Oscine_fulltreeQ_ HighConfidence_Coop", tempfeat))
   
-  print(tempfile1)
-  print(tempfile2)
+#  print(tempfile1)
+#  print(tempfile2)
   
-  browniedf1 = read.csv(tempfile1)
-  browniedf2 = read.csv(tempfile2)
-  browniedf= rbind(browniedf1, browniedf2)
+#  browniedf1 = read.csv(tempfile1)
+#  browniedf2 = read.csv(tempfile2)
+#  browniedf= rbind(browniedf1, browniedf2)
+
+  tempfile = files[which(str_detect(files, tempfeat))]
+  browniedf = read.csv(tempfile)
   
-  browniedf = browniedf[which(browniedf$TreeNum != 1),]
+ # browniedf = browniedf[which(browniedf$TreeNum != 1),] # from when there were 301 trees
   
   browniedf$ARDRate1.GreaterThan.ARDRate0 = 0
   browniedf$ARDRate1.GreaterThan.ARDRate0[which(browniedf$ARDRate1 > browniedf$ARDRate0)] = 1
@@ -32,6 +36,7 @@ for (tempfeat in c("Syll.song.final", "Syllable.rep.final", "Song.rep.final")) {
   state0 = "Non-cooperative"
   state1 = "Cooperative"
   nTrees = length(browniedf$DiscreteTrait)/numSimsPerTree
+  nTrees = length(unique(browniedf$TreeNum))
   
   ## test for outlier trees
   kruskal.test(Pval ~ TreeNum, data = browniedf)
@@ -83,14 +88,25 @@ for (tempfeat in c("Syll.song.final", "Syllable.rep.final", "Song.rep.final")) {
 #  write.csv(result, file = paste0("brownie multitree summary HighConfidence_Coop ", tempfeat, " ", nTrees, "trees ", numSimsPerTree, "sims fullTreeQ.csv"), row.names = F)
   
   
-  pdf(file = paste0("brownie all multitree HighConfidence_Coop ", tempfeat, " ", nTrees, "trees ", numSimsPerTree, "sims fullTreeQ hists.pdf"), height = 8, width = 8)
-  par(mar = c(4,4,2,1))
-  par(mfrow = c(2,2)) 
+#  pdf(file = paste0(Sys.Date(), "_brownie all multitree HighConfidence_Coop ", tempfeat, " ", nTrees, "trees ", numSimsPerTree, "sims fullTreeQ hists.pdf"), height = 8, width = 8)
+#  par(mar = c(4,4,2,1))
+#  par(mfrow = c(2,2)) 
   
   MedianFractionSignificant = median(result$FractionSims.SignificantPvalBrownie)
   MedianFractionSims.ARDRate0.GreaterThan.ARDRate1 = median(result$FractionSims.ARDRate0.GreaterThan.ARDRate1)
   
   # plot1 - rates (brownie)
+  for (i in 1:2) {
+    if (i == 1) {
+      pdf(file = paste0(Sys.Date(), "_brownie all multitree HighConfidence_Coop ", tempfeat, " ", nTrees, "trees ", numSimsPerTree, "sims fullTreeQ RateHistPlotOnly.pdf"), height = 5, width = 5)
+      par(mar = c(4,4,2,1))
+      par(mfrow = c(1,1)) 
+    } else if (i == 2) {
+      pdf(file = paste0(Sys.Date(), "_brownie all multitree HighConfidence_Coop ", tempfeat, " ", nTrees, "trees ", numSimsPerTree, "sims fullTreeQ hists.pdf"), height = 8, width = 8)
+      par(mar = c(4,4,2,1))
+      par(mfrow = c(2,2)) 
+    }
+    
   titlelabel <- paste(DiscreteTrait, ContinuousTrait, nTrees, "trees,", numSimsPerTree, "sims per tree\nPer tree: Median Fraction Sig =", MedianFractionSignificant, "| Median Fraction Rate0 > Rate1 =", MedianFractionSims.ARDRate0.GreaterThan.ARDRate1)
   
   D0 <- density(browniedf$ARDRate0)
@@ -101,21 +117,34 @@ for (tempfeat in c("Syll.song.final", "Syllable.rep.final", "Song.rep.final")) {
   length(unique(browniedf$ARDRate0))
   length(unique(browniedf$ERRate))
   
-  plot(D0,col="blue",
-       xlim=c(min(c(D0$x,D1$x)),
-              max(c(D0$x,D1$x))),
-       ylim=c(min(c(D0$y,D1$y)),
-              max(c(D0$y,D1$y))),
+  par(cex.axis=0.8,
+      cex.lab=0.8)
+  
+  plot(D0,col="#BFD3E6",
+       xlim=c(min(c(D0$x,D1$x,DER$x)),
+              max(c(D0$x,D1$x, DER$x))),
+       ylim=c(min(c(D0$y,D1$y, DER$y)),
+              max(c(D0$y,D1$y, DER$y))),
        main=titlelabel, 
        xlab = "", 
        ylab = "",
-       cex.main = 0.6)
-  lines(D1, col="red")
-  lines(DER)
-  lines(ERresultD, col = "green")
-  title(xlab=paste("Rate of log", ContinuousTrait,"evolution"),
+       cex.main = 0.6, 
+       yaxt = 'n',
+       lwd = 2)
+  lines(D1, col="#1E00E6", lwd = 1)
+  lines(DER, lty = 2)
+ # lines(ERresultD, col = "green")
+  title(xlab=paste("Rate of", ContinuousTrait,"evolution"),
         ylab= paste("Number of Observations across all simulations, all trees"), line = 2)
-  legend("topright",legend = c(paste(state0),paste(state1), "Equal Rates"), lwd=1,col=c("blue","red", "black"), lty = c(1,1,1))
+  legend("topright",legend = c(paste(state0),paste(state1), "Equal Rates"), lwd=c(2,1,1),col=c("#BFD3E6","#1E00E6", "black"), lty = c(1,1,2))
+  axis(side=2, las=2)
+
+  
+  if (i == 1) {
+    dev.off()
+  }
+  
+} # end for i in 1:2 (make 2 PDFs)
   
   # plot 2 - pval density plot
   FracSignificantBrownie = sum(browniedf$Pval < 0.05)/length(browniedf$Pval)
@@ -138,7 +167,7 @@ for (tempfeat in c("Syll.song.final", "Syllable.rep.final", "Song.rep.final")) {
   Dard01 = density(result$ARDsimmapQ0to1_median)
   Dard10 = density(result$ARDsimmapQ1to0_median)
   DerQ = density(result$ERsimmapQ_median)
-  plot(Dard01,col="blue",
+  plot(Dard01,col="#BFD3E6",
        xlim=c(min(c(Dard01$x,Dard10$x)),
               max(c(Dard01$x,Dard10$x))),
        ylim=c(min(c(Dard01$y,Dard10$y)),
@@ -147,9 +176,9 @@ for (tempfeat in c("Syll.song.final", "Syllable.rep.final", "Song.rep.final")) {
        xlab = "", 
        ylab = "",
        cex.main = 0.6)
-  lines(Dard10, col="red")
+  lines(Dard10, col="#1E00E6")
   lines(DerQ)
-  legend("topright",legend = c("ARD rate - 0 to 1", "ARD rate - 1 to 0", "ER Rate"), lwd=1,col=c("blue","red", "black"), lty = c(1,1,1))
+  legend("topright",legend = c("ARD rate - 0 to 1", "ARD rate - 1 to 0", "ER Rate"), lwd=1,col=c("#BFD3E6","#1E00E6", "black"), lty = c(1,1,2))
   title(xlab=paste("Rate of transition between discrete states"),
         ylab= paste("Number of Observations across all trees"), line = 2)
   

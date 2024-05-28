@@ -14,8 +14,10 @@
 ## 1/17/2024 - outputted dfMeltCounts from calcHuel but probably didn't need to
 ## 1/30/2024 - calcHuel: outputs a 1-row dataframe with medians of simmap overlap values for Real and Dummy sims, p-value, and post-hoc test p-values
 ## 2/1/2024 - calcHuel: Observed State boxplot organized and labeled with actual states (e.g. "Asocial", "Pair, small group, large group"), made ordered factor to have one label per pair of boxplots (Real and Dummy)
+## 5/20/2024 - changed color scheme in calcHuel to green/purple instead of red/blue
+## 5/26/2024 - added setQratesTree to args - specify a tree for 
 
-setwd("/Users/kate/Desktop/CooperativeBreedingEvolution/")
+#setwd("/Users/kate/Desktop/CooperativeBreedingEvolution/")
 library(phytools)
 source("subsettreedata.R")
 
@@ -61,29 +63,37 @@ source("findQrates.R")
 
 
 #### CharacterSimmaps fxn ----
-CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalabel = NULL, dummyMethod = c("simHistory", "makeSimmap"), plotSampleSimmaps = FALSE, cladesubsetvalue = NULL) {
+CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalabel = NULL, dummyMethod = c("simHistory", "makeSimmap"), plotSampleSimmaps = FALSE, cladesubsetvalue = NULL, setQratesTree = NULL) {
   
   if (is.null(datalabel)) {
     datalabel = paste(columns[1], columns[2])
   }
   
+  if (is.null(setQratesTree)) {
+    Qtree = tree
+  } else if (is.character(setQratesTree)) {
+    Qtree = read.nexus(setQratesTree)
+  } else {
+    Qtree = setQratesTree
+  }
+  
   require(stringr)
   source("findQrates.R")
-  cooprates <- findQrates(columns = columns[1], newdata = df, newtree = tree)
+  cooprates <- findQrates(columns = columns[1], newdata = df, newtree = Qtree)
   coopQ <- cooprates$qrates
   coopQ01 <- coopQ[3]
   coopQ10 <- coopQ[2]
   coopAnc = str_remove(cooprates$ARDlikanc, "ARDlik.anc ")  # added this for sim.history()
   coopAnc = as.numeric(coopAnc)
   names(coopAnc) <- c("0","1")
-  FSrates <- findQrates(columns = columns[2], newdata = df, newtree = tree)
+  FSrates <- findQrates(columns = columns[2], newdata = df, newtree = Qtree)
   FSQ <- FSrates$qrates
   FSQAbsPres <- FSQ[3]
   FSQPresAbs <- FSQ[2]
   FSAnc = str_remove(FSrates$ARDlikanc, "ARDlik.anc ")  # added this for sim.history()
   FSAnc = as.numeric(FSAnc)
   names(FSAnc) <- c("0","1")
-  subsets <- subsettreedata(columns = columns, newdata = df, newtree = tree)
+  subsets <- subsettreedata(columns = columns, newdata = df, newtree = Qtree)
   subsetdf <- subsets$subsetdf
   subsettree <- subsets$subsettree
   FSvec <- subsetdf[,columns[2]]
@@ -410,7 +420,7 @@ if (newplot == TRUE) {
     geom_boxplot(outlier.shape = NA) + # Exclude outliers
     theme_minimal() +
     labs(y = "Observed State Proportion", x = "", fill = "Simulation Data") +
-    scale_fill_manual(values = c("Real" = "blue", "Dummy" = "red")) +
+    scale_fill_manual(values = c("Real" = "#762a83", "Dummy" = "#1b7837")) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     ggtitle(paste(trait1, trait2, "p =", pval))
   
@@ -438,7 +448,7 @@ if (newplot == TRUE) {
       geom_boxplot(outlier.shape = NA) + # Exclude outliers
       theme_minimal() +
       labs(y = "Transition Counts", x = "", fill = "Simulation Data") +
-      scale_fill_manual(values = c("Real" = "blue", "Dummy" = "red")) +
+      scale_fill_manual(values = c("Real" = "#762a83", "Dummy" = "#1b7837")) +
       theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 5), title = element_text(size = 8)) +
       #ggtitle(paste(trait1, trait2))
       ggtitle(paste(trait1, trait2, "\nnSimsReal =", nsims_real, "    nSimsDummy =", nsims_dummy))
@@ -505,7 +515,7 @@ if (newplot == TRUE) {
         geom_boxplot(outlier.shape = NA) + # Exclude outliers
         theme_minimal() +
         labs(y = "Transition Counts", x = "", fill = "Observed/Expected") +
-        scale_fill_manual(values = c("Observed" = "blue", "Expected" = "red")) +
+        scale_fill_manual(values = c("Observed" = "#762a83", "Expected" = "#1b7837")) +
         theme(axis.text.x = element_text(angle = 45, hjust = 1), title = element_text(size = 8)) +
         ggtitle(paste(trait1, trait2, "\nnSimsObserved =", nsims_real, "    nSimsExpected =", nsims_real, "    Obs/Exp:TransCounts", pvalInteractionLabel)) +
         stat_compare_means(aes(label = after_stat(p.signif)), method = "t.test") 
@@ -519,7 +529,7 @@ if (newplot == TRUE) {
         geom_boxplot(outlier.shape = NA) + # Exclude outliers
         theme_minimal() +
         labs(y = "log(Transition Counts)", x = "", fill = "Observed/Expected") +
-        scale_fill_manual(values = c("Observed" = "blue", "Expected" = "red")) +
+        scale_fill_manual(values = c("Observed" = "#762a83", "Expected" = "#1b7837")) +
         theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 6), title = element_text(size = 8)) +
         ggtitle(paste(trait1, trait2, "\nnSimsObserved =", nsims_real, "    nSimsExpected =", nsims_real, "    Obs/Exp:TransCounts", pvalInteractionLogLabel)) +
         stat_compare_means(aes(label = after_stat(p.signif)), method = "t.test") +

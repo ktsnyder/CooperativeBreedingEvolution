@@ -15,11 +15,12 @@
 # 8/26/2021: added otherlabel arg - for csv output and to feed into findQrates
 # 4/26/2024: changed object returned from browniedf (no longer used) to browniedata
 # 4/27/2024: added findQrates outputs to browniedata columns
+# 5/23/2024: added setQrates to args
 # 
 # e.g.
 # brownieout <- browniefunction(c("Final.polygyny", "Syllable.rep.final"), islog = "Syllable.rep.final", nsim = 500)
 
-browniefunction <- function(columns, newtree = FALSE, newdata = FALSE, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, nsim = 500, islog = FALSE, phylanovaP = "not evaluated", plotsimmaps = FALSE, otherlabel = NULL) {
+browniefunction <- function(columns, newtree = FALSE, newdata = FALSE, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, nsim = 500, islog = FALSE, phylanovaP = "not evaluated", plotsimmaps = FALSE, otherlabel = NULL, setQrates = NULL) {
   require(R.utils)
   require(phytools)
  # require(ape)
@@ -42,7 +43,7 @@ browniefunction <- function(columns, newtree = FALSE, newdata = FALSE, cladesubs
   #phylanova <- phylANOVA(tree,discretetraitvec,continuoustraitvec, nsim=nsim)
   #phylanovaP = phylanova[[2]] #pval 
   
-  Qoutput <- findQrates(columns, plot=plotsimmaps, newtree = newtree, newdata = newdata, cladesubsetcolumn = cladesubsetcolumn, cladesubsetvalue = cladesubsetvalue, otherlabel = otherlabel)
+  Qoutput <- findQrates(columns, plot=plotsimmaps, newtree = newtree, newdata = newdata, cladesubsetcolumn = cladesubsetcolumn, cladesubsetvalue = cladesubsetvalue, otherlabel = otherlabel, GlobalQrates = setQrates)
   qrates <- Qoutput$qrates
   print(qrates)
   

@@ -9,21 +9,28 @@ source("subsettreedata.R")
 
 multitree = read.tree("/Users/kate/Library/CloudStorage/Box-Box/Kate_Nicole/Birdsong - Life History Evolution/BirdzillaHackett4_Stage2_1000trees.tre")
 OscineTree = read.nexus("2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex")
-newdata = "2024-02-24_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
+#newdata = "2024-02-24_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
+newdata = "2024-05-13_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
+dfIn = read.csv(newdata)
 
 
 #### Brownie ----
-otherlabel = "_Hackett4Oscine_fulltreeQ_"
-nTreesToSample = 400
+otherlabel = "_Hackett4Oscine_fulltreeQ_UpdatedSongData_"
+nTreesToSample = 300
 nSimsPerTree = 20
 df = read.csv(newdata)
 df = df[which(df$species %in% OscineTree$tip.label),]
 
 multitrees = multitree[1:nTreesToSample]
 
+# get global Q rates from consensus tree
+source("findQrates.R")
+Qout = findQrates(columns = "HighConfidence_Coop", newdata = newdata, newtree = OscineTree)
+qrates= Qout$qrates
+
 source("browniefunction.R")
-trait1vec = c("HighConfidence_Coop", "HighConfidence_Coop", "HighConfidence_Coop")
-trait2vec = c("Song.rep.final", "Syllable.rep.final", "Syll.song.final")
+trait1vec = c("HighConfidence_Coop", "HighConfidence_Coop")
+trait2vec = c("Song.rep.final", "Syllable.rep.final")
 
 for (f in 1:length(trait1vec)) {
   trait1 = trait1vec[f]
@@ -33,7 +40,7 @@ for (f in 1:length(trait1vec)) {
 #  subsetdf = subsetout$subsetdf
   
   allbrownie = set.seed(10)
-  for (i in 200:nTreesToSample) {
+  for (i in 1:nTreesToSample) {
     print(paste("tree number", i))
 #    temptree = subsetmultitree[[i]]
     temptree = multitrees[[i]]
@@ -46,14 +53,16 @@ for (f in 1:length(trait1vec)) {
   
 } # end brownie cycle through traits
 
-
-
+source("plotbrownie.R")
+plotbrownie(data = allbrownie, columns = c("HighConfidence_Coop", "Syllable.rep.final"), discreteCategoryLabels = c("Non-cooperative", "Cooperative"), islog = T, newpdf = T, otherlabel = "_MultitreeHackett4Oscine_fulltreeQ_UpdatedSongData_")
+allbrownie = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/2024-05-16 brownie multitree 300trees 20simsPerTree _Hackett4Oscine_fulltreeQ_UpdatedSongData_ HighConfidence_Coop Song.rep.final.csv")
+plotbrownie(data = allbrownie, columns = c("HighConfidence_Coop", "Song.rep.final"), discreteCategoryLabels = c("Non-cooperative", "Cooperative"), islog = T, newpdf = T, otherlabel = "_MultitreeHackett4Oscine_fulltreeQ_UpdatedSongData_")
 
 #### Simmap overlap ----
 source("test_trait_overlap_simmaps.R")
-otherlabel = "_Hackett4Oscine_multitree"
-nTreesToSample = 100
-nSimsPerTree = 50
+otherlabel = "_Hackett4Oscine_multitree_setQtree"
+nTreesToSample = 300
+nSimsPerTree = 20
 trait1 = "HighConfidence_Coop"
 trait2 = "FemaleSong_Agg01"
 df = read.csv(newdata)
@@ -61,13 +70,20 @@ df = df[which(df$species %in% OscineTree$tip.label),]
 
 multitrees = multitree[1:nTreesToSample]
 
+# Fake multitree with many consensus trees
+multitrees= as.list(rep(consTree, 50))
+otherlabel = "_multiConsensustree"
+nTreesToSample = 50
+nSimsPerTree = 20
+# end Fake multitree with many consensus trees
+
 alldfout = set.seed(10)
 alldummy = set.seed(10)
-for (i in 1:nTreesToSample) {
+for (i in 1:(0+nTreesToSample)) {
   temptree = multitrees[[i]]
   print(paste(Sys.time(), "tree #", i))
-  dfout4 <- CharacterSimmaps(columns = c(trait1,trait2), df = df, tree =  temptree, dummy = FALSE, nsims = nSimsPerTree, treelabel = otherlabel, datalabel = NULL)
-  dfDummy4 <- CharacterSimmaps(columns = c(trait1,trait2), df = df, tree =  temptree, dummy = TRUE, nsims = nSimsPerTree, treelabel = otherlabel, datalabel = NULL, dummyMethod = "makeSimmap")
+  dfout4 <- CharacterSimmaps(columns = c(trait1,trait2), df = df, tree =  temptree, dummy = FALSE, nsims = nSimsPerTree, treelabel = otherlabel, datalabel = NULL, setQratesTree = OscineTree)
+  dfDummy4 <- CharacterSimmaps(columns = c(trait1,trait2), df = df, tree =  temptree, dummy = TRUE, nsims = nSimsPerTree, treelabel = otherlabel, datalabel = NULL, dummyMethod = "makeSimmap", setQratesTree = OscineTree)
   colnames(dfout4)[which(colnames(dfout4) == "treenum")] <- "simmapNum"
   dfout4$treenum = i
   colnames(dfDummy4)[which(colnames(dfDummy4) == "treenum")] <- "simmapNum"
@@ -76,7 +92,7 @@ for (i in 1:nTreesToSample) {
   alldfout = rbind(alldfout, dfout4)
   alldummy = rbind(alldummy, dfDummy4)
   
-  if (i %in% c(2,25,50,75,100, 125, 150, 175)) {
+  if (i %in% (0+c(2,25,50,75,100, 125, 150, 175, 200, 225, 250, 275))) {
     write.csv(alldfout, paste0("Simmap Overlap Outputs/", trait1, " ", trait2, " ", nTreesToSample, "trees ", nSimsPerTree, "simsPerTree", otherlabel, "_All REAL.csv"), row.names = FALSE)
     write.csv(alldummy, paste0("Simmap Overlap Outputs/", trait1, " ", trait2, " ", nTreesToSample, "trees ", nSimsPerTree, "simsPerTree", otherlabel, "_All DUMMY.csv"), row.names = FALSE)
     print(paste("Wrote csvs at tree number", i, "--- Simmap Overlap Outputs/", trait1, " ", trait2, " ", nTreesToSample, "trees ", nSimsPerTree, "simsPerTree", otherlabel, "_All REAL.csv"))
@@ -89,8 +105,16 @@ print(Sys.time())
 Huelout = calcHuel(alldfout, alldummy)
 Huelout$p2
 
-
-
+alldfout = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Simmap Overlap Outputs/HighConfidence_Coop FemaleSong_Agg01 100trees 50simsPerTree_Hackett4Oscine_multitree_All REAL.csv")
+alldummy = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Simmap Overlap Outputs/HighConfidence_Coop FemaleSong_Agg01 100trees 50simsPerTree_Hackett4Oscine_multitree_All DUMMY.csv")
+sum(alldummy$ObsProp0Absent < median(alldfout$ObsProp0Absent))/length(alldummy$simmapNum)
+sum(alldummy$ObsProp1Absent < median(alldfout$ObsProp1Absent))/length(alldummy$simmapNum)
+sum(alldummy$ObsProp0Present < median(alldfout$ObsProp0Present))/length(alldummy$simmapNum)
+sum(alldummy$ObsProp1Present < median(alldfout$ObsProp1Present))/length(alldummy$simmapNum)
+Huelout = calcHuel(alldfout, alldummy, otherlabel = "_Hackett4Oscine_multitree_300trees-20simsPerTree")
+pdf(file = paste("simmap overlap states", trait1, trait2, "Hackett4Oscine_multitree_300trees-20simsPerTree.pdf"))
+Huelout$p3
+dev.off()
 
 #### Visualize different trees ----
 newdata = "2024-02-24_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"

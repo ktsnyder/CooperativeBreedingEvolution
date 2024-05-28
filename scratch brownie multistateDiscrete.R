@@ -2,8 +2,9 @@
 # 
 # Building function in 2nd section - status: update plot to allow nGroups != 4
 
-newdata = "2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv"
-newdata = "/Users/kate/Desktop/CooperativeBreedingEvolution/2024-02-24_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
+#newdata = "2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv"
+#newdata = "/Users/kate/Desktop/CooperativeBreedingEvolution/2024-02-24_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
+newdata = "2024-05-13_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
 treefile = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
 
 df = read.csv(newdata)
@@ -162,17 +163,26 @@ title(xlab=paste0("Rate of evolution of ", "log Song rep"),line = 2.5, cex.lab =
 #### Griesser 2017 social_system (coop x fam) ----
 #### Now being reworked for flex/functionality
 #df =  read.csv("2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv")
-df = read.csv("2024-02-24_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv")
+#df = read.csv("2024-02-24_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv")
+newdata = "2024-05-13_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
+df = read.csv(newdata)
 treefile = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
 DiscreteTrait = "social_system_incl_nk_coop_Griesser2017"
 DiscreteTrait = "grouping"
 ContinuousTrait = "Song.rep.final"
 ContinuousTrait = "Syllable.rep.final"
+otherlabel = "UpdatedSongData"
 nsim = 500
 plotsimmaps = TRUE
 unique(df$social_system_incl_nk_coop_Griesser2017)
 df$social_system_incl_nk_coop_Griesser2017[which(df$social_system_incl_nk_coop_Griesser2017 == "nk-coop")] <- "nk.coop"
 
+DiscreteTraits = c("social_system_incl_nk_coop_Griesser2017", "social_system_incl_nk_coop_Griesser2017", "grouping_Griesser2023", "grouping_Griesser2023")
+ContinuousTraits = c("Song.rep.final", "Syllable.rep.final", "Song.rep.final", "Syllable.rep.final")
+
+for (traitpair in 1:4) {
+  DiscreteTrait = DiscreteTraits[traitpair]
+  ContinuousTrait = ContinuousTraits[traitpair]
 
 subsetout = subsettreedata(columns = DiscreteTrait, newdata = df, newtree = treefile)
 subsetDisctree = subsetout$subsettree
@@ -238,7 +248,7 @@ simmappy = make.simmap(subsettree, discretetraitvec, nsim = nsim, Q= rate_matrix
 plotSimmap(simmappy[[1]])
 
 if (plotsimmaps) { 
-  simmapFileName = paste0(DiscreteTrait, " multistate simmap plots ", ContinuousTrait, " subset", Sys.Date(),".pdf")
+  simmapFileName = paste0(DiscreteTrait, " multistate simmap plots ", ContinuousTrait, " subset ", otherlabel,  Sys.Date(),".pdf")
   pdf(simmapFileName, height = 9, width = 12)
   par(mfrow = c(2,3))
   par(mar = c(3.8,3.8,3,1))
@@ -333,6 +343,7 @@ for (i in 1:nsim) {
   # print(paste("compute error",i));
   # })
 }
+write.csv(browniedata, paste(Sys.Date(), DiscreteTrait, ContinuousTrait, "multistate aceARD Brownie", otherlabel, nsim, "sims.csv"), row.names = F)
 
 # add columns that say which rates are higher in each sim - added 1/10/2024
 for (ARDcolumn1Num in 1:length(ARDRateColNames)) {
@@ -345,6 +356,7 @@ for (ARDcolumn1Num in 1:length(ARDRateColNames)) {
     }
   }
 }
+write.csv(browniedata, paste(Sys.Date(), DiscreteTrait, ContinuousTrait, "multistate aceARD Brownie", otherlabel, nsim, "sims.csv"), row.names = F)
 
 nsim = length(browniedata[,1])
 CompareColNames = colnames(browniedata)[grep("_greater_than_", colnames(browniedata))]
@@ -368,22 +380,21 @@ for (i in 1:length(SplitRates)) { # added 1/24/2024
     CompareColSums$Fraction[i] = 1-CompareColSums$Fraction1[i]
   }
 }
-compareCSVname = paste(Sys.Date(), DiscreteTrait, ContinuousTrait, "multistate aceARD Brownie", nsim, "sims COMPARE RATES.csv")
+compareCSVname = paste(Sys.Date(), DiscreteTrait, ContinuousTrait, "multistate aceARD Brownie", otherlabel, nsim, "sims COMPARE RATES.csv")
 write.csv(CompareColSums, compareCSVname, row.names = F)
 # end added 1/10/2024
 
-
-csvname = paste(Sys.Date(), DiscreteTrait, ContinuousTrait, "multistate aceARD Brownie", nsim, "sims.csv")
-pdfname = paste0(DiscreteTrait, " ", ContinuousTrait, " multistate aceARD Brownie ", nsim, " sims ", Sys.Date(), ".pdf")
+#csvname = paste(Sys.Date(), DiscreteTrait, ContinuousTrait, "multistate aceARD Brownie", nsim, "sims.csv")
+#pdfname = paste0(DiscreteTrait, " ", ContinuousTrait, " multistate aceARD Brownie ", nsim, " sims ", Sys.Date(), ".pdf")
 
 #write.csv(browniedata, csvname, row.names = FALSE)
 
 
-browniedata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/MultistateBrownie/2024-01-08 social_system_incl_nk_coop_Griesser2017 Song.rep.final multistate aceARD Brownie 500 sims.csv")
-browniedata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/MultistateBrownie/2024-01-09 grouping Song.rep.final multistate aceARD Brownie 500 sims.csv")
-browniedata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/MultistateBrownie/2024-04-02 social_system_incl_nk_coop_Griesser2017 Syllable.rep.final multistate aceARD Brownie 500 sims.csv")
-browniedata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/MultistateBrownie/2024-04-02 grouping_Griesser2023 Syllable.rep.final multistate aceARD Brownie 500 sims.csv")
-sum(browniedata$Pval < 0.05)/500
+#browniedata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/MultistateBrownie/2024-01-08 social_system_incl_nk_coop_Griesser2017 Song.rep.final multistate aceARD Brownie 500 sims.csv")
+#browniedata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/MultistateBrownie/2024-01-09 grouping Song.rep.final multistate aceARD Brownie 500 sims.csv")
+#browniedata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/MultistateBrownie/2024-04-02 social_system_incl_nk_coop_Griesser2017 Syllable.rep.final multistate aceARD Brownie 500 sims.csv")
+#browniedata = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/MultistateBrownie/2024-04-02 grouping_Griesser2023 Syllable.rep.final multistate aceARD Brownie 500 sims.csv")
+sum(browniedata$Pval < 0.05)/nsim
 
 ARDRateColNames = colnames(browniedata)[which(str_detect(colnames(browniedata), "ARDRate") & str_detect(colnames(browniedata), "greater", negate = T))]
 DiscreteTrait = browniedata$DiscreteTrait[1]
@@ -393,7 +404,7 @@ if (browniedata$DiscreteTrait[1] %in% c("grouping", "grouping_Griesser2023")) {
   ARDRateColNames = c("ARDRate_asocial", "ARDRate_pair", "ARDRate_small_groups", "ARDRate_large_groups")
 }
 
-pdfname = paste0(DiscreteTrait, " ", ContinuousTrait, " multistate aceARD Brownie ", nsim, " sims ", Sys.Date(), ".pdf")
+pdfname = paste0(DiscreteTrait, " ", ContinuousTrait, " multistate aceARD Brownie ", otherlabel," ", nsim, " sims ", Sys.Date(), ".pdf")
 
 # make rate distribution plots
 for (ARDcolumn in 1:length(ARDRateColNames)) {
@@ -449,3 +460,28 @@ title(ylab = "Frequency",line=2.5, cex.lab=1.15)
 title(xlab = "p-value", line = 2.5, cex.lab = 1)
 abline(v=0.05, col = "gray")
 dev.off()
+} # end for traitpair
+
+
+
+#### stats for fig captions ----
+files = list.files(pattern = "multistate aceARD Brownie UpdatedSongData 500 sims.csv")
+summarydf = set.seed(10)
+for (i in 1:4) {
+  filename = files[i]
+  df = read.csv(filename)
+  DiscreteTrait = df$DiscreteTrait[1]
+  ContinuousTrait = df$ContinuousTrait[1]
+  nsims = length(df$DiscreteTrait)
+  nSig = sum(df$Pval < 0.05, na.rm = T)
+  medianPval = median(df$Pval)
+  fractionSig = nSig/nsims
+  temprow = c(filename, DiscreteTrait, ContinuousTrait, nsims, nSig, fractionSig, medianPval)
+  as.data.frame(temprow)
+  summarydf = as.data.frame(rbind(summarydf, temprow))
+  colnames(summarydf) = c("filename", "DiscreteTrait", "ContinuousTrait", "nsims", "nSig", "fractionSig", "medianPval")
+}
+write.csv(summarydf, "Supp summary info - multistate Brownie 500sims 2024-05-15.csv")
+
+
+
