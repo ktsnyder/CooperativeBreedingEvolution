@@ -109,6 +109,42 @@ Rdatasubset[c(237,266),]
 Refsdata[c(237,266),]
 
 
+# after all data re-compiled
+AggNew = read.csv("2024-05-13_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv")
+AggOld = read.csv("2024-02-24_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv")
+
+AggNew = read.csv("2024-05-13_Aggregate_CBSource_Data_AllColumns.csv")
+AggOld = read.csv("2024-02-24_Aggregate_CBSource_Data_AllColumns.csv")
+
+
+sum(AggNew$species == AggOld$species)
+sum(AggNew$HighConfidence_Coop == AggOld$HighConfidence_Coop, na.rm = T)
+sum(!is.na(AggNew$HighConfidence_Coop))
+sum(!is.na(AggOld$HighConfidence_Coop))
+sum(AggNew$HighConfidence_FemaleSong == AggOld$HighConfidence_FemaleSong, na.rm = T)
+sum(!is.na(AggNew$HighConfidence_FemaleSong))
+sum(!is.na(AggOld$HighConfidence_FemaleSong))
+sum(AggNew$FemaleSong_Agg01 == AggOld$FemaleSong_Agg01, na.rm = T)
+sum(!is.na(AggNew$FemaleSong_Agg01))
+sum(!is.na(AggOld$FemaleSong_Agg01))
+sum(AggNew$MeanCoopTie2Noncoop == AggOld$MeanCoopTie2Noncoop, na.rm = T)
+sum(!is.na(AggNew$MeanCoopTie2Noncoop))
+sum(!is.na(AggOld$MeanCoopTie2Noncoop))
+sum(AggNew$Syll.song.final == AggOld$Syll.song.final, na.rm = T)
+sum(!is.na(AggNew$Syll.song.final))
+sum(!is.na(AggOld$Syll.song.final))
+sum(AggNew$Syllable.rep.final == AggOld$Syllable.rep.final, na.rm = T)
+sum(!is.na(AggNew$Syllable.rep.final))
+sum(!is.na(AggOld$Syllable.rep.final))
+sum(AggNew$Song.rep.final == AggOld$Song.rep.final, na.rm = T)
+sum(!is.na(AggNew$Song.rep.final))
+sum(!is.na(AggOld$Song.rep.final))
+sum(AggNew$Duration.final == AggOld$Duration.final, na.rm = T)
+sum(!is.na(AggNew$Duration.final))
+sum(!is.na(AggOld$Duration.final))
+sum(AggNew$Interval.final == AggOld$Interval.final, na.rm = T)
+sum(!is.na(AggNew$Interval.final))
+sum(!is.na(AggOld$Interval.final))
 
 ### redo brownie ----
 
@@ -142,3 +178,21 @@ for (k in 1:length(songfeatures)) {
 } # end for k
 
 
+
+df = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/2024-05-13HighConfidence_CoopSong.rep.finalUpdatedSongData_brownie500sim.csv")
+dfold = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/Brownie/2024-02-25HighConfidence_CoopSong.rep.finalHackettOscine_brownie500sim.csv")
+sum(df$Pval < 0.05)/500
+df$ARDRate1 == dfold$ARDRate1
+df$ARDRate0 == dfold$ARDRate0
+df$ERRate == dfold$ERRate
+
+df = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/2024-05-13HighConfidence_CoopSyllable.rep.finalUpdatedSongData_brownie500sim.csv")
+dfold = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/OutputFiles/Brownie/2024-02-25HighConfidence_CoopSyllable.rep.finalHackettOscine_brownie500sim.csv")
+sum(df$Pval < 0.05)/500
+sum(dfold$Pval < 0.05)/500
+df$ARDRate1 == dfold$ARDRate1
+df$ARDRate0 == dfold$ARDRate0
+df$ERRate == dfold$ERRate
+
+head(df)
+head(dfold)
