@@ -15,7 +15,8 @@
 ## 1/30/2024 - calcHuel: outputs a 1-row dataframe with medians of simmap overlap values for Real and Dummy sims, p-value, and post-hoc test p-values
 ## 2/1/2024 - calcHuel: Observed State boxplot organized and labeled with actual states (e.g. "Asocial", "Pair, small group, large group"), made ordered factor to have one label per pair of boxplots (Real and Dummy)
 ## 5/20/2024 - changed color scheme in calcHuel to green/purple instead of red/blue
-## 5/26/2024 - added setQratesTree to args - specify a tree for 
+## 5/26/2024 - added setQratesTree to args - specify a tree for calculating Q rates different from the tree being modeled on
+## 5/29/2024 - fixed issue where the set Qrates tree was also the one that got modeled on
 
 #setwd("/Users/kate/Desktop/CooperativeBreedingEvolution/")
 library(phytools)
@@ -93,7 +94,7 @@ CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalab
   FSAnc = str_remove(FSrates$ARDlikanc, "ARDlik.anc ")  # added this for sim.history()
   FSAnc = as.numeric(FSAnc)
   names(FSAnc) <- c("0","1")
-  subsets <- subsettreedata(columns = columns, newdata = df, newtree = Qtree)
+  subsets <- subsettreedata(columns = columns, newdata = df, newtree = tree)
   subsetdf <- subsets$subsetdf
   subsettree <- subsets$subsettree
   FSvec <- subsetdf[,columns[2]]
@@ -418,6 +419,7 @@ if (newplot == TRUE) {
   # Create the boxplot
   p3 <-  ggplot(dfCombined, aes(x = Label, y = ObservedState.prop, fill = Which)) +
     geom_boxplot(outlier.shape = NA) + # Exclude outliers
+    # geom_dotplot(binaxis='y', stackdir='center', dotsize=0.05, position=position_dodge(width=0.75), color="black", binwidth = 0.003, stackratio = 0.5) + # consider adding dots to plot - will probably need arg tweaking based on number of dots, however.
     theme_minimal() +
     labs(y = "Observed State Proportion", x = "", fill = "Simulation Data") +
     scale_fill_manual(values = c("Real" = "#762a83", "Dummy" = "#1b7837")) +

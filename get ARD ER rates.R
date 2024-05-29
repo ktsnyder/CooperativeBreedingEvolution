@@ -3,8 +3,13 @@
 source("findQrates.R")
 
 newdata = "2024-02-24_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
+newdata = "2024-05-13_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
 dfIn = read.csv(newdata)
-treefile = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
+treeOscine = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
+OscineTree = read.nexus(treeOscine)
+treeIn = read.nexus("2024-05-26ConsensusPasserineTreeHackett4_1000_mean-edge_ignore-absent.nex")
+treefile = drop.tip(treeIn, which(!treeIn$tip.label %in% OscineTree$tip.label))
+
 
 SocialColumns <- c("Griesser2023.Colonial01" , "Griesser2023.MoreThanTwoCaretakers" ,"Griesser2023.LongSocialBonds","Griesser2023.GroupsLargerThanPair", "Griesser2023.TwoOrMoreCaretakers", "Griesser2023.Asocial0VsSocial1", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2017FamilialLiving", "Final.polygyny", "HighConfidence_Coop", "FemaleSong_Agg01", "MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop", "AnyNoncoopEqualsNoncoop")
 
@@ -38,4 +43,4 @@ for ( i in 1:length(SocialColumns)) {
 allQout$ARDvERsimmapQ.LRtestPval.abbr = as.numeric(allQout$ARDvERsimmapQ.LRtestPval)
 allQout$ARDvERsimmapQ.LRtestPval.abbr = round(allQout$ARDvERsimmapQ.LRtestPval.abbr, digits = 3)
 allQout$ARDvERsimmapQ.LRtestPval.abbr[which(allQout$ARDvERsimmapQ.LRtestPval.abbr < 0.001)] <- "<0.001"
-write.csv(allQout,"binary trait Qrates for supp_rounded.csv")
+#write.csv(allQout,"binary trait Qrates for supp_rounded.csv")
