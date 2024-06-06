@@ -200,6 +200,15 @@ socTraits = c("Griesser2023.Asocial0vsSocial1", "Griesser2023.GroupsLargerThanPa
 socTraits = c("HighConfidence_Coop", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop", "AnyNoncoopEqualsNoncoop", "MeanCoopTie2Noncoop", "Griesser2017Coop", "CornwallisCoop", "CockburnCoop", "JetzCoop", "DaleCoop", "DowningCoop", "BiagoliniCoop")
 otherTraits = c("FemaleSong_Agg01")
 
+# dfout1 = read.csv("Simmap Overlap Outputs/ HighConfidence_Coop FemaleSong_Agg01 REAL simmap overlap_counts output nsim 500 HackettPasserineMeanEdgeIgnoreAbsent .csv")
+# dfDummy1 = read.csv("Simmap Overlap Outputs/ HighConfidence_Coop FemaleSong_Agg01 DUMMYResampledMkSimmap-CoopFS simmap overlap_counts output nsim 500 HackettPasserineMeanEdgeIgnoreAbsent .csv")
+# calcHuelout = calcHuel(dfout1, dfDummy1, otherlabel = "HackettPasserineMeanEdgeIgnoreAbsent")
+
+dfDummy1 = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Simmap Overlap Outputs/HighConfidence_Coop FemaleSong_Agg01 200trees 20simsPerTree_multitree_setQtreeCorrected_All DUMMY.csv")
+dfout1 = read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Simmap Overlap Outputs/HighConfidence_Coop FemaleSong_Agg01 200trees 20simsPerTree_multitree_setQtreeCorrected_All REAL.csv")
+calcHuelout = calcHuel(dfout1, dfDummy1, otherlabel = "Multitree")
+
+
 outlist = list()
 boxplotlist = list()
 transplotlist = list()

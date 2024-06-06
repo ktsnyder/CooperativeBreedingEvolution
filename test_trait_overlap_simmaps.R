@@ -17,6 +17,7 @@
 ## 5/20/2024 - changed color scheme in calcHuel to green/purple instead of red/blue
 ## 5/26/2024 - added setQratesTree to args - specify a tree for calculating Q rates different from the tree being modeled on
 ## 5/29/2024 - fixed issue where the set Qrates tree was also the one that got modeled on
+## 6/5/2024 - columnForGlobalQ = NULL, columnGlobalQrates = NULL added
 
 #setwd("/Users/kate/Desktop/CooperativeBreedingEvolution/")
 library(phytools)
@@ -64,7 +65,7 @@ source("findQrates.R")
 
 
 #### CharacterSimmaps fxn ----
-CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalabel = NULL, dummyMethod = c("simHistory", "makeSimmap"), plotSampleSimmaps = FALSE, cladesubsetvalue = NULL, setQratesTree = NULL) {
+CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalabel = NULL, dummyMethod = c("simHistory", "makeSimmap"), plotSampleSimmaps = FALSE, cladesubsetvalue = NULL, setQratesTree = NULL, columnForGlobalQ = NULL, columnGlobalQrates = NULL) {
   
   if (is.null(datalabel)) {
     datalabel = paste(columns[1], columns[2])
@@ -101,6 +102,19 @@ CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalab
   names(FSvec) <- subsetdf$species
   Coopvec <- subsetdf[,columns[1]]
   names(Coopvec) <- subsetdf$species
+  
+  if (is.matrix(columnGlobalQrates)) {
+    if (columnForGlobalQ == 1) {
+      coopQ <- columnGlobalQrates
+      coopQ01 <- coopQ[3]
+      coopQ10 <- coopQ[2]
+    } else {
+      FSQ <- columnGlobalQrates
+      FSQAbsPres <- FSQ[3]
+      FSQPresAbs <- FSQ[2]
+    }
+  }
+  
   
   if (dummy == FALSE) {
     FSsimtrees <- make.simmap(tree = subsettree, x = FSvec, model = "ARD", nsim = nsims, Q = FSQ)
