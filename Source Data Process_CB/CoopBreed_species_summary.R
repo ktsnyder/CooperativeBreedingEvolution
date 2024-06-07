@@ -13,13 +13,16 @@
 ## 2/23/2024 - edited to work with new output of merge_data_allcolumns.R
 ## 2/24/2024 - edited to do Griesser et al 2023 binarization
 ## 5/13/2024 - added AnyNoncoopEqualsNoncoop, require dplyr
+## 6/6/2026 - fixed AnyNoncoopEqualsNoncoop (had assigned anything containing "0" as "1" *facepalm*); made new output column "JetzCoopInclCockburn" to enable single-source testing of Jetz data; integrated code from end of merge_data_allcolumns.R that added the HighConfidence_Coop column to the database and associated HighConfCoopFile = "2024-05-13_CoopClassesWSourceColumns_HighConfCoopColumn.csv" arg
 
 #setwd("~/Desktop/CooperativeBreedingEvolution/Source Data Process_CB")
 
 #coopbreedfile = "2024-02-24_Aggregate_CBSource_Data_AllColumns.csv"
+#coopbreedfile = "2024-05-13_Aggregate_CBSource_Data_AllColumns.csv"
 #CoopBreed_species_summary(coopbreedfile = coopbreedfile)
 
-CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Update.csv") {
+
+CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Update.csv", HighConfCoopFile = "2024-05-13_CoopClassesWSourceColumns_HighConfCoopColumn.csv") {
   require(dplyr)
   ourdf <- read.csv(file = coopbreedfile)
   
@@ -91,13 +94,13 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
     }
     
     if (is.na(tempRowIn$System_Jetz2011)) {
-      Jetz <- NA
+      Jetz <- JetzInclCockburn <- NA
     } else if (tempRowIn$System_Jetz2011 == "Non-cooperative") {
-      Jetz <- 0
+      Jetz <- JetzInclCockburn <- 0
     } else if (tempRowIn$System_Jetz2011 == "Cooperative") {
-      Jetz <- 1
+      Jetz <- JetzInclCockburn <- 1
     } else {
-      Jetz <- NA
+      Jetz <- JetzInclCockburn <- NA
     }
     
     JetzSource <- as.character(tempRowIn$Source_Jetz2011)
@@ -208,9 +211,9 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
       } else {AnyCoopEqualsCoop = NA}
         
         if (0 %in% allsourcesvec) {
-          AnyNoncoopEqualsNoncoop = 1
-        } else if (0 %in% allsourcesvec) {
           AnyNoncoopEqualsNoncoop = 0
+        } else if (1 %in% allsourcesvec) {
+          AnyNoncoopEqualsNoncoop = 1
         } else {AnyNoncoopEqualsNoncoop = NA}
 
         if (meanclass > 0.5) { # 3/8/2022 changed from >=
@@ -247,9 +250,9 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
     
     
     # this comes after all the if...else statements for each column - putting the whole thing together!
-    tempRowOut <- c(species, MeanCoopOmitTies, MeanCoopTie2Noncoop, MeanCoopTie2Coop, AnyCoopEqualsCoop, AnyNoncoopEqualsNoncoop, Kin_NK, numSourcesNonCoop, numSourcesCoop, SourceDiscrepancy, Dunn, Biagolini, DowningCoop, Jetz, Rubenstein, Cockburn, ReihlCoop, Griesser2017_Coop, BOWCoop, Dale, Cornwallis, RiehlKin, DowningKinCoop, Griesser2017_KinCoop, Griesser2017_Familial, numKin, numNonKin, numMixedKinNonKin)  # removed FemaleSong, added Mikula and Dale; on 2/24/2024, removed Mikula
+    tempRowOut <- c(species, MeanCoopOmitTies, MeanCoopTie2Noncoop, MeanCoopTie2Coop, AnyCoopEqualsCoop, AnyNoncoopEqualsNoncoop, Kin_NK, numSourcesNonCoop, numSourcesCoop, SourceDiscrepancy, Dunn, Biagolini, DowningCoop, Jetz, JetzInclCockburn, Rubenstein, Cockburn, ReihlCoop, Griesser2017_Coop, BOWCoop, Dale, Cornwallis, RiehlKin, DowningKinCoop, Griesser2017_KinCoop, Griesser2017_Familial, numKin, numNonKin, numMixedKinNonKin)  # removed FemaleSong, added Mikula and Dale; on 2/24/2024, removed Mikula
     summarydf <- rbind(summarydf, tempRowOut)
-    colnames(summarydf) <- c("species","MeanCoopOmitTies", "MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "AnyCoopEqualsCoop", "AnyNoncoopEqualsNoncoop", "Kin_NK", "numSourcesNonCoop", "numSourcesCoop", "SourceDiscrepancy", "DunnCoop","BiagoliniCoop", "DowningCoop", "JetzCoop", "RubensteinCoop", "CockburnCoop", "ReihlCoop", "Griesser2017Coop", "BOWCoop", "DaleCoop", "CornwallisCoop", "RiehlKin", "DowningKinNKCoop", "Griesser2017KinCoop", "Griesser2017FamilialLiving", "numKin", "numNonKin", "numMixed") # removed FemaleSong, added Mikula and Dale; 2/24/24 removed Mikula
+    colnames(summarydf) <- c("species","MeanCoopOmitTies", "MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "AnyCoopEqualsCoop", "AnyNoncoopEqualsNoncoop", "Kin_NK", "numSourcesNonCoop", "numSourcesCoop", "SourceDiscrepancy", "DunnCoop","BiagoliniCoop", "DowningCoop", "JetzCoop", "JetzCoopInclCockburn", "RubensteinCoop", "CockburnCoop", "ReihlCoop", "Griesser2017Coop", "BOWCoop", "DaleCoop", "CornwallisCoop", "RiehlKin", "DowningKinNKCoop", "Griesser2017KinCoop", "Griesser2017FamilialLiving", "numKin", "numNonKin", "numMixed") # removed FemaleSong, added Mikula and Dale; 2/24/24 removed Mikula
     
   }  # end for (i in 1:length(ourdf$species_in_birdtree))
   
@@ -310,4 +313,11 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
   
   write.csv(coopsongdf, paste0(Sys.Date(),"_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv"), row.names = FALSE)
   
+  # adapted from end of merge_data_allcolumns.R
+  if (is.character(HighConfCoopFile)) {
+    fulldf = read.csv(HighConfCoopFile)
+    CoopSongSocPasser = merge(fulldf[,c("species", "HighConfidence_Coop")], coopsongdf, by = "species", all.y = T)
+    write.csv(CoopSongSocPasser, paste0(Sys.Date(), "_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"), row.names = F)
+  }
+
 } # end function
