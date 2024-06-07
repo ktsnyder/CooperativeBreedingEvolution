@@ -73,27 +73,32 @@ for (k in 1:length(songfeatures)) {
 
 # Brownie - All other cooperative breeding classification methods with Song repertoire
 dfIn = read.csv(newdata)
-dfIn$AnyNoncoopEqualsNoncoop = dfIn$MeanCoopTie2Noncoop
-dfIn$AnyNoncoopEqualsNoncoop[which(dfIn$SourceDiscrepancy == 1)] = 0
+dfIn$AnyNoncoopEqualsNoncoop2 = dfIn$MeanCoopTie2Noncoop
+dfIn$AnyNoncoopEqualsNoncoop2[which(dfIn$SourceDiscrepancy == 1)] = 0
 newdata = dfIn
 CBcolumns <- c("MeanCoopTie2Noncoop","MeanCoopTie2Coop", "AnyCoopEqualsCoop", "AnyNoncoopEqualsNoncoop", "MeanCoopOmitTies")
-CBcolumns = rep(c("BiagoliniCoop", "DowningCoop", "JetzCoop", "CockburnCoop" , "Griesser2017Coop" , "DaleCoop", "CornwallisCoop"),2)
-songtraits = c(rep("Song.rep.final",7), rep("Syllable.rep.final",7))
+CBcolumns = rep(c("BiagoliniCoop", "DowningCoop", "CockburnCoop" , "Griesser2017Coop" , "DaleCoop", "CornwallisCoop"),2) #"JetzCoop", 
+songtraits = c(rep("Song.rep.final",6), rep("Syllable.rep.final",6))
+
+newdata = "2024-06-06_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
+CBcolumns = rep("JetzCoopInclCockburn",2)
+songtraits = c("Song.rep.final", "Syllable.rep.final")
 
 discreteCatLabels = c("Non-cooperative", "Cooperative")
-feature <- "Syll.song.final"
+#feature <- "Syll.song.final"
 nsim = 500
 currentlabel <- " HackettOscine_LocalQ"
 
-findQout = findQrates(columns = "HighConfidence_Coop", newtree = treefile, newdata = newdata)
-GlobalQrates = findQout$qrates
+#findQout = findQrates(columns = "HighConfidence_Coop", newtree = treefile, newdata = newdata)
+#GlobalQrates = findQout$qrates
+#currentlabel <- " HackettOscine_GlobalQ"
 
-for (k in 4:length(CBcolumns)) {
+for (k in 1:length(CBcolumns)) {
   print(Sys.time())
   CBcolumn = CBcolumns[k]
   feature = songtraits[k]
   print(CBcolumn)
-  browniefunction(columns = c(CBcolumn, feature), newdata = newdata, newtree = treefile, nsim = nsim, islog = feature, plotsimmaps = FALSE, otherlabel = currentlabel)
+  browniefunction(columns = c(CBcolumn, feature), newdata = newdata, newtree = treefile, nsim = nsim, islog = feature, plotsimmaps = FALSE, otherlabel = currentlabel)#, setQrates = GlobalQrates)
   if (file.exists(paste0("OutputFiles/",Sys.Date(),CBcolumn,feature, currentlabel, "_brownie",nsim,"sim.csv"))) {
     print("file exists")
     plotbrownie(data = paste0(Sys.Date(),CBcolumn,feature, currentlabel, "_brownie",nsim,"sim.csv"), columns = c(CBcolumn,feature), discreteCategoryLabels = discreteCatLabels, otherlabel = currentlabel, newpdf = TRUE, nsim = nsim, islog = TRUE)
@@ -260,6 +265,7 @@ sum(!is.na(dfIn$AsocSmallLarge0_Pair1))
 socialityMetrics = c("Griesser2023.Asocial0vsSocial1", "Griesser2023.GroupsLargerThanPair", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2023.LongSocialBonds", "Griesser2017FamilialLiving", "Griesser2023.Colonial01", "Final.polygyny", "Griesser2023.TwoOrMoreCaretakers", "Griesser2023.MoreThanTwoCaretakers")#, "MeanCoopTie2Noncoop", "MeanCoopTie2Coop")
 socialityMetrics = c("MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop")
 socialityMetrics = c("NonkinNoncoop0_FamAndOrCoop1", "AsocPairLarge0_SmallGroup1", "AsocSmallLarge0_Pair1")
+socialityMetrics = c("BiagoliniCoop", "DowningCoop", "JetzCoop", "CockburnCoop" , "Griesser2017Coop" , "DaleCoop", "CornwallisCoop")
 
 treelabel = "HackettOscineER"
 nsims_real = 500
