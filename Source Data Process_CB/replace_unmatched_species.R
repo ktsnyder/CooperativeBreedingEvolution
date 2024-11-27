@@ -6,10 +6,10 @@
 # Last Update: 8/17/2021 - added post-check to ensure all duplicates successfully removed for those sources that had 2+ entries for some species
 # Updated: 3/7/2022 - add Odom et al 2014
 
-setwd("~/Desktop/CooperativeBreedingEvolution/Source Data Process_CB")
+setwd("Source Data Process_CB")
 
 library(phytools)
-birdtree <- read.nexus("birdzillatreeMaybeConsensus.nex")
+birdtree <- read.nexus("birdzillatreeForTipNames.nex")
 thousandtrees <- read.tree("~/Desktop/CooperativeBreedingEvolution/BirdzillaHackett3.tre")
 birdtree <- thousandtrees[[1]]
 AllBirdtreeSpecies <- birdtree$tip.label
@@ -186,7 +186,7 @@ length(df$BirdtreeSpecies)
 
 
 # Odom et al 2014 - female song
-df <- read.csv("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/FemaleSongData_OdomEtal2014_PresentAbsentSubset.csv")
+df <- read.csv("Source Data Process_CB/FemaleSongData_OdomEtal2014_PresentAbsentSubset.csv")
 df$Latin_binomial[which(df$Latin_binomial == "Chlorophoneus_sulfureopectus")] <- "Telophorus_sulfureopectus"
 df$Latin_binomial[which(df$Latin_binomial == "Phylidonyris_nigra")] <- "Phylidonyris_niger"
 df$Latin_binomial[which(df$Latin_binomial == "Phylidonyris_pyrrhoptera")] <- "Phylidonyris_pyrrhopterus"

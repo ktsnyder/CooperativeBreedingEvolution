@@ -13,7 +13,8 @@
 ## 2/23/2024 - edited to work with new output of merge_data_allcolumns.R
 ## 2/24/2024 - edited to do Griesser et al 2023 binarization
 ## 5/13/2024 - added AnyNoncoopEqualsNoncoop, require dplyr
-## 6/6/2026 - fixed AnyNoncoopEqualsNoncoop (had assigned anything containing "0" as "1" *facepalm*); made new output column "JetzCoopInclCockburn" to enable single-source testing of Jetz data; integrated code from end of merge_data_allcolumns.R that added the HighConfidence_Coop column to the database and associated HighConfCoopFile = "2024-05-13_CoopClassesWSourceColumns_HighConfCoopColumn.csv" arg
+## 6/6/2024 - fixed AnyNoncoopEqualsNoncoop (had assigned anything containing "0" as "1" *facepalm*); made new output column "JetzCoopInclCockburn" to enable single-source testing of Jetz data; integrated code from end of merge_data_allcolumns.R that added the HighConfidence_Coop column to the database and associated HighConfCoopFile = "2024-05-13_CoopClassesWSourceColumns_HighConfCoopColumn.csv" arg
+## 6/7/2024 - AnyNoncoopEqualsNoncoop - made it be NA if meanclass is NA 
 
 #setwd("~/Desktop/CooperativeBreedingEvolution/Source Data Process_CB")
 
@@ -197,42 +198,43 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
       SourceDiscrepancy <- 0
     }
     
-      if (!is.na(meanclass)) {
-        if (meanclass > 0.5) { # 3/8/2022 changed from >=
-          MeanCoopOmitTies <- 1
-        } else if (meanclass < 0.5) {
-          MeanCoopOmitTies <- 0
-        } else {MeanCoopOmitTies <- NA}
-
+    if (!is.na(meanclass)) {
+      if (meanclass > 0.5) { # 3/8/2022 changed from >=
+        MeanCoopOmitTies <- 1
+      } else if (meanclass < 0.5) {
+        MeanCoopOmitTies <- 0
+      } else {MeanCoopOmitTies <- NA}
+      
       if (1 %in% allsourcesvec) {
         AnyCoopEqualsCoop = 1
       } else if (0 %in% allsourcesvec) {
         AnyCoopEqualsCoop = 0
       } else {AnyCoopEqualsCoop = NA}
-        
-        if (0 %in% allsourcesvec) {
-          AnyNoncoopEqualsNoncoop = 0
-        } else if (1 %in% allsourcesvec) {
-          AnyNoncoopEqualsNoncoop = 1
-        } else {AnyNoncoopEqualsNoncoop = NA}
-
-        if (meanclass > 0.5) { # 3/8/2022 changed from >=
-          MeanCoopTie2Noncoop <- 1
-        } else if (meanclass <= 0.5) {
-          MeanCoopTie2Noncoop <- 0
-        } else {MeanCoopTie2Noncoop <- NA}
-
-        if (meanclass >= 0.5) { # 3/8/2022 changed from >=
-          MeanCoopTie2Coop <- 1
-        } else if (meanclass < 0.5) {
-          MeanCoopTie2Coop <- 0
-        } else {MeanCoopTie2Coop <- NA}
-       } else {  # end if !is.na(meanclass)
-        MeanCoopOmitTies <- NA
-        AnyCoopEqualsCoop <- NA
-        MeanCoopTie2Noncoop <- NA
-        MeanCoopTie2Coop <- NA
-       }  # end else
+      
+      if (0 %in% allsourcesvec) {
+        AnyNoncoopEqualsNoncoop = 0
+      } else if (1 %in% allsourcesvec) {
+        AnyNoncoopEqualsNoncoop = 1
+      } else {AnyNoncoopEqualsNoncoop = NA}
+      
+      if (meanclass > 0.5) { # 3/8/2022 changed from >=
+        MeanCoopTie2Noncoop <- 1
+      } else if (meanclass <= 0.5) {
+        MeanCoopTie2Noncoop <- 0
+      } else {MeanCoopTie2Noncoop <- NA}
+      
+      if (meanclass >= 0.5) { # 3/8/2022 changed from >=
+        MeanCoopTie2Coop <- 1
+      } else if (meanclass < 0.5) {
+        MeanCoopTie2Coop <- 0
+      } else {MeanCoopTie2Coop <- NA}
+    } else {  # end if !is.na(meanclass)
+      MeanCoopOmitTies <- NA
+      AnyCoopEqualsCoop <- NA
+      MeanCoopTie2Noncoop <- NA
+      MeanCoopTie2Coop <- NA
+      AnyNoncoopEqualsNoncoop = NA
+    }  # end else
         
     allkinsources <- c(Griesser2017_KinCoop, RiehlKin, DowningKinCoop)
     numKin <- sum(allkinsources == "K", na.rm = TRUE)

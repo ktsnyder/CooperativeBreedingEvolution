@@ -8,6 +8,10 @@ setwd("/Users/kate/Desktop/CooperativeBreedingEvolution")
 
 #files = c("2024-04-28 brownie multitree 400trees 20simsPerTree _Hackett4Oscine_fulltreeQ_ HighConfidence_Coop Syll.song.final.csv", "2024-04-28 brownie multitree 400trees 20simsPerTree _Hackett4Oscine_fulltreeQ_ HighConfidence_Coop Syllable.rep.final.csv", "2024-04-28 brownie multitree 400trees 20simsPerTree _Hackett4Oscine_fulltreeQ_ HighConfidence_Coop Song.rep.final.csv")
 files = c("2024-05-16 brownie multitree 300trees 20simsPerTree _Hackett4Oscine_fulltreeQ_UpdatedSongData_ HighConfidence_Coop Song.rep.final.csv", "2024-05-16 brownie multitree 300trees 20simsPerTree _Hackett4Oscine_fulltreeQ_UpdatedSongData_ HighConfidence_Coop Syllable.rep.final.csv")
+files = c("/Users/kate/Desktop/CooperativeBreedingEvolution/2024-05-31 brownie multitree 200trees 20simsPerTree _Hackett4Oscine_consensustreeQ_ HighConfidence_Coop Syllable.rep.final.csv",
+"/Users/kate/Desktop/CooperativeBreedingEvolution/2024-05-30 brownie multitree 200trees 20simsPerTree _Hackett4Oscine_consensustreeQ_ HighConfidence_Coop Song.rep.final.csv")
+
+
 
 for (tempfeat in c("Syllable.rep.final", "Song.rep.final")) {
   

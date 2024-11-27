@@ -81,13 +81,13 @@ CBcolumns = rep(c("BiagoliniCoop", "DowningCoop", "CockburnCoop" , "Griesser2017
 songtraits = c(rep("Song.rep.final",6), rep("Syllable.rep.final",6))
 
 newdata = "2024-06-06_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
-CBcolumns = rep("JetzCoopInclCockburn",2)
-songtraits = c("Song.rep.final", "Syllable.rep.final")
+CBcolumns = rep("HighConfidence_Coop",2)
+songtraits = c("Syll.song.min", "Syll.song.max")
 
 discreteCatLabels = c("Non-cooperative", "Cooperative")
 #feature <- "Syll.song.final"
 nsim = 500
-currentlabel <- " HackettOscine_LocalQ"
+currentlabel <- " HackettOscine_UpdatedSongData"
 
 #findQout = findQrates(columns = "HighConfidence_Coop", newtree = treefile, newdata = newdata)
 #GlobalQrates = findQout$qrates
@@ -166,10 +166,10 @@ multigrouptraits = c("Griesser2023.Asocial0VsSocial1", "Griesser2023.Colonial01"
 songtraits = c("Song.rep.final","Syllable.rep.final", "Syll.song.final", "Duration.final", "Interval.final", "Song.rep.max", "Song.rep.min","Syllable.rep.max", "Syllable.rep.min")
 #songtraits = c("Song.rep.max", "Song.rep.min","Syllable.rep.max", "Syllable.rep.min", "Song.rep.final","Syllable.rep.final")
 #multigrouptraits = c("HighConfidence_Coop","HighConfidence_Coop", "HighConfidence_Coop", "HighConfidence_Coop", "AnyNoncoopEqualsNoncoop", "AnyNoncoopEqualsNoncoop")
-multigrouptraits = c("AnyNoncoopEqualsNoncoop", "BiagoliniCoop", "DowningCoop", "JetzCoop", "CockburnCoop" , "Griesser2017Coop" , "DaleCoop", "CornwallisCoop")
+multigrouptraits = c("AnyNoncoopEqualsNoncoop", "BiagoliniCoop", "DowningCoop", "JetzCoopInclCockburn", "CockburnCoop" , "Griesser2017Coop" , "DaleCoop", "CornwallisCoop")
 songtraits = c("Song.rep.final", "Syllable.rep.final")
 #newdata = "2024-02-24_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
-newdata = "/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2024-05-13_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
+newdata = "/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/2024-06-06_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
 dfIn = read.csv(newdata)
 dfIn$AnyNoncoopEqualsNoncoop = dfIn$MeanCoopTie2Noncoop
 dfIn$AnyNoncoopEqualsNoncoop[which(dfIn$SourceDiscrepancy == 1)] = 0
@@ -192,12 +192,10 @@ for (j in 1:length(songtraits)) {
     Ngroups = length(unique(discvec))
     
     tryCatch({
-      # Code that might fail
       phylANOVAout = phylANOVA(subsettree, x = discvec, y = contvec, nsim = 50000, posthoc = TRUE)
       phylANOVAp = phylANOVAout$Pf
       temprow = c(tempgrouptrait, Ngroups, songtrait, Nspecies, phylANOVAp)
     }, error = function(e) {
-      # Code to run in case of an error
       temprow = c(tempgrouptrait, Ngroups, songtrait, Nspecies, NA)
       message("Error in phylANOVA computation: ", e$message)
     })
@@ -297,6 +295,8 @@ ggsave(plotname, m3, width = 7.5, height = 3.8*nPlots, units = "in")
 #### Simmap overlap and counts ----
 # Using already-generated data from CharacterSimmaps
 
+socialityMetrics = c("MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop", "AnyNoncoopEqualsNoncoop", "HighConfidence_Coop")
+
 for (i in 1:length(socialityMetrics)) {
   tempMetric = socialityMetrics[i]
   print(tempMetric)
@@ -365,6 +365,7 @@ plotlist = list()
 plotlistGray = list()
 transitionList = list()
 outlist = list()
+socialityMetrics = c("MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop", "AnyNoncoopEqualsNoncoop", "HighConfidence_Coop")
 for (i in 1:length(socialityMetrics)) {
   tempMetric = socialityMetrics[i]
   print(tempMetric)
@@ -379,6 +380,8 @@ for (i in 1:length(socialityMetrics)) {
   IndFile = filelist[which(str_detect(filelist,"DUMMY"))]
   DepFile = filelist[which(str_detect(filelist,"REAL"))]
   
+  print(DepFile)
+  print(IndFile)
   tempdfDep = read.csv(DepFile)
   tempdfInd = read.csv(IndFile)
   nsims = nsims_real = length(tempdfDep[,1])
@@ -476,7 +479,6 @@ for (i in 1:length(socialityMetrics)) {
     lab1x = paste("Large groups") 
   }
   
-  #plotSimpleDiscreteBayes(columns = columns, df = tempdfDep, nocorrDdf = NULL, LhCol = "Lh", nsim = nsims, treelabel = "HackettOscine", newpdf = TRUE, cladesubsetvalue = NULL, ylabel = "Transition Counts", arrowmod = 0.5, otherlabel = "TransitionCountArrows_halfTotalTransIndependent", roundDigits = 3)
   trait1StateLabels = c(lab0x, lab1x)
   trait2StateLabels = c(labx0, labx1)
   plottitle = paste(trait1, trait2, "nsims:", nsims_real)
@@ -485,19 +487,6 @@ for (i in 1:length(socialityMetrics)) {
   templist = outlist[[i]]
   plotlist[[i]] = templist$transition_plot
   plotlistGray[[i]] = templist$transitionplot_GrayNS
-  
-  # calcHuelout = calcHuel(tempdfDep, tempdfInd)
-  # require(gridExtra)
-  # plotname = paste0("Simmap Overlap Outputs/",tempMetric, " FemaleSong_Agg01 ", nsims_real, " ", nsims_dummy, " ", treelabel, " withTransCountsStatsSig.pdf")
-  # nPlots = length(grep("^p", names(calcHuelout)))
-  # m3 <- marrangeGrob(calcHuelout[1:nPlots], ncol = 1, nrow = nPlots)
-  # #ggsave(plotname, m3, width = 7.5, height = 3.9*nPlots, units = "in")
-  # socialityPlots[[i]] <- calcHuelout
-  # socialityStats[[i]] <- calcHuelout$TransitionStats
-  # names(socialityStats)[i] <- calcHuelout$filename
-  # 
-  # print(calcHuelout$filename)
-  # print(calcHuelout$TransitionStats)
 }
 #plotlist[[i]]$transition_plot
 #plotlist[[i]]$transition_df
@@ -512,7 +501,7 @@ grobs_with_margins <- lapply(plotlist, function(plot) {
   ggplotGrob(plot_with_margin)
 })
 # Arrange the grobs on a single page
-single_page_plot <- grid.arrange(grobs = grobs_with_margins, ncol = 2, nrow = 6) # Adjust ncol and nrow as needed
+single_page_plot <- grid.arrange(grobs = grobs_with_margins, ncol = 2, nrow = 3) # Adjust ncol and nrow as needed
 
 # Save the arranged plot to a file
 ggsave("transition plots sociality FS_onepage_median_percentStates_percentTrending.pdf", single_page_plot, width = 18, height = 38, units = "in")
@@ -526,10 +515,11 @@ grobs_with_marginsGray <- lapply(plotlistGray, function(plot) {
   ggplotGrob(plot_with_margin)
 })
 # Arrange the grobs on a single page
-single_page_plotGray <- grid.arrange(grobs = grobs_with_marginsGray, ncol = 2, nrow = 6) # Adjust ncol and nrow as needed
+single_page_plotGray <- grid.arrange(grobs = grobs_with_marginsGray, ncol = 2, nrow = 3) # Adjust ncol and nrow as needed
 
 # Save the arranged plot to a file
 ggsave("transition plots sociality FS_onepage_median_percentStates_weightsNumTransitions_GrayNonsig.pdf", single_page_plotGray, width = 18, height = 38, units = "in")
+ggsave("transition plots AltCoops FSAgg_HighConfFS_onepage_median_percentStates_weightsNumTransitions_GrayNonsig.pdf", single_page_plotGray, width = 18, height = 18, units = "in")
 
 # just Coop-FS plot
 ggsave("transition plot Tie2Noncoop FSAgg median_percentStates_weightsNumTransitions_labsPercentTrending_GrayNonsig.png", plotlistGray[[11]], width = 9, height = 5, units = "in", device = "png")

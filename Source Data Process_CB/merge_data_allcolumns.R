@@ -17,7 +17,7 @@ library(readxl)
 
 # setwd("/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/")
 
-birdtree = read.nexus("birdzillatreeMaybeConsensus.nex")
+birdtree = read.nexus("birdzillatreeForTipNames.nex")
 
 ourdatabase <- read.csv("SongData_R_Update.csv", stringsAsFactors = FALSE)
 ourdatabaserefs <- read.csv("SupplementDataRefs_Update_2024-05-13.csv")
@@ -107,11 +107,13 @@ newdf15 <- newdf11 # vestigial
 newdf16 <- merge(newdf15, DaleData, by.x = "BirdtreeSpecies", by.y = "TipLabel_Dale2015", all = T, suffixes = c("","_Dale"))
 
 # Merge Remes data - does not contain female song or cooperative breeding per se, but has EPP and biparental cooperation
-RemesData = read.csv("Remes et al 2015 PNAS doi_10.5061_dryad.02jk0__v1/PNAS_data.csv")
-RemesClimateData = read.csv("Remes et al 2015 PNAS doi_10.5061_dryad.02jk0__v1/PNAS_data_climatic.csv")
-RemesDataAll = merge(RemesData, RemesClimateData)
-colnames(RemesDataAll) <- paste(colnames(RemesDataAll), "Remes2015", sep = "_")
-newdf17 = merge(newdf16, RemesDataAll, by.x = "BirdtreeSpecies", by.y = "Species_name_Remes2015", all = T, suffixes = c("","_Remes"))
+#RemesData = read.csv("Remes et al 2015 PNAS doi_10.5061_dryad.02jk0__v1/PNAS_data.csv")
+#RemesClimateData = read.csv("Remes et al 2015 PNAS doi_10.5061_dryad.02jk0__v1/PNAS_data_climatic.csv")
+#RemesDataAll = merge(RemesData, RemesClimateData)
+#colnames(RemesDataAll) <- paste(colnames(RemesDataAll), "Remes2015", sep = "_")
+#newdf17 = merge(newdf16, RemesDataAll, by.x = "BirdtreeSpecies", by.y = "Species_name_Remes2015", all = T, suffixes = c("","_Remes"))
+
+newdf17 = newdf16
 
 # Merge Cornwallis et al 2017 Nature EcoEvo
 cornwallisData = read.csv("Unaltered from publication/Cornwallis 2017 supp table13.csv")

@@ -2,9 +2,8 @@
 #Started: 7/7/2020
 #Last Edited: 8/12/2021 - make "Brood parasite" "Brood_parasite"
 
-#setwd("~/Documents/Creanza Lab/Comparative Evolution/Cooperative Breeding")  #you want to set your working directory to whichever folder has the pdf in it
+#setwd("Unaltered from publication")  #you want to set your working directory to whichever folder has the pdf in it
 
-#you may need to install these, but they might not work on the older version of R you have
 library(pdftools)
 library(tidyverse)
 

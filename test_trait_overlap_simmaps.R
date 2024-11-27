@@ -18,6 +18,7 @@
 ## 5/26/2024 - added setQratesTree to args - specify a tree for calculating Q rates different from the tree being modeled on
 ## 5/29/2024 - fixed issue where the set Qrates tree was also the one that got modeled on
 ## 6/5/2024 - columnForGlobalQ = NULL, columnGlobalQrates = NULL added
+## 6/7/2024 - calcHuel(): added ObsProp0Absent_FractionDummyLessThanMedianReal, ObsProp0Present_FractionDummyLessThanMedianReal, ObsProp1Absent_FractionDummyLessThanMedianReal, ObsProp1Present_FractionDummyLessThanMedianReal calculation and output in mediansRow
 
 #setwd("/Users/kate/Desktop/CooperativeBreedingEvolution/")
 library(phytools)
@@ -314,6 +315,11 @@ calcHuel <- function(dfout, dfDummy, nsims_real = NULL, nsims_dummy = NULL, othe
   print(paste("num Dummy dsums > D_real:", sum(Dummy_dsums > D_real)))
   print(paste("pval:",pval))
   
+  ObsProp0Absent_FractionDummyLessThanMedianReal = sum(dfDummy$ObsProp0Absent <= median(dfout$ObsProp0Absent))/length(dfDummy$treenum)
+  ObsProp0Present_FractionDummyLessThanMedianReal = sum(dfDummy$ObsProp0Present <= median(dfout$ObsProp0Present))/length(dfDummy$treenum)
+  ObsProp1Absent_FractionDummyLessThanMedianReal = sum(dfDummy$ObsProp1Absent <= median(dfout$ObsProp1Absent))/length(dfDummy$treenum)
+  ObsProp1Present_FractionDummyLessThanMedianReal = sum(dfDummy$ObsProp1Present <= median(dfout$ObsProp1Present))/length(dfDummy$treenum)
+  
   plotlabel = paste(trait1, trait2, "\nN species =", Nspecies, otherlabel)
   dummytitle = paste("Nsims =", nsims_dummy, otherlabel, "\nnum Dummy dsums > D_real:", sum(Dummy_dsums > D_real), ", pval =", pval)
   
@@ -428,6 +434,7 @@ if (newplot == TRUE) {
   PairwisePvals = as.data.frame(t(as.data.frame(PairwisePvals)))
   colnames(PairwisePvals) <- paste0(PairwisePostHoc$ObservedState, "_DummyVsRealPval")
   mediansRow = cbind(mediansRow, PairwisePvals)
+  mediansRow = cbind(mediansRow, ObsProp0Absent_FractionDummyLessThanMedianReal, ObsProp0Present_FractionDummyLessThanMedianReal, ObsProp1Absent_FractionDummyLessThanMedianReal, ObsProp1Present_FractionDummyLessThanMedianReal)
   
   
   # Create the boxplot

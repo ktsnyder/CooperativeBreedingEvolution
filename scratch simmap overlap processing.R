@@ -213,13 +213,14 @@ outlist = list()
 boxplotlist = list()
 transplotlist = list()
 outdf = set.seed(10)
+allcsvfiles = list.files("Simmap Overlap Outputs", pattern = ".csv")  
 for (i in 1:length(socTraits)) {
   for (j in 1:length(otherTraits)) {
   temptrait1 = socTraits[i]
   temptrait2 = otherTraits[j]
   
-  filelist = list.files("Simmap Overlap Outputs", pattern = ".csv")  
-  filelist = filelist[which(str_detect(filelist, temptrait1) & str_detect(filelist, temptrait2))]
+  
+  filelist = allcsvfiles[which(str_detect(allcsvfiles, temptrait1) & str_detect(allcsvfiles, temptrait2))]
   
   if (length(filelist > 0)) {
     dummyfile = filelist[which(str_detect(filelist, "DUMMY"))]
@@ -396,7 +397,7 @@ ggsave("simmap overlap all boxplots-transitionplots_onepage_500dummySims_testFac
 
 
 #### multistate ----
-multistateTraits = c("social_system_incl_nk_coop_Griesser2017", "social_system_Griesser2017", "grouping")
+multistateTraits = c("social_system_incl_nk_coop_Griesser2017", "social_system_Griesser2017", "grouping_Griesser2023")
 #df =  read.csv("2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv")
 df =  read.csv("2024-02-24_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv")
 df$Griesser2017SocialSystem_w_Tie2Noncoop_KinNK = df$social_system_incl_nk_coop_Griesser2017

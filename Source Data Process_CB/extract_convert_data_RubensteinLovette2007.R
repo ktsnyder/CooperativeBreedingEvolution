@@ -2,7 +2,7 @@
 #Started: 7/7/2020
 #Last Edited: 8/12/2021
 
-#setwd("~/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/Unaltered from publication")  #you want to set your working directory to whichever folder has the pdf in it
+#setwd("Unaltered from publication")  #you want to set your working directory to whichever folder has the pdf in it
 
 #you may need to install these, but they might not work on the older version of R you have
 library(pdftools)
