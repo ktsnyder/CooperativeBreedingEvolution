@@ -68,7 +68,7 @@ if (islog != FALSE) {
   
   treetiplabels <- tree$tip.label %in% names(discretetraitvec[discretetraitvec==1])
   
-  py <- c("black", "white")
+  py <- c("black", "white", "red", "blue")
   circles=ace(x=discretetraitvec,phy=tree,type="discrete",model=discretemodel)
   nodelabels(thermo=circles$lik.anc,piecol=py, height = 1.2, width = 1.2, horiz = TRUE, frame = "circle")
   

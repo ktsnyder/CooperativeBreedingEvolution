@@ -1,3 +1,199 @@
+# R-specific files
+.Rhistory
+.Rhistory*
+.RData
+.Rdata
+.rdata
+.Ruserdata
+.Rproj.user/
+*.Rproj
+
+# R package files
+*.tar.gz
+*.Rcheck/
+vignettes/*.html
+vignettes/*.pdf
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# iCloud files
+*.icloud
+
+# Windows system files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+*.lnk
+
+# Linux system files
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
+*.backup
+~$*
+.~lock.*#
+
+# Excel temporary files
+~$*.xlsx
+~$*.xls
+~$*.xlsm
+
+# Analysis outputs with dates (project-specific)
+*brownie multitree*.csv
+*phylANOVA outputs*.csv
+*simmap overlap*.csv
+*Brownie summary table*.csv
+*brownie output summary*.csv
+# More specific date patterns
+202[0-9]-[0-9][0-9]-[0-9][0-9]*.csv
+202[0-9]-[0-9][0-9]-[0-9][0-9]*.xlsx
+
+# Log files
+*.log
+*.out
+*.err
+
+# Plot outputs (optional - uncomment if you want to exclude)
+# *.png
+# *.pdf
+# *.eps
+# *.ps
+# *.svg
+# *.jpeg
+# *.jpg
+
+# LaTeX auxiliary files
+*.aux
+*.lof
+*.lot
+*.fls
+*.out
+*.toc
+*.fmt
+*.fot
+*.cb
+*.cb2
+.*.lb
+
+# BibTeX auxiliary files
+*.bbl
+*.bcf
+*.blg
+*-blx.aux
+*-blx.bib
+*.run.xml
+
+# Data files (optional - uncomment if needed)
+# *.csv
+# *.xlsx
+# *.xls
+# *.rds
+# *.RData
+
+# Bayesian analysis outputs
+*.mcmc
+*.mcmcchain
+*.chain
+BayesTraits*.txt
+BayesTraits*.log
+
+# Phylogenetic software outputs
+*.trees
+*.p
+*.t
+*.con.tre
+PAUP*.log
+RAxML*
+*.phy.reduced
+
+# Directory for large/temporary outputs (create these if needed)
+temp/
+cache/
+output_temp/
+scratch_outputs/
+
+# Session info files
+sessionInfo*.txt
+session_info*.txt
+
+# Core dumps
+core
+
+# Compiled code
+*.so
+*.dll
+*.o
+*.dylib
+
+# Package documentation
+man/*.Rd
+
+# OAuth2 token
+.httr-oauth
+
+# knitr and R markdown
+*.utf8.md
+*.knit.md
+*_cache/
+*_files/
+*.nb.html
+
+# Shiny
+rsconnect/
+shiny_bookmarks/
+
+# RStudio Connect
+rsconnect/
+
+# pkgdown site
+docs/
+pkgdown/
+
+# translation temp files
+po/*~
+
+# RStudio project files (optional - uncomment if desired)
+# .Rproj.user
+
+# Claude Code session notes (private)
+claude_code_sessions/
+README_private.md
+
+############################################
+# Project-specific patterns from existing .gitignore
+############################################
+
 # Ignore OutputFiles
 OutputFiles
 Simmap*Overlap*Outputs/
@@ -9,13 +205,11 @@ Misc*Song*Features*BayesTraits/
 Simmap*Overlap*Multistate/
 Misc*Tree*Plots/
 
-# Ignore Mac system files
-.DS_Store
-
-
 # Ignore giant .tre file
 BirdzillaHackett3.tre
 *.pdf
+
+# Specific BayesTraits output files
 2023-07-21BayesMeanCoopTie2NoncoopSong.rep.final100reps.csv
 2023-07-21BayesMeanCoopTie2NoncoopSong.rep.max100reps.csv
 2023-07-22BayesMeanCoopTie2CoopSong.rep.final100reps.csv
@@ -40,374 +234,30 @@ BirdzillaHackett3.tre
 2023-07-30BayesMeanCoopOmitTiesSong.rep.final100reps.csv
 2023-07-30BayesMeanCoopOmitTiesSong.rep.max100reps.csv
 2023-07-30BayesMeanCoopOmitTiesSong.rep.min100reps.csv
+
+# Other BayesTraits files
 BayesTraitsDiscrete_Hackett-OmitTies-FSHighConf mlt100_noRes.csv
 BayesTraitsDiscrete_Hackett-Tie2Coop-FSHighConf mlt100_noRes.csv
 BayesTraitsDiscrete_Hackett-Tie2Noncoop-FSHighConf mlt100_noRes.csv
+
+# Simmap overlap files
 Familial FSAgg DUMMYResampledCoopFS simmap overlap output nsim 5000 Hackett .csv
 Familial FSAgg simmap overlap output nsim 1000 Hackett .csv
 Kin_NK FSAgg DUMMYResampledCoopFS simmap overlap output nsim 1000 Hackett .csv
 Kin_NK FSAgg simmap overlap output nsim 1000 Hackett .csv
-MaxLikelihood-Defaults/Discrete-Dependent_ML/data.txt
-MaxLikelihood-Defaults/Discrete-Dependent_ML/data.txt.Log.txt
-MaxLikelihood-Defaults/Discrete-Dependent_ML/inputfile.txt
-MaxLikelihood-Defaults/Discrete-Dependent_ML/tree.nex
-MaxLikelihood-Defaults/Discrete-Independent_ML/data.txt
-MaxLikelihood-Defaults/Discrete-Independent_ML/data.txt.Log.txt
-MaxLikelihood-Defaults/Discrete-Independent_ML/inputfile.txt
-MaxLikelihood-Defaults/Discrete-Independent_ML/tree.nex
-MaxLikelihood-Defaults/MeanCoopTie2Noncoop-HighConfidence_FemaleSong_Dependent_2023-07-12.csv
-MaxLikelihood-Defaults/MeanCoopTie2Noncoop-HighConfidence_FemaleSong_Independent_2023-07-12.csv
-MeanCoopTie2Coop Song.rep.final BayesDependent MCMC Ace Hackett 10 reps 2023-08-08 .csv
-MeanCoopTie2Coop Song.rep.final BayesDependent MCMC Ace Hackett 10 reps 2023-08-09 .csv
-MeanCoopTie2Coop Song.rep.final BayesDependent MCMC Ace Hackett 2 reps 2023-08-09 .csv
-MeanCoopTie2Coop Song.rep.final BayesIndependent MCMC Ace Hackett 10 reps 2023-08-08 .csv
-MeanCoopTie2Coop Song.rep.final BayesIndependent MCMC Ace Hackett 10 reps 2023-08-09 .csv
-MeanCoopTie2Coop Song.rep.final BayesIndependent MCMC Ace Hackett 2 reps 2023-08-09 .csv
-MeanCoopTie2Noncoop Song.rep.final BayesDependent MCMC Ace  10 reps 2023-08-08 .csv
-MeanCoopTie2Noncoop Song.rep.final BayesDependent MCMC Ace Hackett 100 reps 2023-08-09 .csv
-MeanCoopTie2Noncoop Song.rep.final BayesDependent MCMC Ace Hackett 20 reps 2023-08-09 .csv
-MeanCoopTie2Noncoop Song.rep.final BayesDependent MCMC Ace Hackett 20 reps 2023-08-10 .csv
-MeanCoopTie2Noncoop Song.rep.final BayesDependent MCMC Ace Hackett 20 reps 2023-08-11 .csv
-MeanCoopTie2Noncoop Song.rep.final BayesIndependent MCMC Ace  10 reps 2023-08-08 .csv
-MeanCoopTie2Noncoop Song.rep.final BayesIndependent MCMC Ace Hackett 100 reps 2023-08-09 .csv
-MeanCoopTie2Noncoop Song.rep.final BayesIndependent MCMC Ace Hackett 20 reps 2023-08-09 .csv
-MeanCoopTie2Noncoop Song.rep.final BayesIndependent MCMC Ace Hackett 20 reps 2023-08-10 .csv
-MeanCoopTie2Noncoop Song.rep.final BayesIndependent MCMC Ace Hackett 20 reps 2023-08-11 .csv
-NoPriors_Stones100-1000/Discrete-Dependent_MCMC/data.txt
-NoPriors_Stones100-1000/Discrete-Dependent_MCMC/data.txt.Log.txt
-NoPriors_Stones100-1000/Discrete-Dependent_MCMC/data.txt.Schedule.txt
-NoPriors_Stones100-1000/Discrete-Dependent_MCMC/data.txt.Stones.txt
-NoPriors_Stones100-1000/Discrete-Dependent_MCMC/inputfile.txt
-NoPriors_Stones100-1000/Discrete-Dependent_MCMC/tree.nex
-NoPriors_Stones100-1000/Discrete-Independent_MCMC/data.txt
-NoPriors_Stones100-1000/Discrete-Independent_MCMC/data.txt.Log.txt
-NoPriors_Stones100-1000/Discrete-Independent_MCMC/data.txt.Schedule.txt
-NoPriors_Stones100-1000/Discrete-Independent_MCMC/data.txt.Stones.txt
-NoPriors_Stones100-1000/Discrete-Independent_MCMC/inputfile.txt
-NoPriors_Stones100-1000/Discrete-Independent_MCMC/tree.nex
-NoPriors_Stones100-1000/MeanCoopTie2Noncoop-HighConfidence_FemaleSong_Dependent_2023-07-14.csv
-NoPriors_Stones100-1000/MeanCoopTie2Noncoop-HighConfidence_FemaleSong_Independent_2023-07-14.csv
-NoPriors_Stones100-10000/Discrete-Dependent_MCMC/data.txt
-NoPriors_Stones100-10000/Discrete-Dependent_MCMC/data.txt.Log.txt
-NoPriors_Stones100-10000/Discrete-Dependent_MCMC/data.txt.Schedule.txt
-NoPriors_Stones100-10000/Discrete-Dependent_MCMC/data.txt.Stones.txt
-NoPriors_Stones100-10000/Discrete-Dependent_MCMC/inputfile.txt
-NoPriors_Stones100-10000/Discrete-Dependent_MCMC/tree.nex
-NoPriors_Stones100-10000/Discrete-Independent_MCMC/data.txt
-NoPriors_Stones100-10000/Discrete-Independent_MCMC/data.txt.Log.txt
-NoPriors_Stones100-10000/Discrete-Independent_MCMC/data.txt.Schedule.txt
-NoPriors_Stones100-10000/Discrete-Independent_MCMC/data.txt.Stones.txt
-NoPriors_Stones100-10000/Discrete-Independent_MCMC/inputfile.txt
-NoPriors_Stones100-10000/Discrete-Independent_MCMC/tree.nex
-NoPriors_Stones100-10000/MeanCoopTie2Noncoop-HighConfidence_FemaleSong_Dependent_2023-07-14.csv
-NoPriors_Stones100-10000/MeanCoopTie2Noncoop-HighConfidence_FemaleSong_Independent_2023-07-14.csv
-PriorAll-Exp-10/Discrete-Independent_MCMC/data.txt
-PriorAll-Exp-10/Discrete-Independent_MCMC/data.txt.Log.txt
-PriorAll-Exp-10/Discrete-Independent_MCMC/data.txt.Schedule.txt
-PriorAll-Exp-10/Discrete-Independent_MCMC/data.txt.Stones.txt
-PriorAll-Exp-10/Discrete-Independent_MCMC/inputfile.txt
-PriorAll-Exp-10/Discrete-Independent_MCMC/tree.nex
-PriorAll-Exp-10/MeanCoopTie2Noncoop-HighConfidence_FemaleSong_DependentMCMC_2023-07-12.csv
-PriorAll-Exp-10/MeanCoopTie2Noncoop-HighConfidence_FemaleSong_IndependentMCMC_2023-07-12.csv
-PriorAll-Exp-5/Discrete-Dependent_MCMC/data.txt
-PriorAll-Exp-5/Discrete-Dependent_MCMC/data.txt.Log.txt
-PriorAll-Exp-5/Discrete-Dependent_MCMC/data.txt.Schedule.txt
-PriorAll-Exp-5/Discrete-Dependent_MCMC/data.txt.Stones.txt
-PriorAll-Exp-5/Discrete-Dependent_MCMC/inputfile.txt
-PriorAll-Exp-5/Discrete-Dependent_MCMC/tree.nex
-PriorAll-Exp-5/Discrete-Independent_MCMC/data.txt
-PriorAll-Exp-5/Discrete-Independent_MCMC/data.txt.Log.txt
-PriorAll-Exp-5/Discrete-Independent_MCMC/data.txt.Schedule.txt
-PriorAll-Exp-5/Discrete-Independent_MCMC/data.txt.Stones.txt
-PriorAll-Exp-5/Discrete-Independent_MCMC/inputfile.txt
-PriorAll-Exp-5/Discrete-Independent_MCMC/tree.nex
-PriorAll-Exp-5/MeanCoopTie2Noncoop-HighConfidence_FemaleSong_Dependent_2023-07-13.csv
-PriorAll-Exp-5/MeanCoopTie2Noncoop-HighConfidence_FemaleSong_Independent_2023-07-13.csv
-Priors-exp-AceQrates_AnyCoopEqualsCoop-FemaleSong_Agg01/AnyCoopEqualsCoop-FemaleSong_Agg01_Dependent_2023-07-27.csv
-Priors-exp-AceQrates_AnyCoopEqualsCoop-FemaleSong_Agg01/AnyCoopEqualsCoop-FemaleSong_Agg01_Independent_2023-07-27.csv
-Priors-exp-AceQrates_AnyCoopEqualsCoop-FemaleSong_Agg01/Discrete-Dependent_MCMC/data.txt
-Priors-exp-AceQrates_AnyCoopEqualsCoop-FemaleSong_Agg01/Discrete-Dependent_MCMC/data.txt.Log.txt
-Priors-exp-AceQrates_AnyCoopEqualsCoop-FemaleSong_Agg01/Discrete-Dependent_MCMC/data.txt.Schedule.txt
-Priors-exp-AceQrates_AnyCoopEqualsCoop-FemaleSong_Agg01/Discrete-Dependent_MCMC/data.txt.Stones.txt
-Priors-exp-AceQrates_AnyCoopEqualsCoop-FemaleSong_Agg01/Discrete-Dependent_MCMC/inputfile.txt
-Priors-exp-AceQrates_AnyCoopEqualsCoop-FemaleSong_Agg01/Discrete-Dependent_MCMC/LogAllOutputs.txt
-Priors-exp-AceQrates_AnyCoopEqualsCoop-FemaleSong_Agg01/Discrete-Dependent_MCMC/tree.nex
-Priors-exp-AceQrates_AnyCoopEqualsCoop-FemaleSong_Agg01/Discrete-Independent_MCMC/data.txt
-Priors-exp-AceQrates_AnyCoopEqualsCoop-FemaleSong_Agg01/Discrete-Independent_MCMC/data.txt.Log.txt
-Priors-exp-AceQrates_AnyCoopEqualsCoop-FemaleSong_Agg01/Discrete-Independent_MCMC/data.txt.Schedule.txt
-Priors-exp-AceQrates_AnyCoopEqualsCoop-FemaleSong_Agg01/Discrete-Independent_MCMC/data.txt.Stones.txt
-Priors-exp-AceQrates_AnyCoopEqualsCoop-FemaleSong_Agg01/Discrete-Independent_MCMC/inputfile.txt
-Priors-exp-AceQrates_AnyCoopEqualsCoop-FemaleSong_Agg01/Discrete-Independent_MCMC/LogAllOutputs.txt
-Priors-exp-AceQrates_AnyCoopEqualsCoop-FemaleSong_Agg01/Discrete-Independent_MCMC/tree.nex
-Priors-exp-AceQrates_AnyCoopEqualsCoop-HighConfidence_FemaleSong/AnyCoopEqualsCoop-HighConfidence_FemaleSong_Dependent_2023-07-27.csv
-Priors-exp-AceQrates_AnyCoopEqualsCoop-HighConfidence_FemaleSong/AnyCoopEqualsCoop-HighConfidence_FemaleSong_Independent_2023-07-27.csv
-Priors-exp-AceQrates_AnyCoopEqualsCoop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/data.txt
-Priors-exp-AceQrates_AnyCoopEqualsCoop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/data.txt.Log.txt
-Priors-exp-AceQrates_AnyCoopEqualsCoop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/data.txt.Schedule.txt
-Priors-exp-AceQrates_AnyCoopEqualsCoop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/data.txt.Stones.txt
-Priors-exp-AceQrates_AnyCoopEqualsCoop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/inputfile.txt
-Priors-exp-AceQrates_AnyCoopEqualsCoop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/LogAllOutputs.txt
-Priors-exp-AceQrates_AnyCoopEqualsCoop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/tree.nex
-Priors-exp-AceQrates_AnyCoopEqualsCoop-HighConfidence_FemaleSong/Discrete-Independent_MCMC/data.txt
-Priors-exp-AceQrates_AnyCoopEqualsCoop-HighConfidence_FemaleSong/Discrete-Independent_MCMC/data.txt.Log.txt
-Priors-exp-AceQrates_AnyCoopEqualsCoop-HighConfidence_FemaleSong/Discrete-Independent_MCMC/data.txt.Schedule.txt
-Priors-exp-AceQrates_AnyCoopEqualsCoop-HighConfidence_FemaleSong/Discrete-Independent_MCMC/data.txt.Stones.txt
-Priors-exp-AceQrates_AnyCoopEqualsCoop-HighConfidence_FemaleSong/Discrete-Independent_MCMC/inputfile.txt
-Priors-exp-AceQrates_AnyCoopEqualsCoop-HighConfidence_FemaleSong/Discrete-Independent_MCMC/LogAllOutputs.txt
-Priors-exp-AceQrates_AnyCoopEqualsCoop-HighConfidence_FemaleSong/Discrete-Independent_MCMC/tree.nex
-Priors-exp-AceQrates_Final.polygyny-FemaleSong_Agg01/Discrete-Dependent_MCMC/data.txt
-Priors-exp-AceQrates_Final.polygyny-FemaleSong_Agg01/Discrete-Dependent_MCMC/data.txt.Log.txt
-Priors-exp-AceQrates_Final.polygyny-FemaleSong_Agg01/Discrete-Dependent_MCMC/data.txt.Schedule.txt
-Priors-exp-AceQrates_Final.polygyny-FemaleSong_Agg01/Discrete-Dependent_MCMC/data.txt.Stones.txt
-Priors-exp-AceQrates_Final.polygyny-FemaleSong_Agg01/Discrete-Dependent_MCMC/inputfile.txt
-Priors-exp-AceQrates_Final.polygyny-FemaleSong_Agg01/Discrete-Dependent_MCMC/LogAllOutputs.txt
-Priors-exp-AceQrates_Final.polygyny-FemaleSong_Agg01/Discrete-Dependent_MCMC/tree.nex
-Priors-exp-AceQrates_Final.polygyny-FemaleSong_Agg01/Discrete-Independent_MCMC/data.txt
-Priors-exp-AceQrates_Final.polygyny-FemaleSong_Agg01/Discrete-Independent_MCMC/data.txt.Log.txt
-Priors-exp-AceQrates_Final.polygyny-FemaleSong_Agg01/Discrete-Independent_MCMC/data.txt.Schedule.txt
-Priors-exp-AceQrates_Final.polygyny-FemaleSong_Agg01/Discrete-Independent_MCMC/data.txt.Stones.txt
-Priors-exp-AceQrates_Final.polygyny-FemaleSong_Agg01/Discrete-Independent_MCMC/inputfile.txt
-Priors-exp-AceQrates_Final.polygyny-FemaleSong_Agg01/Discrete-Independent_MCMC/LogAllOutputs.txt
-Priors-exp-AceQrates_Final.polygyny-FemaleSong_Agg01/Discrete-Independent_MCMC/tree.nex
-Priors-exp-AceQrates_Final.polygyny-FemaleSong_Agg01/Final.polygyny-FemaleSong_Agg01_Dependent_2023-07-26.csv
-Priors-exp-AceQrates_Final.polygyny-FemaleSong_Agg01/Final.polygyny-FemaleSong_Agg01_Independent_2023-07-26.csv
-Priors-exp-AceQrates_Final.polygyny-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/data.txt
-Priors-exp-AceQrates_Final.polygyny-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/data.txt.Log.txt
-Priors-exp-AceQrates_Final.polygyny-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/data.txt.Schedule.txt
-Priors-exp-AceQrates_Final.polygyny-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/data.txt.Stones.txt
-Priors-exp-AceQrates_Final.polygyny-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/inputfile.txt
-Priors-exp-AceQrates_Final.polygyny-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/LogAllOutputs.txt
-Priors-exp-AceQrates_Final.polygyny-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/tree.nex
-Priors-exp-AceQrates_Final.polygyny-HighConfidence_FemaleSong/Discrete-Independent_MCMC/data.txt
-Priors-exp-AceQrates_Final.polygyny-HighConfidence_FemaleSong/Discrete-Independent_MCMC/data.txt.Log.txt
-Priors-exp-AceQrates_Final.polygyny-HighConfidence_FemaleSong/Discrete-Independent_MCMC/data.txt.Schedule.txt
-Priors-exp-AceQrates_Final.polygyny-HighConfidence_FemaleSong/Discrete-Independent_MCMC/data.txt.Stones.txt
-Priors-exp-AceQrates_Final.polygyny-HighConfidence_FemaleSong/Discrete-Independent_MCMC/inputfile.txt
-Priors-exp-AceQrates_Final.polygyny-HighConfidence_FemaleSong/Discrete-Independent_MCMC/LogAllOutputs.txt
-Priors-exp-AceQrates_Final.polygyny-HighConfidence_FemaleSong/Discrete-Independent_MCMC/tree.nex
-Priors-exp-AceQrates_Final.polygyny-HighConfidence_FemaleSong/Final.polygyny-HighConfidence_FemaleSong_Dependent_2023-07-26.csv
-Priors-exp-AceQrates_Final.polygyny-HighConfidence_FemaleSong/Final.polygyny-HighConfidence_FemaleSong_Dependent_2023-07-27.csv
-Priors-exp-AceQrates_Final.polygyny-HighConfidence_FemaleSong/Final.polygyny-HighConfidence_FemaleSong_Independent_2023-07-26.csv
-Priors-exp-AceQrates_Final.polygyny-HighConfidence_FemaleSong/Final.polygyny-HighConfidence_FemaleSong_Independent_2023-07-27.csv
-Priors-exp-AceQrates_Griesser2017FamilialLiving-FemaleSong_Agg01/Discrete-Dependent_MCMC/data.txt
-Priors-exp-AceQrates_Griesser2017FamilialLiving-FemaleSong_Agg01/Discrete-Dependent_MCMC/data.txt.Log.txt
-Priors-exp-AceQrates_Griesser2017FamilialLiving-FemaleSong_Agg01/Discrete-Dependent_MCMC/data.txt.Schedule.txt
-Priors-exp-AceQrates_Griesser2017FamilialLiving-FemaleSong_Agg01/Discrete-Dependent_MCMC/data.txt.Stones.txt
-Priors-exp-AceQrates_Griesser2017FamilialLiving-FemaleSong_Agg01/Discrete-Dependent_MCMC/inputfile.txt
-Priors-exp-AceQrates_Griesser2017FamilialLiving-FemaleSong_Agg01/Discrete-Dependent_MCMC/LogAllOutputs.txt
-Priors-exp-AceQrates_Griesser2017FamilialLiving-FemaleSong_Agg01/Discrete-Dependent_MCMC/tree.nex
-Priors-exp-AceQrates_Griesser2017FamilialLiving-FemaleSong_Agg01/Discrete-Independent_MCMC/data.txt
-Priors-exp-AceQrates_Griesser2017FamilialLiving-FemaleSong_Agg01/Discrete-Independent_MCMC/data.txt.Log.txt
-Priors-exp-AceQrates_Griesser2017FamilialLiving-FemaleSong_Agg01/Discrete-Independent_MCMC/data.txt.Schedule.txt
-Priors-exp-AceQrates_Griesser2017FamilialLiving-FemaleSong_Agg01/Discrete-Independent_MCMC/data.txt.Stones.txt
-Priors-exp-AceQrates_Griesser2017FamilialLiving-FemaleSong_Agg01/Discrete-Independent_MCMC/inputfile.txt
-Priors-exp-AceQrates_Griesser2017FamilialLiving-FemaleSong_Agg01/Discrete-Independent_MCMC/LogAllOutputs.txt
-Priors-exp-AceQrates_Griesser2017FamilialLiving-FemaleSong_Agg01/Discrete-Independent_MCMC/tree.nex
-Priors-exp-AceQrates_Griesser2017FamilialLiving-FemaleSong_Agg01/Griesser2017FamilialLiving-FemaleSong_Agg01_Dependent_2023-08-01.csv
-Priors-exp-AceQrates_Griesser2017FamilialLiving-FemaleSong_Agg01/Griesser2017FamilialLiving-FemaleSong_Agg01_Independent_2023-08-01.csv
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Dependent_MCMC_Mixed-NA/data.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Dependent_MCMC_Mixed-NA/data.txt.Log.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Dependent_MCMC_Mixed-NA/data.txt.Schedule.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Dependent_MCMC_Mixed-NA/data.txt.Stones.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Dependent_MCMC_Mixed-NA/inputfile.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Dependent_MCMC_Mixed-NA/LogAllOutputs.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Dependent_MCMC_Mixed-NA/tree.nex
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Dependent_MCMC_MixedKin/data.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Dependent_MCMC_MixedKin/data.txt.Log.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Dependent_MCMC_MixedKin/data.txt.Schedule.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Dependent_MCMC_MixedKin/data.txt.Stones.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Dependent_MCMC_MixedKin/inputfile.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Dependent_MCMC_MixedKin/LogAllOutputs.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Dependent_MCMC_MixedKin/tree.nex
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Dependent_MCMC_MixedNonKin/data.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Dependent_MCMC_MixedNonKin/data.txt.Log.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Dependent_MCMC_MixedNonKin/data.txt.Schedule.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Dependent_MCMC_MixedNonKin/data.txt.Stones.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Dependent_MCMC_MixedNonKin/inputfile.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Dependent_MCMC_MixedNonKin/LogAllOutputs.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Dependent_MCMC_MixedNonKin/tree.nex
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Independent_MCMC_Mixed-NA/data.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Independent_MCMC_Mixed-NA/data.txt.Log.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Independent_MCMC_Mixed-NA/data.txt.Schedule.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Independent_MCMC_Mixed-NA/data.txt.Stones.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Independent_MCMC_Mixed-NA/inputfile.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Independent_MCMC_Mixed-NA/LogAllOutputs.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Independent_MCMC_Mixed-NA/tree.nex
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Independent_MCMC_MixedKin/data.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Independent_MCMC_MixedKin/data.txt.Log.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Independent_MCMC_MixedKin/data.txt.Schedule.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Independent_MCMC_MixedKin/data.txt.Stones.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Independent_MCMC_MixedKin/inputfile.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Independent_MCMC_MixedKin/LogAllOutputs.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Independent_MCMC_MixedKin/tree.nex
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Independent_MCMC_MixedNonKin/data.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Independent_MCMC_MixedNonKin/data.txt.Log.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Independent_MCMC_MixedNonKin/data.txt.Schedule.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Independent_MCMC_MixedNonKin/data.txt.Stones.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Independent_MCMC_MixedNonKin/inputfile.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Independent_MCMC_MixedNonKin/LogAllOutputs.txt
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Discrete-Independent_MCMC_MixedNonKin/tree.nex
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Kin_NK_MixedKin-FemaleSong_Agg01_Dependent_2023-08-02.csv
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Kin_NK_MixedKin-FemaleSong_Agg01_Independent_2023-08-02.csv
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Kin_NK_MixedNA-FemaleSong_Agg01_Dependent_2023-08-02.csv
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Kin_NK_MixedNA-FemaleSong_Agg01_Independent_2023-08-02.csv
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Kin_NK_MixedNonKin-FemaleSong_Agg01_Dependent_2023-08-02.csv
-Priors-exp-AceQrates_Kin_NK-FemaleSong_Agg01/Kin_NK_MixedNonKin-FemaleSong_Agg01_Independent_2023-08-02.csv
-Priors-exp-AceQrates_MeanCoopTie2Coop-FemaleSong_Agg01/Discrete-Dependent_MCMC/data.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-FemaleSong_Agg01/Discrete-Dependent_MCMC/data.txt.Log.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-FemaleSong_Agg01/Discrete-Dependent_MCMC/data.txt.Schedule.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-FemaleSong_Agg01/Discrete-Dependent_MCMC/data.txt.Stones.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-FemaleSong_Agg01/Discrete-Dependent_MCMC/inputfile.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-FemaleSong_Agg01/Discrete-Dependent_MCMC/LogAllOutputs.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-FemaleSong_Agg01/Discrete-Dependent_MCMC/tree.nex
-Priors-exp-AceQrates_MeanCoopTie2Coop-FemaleSong_Agg01/Discrete-Independent_MCMC/data.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-FemaleSong_Agg01/Discrete-Independent_MCMC/data.txt.Log.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-FemaleSong_Agg01/Discrete-Independent_MCMC/data.txt.Schedule.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-FemaleSong_Agg01/Discrete-Independent_MCMC/data.txt.Stones.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-FemaleSong_Agg01/Discrete-Independent_MCMC/inputfile.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-FemaleSong_Agg01/Discrete-Independent_MCMC/LogAllOutputs.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-FemaleSong_Agg01/Discrete-Independent_MCMC/tree.nex
-Priors-exp-AceQrates_MeanCoopTie2Coop-FemaleSong_Agg01/MeanCoopTie2Coop-FemaleSong_Agg01_Dependent_2023-07-21.csv
-Priors-exp-AceQrates_MeanCoopTie2Coop-FemaleSong_Agg01/MeanCoopTie2Coop-FemaleSong_Agg01_Independent_2023-07-21.csv
-Priors-exp-AceQrates_MeanCoopTie2Coop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/data.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/data.txt.Log.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/data.txt.Schedule.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/data.txt.Stones.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/inputfile.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/LogAllOutputs.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/tree.nex
-Priors-exp-AceQrates_MeanCoopTie2Coop-HighConfidence_FemaleSong/Discrete-Independent_MCMC/data.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-HighConfidence_FemaleSong/Discrete-Independent_MCMC/data.txt.Log.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-HighConfidence_FemaleSong/Discrete-Independent_MCMC/data.txt.Schedule.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-HighConfidence_FemaleSong/Discrete-Independent_MCMC/data.txt.Stones.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-HighConfidence_FemaleSong/Discrete-Independent_MCMC/inputfile.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-HighConfidence_FemaleSong/Discrete-Independent_MCMC/LogAllOutputs.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-HighConfidence_FemaleSong/Discrete-Independent_MCMC/tree.nex
-Priors-exp-AceQrates_MeanCoopTie2Coop-HighConfidence_FemaleSong/MeanCoopTie2Coop-HighConfidence_FemaleSong_Dependent_2023-07-19.csv
-Priors-exp-AceQrates_MeanCoopTie2Coop-HighConfidence_FemaleSong/MeanCoopTie2Coop-HighConfidence_FemaleSong_Independent_2023-07-19.csv
-Priors-exp-AceQrates_MeanCoopTie2Coop-Song.rep.final/Discrete-Dependent_MCMC/data.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-Song.rep.final/Discrete-Dependent_MCMC/data.txt.Log.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-Song.rep.final/Discrete-Dependent_MCMC/data.txt.Schedule.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-Song.rep.final/Discrete-Dependent_MCMC/data.txt.Stones.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-Song.rep.final/Discrete-Dependent_MCMC/inputfile.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-Song.rep.final/Discrete-Dependent_MCMC/tree.nex
-Priors-exp-AceQrates_MeanCoopTie2Coop-Song.rep.final/Discrete-Independent_MCMC/data.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-Song.rep.final/Discrete-Independent_MCMC/data.txt.Log.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-Song.rep.final/Discrete-Independent_MCMC/data.txt.Schedule.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-Song.rep.final/Discrete-Independent_MCMC/data.txt.Stones.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-Song.rep.final/Discrete-Independent_MCMC/inputfile.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-Song.rep.final/Discrete-Independent_MCMC/tree.nex
-Priors-exp-AceQrates_MeanCoopTie2Coop-Song.rep.final/Discrete-Independent_ML/data.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-Song.rep.final/Discrete-Independent_ML/inputfile.txt
-Priors-exp-AceQrates_MeanCoopTie2Coop-Song.rep.final/Discrete-Independent_ML/tree.nex
-Priors-exp-AceQrates_MeanCoopTie2Coop-Song.rep.final/MeanCoopTie2Coop-Song.rep.final_Dependent_2023-08-08.csv
-Priors-exp-AceQrates_MeanCoopTie2Coop-Song.rep.final/MeanCoopTie2Coop-Song.rep.final_Dependent_2023-08-09.csv
-Priors-exp-AceQrates_MeanCoopTie2Coop-Song.rep.final/MeanCoopTie2Coop-Song.rep.final_Independent_2023-08-08.csv
-Priors-exp-AceQrates_MeanCoopTie2Coop-Song.rep.final/MeanCoopTie2Coop-Song.rep.final_Independent_2023-08-09.csv
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-FemaleSong_Agg01/Discrete-Dependent_MCMC/data.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-FemaleSong_Agg01/Discrete-Dependent_MCMC/data.txt.Log.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-FemaleSong_Agg01/Discrete-Dependent_MCMC/data.txt.Schedule.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-FemaleSong_Agg01/Discrete-Dependent_MCMC/data.txt.Stones.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-FemaleSong_Agg01/Discrete-Dependent_MCMC/inputfile.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-FemaleSong_Agg01/Discrete-Dependent_MCMC/LogAllOutputs.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-FemaleSong_Agg01/Discrete-Dependent_MCMC/tree.nex
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-FemaleSong_Agg01/Discrete-Independent_MCMC/data.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-FemaleSong_Agg01/Discrete-Independent_MCMC/data.txt.Log.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-FemaleSong_Agg01/Discrete-Independent_MCMC/data.txt.Schedule.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-FemaleSong_Agg01/Discrete-Independent_MCMC/data.txt.Stones.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-FemaleSong_Agg01/Discrete-Independent_MCMC/inputfile.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-FemaleSong_Agg01/Discrete-Independent_MCMC/LogAllOutputs.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-FemaleSong_Agg01/Discrete-Independent_MCMC/tree.nex
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-FemaleSong_Agg01/MeanCoopTie2Noncoop-FemaleSong_Agg01_Dependent_2023-07-20.csv
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-FemaleSong_Agg01/MeanCoopTie2Noncoop-FemaleSong_Agg01_Independent_2023-07-20.csv
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/data.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/data.txt.Log.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/data.txt.Schedule.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/data.txt.Stones.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/inputfile.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/LogAllOutputs.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC/tree.nex
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC_23-7-13/data.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC_23-7-13/data.txt.Log.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC_23-7-13/data.txt.Schedule.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC_23-7-13/data.txt.Stones.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC_23-7-13/inputfile.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC_23-7-13/LogAllOutputs.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Dependent_MCMC_23-7-13/tree.nex
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Independent_MCMC/data.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Independent_MCMC/data.txt.Log.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Independent_MCMC/data.txt.Schedule.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Independent_MCMC/data.txt.Stones.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Independent_MCMC/inputfile.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Independent_MCMC/LogAllOutputs.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Independent_MCMC/tree.nex
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Independent_MCMC_23-7-13/data.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Independent_MCMC_23-7-13/data.txt.Log.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Independent_MCMC_23-7-13/data.txt.Schedule.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Independent_MCMC_23-7-13/data.txt.Stones.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Independent_MCMC_23-7-13/inputfile.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/Discrete-Independent_MCMC_23-7-13/tree.nex
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/MeanCoopTie2Noncoop-HighConfidence_FemaleSong_Dependent_2023-07-13.csv
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/MeanCoopTie2Noncoop-HighConfidence_FemaleSong_Dependent_2023-07-29.csv
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/MeanCoopTie2Noncoop-HighConfidence_FemaleSong_Dependent_2023-07-30.csv
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/MeanCoopTie2Noncoop-HighConfidence_FemaleSong_Independent_2023-07-13.csv
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/MeanCoopTie2Noncoop-HighConfidence_FemaleSong_Independent_2023-07-29.csv
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-HighConfidence_FemaleSong/MeanCoopTie2Noncoop-HighConfidence_FemaleSong_Independent_2023-07-30.csv
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-Song.rep.final/Discrete-Dependent_MCMC/data.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-Song.rep.final/Discrete-Dependent_MCMC/data.txt.Log.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-Song.rep.final/Discrete-Dependent_MCMC/data.txt.Schedule.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-Song.rep.final/Discrete-Dependent_MCMC/data.txt.Stones.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-Song.rep.final/Discrete-Dependent_MCMC/inputfile.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-Song.rep.final/Discrete-Dependent_MCMC/tree.nex
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-Song.rep.final/Discrete-Independent_MCMC/data.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-Song.rep.final/Discrete-Independent_MCMC/data.txt.Log.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-Song.rep.final/Discrete-Independent_MCMC/data.txt.Schedule.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-Song.rep.final/Discrete-Independent_MCMC/data.txt.Stones.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-Song.rep.final/Discrete-Independent_MCMC/inputfile.txt
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-Song.rep.final/Discrete-Independent_MCMC/tree.nex
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-Song.rep.final/MeanCoopTie2Noncoop-Song.rep.final_Dependent_2023-08-08.csv
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-Song.rep.final/MeanCoopTie2Noncoop-Song.rep.final_Dependent_2023-08-09.csv
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-Song.rep.final/MeanCoopTie2Noncoop-Song.rep.final_Independent_2023-08-08.csv
-Priors-exp-AceQrates_MeanCoopTie2Noncoop-Song.rep.final/MeanCoopTie2Noncoop-Song.rep.final_Independent_2023-08-09.csv
-Priors-exp-AceQratesFailedRun/Discrete-Dependent_MCMC/data.txt
-Priors-exp-AceQratesFailedRun/Discrete-Dependent_MCMC/data.txt.Log.txt
-Priors-exp-AceQratesFailedRun/Discrete-Dependent_MCMC/data.txt.Schedule.txt
-Priors-exp-AceQratesFailedRun/Discrete-Dependent_MCMC/data.txt.Stones.txt
-Priors-exp-AceQratesFailedRun/Discrete-Dependent_MCMC/inputfile.txt
-Priors-exp-AceQratesFailedRun/Discrete-Dependent_MCMC/tree.nex
-Priors-exp-AceQratesFailedRun/Discrete-Independent_MCMC/data.txt
-Priors-exp-AceQratesFailedRun/Discrete-Independent_MCMC/data.txt.Log.txt
-Priors-exp-AceQratesFailedRun/Discrete-Independent_MCMC/data.txt.Schedule.txt
-Priors-exp-AceQratesFailedRun/Discrete-Independent_MCMC/data.txt.Stones.txt
-Priors-exp-AceQratesFailedRun/Discrete-Independent_MCMC/inputfile.txt
-Priors-exp-AceQratesFailedRun/Discrete-Independent_MCMC/tree.nex
-Priors-exp-MaxLikIndependentValues20230712/Discrete-Dependent_MCMC/data.txt
-Priors-exp-MaxLikIndependentValues20230712/Discrete-Dependent_MCMC/data.txt.Log.txt
-Priors-exp-MaxLikIndependentValues20230712/Discrete-Dependent_MCMC/data.txt.Schedule.txt
-Priors-exp-MaxLikIndependentValues20230712/Discrete-Dependent_MCMC/data.txt.Stones.txt
-Priors-exp-MaxLikIndependentValues20230712/Discrete-Dependent_MCMC/inputfile.txt
-Priors-exp-MaxLikIndependentValues20230712/Discrete-Dependent_MCMC/tree.nex
-Priors-exp-MaxLikIndependentValues20230712/Discrete-Independent_MCMC/data.txt
-Priors-exp-MaxLikIndependentValues20230712/Discrete-Independent_MCMC/data.txt.Log.txt
-Priors-exp-MaxLikIndependentValues20230712/Discrete-Independent_MCMC/data.txt.Schedule.txt
-Priors-exp-MaxLikIndependentValues20230712/Discrete-Independent_MCMC/data.txt.Stones.txt
-Priors-exp-MaxLikIndependentValues20230712/Discrete-Independent_MCMC/inputfile.txt
-Priors-exp-MaxLikIndependentValues20230712/Discrete-Independent_MCMC/tree.nex
-Priors-exp-MaxLikIndependentValues20230712/MeanCoopTie2Noncoop-HighConfidence_FemaleSong_Dependent_2023-07-13.csv
-Priors-exp-MaxLikIndependentValues20230712/MeanCoopTie2Noncoop-HighConfidence_FemaleSong_Independent_2023-07-13.csv
-Priors-exp-MaxLikValues20230712/Discrete-Dependent_MCMC/data.txt
-Priors-exp-MaxLikValues20230712/Discrete-Dependent_MCMC/data.txt.Log.txt
-Priors-exp-MaxLikValues20230712/Discrete-Dependent_MCMC/data.txt.Schedule.txt
-Priors-exp-MaxLikValues20230712/Discrete-Dependent_MCMC/data.txt.Stones.txt
-Priors-exp-MaxLikValues20230712/Discrete-Dependent_MCMC/inputfile.txt
-Priors-exp-MaxLikValues20230712/Discrete-Dependent_MCMC/tree.nex
-Priors-exp-MaxLikValues20230712/Discrete-Independent_MCMC/data.txt
-Priors-exp-MaxLikValues20230712/Discrete-Independent_MCMC/data.txt.Log.txt
-Priors-exp-MaxLikValues20230712/Discrete-Independent_MCMC/data.txt.Schedule.txt
-Priors-exp-MaxLikValues20230712/Discrete-Independent_MCMC/data.txt.Stones.txt
-Priors-exp-MaxLikValues20230712/Discrete-Independent_MCMC/inputfile.txt
-Priors-exp-MaxLikValues20230712/Discrete-Independent_MCMC/tree.nex
-Priors-exp-MaxLikValues20230712/MeanCoopTie2Noncoop-HighConfidence_FemaleSong_Dependent_2023-07-12.csv
-Priors-exp-MaxLikValues20230712/MeanCoopTie2Noncoop-HighConfidence_FemaleSong_Independent_2023-07-12.csv
 Tie2NonCoop FSHighConf DUMMYResampledCoopFS simmap overlap output nsim 1000 Hackett .csv
+
+# MeanCoop analysis files
+MeanCoopTie2Coop Song.rep.final BayesDependent MCMC Ace Hackett*.csv
+MeanCoopTie2Coop Song.rep.final BayesIndependent MCMC Ace Hackett*.csv
+MeanCoopTie2Noncoop Song.rep.final BayesDependent MCMC Ace*.csv
+MeanCoopTie2Noncoop Song.rep.final BayesIndependent MCMC Ace*.csv
+
+# Analysis directories
+MaxLikelihood-Defaults/
+NoPriors_Stones*/
+PriorAll-Exp-*/
+Priors-exp-*/
+
+# Test files
 test.csv

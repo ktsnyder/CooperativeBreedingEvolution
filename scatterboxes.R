@@ -13,8 +13,9 @@
 # 8/18/2021 - change MateParam to DiscreteTrait, $species_in_birdtree to $species
 # 9-12-2023 - outline
 # 11/15/2023 - trycatch around wilcox test
+# 3/18/2025- changed ymin from 0 to min of data to allow for negative values; added ContinuousTraits as an arg; add islog as an arg - can only be TRUE or FALSE, will apply to all continuous traits
 
-#Plots merged boxplot/scatterplot for each song characteristic for each mating classification
+# Function plots merged boxplot/scatterplot for each song characteristic for each mating classification
 
  require(phytools)
 # 
@@ -24,12 +25,13 @@
 # columnnames <- "CoopBreed"
 # passertree <- read.nexus("2020-10-11ConsensusPasserineTreeHack100.nex")
 # treefile <- "birdzillatreeMaybeConsensus.nex"
+# ContinuousTraits = c("Syllable.rep.final","Syll.song.final","Song.rep.final","Duration.final","Interval.final","Song.rate","Continuity")
 # 
 #### Example usage: ----
-# scatterboxes(DiscreteTrait = "CoopBreed", newdata = datafile, newtree = passertree)
+# scatterboxes(DiscreteTrait = "CoopBreed", ContinuousTraits = ContinuousTraits, newdata = datafile, newtree = passertree)
 
 
-scatterboxes <- function(DiscreteTrait = "CoopBreed", newdata = FALSE, newtree = FALSE, discreteCategoryLabels = c("Non-cooperative","Cooperative"), otherlabel = NULL) {
+scatterboxes <- function(DiscreteTrait = "CoopBreed", ContinuousTraits, newdata = FALSE, newtree = FALSE, discreteCategoryLabels = c("Non-cooperative","Cooperative"), otherlabel = NULL, makelog = TRUE) {
   require(phytools)
   require(dplyr)
   source(file = "subsettreedata.R")
@@ -40,13 +42,23 @@ scatterboxes <- function(DiscreteTrait = "CoopBreed", newdata = FALSE, newtree =
   
   layout(mat=matrix(1:4,nrow=1,ncol=4, byrow=TRUE))
   
-  SongParams <- c("Syllable.rep.final","Syll.song.final","Song.rep.final","Duration.final","Interval.final","Song.rate","Continuity")
-  SongNames <- c("Syllable repertoire","Syllables per song","Song repertoire","Song duration","Intersong interval","Song rate","Continuity")
+  #SongParams <- c("Syllable.rep.final","Syll.song.final","Song.rep.final","Duration.final","Interval.final","Song.rate","Continuity")
+  #SongNames <- c("Syllable repertoire","Syllables per song","Song repertoire","Song duration","Intersong interval","Song rate","Continuity")
+  SongParams = ContinuousTraits
+  SongNames = ContinuousTraits
   
   
   for (m in 1:length(SongParams)) {
     SongParam <- SongParams[m]
-    subset <- subsettreedata(columns = c(DiscreteTrait,SongParam), newdata = newdata, newtree = newtree, islog = SongParam)  # this line calls a separate 
+    if (makelog) {
+      logtrans = SongParam
+      loglabel = "log"
+    } else {
+      logtrans = FALSE
+      loglabel = ""
+    }
+    
+    subset <- subsettreedata(columns = c(DiscreteTrait,SongParam), newdata = newdata, newtree = newtree, islog = logtrans)  # this line calls a separate 
     songcol <- SongParam
     matecol <- DiscreteTrait
     subsetdf <- subset$subsetdf
@@ -103,6 +115,9 @@ scatterboxes <- function(DiscreteTrait = "CoopBreed", newdata = FALSE, newtree =
     labels <- c(paste(datalistnames[1]," \nN =",length(datalist[[1]])), paste(datalistnames[2]," \nN =",length(datalist[[2]])))
     main <- paste("Wilcoxon rank-sum p =",round(wilcoxresults$p.value,6) ," \nphylANOVA p =" , phylanovaresults$Pf)
     
+    if (islog) {
+      SongNames = paste(loglabel, SongNames)
+    }
     
     
     ScatterBox(data = datalist, main = main, ylab = SongNames[m], labels = labels)
@@ -118,7 +133,7 @@ ScatterBox <- function(data,main="",sub="",xlab="",ylab="",labels=FALSE,col1=NA,
     data <- list(data)
   }
   offset <- 1:length(data)-1
-  plot(1,type='n',xlim=c(0,2),ylim=c(0,max(unlist(data))),xaxt='n',
+  plot(1,type='n',xlim=c(0,2),ylim=c(min(unlist(data)),max(unlist(data))),xaxt='n',
        xlab=xlab, ylab=ylab, main=main, sub=sub, cex.main = 0.8) #,log="y",cex.main = 1)
   axis(1, at=.5+offset, labels = labels, las = 1, cex.axis = 0.6) 
   #text(x = .5+offset, y = par("usr")[3] - offset, labels = labels, srt = 45, adj = 1, cex = 0.6, xpd = TRUE) # added 11/17/2023
