@@ -190,6 +190,18 @@ po/*~
 claude_code_sessions/
 README_private.md
 
+# Publication materials (pre-publication/sensitive)
+Publication_Materials/
+
+# Generated outputs (can be regenerated from code)
+Outputs/
+
+# Code review documents (internal)
+Independent Codebase Review/
+
+# Sandbox/experimental code (optional - see note below)
+# Sandbox/
+
 ############################################
 # Project-specific patterns from existing .gitignore
 ############################################
