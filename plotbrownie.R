@@ -49,7 +49,11 @@ if (is.data.frame(data)) {
 ##### plot brownie distribution
   
   if (newpdf == TRUE) {
-    pdf(file = paste0(getwd(),"/OutputFiles/", Sys.Date(),columns[1], loglabel, columns[2], otherlabel, "brownie.pdf"), width = 10, height = 5)
+    # Generate filename base for both PDF and PNG
+    filename_base <- paste0(Sys.Date(), "_", columns[1], "_", loglabel, columns[2], "_brownie", otherlabel)
+    
+    # Create PDF output
+    pdf(file = paste0(getwd(),"/OutputFiles/", filename_base, ".pdf"), width = 10, height = 5)
     par(mar = c(4,4,2,1))
     par(mfrow = c(1,2)) 
   } else {
@@ -88,18 +92,57 @@ if (is.data.frame(data)) {
 
   
   #plot brownie pvalue 
-  D0 <- density(browniedf$Pval)
+  D0_pval <- density(browniedf$Pval)
   sdev <- sd(browniedf$Pval)
   meanphy <- mean(browniedf$Pval)
-  plot(D0,col="black",
-       xlim=c(min(D0$x),
-              max(D0$x)),
-       ylim=c(min(D0$y),
-              max(D0$y)),
+  plot(D0_pval,col="black",
+       xlim=c(min(D0_pval$x),
+              max(D0_pval$x)),
+       ylim=c(min(D0_pval$y),
+              max(D0_pval$y)),
        main=paste(columns[1], columns[2], "Brownie pvals", ", # sims =", nsim, " \nMean =", round(meanphy,4), "/ StdDev =", round(sdev,4), otherlabel), cex.main = 0.75, xlab="Pval" ,ylab="Frequency") 
   abline(v=0.05, col = "gray")
   
   if (newpdf == TRUE) {
+    dev.off()
+    
+    # Now create PNG output with same content
+    png(file = paste0(getwd(),"/Outputs/Figures/PNG/", filename_base, ".png"), 
+        width = 10*150, height = 5*150, res = 150)
+    par(mar = c(4,4,2,1))
+    par(mfrow = c(1,2))
+    
+    # Recreate the first plot
+    plot(D0,col="blue",
+         xlim=c(min(c(D0$x,D1$x)),
+                max(c(D0$x,D1$x))),
+         ylim=c(min(c(D0$y,D1$y)),
+                max(c(D0$y,D1$y))),
+         main=titlelabel, 
+         xlab = "", 
+         ylab = "",
+         cex.main = 0.6)
+    lines(D1, col="red")
+    abline(v=browniedf$ERRate[1], lty = 2)
+    title(xlab=paste("Rate of", loglabel, columns[2],"evolution"),
+          ylab= paste("Number of Observations", otherlabel), line = 2)
+    
+    # Add legend
+    if (c(D0$x,D1$x)[which(c(D0$y,D1$y) == max(D0$y,D1$y))] > browniedf$ERRate[1]) {
+      legend("topleft",legend = c(paste(state0),paste(state1),"Equal Rates"), lwd=1,col=c("blue","red", "black"), lty = c(1,1,2))
+    } else if (c(D0$x,D1$x)[which(c(D0$y,D1$y) == max(D0$y,D1$y))] < browniedf$ERRate[1]) {
+      legend("topright",legend = c(paste(state0),paste(state1), "Equal Rates"), lwd=1,col=c("blue","red", "black"), lty = c(1,1,2))
+    }
+    
+    # Recreate the second plot
+    plot(D0_pval,col="black",
+         xlim=c(min(D0_pval$x),
+                max(D0_pval$x)),
+         ylim=c(min(D0_pval$y),
+                max(D0_pval$y)),
+         main=paste(columns[1], columns[2], "Brownie pvals", ", # sims =", nsim, " \nMean =", round(meanphy,4), "/ StdDev =", round(sdev,4), otherlabel), cex.main = 0.75, xlab="Pval" ,ylab="Frequency") 
+    abline(v=0.05, col = "gray")
+    
     dev.off()
   }
   

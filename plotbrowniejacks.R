@@ -52,7 +52,10 @@ require(phytools)
   }
   
   
-    pdf(paste0(Sys.Date()," PlotBrownieJacks ", otherlabel, " ",MateParam, " ", islogLab,SongParam, " ",nsim,"sim.pdf"), height = 10, width = 8)
+    # Generate filename base for both PDF and PNG
+    filename_base <- paste0(Sys.Date(), "_PlotBrownieJacks_", otherlabel, "_", MateParam, "_", islogLab, SongParam, "_", nsim, "sim")
+    
+    pdf(paste0(filename_base, ".pdf"), height = 10, width = 8)
   par(mfrow = c(6,4), cex = 0.3, mar=rep(2,4))
 
   if (MateParam == "Polygyny") {
@@ -129,19 +132,92 @@ require(phytools)
     } # end else (i.e. k =/= 1)
     
     #plot brownie pvalue 
-    D0 <- density(dftemp$Pval)
+    D0_pval <- density(dftemp$Pval)
     sdev <- sd(dftemp$Pval)
     meanphy <- mean(dftemp$Pval)
-    plot(D0,col="black",
-         xlim=c(min(D0$x),
-                max(D0$x)),
-         ylim=c(min(D0$y),
-                max(D0$y)),
+    plot(D0_pval,col="black",
+         xlim=c(min(D0_pval$x),
+                max(D0_pval$x)),
+         ylim=c(min(D0_pval$y),
+                max(D0_pval$y)),
          main=paste(columns[1], islogLab, columns[2], "Brownie pvals", ", # sims =", nsim, " \nMean =", round(meanphy,4), "/ StdDev =", round(sdev,4), otherlabel), cex.main = 0.85, xlab="Pval" ,ylab="Frequency") 
     abline(v=0.05, col = "gray")
     
     rm(dftemp)
   } # end for k in 1:length(browniejacks) - going through each dataframe of results from each removed family
+  dev.off()
+  
+  # Now create PNG output with same content
+  png(paste0("Outputs/Figures/PNG/", filename_base, ".png"), 
+      width = 8*150, height = 10*150, res = 150)
+  par(mfrow = c(6,4), cex = 0.3, mar=rep(2,4))
+  
+  for (k in 1:length(browniejacks)) {
+    dftempNotConv <- browniejacks[[k]] 
+    tempfamily = dftempNotConv[1,"jackedfam"]
+    tempNspecies = dftempNotConv[1,"numSpecies"]
+    if (is.null(nsim)) {
+      numsimsLabel = length(dftempNotConv[,1])
+    } else {
+      numsimsLabel = nsim
+    }
+    dftemp <- dftempNotConv[dftempNotConv$convergence == "Optimization has converged.",]
+    dftemp <- dftemp[!is.na(dftemp$convergence),]
+
+    ARDratio0to1 <- dftemp$ARDRate0/dftemp$ARDRate1
+    dftemp <- cbind(dftemp,ARDratio0to1)
+    all0over1df <- dftemp[which(dftemp$ARDratio0to1 > 1),]
+    all1over0df <- dftemp[which(dftemp$ARDratio0to1 < 1),]
+    ERloglikmean <- mean(dftemp$ERloglik)
+    ARDloglikmean <- mean(dftemp$ARDloglik)
+    P.chisqAll=pchisq(2*(ARDloglikmean-as.numeric(ERloglikmean)),1,lower.tail=FALSE)
+    ERloglikmean0over1 <- mean(all0over1df$ERloglik)
+    ARDloglikmean0over1 <- mean(all0over1df$ARDloglik)
+    P.chisq0over1=pchisq(2*(ARDloglikmean0over1-as.numeric(ERloglikmean0over1)),1,lower.tail=FALSE)
+    ERloglikmean1over0 <- mean(all1over0df$ERloglik)
+    ARDloglikmean1over0 <- mean(all1over0df$ARDloglik)
+    P.chisq1over0=pchisq(2*(ARDloglikmean1over0-as.numeric(ERloglikmean1over0)),1,lower.tail=FALSE)
+
+    familylabel = paste(tempfamily, "Nspecies =", tempNspecies)
+
+    D0 <- density(dftemp$ARDRate0)
+    D1 <- density(dftemp$ARDRate1)
+    
+    par(mar = c(3.8,3.5,4,1))
+    plot(D0,col="blue",
+         xlim=c(min(c(D0$x,D1$x)),
+                max(c(D0$x,D1$x))),
+         ylim=c(min(c(D0$y,D1$y)),
+                max(c(D0$y,D1$y))),
+         main="", xlab="",ylab="", cex.axis=1.5)     
+    title(main=paste("Removed:", familylabel), cex.main = 2, line = 1)
+    title(ylab = "Frequency",line=2.5, cex.lab=1.15)
+    lines(D1, col="red")
+    abline(v=dftemp$ERRate[1], lty = 2)
+    
+    if (k==1) {
+      legend("topright",legend = c(paste(state0),paste(state1),"Equal Rates"), lwd=1,col=c("blue","red", "black"), lty = c(1,1,2), cex=1.9)
+      pval = round(P.chisqAll,4)
+      title(xlab=paste0("Rate of evolution of ", islogLab, SongParam),line = 2.5, cex.lab = 1.8)
+    } else {
+      pval = round(P.chisqAll,4)
+      title(xlab=paste0("Rate of evolution of ", islogLab, SongParam),line = 2.5, cex.lab = 1.8)
+    }
+    
+    # Plot brownie pvalue 
+    D0_pval <- density(dftemp$Pval)
+    sdev <- sd(dftemp$Pval)
+    meanphy <- mean(dftemp$Pval)
+    plot(D0_pval,col="black",
+         xlim=c(min(D0_pval$x),
+                max(D0_pval$x)),
+         ylim=c(min(D0_pval$y),
+                max(D0_pval$y)),
+         main=paste(columns[1], islogLab, columns[2], "Brownie pvals", ", # sims =", nsim, " \nMean =", round(meanphy,4), "/ StdDev =", round(sdev,4), otherlabel), cex.main = 0.85, xlab="Pval" ,ylab="Frequency") 
+    abline(v=0.05, col = "gray")
+    
+    rm(dftemp)
+  }
   dev.off()
   }
 

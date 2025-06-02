@@ -37,7 +37,10 @@ scatterboxes <- function(DiscreteTrait = "CoopBreed", ContinuousTraits, newdata 
   source(file = "subsettreedata.R")
   
 
-  pdf(file=paste(Sys.Date(),DiscreteTrait,otherlabel,"Scatterbox.pdf",sep=""),width = 10, height = 4)
+  # Generate filename base for both PDF and PNG
+  filename_base <- paste0(Sys.Date(), "_", DiscreteTrait, "_", otherlabel, "_Scatterbox")
+  
+  pdf(file=paste0(filename_base, ".pdf"),width = 10, height = 4)
   
   
   layout(mat=matrix(1:4,nrow=1,ncol=4, byrow=TRUE))
@@ -115,13 +118,83 @@ scatterboxes <- function(DiscreteTrait = "CoopBreed", ContinuousTraits, newdata 
     labels <- c(paste(datalistnames[1]," \nN =",length(datalist[[1]])), paste(datalistnames[2]," \nN =",length(datalist[[2]])))
     main <- paste("Wilcoxon rank-sum p =",round(wilcoxresults$p.value,6) ," \nphylANOVA p =" , phylanovaresults$Pf)
     
-    if (islog) {
+    if (makelog) {
       SongNames = paste(loglabel, SongNames)
     }
     
     
     ScatterBox(data = datalist, main = main, ylab = SongNames[m], labels = labels)
   } # end for m in 1:length(SongParams)
+  dev.off()
+  
+  # Now create PNG output with same content
+  png(file = file.path("Outputs/Figures/PNG", paste0(filename_base, ".png")),
+      width = 10*150, height = 4*150, res = 150)
+  
+  layout(mat=matrix(1:4,nrow=1,ncol=4, byrow=TRUE))
+  
+  for (m in 1:length(SongParams)) {
+    SongParam <- SongParams[m]
+    if (makelog) {
+      logtrans = SongParam
+      loglabel = "log"
+    } else {
+      logtrans = FALSE
+      loglabel = ""
+    }
+    
+    subset <- subsettreedata(columns = c(DiscreteTrait,SongParam), newdata = newdata, newtree = newtree, islog = logtrans)
+    songcol <- SongParam
+    matecol <- DiscreteTrait
+    subsetdf <- subset$subsetdf
+    songdatavec <- subsetdf[,SongParam]
+    matingdatavec <- subsetdf[,DiscreteTrait]
+    names(songdatavec) <- subsetdf$species
+    names(matingdatavec) <- subsetdf$species
+    tree <- subset$subsettree
+    
+    nPerGroup = subsetdf %>% group_by(get(DiscreteTrait)) %>% count
+    
+    if (nrow(nPerGroup) == 1) {
+      phylanovaresults = NULL
+      phylanovaresults$Pf = NULL
+    } else {
+      set.seed(10)
+      phylanovaresults <- phylANOVA(tree,matingdatavec,songdatavec,nsim=50000) 
+    }
+    
+    df <- dfwilcox <- subsetdf[,c(matecol,songcol)]
+    datalist <- list()
+    
+    datalist <- list() 
+    datalistnames <- set.seed(10)
+    df[,DiscreteTrait][which(df[,DiscreteTrait] == 0)] <- discreteCategoryLabels[1]
+    df[,DiscreteTrait][which(df[,DiscreteTrait] == 1)] <- discreteCategoryLabels[2]
+    factors <- discreteCategoryLabels 
+    for (i in 1:2) {
+      onefactordf <- df[which(df[,DiscreteTrait] == factors[i]),]
+      tempfactordata <- onefactordf[,songcol]
+      datalist[[i]] <- tempfactordata
+      datalistnames[i] <- as.character(factors[i]) 
+    }
+    names(datalist) <- datalistnames
+    
+    wilcoxresults = NULL
+    
+    if (is.null(wilcoxresults)) {
+      wilcoxresults = NULL
+      wilcoxresults$p.value = NA
+    }
+
+    labels <- c(paste(datalistnames[1]," \nN =",length(datalist[[1]])), paste(datalistnames[2]," \nN =",length(datalist[[2]])))
+    main <- paste("Wilcoxon rank-sum p =",round(wilcoxresults$p.value,6) ," \nphylANOVA p =" , phylanovaresults$Pf)
+    
+    if (makelog) {
+      SongNames = paste(loglabel, SongNames)
+    }
+    
+    ScatterBox(data = datalist, main = main, ylab = SongNames[m], labels = labels)
+  }
   dev.off()
 } # end function scatterboxes
 
