@@ -1,8 +1,0 @@
-"tempfile","DiscreteTrait","SongFeature","nsims","MedianPval","percentSig","PercentSimsRate0GreaterThanRate1","MedianRate0","MedianRate1"
-"OutputFiles/Brownie/2024-02-25HighConfidence_CoopDuration.finalHackettOscine_brownie500sim.csv","HighConfidence_Coop","Duration.final","500","0.119364770266326","0.306","0.296","0.154344977855484","0.281975642143476"
-"OutputFiles/Brownie/2024-02-25HighConfidence_CoopInterval.finalHackettOscine_brownie500sim.csv","HighConfidence_Coop","Interval.final","500","0.473618005888795","0.016","0.886","0.0644955795739548","6.41157946897132e-06"
-"OutputFiles/Brownie/2024-02-25HighConfidence_CoopSong.rep.finalHackettOscine_brownie500sim.csv","HighConfidence_Coop","Song.rep.final","500","0.0374960285220618","0.566","0.992","0.286726383093014","0.00101291507925392"
-"OutputFiles/Brownie/2024-02-25HighConfidence_CoopSyll.song.finalHackettOscine_brownie500sim.csv","HighConfidence_Coop","Syll.song.final","500","4.08892777485911e-06","0.878","0.118","0.0928241197363812","0.963679097013758"
-"OutputFiles/Brownie/2024-02-25HighConfidence_CoopSyllable.rep.finalHackettOscine_brownie500sim.csv","HighConfidence_Coop","Syllable.rep.final","500","0.249477932561479","0.148","0.988","0.184978053184942","0.0346247198002309"
-"OutputFiles/Brownie/2024-02-26HighConfidence_CoopSong.rep.maxHackettOscine_brownie500sim.csv","HighConfidence_Coop","Song.rep.max","500","0.0470227439683087","0.514","0.994","0.34742903655147","0.0032436635809183"
-"OutputFiles/Brownie/2024-02-26HighConfidence_CoopSong.rep.minHackettOscine_brownie500sim.csv","HighConfidence_Coop","Song.rep.min","500","0.0354218757287313","0.602","0.992","0.19607210898921","0.00118054492217811"
