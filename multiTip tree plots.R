@@ -46,7 +46,10 @@ tipsize = 0.1
 filename = paste("fan phylo multi tips names SomeMoreNodesFSxCB5 FemaleSong_Agg01 HighConfidence_Coop 2024-04-12subtree.pdf")
 #filename = "FemaleSong_Agg01 fan phylo HC-Coop tips_candidateLabelSpecies4.pdf"
 
-# Uncomment the next line to save the plot to a PDF file
+# Generate filename base for both PDF and PNG
+filename_base <- gsub("\\.pdf$", "", filename)
+
+# Save the plot to a PDF file
 pdf(filename, height = 8, width = 12)
 par(mar = c(0,0,0,0))
 offsetDenom = 1 # 0.5 #3
@@ -122,6 +125,34 @@ treetiplabels3 = subsettree$tip.label %in% specialspecies
 
 # Add a legend to the plot
 #legend("bottomleft", legend = alllabs, cex = 0.9, fill=pySpecial, bty="n")
+
+dev.off()
+
+# Now create PNG output with same content
+png(file.path("Outputs/Figures/PNG", paste0(filename_base, ".png")), 
+    width = 12*150, height = 8*150, res = 150)
+par(mar = c(0,0,0,0))
+
+# Plot the phylogenetic tree without showing tip labels, in a fan layout
+plot.phylo(subsettree, type = "f", show.tip.label = TRUE, align.tip.label = TRUE, cex = 0.08, show.node.label = TRUE)
+
+# Define colors for the first set of traits
+py = c("purple","orange")
+
+# Identify which tips match the first trait condition and set their colors
+treetiplabels = subsettree$tip.label %in% subsetdf$species[which(subsetdf[,columns[1]] == 1)]
+
+# Add the first set of tip labels with custom colors based on the first trait
+tiplabels(pch=21,bg=py[as.numeric(treetiplabels)+1], col = py[as.numeric(treetiplabels)+1], cex=tipsize, offset = 1/offsetDenom)
+
+# Define colors for the second set of traits
+py2 = c("blue","red")
+
+# Identify which tips match the second trait condition
+treetiplabels2 = subsettree$tip.label %in% subsetdf$species[which(subsetdf[,columns[2]] == 1)]
+
+# Add the second set of tip labels with custom colors based on the second trait
+tiplabels(pch=21,bg=py2[as.numeric(treetiplabels2)+1], col = py2[as.numeric(treetiplabels2)+1], cex=tipsize, offset = 2/offsetDenom)
 
 dev.off()
 
@@ -203,7 +234,10 @@ py2 = c("blue","red", "white")
 py2nonsig = c("blue","red", "gray")
 
 
-pdf("phylo HighConfidence_Coop FemaleSong_Agg01 tips - FSxCB tree.pdf", width = 9, height = 8)
+# Generate filename base for both PDF and PNG
+filename_base2 <- "phylo_HighConfidence_Coop_FemaleSong_Agg01_tips_FSxCB_tree"
+
+pdf(paste0(filename_base2, ".pdf"), width = 9, height = 8)
 plot.phylo(subsettree, type = "f", show.tip.label = FALSE, align.tip.label = TRUE, cex = 0.01)
 
 for (i in 1:length(AllColsToPlot)) {

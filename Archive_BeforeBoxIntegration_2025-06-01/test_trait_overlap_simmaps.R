@@ -3,8 +3,6 @@
 ## 4/4/2022
 ## Method based on Huelsenbeck et al (2003)
 ## Last modified 6/19/2024
-## Last edited 12/11/2024 - calcHuelflex - changed columns made as.numeric to start with numericColumnStart based on the position of the last column containing "trait"
-## Last edited 2/3/2025 - add "setQratesData" arg to CharacterSimmaps, to work with setQratesTree to allow Q rates to be calculated for all characters using a specific tree and data subset. NOT to be used with columnForGlobalQ and columnGlobalQrates
 
 
 library(phytools)
@@ -14,7 +12,7 @@ source("find transition counts by state for 2 Discrete traits.R")
 
 
 #### CharacterSimmaps fxn ----
-CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalabel = NULL, dummyMethod = c("simHistory", "makeSimmap"), plotSampleSimmaps = FALSE, cladesubsetvalue = NULL, setQratesTree = NULL, setQratesData = NULL, columnForGlobalQ = NULL, columnGlobalQrates = NULL) {
+CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalabel = NULL, dummyMethod = c("simHistory", "makeSimmap"), plotSampleSimmaps = FALSE, cladesubsetvalue = NULL, setQratesTree = NULL, columnForGlobalQ = NULL, columnGlobalQrates = NULL) {
   
   if (is.null(datalabel)) {
     datalabel = paste(columns[1], columns[2])
@@ -28,28 +26,20 @@ CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalab
     Qtree = setQratesTree
   }
   
-  if (is.null(setQratesData)) {
-    Qdata = df
-  } else if (is.character(setQratesData)) {
-    Qdata = read.csv(setQratesData)
-  } else {
-    Qdata = setQratesData
-  }
-  
   if (!dir.exists("Simmap Overlap Outputs")) {
     dir.create("Simmap Overlap Outputs")
   }
   
   require(stringr)
   source("findQrates.R")
-  cooprates <- findQrates(columns = columns[1], newdata = Qdata, newtree = Qtree)
+  cooprates <- findQrates(columns = columns[1], newdata = df, newtree = Qtree)
   coopQ <- cooprates$qrates
   coopQ01 <- coopQ[3]
   coopQ10 <- coopQ[2]
   coopAnc = str_remove(cooprates$ARDlikanc, "ARDlik.anc ")  # added this for sim.history()
   coopAnc = as.numeric(coopAnc)
   names(coopAnc) <- c("0","1")
-  FSrates <- findQrates(columns = columns[2], newdata = Qdata, newtree = Qtree)
+  FSrates <- findQrates(columns = columns[2], newdata = df, newtree = Qtree)
   FSQ <- FSrates$qrates
   FSQAbsPres <- FSQ[3]
   FSQPresAbs <- FSQ[2]
@@ -83,38 +73,7 @@ CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalab
     datalabel = paste(datalabel, "REAL")
     if (plotSampleSimmaps) {
       
-      # Generate filename base for both PDF and PNG
-      filename_base <- paste(columns[1], columns[2], cladesubsetvalue, treelabel, "egSimmaps")
-      
-      pdf(file = file.path("Simmap Overlap Outputs", paste0(filename_base, ".pdf")),height=12,width=6)
-      layout(matrix(1:6,nrow = 2,ncol=3))
-      for (i in 1:3) {
-        simmap1 <- Coopsimtrees[[i]]
-        py = c("black","red")
-        pynamed <- py
-        names(pynamed) <- c(0,1)
-        
-        # Plot columns[1] data simmap 
-        plotSimmap(simmap1,fsize=0.2, lwd = 0.8, colors = pynamed)
-        #add tips
-        treetiplabels <- simmap1$tip.label %in% names(Coopvec[Coopvec==1]) 
-        tiplabels(pch=21,bg=py[as.numeric(treetiplabels)+1], col = py[as.numeric(treetiplabels)+1], cex=0.1)
-        numrates1 <- lapply(coopQ,round,digits=6)
-        title(paste(" ", "\nmake.simmap","Qrates:", numrates1[2],numrates1[3], columns[1]),cex.main = 0.5)
-        
-        simmapQset <- FSsimtrees[[i]]
-        plotSimmap(simmapQset,fsize=0.2,lwd=0.8, colors = pynamed)
-        #add tips
-        treetiplabels2 <- simmapQset$tip.label %in% names(FSvec[FSvec==1]) 
-        tiplabels(pch=21,bg=py[as.numeric(treetiplabels2)+1], col = py[as.numeric(treetiplabels2)+1], cex=0.1)
-        numrates2 <- lapply(FSQ,round,digits=6)
-        title(main=paste(" ","\nARDmodel","Qrates:",numrates2[2],numrates2[3], columns[2]),cex.main = 0.5)
-      }
-      dev.off()
-      
-      # Now create PNG output with same content
-      png(file = file.path("Outputs/Figures/PNG", paste0(filename_base, ".png")),
-          width = 6*150, height = 12*150, res = 150)
+      pdf(file = file.path("Simmap Overlap Outputs", paste(columns[1], columns[2], cladesubsetvalue, treelabel, "egSimmaps.pdf")),height=12,width=6)
       layout(matrix(1:6,nrow = 2,ncol=3))
       for (i in 1:3) {
         simmap1 <- Coopsimtrees[[i]]
@@ -542,42 +501,28 @@ if (newplot == TRUE) {
         stat_compare_means(aes(label = after_stat(p.signif)), method = "t.test") +
         scale_x_discrete(labels = groupLabels)
       
+      return(list(p1 = p1, p2 = p2, p3 = p3, p4 = p4, p5 = p5, p6 = p6, filename = PDFname, TransitionStats = TransitionStats, dfMeltCounts = dfMeltCounts, mediansRow = mediansRow))
+      
     } else {
-      p5 = NULL
-      p6 = NULL
+      return(list(p1 = p1, p2 = p2, p3 = p3, p4 = p4, filename = PDFname, mediansRow = mediansRow))
     }
     
   } else {
     p4 = NULL
-    p5 = NULL
-    p6 = NULL
-  }
-  
-  # Generate PNG and PDF outputs if requested
-  if (plot_ggplots_pdf == TRUE) {
-    require(cowplot)
-    # Generate filename base for both PDF and PNG
-    filename_base <- paste0("Simmap_Overlap_", trait1, "_", trait2, "_", nsims_real, "sims_real_", nsims_dummy, "sims_dummy", otherlabel)
-    
-    pdf(file = file.path("Simmap Overlap Outputs", paste0(filename_base, ".pdf")), height = 14, width = 6)
-    print(plot_grid(p1, p2, p3, ncol = 1))
-    dev.off()
-    
-    # Now create PNG output with same content
-    png(file = file.path("Outputs/Figures/PNG", paste0(filename_base, ".png")),
-        width = 6*150, height = 14*150, res = 150)
-    print(plot_grid(p1, p2, p3, ncol = 1))
-    dev.off()
-  }
-  
-  # Return appropriate list based on what plots were created
-  if (!is.null(p6)) {
-    return(list(p1 = p1, p2 = p2, p3 = p3, p4 = p4, p5 = p5, p6 = p6, filename = PDFname, TransitionStats = TransitionStats, dfMeltCounts = dfMeltCounts, mediansRow = mediansRow))
-  } else if (!is.null(p4)) {
-    return(list(p1 = p1, p2 = p2, p3 = p3, p4 = p4, filename = PDFname, mediansRow = mediansRow))
-  } else {
     return(list(p1 = p1, p2 = p2, p3 = p3, filename = PDFname, mediansRow = mediansRow))
   }
+  
+  
+  if (plot_ggplots_pdf == TRUE) {
+    require(cowplot)
+    pdf(file = paste("Simmap Overlap Outputs/Simmap Overlap",trait1, trait2, nsims_real, nsims_dummy, otherlabel, ".pdf"), height = 14, width = 6)
+    print(plot_grid(p1, p2, p3, ncol = 1))
+    dev.off()
+  }
+  #require(cowplot)
+  #print(plot_grid(p1, p2, p3, ncol = 1))
+  
+  return(list(p1 = p1, p2 = p2, p3 = p3, p4 = p4, filename = PDFname, mediansRow = mediansRow))
   
 }
 
@@ -586,15 +531,12 @@ if (newplot == TRUE) {
 # only works with output csvs that have the state combinations with DUMMY and REAL in the column names
 calcHuelflex = function(overlapdf) { # 
   require(dplyr)
-  require(tidyr)
-  require(stringr)
-  require(ggplot2)
   overlapdf$X=NULL
   colnames(overlapdf)
   
   nsims = length(overlapdf[,1])
-  numericColumnStart = max(which(str_detect(colnames(overlapdf), "trait")))+1
-  overlapdf[,numericColumnStart:length(colnames(overlapdf))] = apply(overlapdf[,numericColumnStart:length(colnames(overlapdf))], MARGIN = 2, FUN = as.numeric) 
+  
+  overlapdf[,2:length(colnames(overlapdf))] = apply(overlapdf[,2:length(colnames(overlapdf))], MARGIN = 2, FUN = as.numeric) 
   overlaplonger = overlapdf %>%   pivot_longer(
     cols = !c(tree, trait1, trait2),  # may need to be c(tree, trait1, trait2) for some old files?
     names_to = "state",  

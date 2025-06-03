@@ -238,7 +238,16 @@ dfDummy4 <- CharacterSimmaps(columns = c("HighConfidence_Coop","FemaleSong_Agg01
 dfout4 = read.csv("Simmap Overlap Outputs/ HighConfidence_Coop FemaleSong_Agg01 REAL simmap overlap_counts output nsim 500 HackettPasserineMeanEdgeIgnoreAbsent .csv")
 dfDummy4 = read.csv("Simmap Overlap Outputs/ HighConfidence_Coop FemaleSong_Agg01 DUMMYResampledMkSimmap-CoopFS simmap overlap_counts output nsim 500 HackettPasserineMeanEdgeIgnoreAbsent .csv")
 calcHuelout = calcHuel(dfout4, dfDummy4, otherlabel = "HackettPasserineMeanEdgeIgnoreAbsent")
-pdf("simmap overlap states HighConfidence_Coop FemaleSong_Agg01 HackettPasserineMeanEdgeIgnoreAbsent 500sims.pdf")
+# Generate filename base for both PDF and PNG
+filename_base <- "simmap_overlap_states_HighConfidence_Coop_FemaleSong_Agg01_HackettPasserineMeanEdgeIgnoreAbsent_500sims"
+
+pdf(paste0(filename_base, ".pdf"))
+calcHuelout$p3
+dev.off()
+
+# Now create PNG output
+png(file.path("Outputs/Figures/PNG", paste0(filename_base, ".png")), 
+    width = 7*150, height = 7*150, res = 150)
 calcHuelout$p3
 dev.off()
 
@@ -289,6 +298,10 @@ calcHuelout2 = calcHuelout[c("p1", "p2", "p3", "p4","p5","p6")]
 nPlots = 6
 m3 <- marrangeGrob(calcHuelout2, ncol = 1, nrow = nPlots)
 ggsave(plotname, m3, width = 7.5, height = 3.8*nPlots, units = "in")
+# Also save as PNG
+plotname_png = gsub(".pdf", ".png", plotname)
+plotname_png = gsub("Simmap Overlap Outputs/", "Outputs/Figures/PNG/", plotname_png)
+ggsave(plotname_png, m3, width = 7.5, height = 3.8*nPlots, units = "in", device = "png")
 #socialityPlots[[i]] <- calcHuelout
 }
 
@@ -324,6 +337,10 @@ for (i in 1:length(socialityMetrics)) {
   print(calcHuelout$mediansRow)
   m3 <- marrangeGrob(calcHuelout[1:nPlots], ncol = 1, nrow = nPlots) # nrow can be nPlots if no "filename" or "TransitionStats" in calcHuelout
   ggsave(plotname, m3, width = 7.5, height = 4.2*nPlots, units = "in")
+  # Also save as PNG
+  plotname_png = gsub(".pdf", ".png", plotname)
+  plotname_png = gsub("Simmap Overlap Outputs/", "Outputs/Figures/PNG/", plotname_png)
+  ggsave(plotname_png, m3, width = 7.5, height = 4.2*nPlots, units = "in", device = "png")
 }
 
 
@@ -505,6 +522,8 @@ single_page_plot <- grid.arrange(grobs = grobs_with_margins, ncol = 2, nrow = 3)
 
 # Save the arranged plot to a file
 ggsave("transition plots sociality FS_onepage_median_percentStates_percentTrending.pdf", single_page_plot, width = 18, height = 38, units = "in")
+# Also save as PNG
+ggsave("Outputs/Figures/PNG/transition_plots_sociality_FS_onepage_median_percentStates_percentTrending.png", single_page_plot, width = 18, height = 38, units = "in", device = "png")
 
 # With gray nonsig arrows
 nTransPlots= length(plotlistGray)
@@ -519,15 +538,26 @@ single_page_plotGray <- grid.arrange(grobs = grobs_with_marginsGray, ncol = 2, n
 
 # Save the arranged plot to a file
 ggsave("transition plots sociality FS_onepage_median_percentStates_weightsNumTransitions_GrayNonsig.pdf", single_page_plotGray, width = 18, height = 38, units = "in")
+# Also save as PNG
+ggsave("Outputs/Figures/PNG/transition_plots_sociality_FS_onepage_median_percentStates_weightsNumTransitions_GrayNonsig.png", single_page_plotGray, width = 18, height = 38, units = "in", device = "png")
 ggsave("transition plots AltCoops FSAgg_HighConfFS_onepage_median_percentStates_weightsNumTransitions_GrayNonsig.pdf", single_page_plotGray, width = 18, height = 18, units = "in")
+# Also save as PNG
+ggsave("Outputs/Figures/PNG/transition_plots_AltCoops_FSAgg_HighConfFS_onepage_median_percentStates_weightsNumTransitions_GrayNonsig.png", single_page_plotGray, width = 18, height = 18, units = "in", device = "png")
 
 # just Coop-FS plot
-ggsave("transition plot Tie2Noncoop FSAgg median_percentStates_weightsNumTransitions_labsPercentTrending_GrayNonsig.png", plotlistGray[[11]], width = 9, height = 5, units = "in", device = "png")
+# Save as PDF first
+ggsave("transition plot Tie2Noncoop FSAgg median_percentStates_weightsNumTransitions_labsPercentTrending_GrayNonsig.pdf", plotlistGray[[11]], width = 9, height = 5, units = "in", device = "pdf")
+# Then save as PNG
+ggsave("Outputs/Figures/PNG/transition_plot_Tie2Noncoop_FSAgg_median_percentStates_weightsNumTransitions_labsPercentTrending_GrayNonsig.png", plotlistGray[[11]], width = 9, height = 5, units = "in", device = "png")
 
 # just Coop-FS plot
 ggsave("transition plot HighConf_Coop FSAgg median_percentStates_weightsNumTransitions_labsPercentTrending_GrayNonsig.pdf", plotlistGray[[1]], width = 9, height = 5, units = "in", device = "pdf")
+# Also save as PNG
+ggsave("Outputs/Figures/PNG/transition_plot_HighConf_Coop_FSAgg_median_percentStates_weightsNumTransitions_labsPercentTrending_GrayNonsig.png", plotlistGray[[1]], width = 9, height = 5, units = "in", device = "png")
 
 ggsave("Multitree 200trees 20sims per tree transition plot HighConf_Coop FSAgg median_percentStates_weightsNumTransitions_labsPercentTrending_GrayNonsig.pdf", outplot$transitionplot_GrayNS, width = 9, height = 5, units = "in", device = "pdf")
+# Also save as PNG
+ggsave("Outputs/Figures/PNG/Multitree_200trees_20sims_per_tree_transition_plot_HighConf_Coop_FSAgg_median_percentStates_weightsNumTransitions_labsPercentTrending_GrayNonsig.png", outplot$transitionplot_GrayNS, width = 9, height = 5, units = "in", device = "png")
 
 # just target 4 plots
 grobs_with_marginsGray4 <- lapply(plotlistGray[c(3,5,6,10)], function(plot) {
@@ -536,7 +566,10 @@ grobs_with_marginsGray4 <- lapply(plotlistGray[c(3,5,6,10)], function(plot) {
   ggplotGrob(plot_with_margin)
 })
 single_page_plotGray4 <- grid.arrange(grobs = grobs_with_marginsGray4, ncol = 2, nrow = 2)
-ggsave("transition plots 4TargetSociality FS_median_percentStates_weightsNumTransitions_labsPercentTrending_GrayNonsig.png", single_page_plotGray4, width = 20, height = 13, units = "in", device = "png")
+# Save as PDF first
+ggsave("transition plots 4TargetSociality FS_median_percentStates_weightsNumTransitions_labsPercentTrending_GrayNonsig.pdf", single_page_plotGray4, width = 20, height = 13, units = "in", device = "pdf")
+# Then save as PNG
+ggsave("Outputs/Figures/PNG/transition_plots_4TargetSociality_FS_median_percentStates_weightsNumTransitions_labsPercentTrending_GrayNonsig.png", single_page_plotGray4, width = 20, height = 13, units = "in", device = "png")
 
 
 
@@ -624,6 +657,8 @@ write.csv(mediandf, paste("jackknifed BayesTraitsDiscrete MeanMedianResults SigO
 require(gridExtra)
 mBayes <- marrangeGrob(bayesbarplots, ncol = 2, nrow = 4)
 ggsave("jackknifed BayesTraitsDiscrete RateScatterBarplots Coop FemaleSong_Agg01 HackettOscine.pdf", mBayes, width = 8, height = 10, units = "in")
+# Also save as PNG
+ggsave("Outputs/Figures/PNG/jackknifed_BayesTraitsDiscrete_RateScatterBarplots_Coop_FemaleSong_Agg01_HackettOscine.png", mBayes, width = 8, height = 10, units = "in", device = "png")
 
 
 #### Jackknife Coop/FS Simmap Overlap ----
@@ -679,7 +714,12 @@ for (i in 1:54) {
   }
 }
 m1 <- marrangeGrob(plotlist2, ncol = 1, nrow = 3)
-ggsave(paste(Sys.Date(), "jackknifed Simmap Overlaps Coop FemaleSong_Agg01 HackettOscine.pdf"), m1, width = 8, height = 9, units = "in")
+# Save as PDF
+pdf_filename <- paste(Sys.Date(), "jackknifed Simmap Overlaps Coop FemaleSong_Agg01 HackettOscine.pdf")
+ggsave(pdf_filename, m1, width = 8, height = 9, units = "in")
+# Also save as PNG
+png_filename <- paste0("Outputs/Figures/PNG/", Sys.Date(), "_jackknifed_Simmap_Overlaps_Coop_FemaleSong_Agg01_HackettOscine.png")
+ggsave(png_filename, m1, width = 8, height = 9, units = "in", device = "png")
 
 
 
