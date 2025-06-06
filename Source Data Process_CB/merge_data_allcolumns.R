@@ -10,6 +10,9 @@
 ## 2/23/2024 - removed unnecessary code/lines
 ## 2/24/2024 - removed merging Mikula data because the duetting info is in the FS Gsheet
 ## 5/13/2024 - changed ourdatabaserefs file from "SupplementDataRefs_Update.csv" to "SupplementDataRefs_Update_2024-05-13.csv"; made output files use current date
+## 2/28/2025 - at end of script, added AVONET data addition directly to Data_R_Passerine_withTobias.csv
+## 6/6/2025 - added Tobias Territoriality data with code originally written/performed in "scratch MCMCglmm 2.R"; AVONET data was originally the main thing added in this version compared to the version of "merge_data_allcolumns.R" in the Git repo - changed it here to reflect that the species data files made were the Oscine subset, not Passerine; 
+
 
 require(ape)
 require(phytools)
@@ -182,3 +185,176 @@ CoopSongSoc = read.csv(paste0(Sys.Date(), "_CoopBreed-FemaleSong-Song-Sociality0
 SongSocCols = colnames(CoopSongSoc)[which(!colnames(CoopSongSoc) %in% colnames(fulldf))]
 CoopSongSocPasser = merge(fulldf, CoopSongSoc[,c("species", SongSocCols)], by = "species", all.y = T)
 write.csv(CoopSongSocPasser, paste0(Sys.Date(), "_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"), row.names = F)
+
+
+#### add Tobias et al 2016 data to 1st submission dataset ----
+
+newdata = "Data_R.csv"
+newdf = read.csv(newdata)
+rownames(newdf) <- newdf$species
+treefile = "ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
+tree = read.nexus(treefile)
+sum(!newdf$species %in% tree$tip.label)
+newdfsub = newdf[which(newdf$species %in% tree$tip.label),]
+
+require(readxl)
+require(stringr)
+require(dplyr)
+tobias = read_excel("Unaltered from publication/Tobias et al 2016 Territoriality Communal Signalling - Data Sheet 3.xlsx")
+tobias$BirdTree = str_replace(tobias$Species, " ", "_")
+#write.csv(tobias, "Tobias et al 2016 Territoriality Communal Signalling DataSheet3_underscoredSpecies.csv", row.names = F)
+tobias = read.csv("Tobias et al 2016 Territoriality Communal Signalling DataSheet3_underscoredSpecies.csv")
+tobias$TobiasSpeciesUnderscored <- tobias$BirdTree
+inconsistentNames = read.csv("inconsistent_species_names_InclTobias.csv") ## see below for process of getting this list
+inconsistentNames <- inconsistentNames[which(!is.na(inconsistentNames$species_in_birdtree)),]
+for (i in 1:length(tobias$BirdTree)) {
+  tobiasSpecies = tobias$BirdTree[i]
+  if (!tobiasSpecies %in% newdf$species) {
+    if (tobiasSpecies %in% inconsistentNames$in_database) {
+      # if (length(inconsistentNames$species_in_birdtree[which(inconsistentNames$in_database == tobiasSpecies)]) > 1) {
+      #   print(paste(tobiasSpecies, "getting replaced with", inconsistentNames$species_in_birdtree[which(inconsistentNames$in_database == tobiasSpecies)])) 
+      #   print(paste("Actually getting replaced with", na.omit(inconsistentNames$species_in_birdtree[which(inconsistentNames$in_database == tobiasSpecies)])))
+      # }
+      tobias$BirdTree[i] <- na.omit(inconsistentNames$species_in_birdtree[which(inconsistentNames$in_database == tobiasSpecies)])
+      print(paste(na.omit(inconsistentNames$species_in_birdtree[which(inconsistentNames$in_database == tobiasSpecies)])))
+    }
+  }
+}
+#write.csv(tobias, "Tobias et al 2016 Territoriality Communal Signalling DataSheet3_FSxCB species matchBirdtree_withdups.csv", row.names = F)
+# manually changed the BirdTree name of the duplicated species to NA
+
+tobias <- read.csv("Tobias et al 2016 Territoriality Communal Signalling DataSheet3_FSxCB species matchBirdtree_dupsNA.csv")
+newdf_tobias = merge(newdfsub, tobias, by.x = "species", by.y = "BirdTree", all.x = T)
+newdf_tobias$Territory <- as.factor(newdf_tobias$Territory)
+newdf_tobias$Territory_12vs3 <- NA
+newdf_tobias$Territory_12vs3[which(newdf_tobias$Territory %in% c(1,2))] <- 0
+newdf_tobias$Territory_12vs3[which(newdf_tobias$Territory %in% c(3))] <- 1
+newdf_tobias$Territory_1vs23 <- NA
+newdf_tobias$Territory_1vs23[which(newdf_tobias$Territory %in% c(1))] <- 0
+newdf_tobias$Territory_1vs23[which(newdf_tobias$Territory %in% c(2,3))] <- 1
+table(newdf_tobias$Territory_12vs3, newdf_tobias$Territory_1vs23)
+#write.csv(newdf_tobias,"Data_R_Oscine_withTobias.csv", row.names = F)
+
+
+## From above - This was what I did to get the Tobias species that weren't in the female song + coop breed set
+# sum(!newdf$species %in% tobias$BirdTree)
+# newdf[which(!newdf$species %in% tobias$BirdTree),] %>% group_by(HighConfidence_Coop, FemaleSong_Agg01) %>% count # gonna need to figure these out
+# newdf[which(!newdf$species %in% tobias$BirdTree & !is.na(newdf$HighConfidence_Coop) & !is.na(newdf$FemaleSong_Agg01)),"species"]
+# tobiasUnmatchedPasserines = tobias[which(!tobias$BirdTree %in% newdf$species & tobias$Order == "Passeriformes"),]
+# 
+# inconsistentNames = read.csv('/Users/kate/Library/CloudStorage/Box-Box/Kate_Nicole/CooperativeBreedingEvolutionOutputs/Nature Eco Evo - resubmission Code/Data Processing/inconsistent_species_names_BirdTree.csv')
+# missingFSxCBspecies <- newdf_clean[which(!newdf_clean$species %in% tobias$BirdTree), c("species")]
+# tobiasPasserines = tobias[which(tobias$Order == "Passeriformes"),]
+# tobiasUnmatchedPasserines = tobias[which(!tobias$BirdTree %in% newdf$species & tobias$Order == "Passeriformes"),]
+# sum(tobiasUnmatchedPasserines$BirdTree %in% inconsistentNames$in_database)
+# missingFSxCBspecies[missingFSxCBspecies %in% inconsistentNames$species_in_birdtree[which(inconsistentNames$in_database %in% tobiasUnmatchedPasserines$BirdTree)]]
+# 
+# MissingFromTobias = as.data.frame(cbind("", missingFSxCBspecies, "", "Tobias"))
+# colnames(MissingFromTobias) <- colnames(inconsistentNames)
+# inconsistentNamesWTobiasMissing <- rbind(inconsistentNames, MissingFromTobias)
+# duplicated(inconsistentNamesWTobiasMissing$species_in_birdtree)
+# #write.csv(inconsistentNamesWTobiasMissing, "inconsistent_species_names_InclTobias.   .csv", row.names = F)
+
+#### Add AVONET data ----
+datapath = "Data_R_Oscine_withTobias.csv" 
+data = read.csv(datapath)
+data = data[,which(!colnames(data) %in% c("Family3_BirdtreeMatchSpecies2_AVONET", "Order_AVONET"))] # remove the two AVONET columns previously used
+
+require(readxl)
+require(stringr)
+AVONET = read_excel("Unaltered from publication/AVONET Supplementary dataset 1.xlsx", sheet = 4)
+colnames(AVONET)[which(colnames(AVONET) == "Family3")] <- "Family3_BirdtreeMatchSpecies2"
+colnames(AVONET)[which(colnames(AVONET) == "Order3")] <- "Order"
+AVONET$Species3 = str_replace(AVONET$Species3, " ", "_")
+colnames(AVONET) <- paste(colnames(AVONET), "AVONET", sep = "_")
+newdfAVONET = merge(data, AVONET, by.x = "species", by.y = "Species3_AVONET", all.x = T)
+colnames(newdfAVONET)
+write.csv(newdfAVONET, "Data_R_Oscine_withTobias_AVONET.csv", row.names = F)
+
+#### Add special territoriality classifications performed by KTS and NC from BOW and literature searches ----
+ # Initially performed in "integrate bow categorization data.R"
+data = read.csv("Data_R_Oscine_withTobias_AVONET.csv")
+ktsnotes = read.csv('Territory2 species with KTS notes - Sheet1_20250509.csv') # already has BirdTree matches, can skip to "Basic analyses"
+ktsnotes = ktsnotes[which(!ktsnotes$SPECIES %in% c("Buru Friarbird", "Chihuahuan Meadowlark", "Lynes's Cisticola", "Chestnut-capped Warbler")),] # drop duplicate species (species that are split in BOW, but not recognized in BirdTree)
+ktsnotes1 = rename(ktsnotes, PermissiveExclusive = Exclusive.vs.Not.exclusive.territoriality..should.be.Strong...Exclusive.and.Weak.Grouped.except.for.colonial.and.group.defense.species..which.would.become.permissive., WeakStrong = Together.assessment..Weak.Strong., Confidence = Confidence.together)
+mergeddata = merge(data, ktsnotes1[,c("BirdtreeMatch", "PermissiveExclusive", "WeakStrong", "Confidence")], by.x = "species", by.y = "BirdtreeMatch", all.x = T)
+
+# Make special classifications binary 
+mergeddata$TerritorialityWeakVsStrong = NA
+mergeddata$TerritorialityWeakVsStrong[which(mergeddata$Territory == "1")] <- "0"
+mergeddata$TerritorialityWeakVsStrong[which(mergeddata$Territory == "3")] <- "1"
+mergeddata$TerritorialityWeakVsStrong[which(mergeddata$WeakStrong == "Weak")] <- "0"
+mergeddata$TerritorialityWeakVsStrong[which(mergeddata$WeakStrong == "Strong")] <- "1"
+
+mergeddata$TerritorialityWeakVsStrongHighConf = NA
+mergeddata$TerritorialityWeakVsStrongHighConf[which(mergeddata$Territory == "1")] <- "0"
+mergeddata$TerritorialityWeakVsStrongHighConf[which(mergeddata$Territory == "3")] <- "1"
+mergeddata$TerritorialityWeakVsStrongHighConf[which(mergeddata$WeakStrong == "Weak" & mergeddata$Confidence %in% c("Medium", "High"))] <- "0"
+mergeddata$TerritorialityWeakVsStrongHighConf[which(mergeddata$WeakStrong == "Strong" & mergeddata$Confidence %in% c("Medium", "High"))] <- "1"
+
+mergeddata$TerritorialityPermissiveExclusive = NA
+mergeddata$TerritorialityPermissiveExclusive[which(mergeddata$Territory == "1")] <- "0"
+mergeddata$TerritorialityPermissiveExclusive[which(mergeddata$Territory == "3")] <- "1"
+mergeddata$TerritorialityPermissiveExclusive[which(mergeddata$PermissiveExclusive == "Permissive")] <- "0"
+mergeddata$TerritorialityPermissiveExclusive[which(mergeddata$PermissiveExclusive == "Exclusive")] <- "1"
+
+mergeddata$TerritorialityPermissiveExclusiveHighConf = NA
+mergeddata$TerritorialityPermissiveExclusiveHighConf[which(mergeddata$Territory == "1")] <- "0"
+mergeddata$TerritorialityPermissiveExclusiveHighConf[which(mergeddata$Territory == "3")] <- "1"
+mergeddata$TerritorialityPermissiveExclusiveHighConf[which(mergeddata$PermissiveExclusive == "Permissive" & mergeddata$Confidence %in% c("Medium", "High"))] <- "0"
+mergeddata$TerritorialityPermissiveExclusiveHighConf[which(mergeddata$PermissiveExclusive == "Exclusive" & mergeddata$Confidence %in% c("Medium", "High"))] <- "1"
+
+mergeddata$TerritorialityPermissiveColonialCoopVsExclusive = NA
+mergeddata$TerritorialityPermissiveColonialCoopVsExclusive[which(mergeddata$Territory == "1")] <- "0"
+mergeddata$TerritorialityPermissiveColonialCoopVsExclusive[which(mergeddata$Territory == "3")] <- "1"
+mergeddata$TerritorialityPermissiveColonialCoopVsExclusive[which(mergeddata$colonial_Griesser2023 == "colonial" | mergeddata$HighConfidence_Coop == 1)] <- "0"
+mergeddata$TerritorialityPermissiveColonialCoopVsExclusive[which(mergeddata$PermissiveExclusive == "Permissive")] <- "0"
+mergeddata$TerritorialityPermissiveColonialCoopVsExclusive[which(mergeddata$PermissiveExclusive == "Exclusive")] <- "1"
+
+# write.csv(mergeddata, paste0("Data_R_Oscine_withTobias_AVONET_WeakStrong", Sys.Date(), ".csv"), row.names = F)
+
+
+#### Add data for bias tests ----
+
+dfOs = read.csv("Data_R_Oscine_withTobias_AVONET_WeakStrong2025-06-06.csv")
+dfOs$HaveFSData = !is.na(dfOs$FemaleSong_Agg01)
+dfOs$HaveCBData = !is.na(dfOs$HighConfidence_Coop)
+
+## Holarctic vs Tropical
+# Realm (from Jetz and Rubenstein 2011), Region (from Cockburn 2006) - some regions have been studied more intensively. If certain regions are understudied, species would be less likely to have a female song and/or cooperative breeding classification there
+# Realm: AT - Afrotropics, PA - Palearctic, NA - Nearctic, NT - Neotropics, IM - Indomalay, AA - Australasia, OC - Oceania. 
+# Region: Africa   Antarctic   Australia   Holarctic Indomalayan    Nearctic Neotropical  Palearctic     Unknown  Widespread. 
+JetzData <- read.csv("Jetz_data_BirdTreeNames_nodups.csv", check.names = FALSE)
+#CockburnData <- read.csv("Cockburn2006_data_BirdTreeNames_nodups.csv", stringsAsFactors = FALSE)
+colnames(JetzData) <- ifelse(colnames(JetzData) == "BirdtreeSpecies", "BirdtreeSpecies", paste(colnames(JetzData), "Jetz2011", sep = "_"))
+#colnames(CockburnData) <- ifelse(colnames(CockburnData) == "BirdtreeSpecies", "BirdtreeSpecies", paste(colnames(CockburnData), "Cockburn2006", sep = "_"))
+
+dfOs2 = merge(dfOs, JetzData[,c("BirdtreeSpecies", "Realm_Jetz2011")], by.x = "species", by.y = "BirdtreeSpecies", all.x = T)
+#dfOs2 = merge(dfOs2, CockburnData[,c("BirdtreeSpecies", "Region_Cockburn2006")], by.x = "species", by.y = "BirdtreeSpecies", all.x = T)
+
+#dfOs2 %>% group_by(Realm_Jetz2011, Region_Cockburn2006) %>% count %>% print(n=50)
+#dfOs2 %>% filter(is.na(Realm_Jetz2011)) %>% group_by(HighConfidence_Coop, FemaleSong_Agg01,Realm_Jetz2011, Region_Cockburn2006) %>% count %>% print(n=50)
+
+dfOs2$GeographicRegion_Jetz = NA
+dfOs2$GeographicRegion_Jetz[which(dfOs2$Realm_Jetz2011 %in% c("PA", "NeA"))] <- "Holarctic"
+dfOs2$GeographicRegion_Jetz[which(dfOs2$Realm_Jetz2011 %in% c("AT", "NT", "IM", "AA", "OC"))] <- "Tropical"
+#dfOs2$GeographicRegion_Cockburn = NA 
+#dfOs2$GeographicRegion_Cockburn[which(dfOs2$Region_Cockburn2006 %in% c("Nearctic", "Holarctic", "Palearctic"))] <- "Holarctic"
+#dfOs2$GeographicRegion_Cockburn[which(dfOs2$Region_Cockburn2006 %in% c("Indomalayan", "Australia",   "Neotropical", "Africa"))] <- "Tropical"
+
+table(dfOs2$GeographicRegion_Jetz)
+
+## Dale dichromatism
+DaleData = read.csv("plumage_scores_Dale et al 2016.csv")
+colnames(DaleData) <- ifelse(colnames(DaleData) == "BirdtreeSpecies", "BirdtreeSpecies", paste(colnames(DaleData), "Dale2015", sep = "_"))
+dfOs2 = merge(dfOs2, DaleData[,c("TipLabel_Dale2015", "Female_plumage_score_Dale2015", "Male_plumage_score_Dale2015")], by.x = "species", by.y = "TipLabel_Dale2015", all.x = T)
+dfOs2$MaleFemalePlumageDiff = dfOs2$Male_plumage_score_Dale2015-dfOs2$Female_plumage_score_Dale2015
+dfOs2$MaleFemalePlumageDiffAbs = abs(dfOs2$MaleFemalePlumageDiff) # absolute value of difference Male-Female
+dfOs2$logMaleFemalePlumageDiffAbs = log(abs(dfOs2$MaleFemalePlumageDiff)) # log absolute value of difference Male-Female
+
+
+## Calculate AVONET dimorphism
+dfOs2$MassDiff_AVONET = abs(dfOs2$Male_AVONET - dfOs2$Female_AVONET)+0.01 #NOPE. These are # of specimens measured
+logMassDiff_AVONET = log(dfOs2$MassDiff_AVONET)
+
+
