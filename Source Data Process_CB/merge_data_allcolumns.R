@@ -354,7 +354,54 @@ dfOs2$logMaleFemalePlumageDiffAbs = log(abs(dfOs2$MaleFemalePlumageDiff)) # log 
 
 
 ## Calculate AVONET dimorphism
-dfOs2$MassDiff_AVONET = abs(dfOs2$Male_AVONET - dfOs2$Female_AVONET)+0.01 #NOPE. These are # of specimens measured
-logMassDiff_AVONET = log(dfOs2$MassDiff_AVONET)
+avonet_data <- read.csv("AVONET Supplementary dataset 1_Raw Data.csv", 
+                        stringsAsFactors = FALSE) # data per individual measured
+avonet_data$SpeciesUnderscored = gsub(pattern = " ", "_", avonet_data$Species3_BirdTree)
 
+# Define the measurement columns
+measurement_cols <- c("Beak.Length_Culmen", "Beak.Length_Nares", "Beak.Width", 
+                      "Beak.Depth", "Tarsus.Length", "Wing.Length", 
+                      "Kipps.Distance", "Secondary1", "Hand.wing.Index", 
+                      "Tail.Length")
+
+# Filter for records with valid sex data (M or F)
+avonet_filtered <- avonet_data %>%
+  filter(Sex %in% c("M", "F"))
+# Convert measurement columns to numeric
+avonet_filtered[measurement_cols] <- lapply(avonet_filtered[measurement_cols], 
+                                            function(x) as.numeric(as.character(x)))
+# log-transform
+avonet_filtered[measurement_cols] <- lapply(avonet_filtered[measurement_cols], 
+                                            function(x) log(x))
+
+# 1. Calculate mean and median values by SpeciesUnderscored and Sex
+species_sex_summary <- avonet_filtered %>%
+  group_by(SpeciesUnderscored, Sex) %>%
+  summarise(
+    n_individuals = n(),
+    across(all_of(measurement_cols), 
+           list(mean = ~mean(.x, na.rm = TRUE),
+                median = ~median(.x, na.rm = TRUE)),
+           .names = "{.col}_{.fn}")
+  ) %>%
+  ungroup()
+
+sum(dfOs2$species[complete.cases(dfOs2[,c("HighConfidence_Coop", "FemaleSong_Agg01")])] %in% species_sex_summary$SpeciesUnderscored)
+
+# 2. Reshape data to have male and female measurements side by side
+dimorphism_data <- species_sex_summary %>%
+  filter(!is.na(SpeciesUnderscored)) %>%
+  pivot_wider(
+    id_cols = SpeciesUnderscored,
+    names_from = Sex,
+    values_from = c(n_individuals, contains("_mean"))
+  )
+
+dimorphism_data$PercentLogWingDimorphism_AVONET = (dimorphism_data$Wing.Length_mean_M - dimorphism_data$Wing.Length_mean_F) / dimorphism_data$Wing.Length_mean_F * 100
+
+hist(dimorphism_data$PercentLogWingDimorphism_AVONET)
+
+dfOs2 = merge(dfOs2, dimorphism_data, by.x = "species", by.y = "SpeciesUnderscored", all.x = T)
+
+write.csv(dfOs2, paste0(Sys.Date(), "_Data.csv"), row.names = F)
 

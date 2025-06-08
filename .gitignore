@@ -114,13 +114,6 @@ $RECYCLE.BIN/
 *-blx.bib
 *.run.xml
 
-# Data files (optional - uncomment if needed)
-# *.csv
-# *.xlsx
-# *.xls
-# *.rds
-# *.RData
-
 # Bayesian analysis outputs
 *.mcmc
 *.mcmcchain
