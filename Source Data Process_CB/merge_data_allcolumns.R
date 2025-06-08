@@ -403,5 +403,5 @@ hist(dimorphism_data$PercentLogWingDimorphism_AVONET)
 
 dfOs2 = merge(dfOs2, dimorphism_data, by.x = "species", by.y = "SpeciesUnderscored", all.x = T)
 
-write.csv(dfOs2, paste0(Sys.Date(), "_Data.csv"), row.names = F)
+write.csv(dfOs2, paste0("Data_R_", Sys.Date(), ".csv"), row.names = F)
 
