@@ -16,6 +16,7 @@ vignettes/*.pdf
 
 # macOS system files
 .DS_Store
+*.DS_Store
 .AppleDouble
 .LSOverride
 Icon
