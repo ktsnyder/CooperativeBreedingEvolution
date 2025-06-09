@@ -12,7 +12,7 @@
 ## 5/13/2024 - changed ourdatabaserefs file from "SupplementDataRefs_Update.csv" to "SupplementDataRefs_Update_2024-05-13.csv"; made output files use current date
 ## 2/28/2025 - at end of script, added AVONET data addition directly to Data_R_Passerine_withTobias.csv
 ## 6/6/2025 - added Tobias Territoriality data with code originally written/performed in "scratch MCMCglmm 2.R"; AVONET data was originally the main thing added in this version compared to the version of "merge_data_allcolumns.R" in the Git repo - changed it here to reflect that the species data files made were the Oscine subset, not Passerine; 
-
+## 6/9/2025 - added +0.1 pre-log-transformation of plumage dimorphism to avoid log issues; exporting additional relevant columns that show the process of transforming the wing length dimorphism variable; added HaveFSCBData as a column in the output file; added "_AVONET" to morphometric columns calculated from AVONET data.
 
 require(ape)
 require(phytools)
@@ -319,6 +319,7 @@ mergeddata$TerritorialityPermissiveColonialCoopVsExclusive[which(mergeddata$Perm
 dfOs = read.csv("Data_R_Oscine_withTobias_AVONET_WeakStrong2025-06-06.csv")
 dfOs$HaveFSData = !is.na(dfOs$FemaleSong_Agg01)
 dfOs$HaveCBData = !is.na(dfOs$HighConfidence_Coop)
+dfOs$HaveFSCBdata <- !is.na(dfOs$HighConfidence_Coop) & !is.na(dfOs$FemaleSong_Agg01)
 
 ## Holarctic vs Tropical
 # Realm (from Jetz and Rubenstein 2011), Region (from Cockburn 2006) - some regions have been studied more intensively. If certain regions are understudied, species would be less likely to have a female song and/or cooperative breeding classification there
@@ -350,7 +351,7 @@ colnames(DaleData) <- ifelse(colnames(DaleData) == "BirdtreeSpecies", "BirdtreeS
 dfOs2 = merge(dfOs2, DaleData[,c("TipLabel_Dale2015", "Female_plumage_score_Dale2015", "Male_plumage_score_Dale2015")], by.x = "species", by.y = "TipLabel_Dale2015", all.x = T)
 dfOs2$MaleFemalePlumageDiff = dfOs2$Male_plumage_score_Dale2015-dfOs2$Female_plumage_score_Dale2015
 dfOs2$MaleFemalePlumageDiffAbs = abs(dfOs2$MaleFemalePlumageDiff) # absolute value of difference Male-Female
-dfOs2$logMaleFemalePlumageDiffAbs = log(abs(dfOs2$MaleFemalePlumageDiff)) # log absolute value of difference Male-Female
+dfOs2$logMaleFemalePlumageDiffAbs = log(abs(dfOs2$MaleFemalePlumageDiff)+0.1) # log absolute value of difference Male-Female, with offset from 0 to prevent log issues
 
 
 ## Calculate AVONET dimorphism
@@ -374,12 +375,16 @@ avonet_filtered[measurement_cols] <- lapply(avonet_filtered[measurement_cols],
 avonet_filtered[measurement_cols] <- lapply(avonet_filtered[measurement_cols], 
                                             function(x) log(x))
 
+names(avonet_filtered)[names(avonet_filtered) %in% measurement_cols] <- paste0("log_", measurement_cols)
+
+log_measurement_cols = paste0("log_", measurement_cols)
+
 # 1. Calculate mean and median values by SpeciesUnderscored and Sex
 species_sex_summary <- avonet_filtered %>%
   group_by(SpeciesUnderscored, Sex) %>%
   summarise(
     n_individuals = n(),
-    across(all_of(measurement_cols), 
+    across(all_of(log_measurement_cols), 
            list(mean = ~mean(.x, na.rm = TRUE),
                 median = ~median(.x, na.rm = TRUE)),
            .names = "{.col}_{.fn}")
@@ -397,11 +402,23 @@ dimorphism_data <- species_sex_summary %>%
     values_from = c(n_individuals, contains("_mean"))
   )
 
-dimorphism_data$PercentLogWingDimorphism_AVONET = (dimorphism_data$Wing.Length_mean_M - dimorphism_data$Wing.Length_mean_F) / dimorphism_data$Wing.Length_mean_F * 100
+names(dimorphism_data) <- paste0(names(dimorphism_data), "_AVONET")
 
-hist(dimorphism_data$PercentLogWingDimorphism_AVONET)
 
-dfOs2 = merge(dfOs2, dimorphism_data, by.x = "species", by.y = "SpeciesUnderscored", all.x = T)
+dimorphism_data$DiffMaleFemaleLogWing = (dimorphism_data$log_Wing.Length_mean_M_AVONET - dimorphism_data$log_Wing.Length_mean_F_AVONET)
+
+dimorphism_data$DiffMaleFemaleLogWingAbs = abs(dimorphism_data$DiffMaleFemaleLogWing)
+
+dimorphism_data$PercentLogWingDimorphism = dimorphism_data$DiffMaleFemaleLogWing / dimorphism_data$log_Wing.Length_mean_F_AVONET * 100
+
+dimorphism_data$PercentAbsLogWingDimorphism = dimorphism_data$DiffMaleFemaleLogWingAbs / dimorphism_data$log_Wing.Length_mean_F_AVONET * 100
+
+hist(dimorphism_data$DiffMaleFemaleLogWing)
+hist(dimorphism_data$DiffMaleFemaleLogWingAbs)
+hist(dimorphism_data$PercentLogWingDimorphism)
+hist(dimorphism_data$PercentAbsLogWingDimorphism)
+
+dfOs2 = merge(dfOs2, dimorphism_data, by.x = "species", by.y = "SpeciesUnderscored_AVONET", all.x = T)
 
 write.csv(dfOs2, paste0("Data_R_", Sys.Date(), ".csv"), row.names = F)
 
