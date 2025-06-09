@@ -269,6 +269,7 @@ AVONET$Species3 = str_replace(AVONET$Species3, " ", "_")
 colnames(AVONET) <- paste(colnames(AVONET), "AVONET", sep = "_")
 newdfAVONET = merge(data, AVONET, by.x = "species", by.y = "Species3_AVONET", all.x = T)
 colnames(newdfAVONET)
+newdfAVONET$logMass_AVONET <- log(newdfAVONET$Mass_AVONET)
 write.csv(newdfAVONET, "Data_R_Oscine_withTobias_AVONET.csv", row.names = F)
 
 #### Add special territoriality classifications performed by KTS and NC from BOW and literature searches ----
@@ -316,7 +317,7 @@ mergeddata$TerritorialityPermissiveColonialCoopVsExclusive[which(mergeddata$Perm
 
 #### Add data for bias tests ----
 
-dfOs = read.csv("Data_R_Oscine_withTobias_AVONET_WeakStrong2025-06-06.csv")
+dfOs = read.csv("Data_R_Oscine_withTobias_AVONET_WeakStrong2025-06-09.csv")
 dfOs$HaveFSData = !is.na(dfOs$FemaleSong_Agg01)
 dfOs$HaveCBData = !is.na(dfOs$HighConfidence_Coop)
 dfOs$HaveFSCBdata <- !is.na(dfOs$HighConfidence_Coop) & !is.na(dfOs$FemaleSong_Agg01)
