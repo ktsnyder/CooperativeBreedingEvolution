@@ -52,7 +52,7 @@ for (terrcol in TerritorialityCols) {
   results <- run_multiple_phylopath(
     dfIn = dfIn,
     tree = tree,
-    downsample_columns = c("GeographicRegion_Cockburn", "HighConfidence_Coop", "HaveFSData"),
+    downsample_columns = c("GeographicRegion_Jetz", "HighConfidence_Coop", "HaveFSData"),
     downsample_values = c("Holarctic", 0, TRUE),
     numToRemove = 88,
     n_iterations = 500,
@@ -60,7 +60,7 @@ for (terrcol in TerritorialityCols) {
     coop_breeding_var = "HighConfidence_Coop", 
     territoriality_var = terrcol, 
     mass_var = "logMass_AVONET",
-    plotlabel = paste(terrcol, "GeographicRegion_Cockburn ")
+    plotlabel = paste(terrcol, "GeographicRegion_Jetz ")
   )
 }
 
