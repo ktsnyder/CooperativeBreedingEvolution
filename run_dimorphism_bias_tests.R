@@ -66,6 +66,16 @@ test_dimorphism_bias <- function(df,
   cat("Mean dimorphism (No FS Data):", round(t_test_have_data$estimate[1], 3), "\n")
   cat("Mean dimorphism (Has FS Data):", round(t_test_have_data$estimate[2], 3), "\n\n")
   
+  # Perform Wilcoxon rank-sum test on the same data
+  wilcox_test_have_data <- wilcox.test(df_work[[dimorphism_col]] ~ df_work$HaveFSData)
+  results$wilcox_test_have_data <- wilcox_test_have_data
+  
+  cat("Wilcoxon rank sum test:\n")
+  cat("W =", wilcox_test_have_data$statistic, 
+      ", p-value =", format.pval(wilcox_test_have_data$p.value, digits = 3), "\n")
+  cat("Median dimorphism (No FS Data):", round(median(df_work[[dimorphism_col]][df_work$HaveFSData == FALSE], na.rm = TRUE), 3), "\n")
+  cat("Median dimorphism (Has FS Data):", round(median(df_work[[dimorphism_col]][df_work$HaveFSData == TRUE], na.rm = TRUE), 3), "\n\n")
+  
   # Create violin plot for HaveFSData
   p1 <- ggplot(df_work, aes(x = HaveFSData_factor, y = .data[[dimorphism_col]], 
                            fill = HaveFSData_factor)) +
@@ -81,8 +91,8 @@ test_dimorphism_bias <- function(df,
     labs(x = "Female Song Data Availability",
          y = dimorphism_col,
          title = paste("Sexual Dimorphism by Data Availability"),
-         subtitle = paste0("p = ", format.pval(t_test_have_data$p.value, digits = 3),
-                          " (n = ", nrow(df_work), " species)"))
+         subtitle = paste0("t-test p = ", format.pval(t_test_have_data$p.value, digits = 3),
+                          " | wilcox p = ",  format.pval(wilcox_test_have_data$p.value, digits = 3), "  (n = ", nrow(df_work), " species)"))
   
   # 2. Test with actual FemaleSong values (excluding NA)
   df_fs_only <- df_work[!is.na(df_work[[data_col]]), ]
@@ -181,12 +191,12 @@ run_dimorphism_bias_tests <- function(df,
   }
   
   # Test size dimorphism
-  if ("PercentLogWingDimorphism_AVONET" %in% colnames(df)) {
+  if ("PercentAbsLogWingDimorphism" %in% colnames(df)) {
     cat("\n==== TESTING SIZE DIMORPHISM BIAS ====\n")
     results$size <- test_dimorphism_bias(
       df = df,
       tree = tree,
-      dimorphism_col = "PercentLogWingDimorphism_AVONET",
+      dimorphism_col = "PercentAbsLogWingDimorphism",
       data_col = "FemaleSong_Agg01",
       output_dir = output_dir
     )

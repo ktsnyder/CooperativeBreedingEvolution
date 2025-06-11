@@ -180,7 +180,7 @@ run_bias_tests <- function(df,
                                                 "TerritorialityWeakVsStrongHighConf",
                                                 "Territory_12vs3"),
                           dimorphism_cols = c("logMaleFemalePlumageDiffAbs", 
-                                            "PercentLogWingDimorphism_AVONET"),
+                                            "PercentAbsLogWingDimorphism"),
                           dimorphism_thresholds = list(
                             logMaleFemalePlumageDiffAbs = 0.5,  # median split by default
                             PercentLogWingDimorphism_AVONET = 0.5  # median split by default
