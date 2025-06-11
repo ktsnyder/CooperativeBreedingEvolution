@@ -2595,7 +2595,6 @@ create_dimorphism_downsamples_violin_plot <- function(dfIn_phylo,
 }
 
 #### Wrapper Plotting functions from phylopath_plotting_comprehensive_fixed.R ----
-## NOT RE-TESTED 6/9/2025
 #' Create all plots for non-downsampled phylopath runs
 #'
 #' @param phylopath_output Output from run_CB_FS_Terr_phylopath()
@@ -3085,6 +3084,7 @@ create_downsampled_plots_inflexible <- function(downsampling_results,
 
 #' Updated create_downsampled_plots with flexible input
 #' Formerly create_downsampled_plots_flexible()
+#' Further developed in create_downsampled_plots_forDev2025-06-11.R to plot conditional average coefficients from full dataset on violin-box plots
 #'
 #' This version accepts detailed_models_df as:
 #' A) A dataframe object
@@ -3093,18 +3093,32 @@ create_downsampled_plots_inflexible <- function(downsampling_results,
 #'
 #' @param downsampling_results Output from run_multiple_phylopath or similar
 #' @param detailed_models_input Either a dataframe, file path, or NULL
+#' @param model_frequencies_input Either a dataframe, file path, or NULL
+#' @param full_data_phylopath_input Either a phylopath result object or NULL
+#' @param full_dataset Full dataset for running phylopath (if full_data_phylopath_input is NULL)
+#' @param tree Phylogenetic tree for running phylopath (if full_data_phylopath_input is NULL)
 #' @param downsampling_info Information about the downsampling
 #' @param output_prefix Prefix for output files
 #' @param output_dir Output directory
 #' @param save_png Save plots as PNG
 #' @param save_pdf Save plots as PDF
 create_downsampled_plots <- function(downsampling_results,
-                                              detailed_models_input = NULL,
-                                              downsampling_info = NULL,
-                                              output_prefix = "phylopath_downsampled",
-                                              output_dir = "Outputs/PhylopathPlots",
-                                              save_png = TRUE,
-                                              save_pdf = TRUE) {
+                                     detailed_models_input = NULL,
+                                     model_frequencies_input = NULL,
+                                     full_data_phylopath_input = NULL,
+                                     full_dataset = NULL,
+                                     tree = NULL,
+                                     downsampling_info = NULL,
+                                     output_prefix = "phylopath_downsampled",
+                                     output_dir = "Outputs/PhylopathPlots",
+                                     save_png = TRUE,
+                                     save_pdf = TRUE) {
+  
+  # Load required libraries
+  require(ggplot2)
+  require(dplyr)
+  require(cowplot)
+  require(phylopath)
   
   if (!dir.exists(output_dir)) {
     dir.create(output_dir, recursive = TRUE)
@@ -3169,6 +3183,48 @@ create_downsampled_plots <- function(downsampling_results,
     detailed_models_df <- downsampling_results$detailed_models
   }
   
+  # Handle model frequencies input
+  model_frequencies_df <- NULL
+  
+  if (is.data.frame(model_frequencies_input)) {
+    # Case A: Already a dataframe
+    cat("Using provided model frequencies dataframe\n")
+    model_frequencies_df <- model_frequencies_input
+    
+  } else if (is.character(model_frequencies_input) && file.exists(model_frequencies_input)) {
+    # Case B: File path provided
+    cat("Loading model frequencies from:", model_frequencies_input, "\n")
+    model_frequencies_df <- read.csv(model_frequencies_input)
+    
+  } else if (is.null(model_frequencies_input)) {
+    # Case C: Try to get from downsampling_results or search for file
+    if (!is.null(downsampling_results$model_frequencies)) {
+      cat("Using model frequencies from results object\n")
+      model_frequencies_df <- downsampling_results$model_frequencies
+    } else {
+      # Search for file using pattern
+      cat("Searching for model frequencies file...\n")
+      
+      model_freq_files <- list.files(pattern = paste0("model_frequencies_.*", 
+                                                      gsub(" ", "_", output_prefix), 
+                                                      ".*\\.csv$"))
+      
+      if (length(model_freq_files) == 0 && output_dir != ".") {
+        model_freq_files <- list.files(output_dir, 
+                                       pattern = paste0("model_frequencies_.*", 
+                                                        gsub(" ", "_", output_prefix), 
+                                                        ".*\\.csv$"),
+                                       full.names = TRUE)
+      }
+      
+      if (length(model_freq_files) > 0) {
+        model_freq_file <- model_freq_files[1]
+        cat("Loading model frequencies from:", model_freq_file, "\n")
+        model_frequencies_df <- read.csv(model_freq_file)
+      }
+    }
+  }
+  
   # Process detailed models if available
   if (!is.null(detailed_models_df) && nrow(detailed_models_df) > 0) {
     # Extract edge information
@@ -3181,6 +3237,154 @@ create_downsampled_plots <- function(downsampling_results,
     seed_dataframes <- convert_all_seed_results_to_dataframes(agg_results)
     seed_level_conditional <- seed_dataframes$conditionalAverage_coefficient_perSeed
     
+    # Process full dataset phylopath results if provided
+    full_data_coefficients <- NULL
+    
+    if (!is.null(full_data_phylopath_input)) {
+      cat("Processing full dataset phylopath results...\n")
+      
+      if (is.list(full_data_phylopath_input) && "result" %in% names(full_data_phylopath_input)) {
+        # Extract conditional average coefficients from the phylopath result
+        full_result <- full_data_phylopath_input$result
+        
+        # Get best models (delta_CICc < 2)
+        full_summary <- summary(full_result)
+        best_models <- full_summary[full_summary$delta_CICc < 2, ]
+        
+        if (nrow(best_models) > 0) {
+          # Extract coefficients for each best model
+          all_paths <- list()
+          
+          for (i in 1:nrow(best_models)) {
+            model_name <- best_models$model[i]
+            chosen_model <- choice(full_result, model_name)
+            
+            if (!is.null(chosen_model$coef) && is.matrix(chosen_model$coef)) {
+              coef_matrix <- chosen_model$coef
+              
+              # Convert to path format
+              for (from_idx in 1:nrow(coef_matrix)) {
+                for (to_idx in 1:ncol(coef_matrix)) {
+                  coef_value <- coef_matrix[from_idx, to_idx]
+                  if (coef_value != 0) {
+                    from_name <- rownames(coef_matrix)[from_idx]
+                    to_name <- colnames(coef_matrix)[to_idx]
+                    path_name <- paste0(from_name, "_to_", to_name)
+                    
+                    all_paths[[path_name]] <- c(all_paths[[path_name]], coef_value)
+                  }
+                }
+              }
+            }
+          }
+          
+          # Calculate conditional averages
+          full_data_coefficients <- data.frame(
+            path = names(all_paths),
+            full_data_mean = sapply(all_paths, mean),
+            stringsAsFactors = FALSE
+          )
+        }
+      }
+    } else {
+      # Option B: Run phylopath on full dataset if dataset and tree are provided
+      if (!is.null(full_dataset) && !is.null(tree)) {
+        cat("Running phylopath on full dataset...\n")
+        
+        # Load dataset and tree if they are file paths
+        if (is.character(full_dataset)) {
+          cat("Loading dataset from:", full_dataset, "\n")
+          full_dataset <- read.csv(full_dataset)
+        }
+        
+        if (is.character(tree)) {
+          cat("Loading tree from:", tree, "\n")
+          require(ape)
+          if (grepl("\\.nex", tree)) {
+            tree <- read.nexus(tree)
+          } else if (grepl("\\.nwk|\\.tre", tree)) {
+            tree <- read.tree(tree)
+          }
+        }
+        
+        # Filter dataset to species in tree
+        full_dataset <- full_dataset[full_dataset$species %in% tree$tip.label, ]
+        rownames(full_dataset) <- full_dataset$species
+        
+        # Determine which variables are being used based on output_prefix
+        # Look for common patterns in the prefix
+        if (grepl("PlumageDimorphism", output_prefix)) {
+          mass_var <- "logMaleFemalePlumageDiffAbs"
+        } else if (grepl("WingDimorphism", output_prefix)) {
+          mass_var <- "PercentAbsLogWingDimorphism"
+        } else {
+          mass_var <- "logMass_AVONET"  # Default
+        }
+        
+        # Determine territoriality variable
+        if (grepl("Territory_12vs3|Terr3", output_prefix)) {
+          territoriality_var <- "Territory_12vs3"
+        } else {
+          territoriality_var <- "TerritorialityWeakVsStrong"  # Default
+        }
+        
+        # Run phylopath
+        full_result <- run_CB_FS_Terr_phylopath(
+          dfIn = full_dataset,
+          tree = tree,
+          female_song_var = "FemaleSong_Agg01",
+          coop_breeding_var = "HighConfidence_Coop",
+          territoriality_var = territoriality_var,
+          mass_var = mass_var,
+          plots2pdf = FALSE
+        )
+        
+        # Now process the result
+        if (!is.null(full_result) && !is.null(full_result$result)) {
+          full_summary <- summary(full_result$result)
+          best_models <- full_summary[full_summary$delta_CICc < 2, ]
+          
+          if (nrow(best_models) > 0) {
+            all_paths <- list()
+            
+            for (i in 1:nrow(best_models)) {
+              model_name <- best_models$model[i]
+              chosen_model <- choice(full_result$result, model_name)
+              
+              if (!is.null(chosen_model$coef) && is.matrix(chosen_model$coef)) {
+                coef_matrix <- chosen_model$coef
+                
+                for (from_idx in 1:nrow(coef_matrix)) {
+                  for (to_idx in 1:ncol(coef_matrix)) {
+                    coef_value <- coef_matrix[from_idx, to_idx]
+                    if (coef_value != 0) {
+                      from_name <- rownames(coef_matrix)[from_idx]
+                      to_name <- colnames(coef_matrix)[to_idx]
+                      path_name <- paste0(from_name, "_to_", to_name)
+                      
+                      all_paths[[path_name]] <- c(all_paths[[path_name]], coef_value)
+                    }
+                  }
+                }
+              }
+            }
+            
+            # Calculate conditional averages
+            full_data_coefficients <- data.frame(
+              path = names(all_paths),
+              full_data_mean = sapply(all_paths, mean),
+              stringsAsFactors = FALSE
+            )
+          }
+        }
+      } else {
+        cat("full_data_phylopath_input is NULL and dataset/tree not provided\n")
+        cat("To enable full dataset comparison, provide either:\n")
+        cat("  1. full_data_phylopath_input = result_bodymass (or similar)\n")
+        cat("  2. full_dataset = dfIn_phylo and tree = tree_phylo\n")
+      }
+    }
+    
     # Create VIOLIN-BOX PLOTS
     cat("Creating violin-box plots of path coefficients...\n")
     
@@ -3188,8 +3392,8 @@ create_downsampled_plots <- function(downsampling_results,
     seed_level_conditional$path_clean <- gsub("_to_", " → ", seed_level_conditional$path)
     seed_level_conditional$path_clean <- gsub("FemaleSong_Agg01", "Female Song", seed_level_conditional$path_clean)
     seed_level_conditional$path_clean <- gsub("HighConfidence_Coop", "Cooperation", seed_level_conditional$path_clean)
-    seed_level_conditional$path_clean <- gsub("TerritorialityWeakVsStrong", "Territoriality", seed_level_conditional$path_clean)
-    seed_level_conditional$path_clean <- gsub("Territory_12vs3", "Territory Type", seed_level_conditional$path_clean)
+    seed_level_conditional$path_clean <- gsub("TerritorialityWeakVsStrong", "Strong Territoriality", seed_level_conditional$path_clean)
+    seed_level_conditional$path_clean <- gsub("Territory_12vs3", "Year-round Territory", seed_level_conditional$path_clean)
     seed_level_conditional$path_clean <- gsub("logMass_AVONET", "Body Mass", seed_level_conditional$path_clean)
     seed_level_conditional$path_clean <- gsub("logMaleFemalePlumageDiffAbs", "Plumage Dimorphism", seed_level_conditional$path_clean)
     seed_level_conditional$path_clean <- gsub("PercentAbsLogWingDimorphism", "Wing Dimorphism", seed_level_conditional$path_clean)
@@ -3202,6 +3406,23 @@ create_downsampled_plots <- function(downsampling_results,
     
     seed_level_plot <- seed_level_conditional %>%
       filter(path %in% path_counts$path)
+    
+    # Prepare full dataset coefficients for plotting if available
+    full_data_plot <- NULL
+    if (!is.null(full_data_coefficients)) {
+      # Clean path names to match
+      full_data_coefficients$path_clean <- gsub("_to_", " → ", full_data_coefficients$path)
+      full_data_coefficients$path_clean <- gsub("FemaleSong_Agg01", "Female Song", full_data_coefficients$path_clean)
+      full_data_coefficients$path_clean <- gsub("HighConfidence_Coop", "Cooperation", full_data_coefficients$path_clean)
+      full_data_coefficients$path_clean <- gsub("TerritorialityWeakVsStrong", "Strong Territoriality", full_data_coefficients$path_clean)
+      full_data_coefficients$path_clean <- gsub("Territory_12vs3", "Year-round Territory", full_data_coefficients$path_clean)
+      full_data_coefficients$path_clean <- gsub("logMass_AVONET", "Body Mass", full_data_coefficients$path_clean)
+      full_data_coefficients$path_clean <- gsub("logMaleFemalePlumageDiffAbs", "Plumage Dimorphism", full_data_coefficients$path_clean)
+      full_data_coefficients$path_clean <- gsub("PercentAbsLogWingDimorphism", "Wing Dimorphism", full_data_coefficients$path_clean)
+      
+      # Filter to paths that are in the downsampled data
+      full_data_plot <- full_data_coefficients[full_data_coefficients$path_clean %in% seed_level_plot$path_clean, ]
+    }
     
     p_violin <- ggplot(seed_level_plot, 
                        aes(x = path_clean, y = mean_coefficient)) +
@@ -3221,6 +3442,22 @@ create_downsampled_plots <- function(downsampling_results,
         plot.title = element_text(size = 14, face = "bold"),
         axis.text.y = element_text(size = 10)
       )
+    
+    # Add full dataset coefficients if available
+    if (!is.null(full_data_plot) && nrow(full_data_plot) > 0) {
+      # Use geom_crossbar for a clean horizontal line that appears vertical after coord_flip
+      p_violin <- p_violin +
+        geom_crossbar(data = full_data_plot,
+                      aes(x = path_clean, y = full_data_mean, 
+                          ymin = full_data_mean, ymax = full_data_mean),
+                      width = 0.4, color = "red", size = 0.5)
+      
+      # Update subtitle to indicate full dataset overlay
+      p_violin <- p_violin +
+        labs(subtitle = paste("Based on", length(unique(seed_level_plot$seed)), 
+                              "downsampling iterations (conditional averaging)",
+                              "\nRed lines show full dataset conditional averages"))
+    }
     
     # Create COEFFICIENT HEATMAP
     cat("Creating heatmap of mean coefficients...\n")
@@ -3252,8 +3489,8 @@ create_downsampled_plots <- function(downsampling_results,
       clean_names <- function(x) {
         x <- gsub("FemaleSong_Agg01", "Female\nSong", x)
         x <- gsub("HighConfidence_Coop", "Cooperation", x)
-        x <- gsub("TerritorialityWeakVsStrong", "Territoriality", x)
-        x <- gsub("Territory_12vs3", "Territory\nType", x)
+        x <- gsub("TerritorialityWeakVsStrong", "Strong\nTerritoriality", x)
+        x <- gsub("Territory_12vs3", "Year-Round\nTerritory\nType", x)
         x <- gsub("logMass_AVONET", "Body Mass", x)
         return(x)
       }
@@ -3301,8 +3538,8 @@ create_downsampled_plots <- function(downsampling_results,
     
     # MODEL FREQUENCY BAR PLOT
     cat("Creating model frequency plot...\n")
-    if (!is.null(downsampling_results$model_frequencies)) {
-      model_freq <- downsampling_results$model_frequencies %>%
+    if (!is.null(model_frequencies_df)) {
+      model_freq <- model_frequencies_df %>%
         arrange(desc(frequency_in_sub2)) %>%
         head(15) %>%
         mutate(
@@ -3379,6 +3616,12 @@ create_downsampled_plots <- function(downsampling_results,
 #' @param phylopath_output Output from phylopath analysis
 #' @param downsampling_info Optional downsampling information
 #' @param output_prefix Prefix for output files
+#' @param output_dir Output directory
+#' @param detailed_models_input Either a dataframe, file path, or NULL
+#' @param model_frequencies_input Either a dataframe, file path, or NULL
+#' @param full_data_phylopath_input Either a phylopath result object from non-downsampled analysis or NULL
+#' @param full_dataset Full dataset for running phylopath (if full_data_phylopath_input is NULL and analysis_type is "downsampled")
+#' @param tree Phylogenetic tree for running phylopath (if full_data_phylopath_input is NULL and analysis_type is "downsampled")
 #' @param save_png Save as PNG
 #' @param save_pdf Save as PDF
 create_all_phylopath_plots <- function(analysis_type = c("nondownsampled", "downsampled"),
@@ -3387,6 +3630,10 @@ create_all_phylopath_plots <- function(analysis_type = c("nondownsampled", "down
                                        downsampling_info = NULL,
                                        output_prefix = "phylopath",
                                        output_dir = "Outputs/PhylopathPlots",
+                                       model_frequencies_input = NULL,
+                                       full_data_phylopath_input = NULL,
+                                       full_dataset = NULL,
+                                       tree = NULL,
                                        save_png = TRUE,
                                        save_pdf = FALSE) {
   
@@ -3407,6 +3654,10 @@ create_all_phylopath_plots <- function(analysis_type = c("nondownsampled", "down
       downsampling_info = downsampling_info,
       output_prefix = output_prefix,
       output_dir = output_dir,
+      model_frequencies_input = model_frequencies_input,
+      full_data_phylopath_input = full_data_phylopath_input,
+      full_dataset = full_dataset,
+      tree = tree,
       save_png = save_png,
       save_pdf = save_pdf
     )

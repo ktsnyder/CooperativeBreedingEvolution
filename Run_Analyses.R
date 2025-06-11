@@ -646,8 +646,6 @@ plot_transition_counts_3trait(Qdata = "Data_R_2025-06-09.csv", Qtree = '2022-03-
 
 #### Phylopath analyses ----
 source("run_phylopath_fxns.R")
-#source("phylopath_plotting_comprehensive_fixed.R") #this moved to
-#source("create_phylopath_plots_enhanced_fixed.R")
 
 # Prepare data for phylopath
 df_phylo <- read.csv("Data_R_2025-06-09.csv")
@@ -745,6 +743,18 @@ for (tempCoop in altCoops) {
     )
   }
 }
+
+# 5. Phylopath with binarized territory from Tobias et al (2016) body mass
+cat("\nRunning phylopath with body mass...\n")
+result_bodymass <- run_CB_FS_Terr_phylopath(
+  dfIn = dfIn_phylo,
+  tree = tree_phylo,
+  female_song_var = "FemaleSong_Agg01",
+  coop_breeding_var = "HighConfidence_Coop",
+  territoriality_var = "Territory_12vs3",
+  mass_var = "logMass_AVONET",
+  plots2pdf = TRUE
+)
 
 #### Run brownie resampled min/max values ----
 source("browniefunction.R")
@@ -930,7 +940,9 @@ prefix_geo <- "Remove83HolarcticNoncoop"
 plots_geo <- create_all_phylopath_plots(
   analysis_type = "downsampled",
   phylopath_output = result_geo_holarctic,
-  downsampling_info = NULL, #geo_holarctic_info,
+  downsampling_info = geo_holarctic_info,
+  full_dataset = "Data_R_2025-06-09.csv",
+  tree = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex",
   output_prefix = prefix_geo,
   output_dir = phylopath_output_dir,
   save_png = TRUE
@@ -974,6 +986,8 @@ plots_trop <- create_all_phylopath_plots(
   analysis_type = "downsampled",
   phylopath_output = result_geo_tropical,
   downsampling_info = trop_coop_info,
+  full_dataset = "Data_R_2025-06-09.csv",
+  tree = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex",
   output_prefix = prefix_trop,
   output_dir = phylopath_output_dir,
   save_png = TRUE
@@ -1017,6 +1031,8 @@ plots_global <- create_all_phylopath_plots(
   analysis_type = "downsampled",
   phylopath_output = result_global_coop,
   downsampling_info = global_coop_info,
+  full_dataset = "Data_R_2025-06-09.csv",
+  tree = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex",
   output_prefix = prefix_global,
   output_dir = phylopath_output_dir,
   save_png = TRUE
@@ -1028,15 +1044,6 @@ cat("\n\nRunning territoriality bias correction...\n")
 # Convert territoriality to character for calculation
 dfIn_phylo_char <- dfIn_phylo
 dfIn_phylo_char$TerritorialityWeakVsStrong <- as.character(dfIn_phylo_char$TerritorialityWeakVsStrong)
-
-# Calculate downsampling needed
-# terr_downsample_info <- calculate_territoriality_downsampling(
-#   dfIn_phylo_char,
-#   territoriality_col = "TerritorialityWeakVsStrong",
-#   territory_value_high = "1",
-#   territory_value_low = "0",
-#   data_cols = c("FemaleSong_Agg01", "HighConfidence_Coop")
-# )
 
 if (downsampling_results$downsampling$territoriality_bias$n_to_remove > 0) {
   cat("Need to remove", downsampling_results$downsampling$territoriality_bias$n_to_remove, "species from StrongTerr\n")
@@ -1053,8 +1060,7 @@ if (downsampling_results$downsampling$territoriality_bias$n_to_remove > 0) {
     territoriality_var = "TerritorialityWeakVsStrong",
     mass_var = "logMass_AVONET",
     save_conditional_plots = TRUE,
-    plotlabel = paste0("Remove",
-                       downsampling_results$downsampling$territoriality_bias$n_to_remove, "StrongTerr")
+    plotlabel = paste0("Remove", downsampling_results$downsampling$territoriality_bias$n_to_remove, "StrongTerr")
   )
   
   # Create plots
@@ -1064,6 +1070,8 @@ if (downsampling_results$downsampling$territoriality_bias$n_to_remove > 0) {
     analysis_type = "downsampled",
     phylopath_output = result_terr,
     downsampling_info = downsampling_results$downsampling$territoriality_bias$n_to_remove,
+    full_dataset = "Data_R_2025-06-09.csv",
+    tree = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex",
     output_prefix = prefix_terr,
     output_dir = phylopath_output_dir,
     save_png = TRUE
@@ -1076,15 +1084,6 @@ cat("\n\nRunning Territory_12vs3 bias correction...\n")
 # Convert territoriality to character for calculation
 dfIn_phylo_char <- dfIn_phylo
 dfIn_phylo_char$Terr <- as.character(dfIn_phylo_char$Territory_12vs3)
-
-# Calculate downsampling needed
-# terr_downsample_info <- calculate_territoriality_downsampling(
-#   dfIn_phylo_char,
-#   territoriality_col = "Territory_12vs3",
-#   territory_value_high = "1",
-#   territory_value_low = "0",
-#   data_cols = c("FemaleSong_Agg01", "HighConfidence_Coop")
-# )
 
 if (downsampling_results$downsampling$territory_12vs3_bias$n_to_remove > 0) {
   cat("Need to remove", downsampling_results$downsampling$territory_12vs3_bias$n_to_remove, "species from",
@@ -1112,6 +1111,8 @@ if (downsampling_results$downsampling$territory_12vs3_bias$n_to_remove > 0) {
     analysis_type = "downsampled",
     phylopath_output = result_terr,
     downsampling_info = NULL, #terr_downsample_info$report,
+    full_dataset = "Data_R_2025-06-09.csv",
+    tree = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex",
     output_prefix = prefix_terr,
     output_dir = phylopath_output_dir,
     save_png = TRUE
@@ -1405,10 +1406,13 @@ for (dim_type in names(dimorphism_vars)) {
                                 dim_info$label,"ByPropensity")
     
     # Use the flexible plotting function
-    plots_dimorphism <- create_downsampled_plots_flexible(
+    plots_dimorphism <- create_downsampled_plots(
       downsampling_results = result_dimorphism,
       detailed_models_input = result_dimorphism$detailed_models,  # Pass dataframe directly
       downsampling_info = NULL,
+      full_dataset = dfIn_phylo,
+      tree = tree_phylo,
+      full_data_phylopath_input = NULL,
       output_prefix = prefix_dimorphism,
       output_dir = file.path(phylopath_output_dir, dim_info$label),
       save_png = TRUE
@@ -1417,3 +1421,6 @@ for (dim_type in names(dimorphism_vars)) {
 }
 
 cat("\n\nAll dimorphism bias corrections complete!\n")
+
+
+#### PhyloGLM ----
