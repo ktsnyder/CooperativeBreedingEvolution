@@ -702,7 +702,7 @@ if ("logMaleFemalePlumageDiffAbs" %in% colnames(dfIn_phylo)) {
 }
 
 # 3. Phylopath with sexual dimorphism
-if ("PercentLogWingDimorphism_AVONET" %in% colnames(dfIn_phylo)) {
+if ("PercentAbsLogWingDimorphism" %in% colnames(dfIn_phylo)) {
   cat("\nRunning phylopath with sexual dimorphism...\n")
   result_dimorph <- run_CB_FS_Terr_phylopath(
     dfIn = dfIn_phylo,
@@ -710,7 +710,7 @@ if ("PercentLogWingDimorphism_AVONET" %in% colnames(dfIn_phylo)) {
     female_song_var = "FemaleSong_Agg01",
     coop_breeding_var = "HighConfidence_Coop",
     territoriality_var = "TerritorialityWeakVsStrong",
-    mass_var = "PercentLogWingDimorphism_AVONET",
+    mass_var = "PercentAbsLogWingDimorphism",
     plots2pdf = FALSE
   )
   
@@ -722,9 +722,80 @@ if ("PercentLogWingDimorphism_AVONET" %in% colnames(dfIn_phylo)) {
   )
 }
 
+# 4. Phylopath with alternative cooperative breeding classifications
+altCoops <- c("MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop", "AnyNoncoopEqualsNoncoop")
+for (tempCoop in altCoops) {
+  if ("PercentLogWingDimorphism_AVONET" %in% colnames(dfIn_phylo)) {
+    cat("\nRunning phylopath with sexual dimorphism...\n")
+    result_altCoops <- run_CB_FS_Terr_phylopath(
+      dfIn = dfIn_phylo,
+      tree = tree_phylo,
+      female_song_var = "FemaleSong_Agg01",
+      coop_breeding_var = tempcoop,
+      territoriality_var = "TerritorialityWeakVsStrong",
+      mass_var = "logMass_AVONET",
+      plots2pdf = FALSE
+    )
+    
+    plots_altCoops <- create_all_phylopath_plots(
+      analysis_type = "nondownsampled",
+      phylopath_output = result_altCoops,
+      output_dir = phylopath_output_dir,
+      save_png = TRUE
+    )
+  }
+}
 
 #### Run brownie resampled min/max values ----
+source("browniefunction.R")
+source("findQrates.R")
+source("plotbrownie.R")
 
+dfIn <- read.csv("Data_R_2025-06-09.csv")
+tree <- tree_phylo <- read.nexus("2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex")
+
+discreteCatLabels = c("Non-cooperative", "Cooperative")
+nsim = 2 # due to the way each simmap is called in browniefunction() (as one element in a list of simmaps), we can't do just 1 sim
+currentlabel = "ResampleMinMedMax"
+nSeeds = 500
+
+# get Q rates out here so we can use the pared-down dataframe in the loop
+Qoutput <- findQrates(columns = "HighConfidence_Coop", plot=F, newtree = tree, newdata = dfIn)
+qrates <- Qoutput$qrates
+
+# Resample song features and run brownie
+for (song_base in c("Song.rep.", "Syllable.rep.")) {
+  
+  songcols <- grep(paste0("^",song_base), colnames(dfIn), value = TRUE)
+  songcols
+  
+  # subset dataframe
+  complete_vars <- c("HighConfidence_Coop", songcols)
+  df <- dfIn[complete.cases(dfIn[,complete_vars]),]
+  df = df[,c("species", complete_vars)]
+  
+  dfloop <- df
+  outdf = set.seed(10)
+  for (i in 1:nSeeds) {
+    set.seed(i)
+    sampleColName = paste0(song_base,"Sample",i)
+    dfloop[[sampleColName]] <- apply(dfloop[, songcols], 1, sample, size = 1)
+    brownieout = browniefunction(columns = c("HighConfidence_Coop", sampleColName), newdata = dfloop, newtree = treefile, nsim = nsim, islog = sampleColName, plotsimmaps = FALSE, setQrates = qrates)
+    outdf = rbind(outdf, brownieout)
+  }
+  
+  write.csv(outdf, paste0(Sys.Date(),"HighConfidence_Coop_",song_base, currentlabel, "_brownie",nsim,"sim", nSeeds, "resamples.csv"), row.names = F)
+  write.csv(dfloop, paste0(Sys.Date()," HighConfidence_Coop_",song_base, currentlabel, " ", nSeeds, "resampled columns.csv"), row.names = F)
+  
+  plotbrownie(data = outdf, columns = c("HighConfidence_Coop",song_base), discreteCategoryLabels = discreteCatLabels, otherlabel = currentlabel, newpdf = TRUE, nsim = nSeeds, islog = TRUE)
+  
+}
+
+# Aggregate results
+source("brownie relative rates.R")
+# compile results into one table
+#BrownieRelativeRates(BrownieOutputFolder = ".", otherlabel = currentlabel)
+BrownieRelativeRates(BrownieOutputFolder = "OutputFiles", otherlabel = currentlabel)
 
 
 #### Run bias analyses and calculate downsampling ----
