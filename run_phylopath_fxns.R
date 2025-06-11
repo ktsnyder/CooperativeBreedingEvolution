@@ -22,7 +22,7 @@ run_multiple_phylopath <- function(dfIn, tree, downsample_columns, downsample_va
                                    save_path_coefficients = TRUE,
                                    save_downsampling_plots = TRUE,
                                    plotlabel = "",
-                                   output_dir = "Outputs/PhylopathPlots") {
+                                   output_dir = file.path("Outputs","PhylopathDownsampled")) {
   
   require(dplyr)
   require(ggplot2)
@@ -38,6 +38,10 @@ run_multiple_phylopath <- function(dfIn, tree, downsample_columns, downsample_va
     best_CICc = numeric(n_iterations),
     stringsAsFactors = FALSE
   )
+  
+  if (!dir.exists(output_dir)) {
+    dir.create(output_dir, recursive = TRUE)
+  }
   
   # Create lists to store additional results
   conditional_average_plots <- list()
@@ -198,7 +202,7 @@ run_multiple_phylopath <- function(dfIn, tree, downsample_columns, downsample_va
   
   # Save the detailed models data frame
   if (!is.null(detailed_models_df) && nrow(detailed_models_df) > 0) {
-    write.csv(detailed_models_df, paste0("detailed_models_", plotlabel, "_", n_iterations, "_", Sys.Date(), ".csv"), row.names = FALSE)
+    write.csv(detailed_models_df, file.path(output_dir, paste0("detailed_models_", plotlabel, "_", n_iterations, "_", Sys.Date(), ".csv")), row.names = FALSE)
     cat("Detailed model information saved to CSV file\n")
   }
   
@@ -238,7 +242,7 @@ run_multiple_phylopath <- function(dfIn, tree, downsample_columns, downsample_va
   
   # Save conditional average plots to a PDF if requested
   if (save_conditional_plots && length(conditional_average_plots) > 0) {
-    pdf_name <- paste0("conditional_average_plots_", plotlabel, "_", n_iterations, "_", Sys.Date(), ".pdf")
+    pdf_name <- file.path(output_dir, paste0("conditional_average_plots_", plotlabel, "_", n_iterations, "_", Sys.Date(), ".pdf"))
     
     # Increased height from 10 to 15
     pdf(pdf_name, width = 12, height = 15)
@@ -275,7 +279,7 @@ run_multiple_phylopath <- function(dfIn, tree, downsample_columns, downsample_va
   }
   
   # Save model frequencies to CSV
-  write.csv(model_freq_df, paste0("model_frequencies_", plotlabel, "_", n_iterations, "_", Sys.Date(), ".csv"), row.names = FALSE)
+  write.csv(model_freq_df, file.path(output_dir, paste0("model_frequencies_", plotlabel, "_", n_iterations, "_", Sys.Date(), ".csv")), row.names = FALSE)
   
   # Return the results
   results <- list(
@@ -305,7 +309,7 @@ run_multiple_phylopath <- function(dfIn, tree, downsample_columns, downsample_va
       theme_minimal()
     
     # Save the plot
-    pdf(paste0("top_models_", plotlabel, "_", n_iterations, "_", Sys.Date(), ".pdf"), width = 10, height = 8)
+    pdf(file.path(output_dir, paste0("top_models_", plotlabel, "_", n_iterations, "_", Sys.Date(), ".pdf")), width = 10, height = 8)
     print(top_models_plot)
     dev.off()
   }
@@ -349,7 +353,7 @@ run_multiple_phylopath <- function(dfIn, tree, downsample_columns, downsample_va
       arrange(desc(prop_significant))
     
     # Save edge summary
-    write.csv(edge_summary, paste0("edge_summary_", plotlabel, "_", n_iterations, "_", Sys.Date(), ".csv"), row.names = FALSE)
+    write.csv(edge_summary, file.path(output_dir, paste0("edge_summary_", plotlabel, "_", n_iterations, "_", Sys.Date(), ".csv")), row.names = FALSE)
     
     # Add to results
     results$edge_summary <- edge_summary
@@ -2783,13 +2787,14 @@ create_nondownsampled_plots <- function(phylopath_output,
 }
 
 #' Create all plots for downsampled phylopath runs
+#' Formerly create_downsampled_plots() - replacing with below function
 #'
 #' @param downsampling_results Output from run_multiple_phylopath()
 #' @param downsampling_info Information about the downsampling
 #' @param output_prefix Prefix including all variables and Remove[n][group] format
 #' @param save_png Save plots as PNG
 #' @param save_pdf Save plots as PDF
-create_downsampled_plots <- function(downsampling_results,
+create_downsampled_plots_inflexible <- function(downsampling_results,
                                      detailed_models_input = NULL,
                                      downsampling_info = NULL,
                                      output_prefix = "phylopath_downsampled",
@@ -3079,6 +3084,7 @@ create_downsampled_plots <- function(downsampling_results,
 
 
 #' Updated create_downsampled_plots with flexible input
+#' Formerly create_downsampled_plots_flexible()
 #'
 #' This version accepts detailed_models_df as:
 #' A) A dataframe object
@@ -3092,7 +3098,7 @@ create_downsampled_plots <- function(downsampling_results,
 #' @param output_dir Output directory
 #' @param save_png Save plots as PNG
 #' @param save_pdf Save plots as PDF
-create_downsampled_plots_flexible <- function(downsampling_results,
+create_downsampled_plots <- function(downsampling_results,
                                               detailed_models_input = NULL,
                                               downsampling_info = NULL,
                                               output_prefix = "phylopath_downsampled",

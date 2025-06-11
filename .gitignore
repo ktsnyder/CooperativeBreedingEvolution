@@ -264,6 +264,7 @@ MaxLikelihood-Defaults/
 NoPriors_Stones*/
 PriorAll-Exp-*/
 Priors-exp-*/
+Outputs_preJun10/
 
 # Test files
 test.csv
