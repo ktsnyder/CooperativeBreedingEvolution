@@ -882,7 +882,11 @@ source("run_phylopath_fxns.R")
 
 dfIn_phylo = read.csv("Data_R_2025-06-09.csv")
 tree <- tree_phylo <- read.nexus("2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex")
-phylopath_output_dir = "Outputs/PhylopathDownsampled"
+phylopath_output_dir = "Outputs"
+
+if (!dir.exists(phylopath_output_dir)) {
+  dir.create(phylopath_output_dir)
+}
 
 # Set number of iterations (use 500 for publication, 50 for testing)
 n_iterations <- 500  # Change to 50 for testing

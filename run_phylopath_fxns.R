@@ -765,6 +765,8 @@ run_phylopath_dimorphism_correction <- function(dfIn_phylo,
                                                 phylopath_output_dir = "Outputs/PhylopathDownsampled",
                                                 save_outputs = TRUE) {
   
+  require(gridExtra)
+  
   # Create output directory specific to this dimorphism type
   dim_output_dir <- file.path(phylopath_output_dir, dim_info$label)
   if (!dir.exists(dim_output_dir)) {
