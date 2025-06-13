@@ -3639,6 +3639,8 @@ create_all_phylopath_plots <- function(analysis_type = c("nondownsampled", "down
                                        save_png = TRUE,
                                        save_pdf = FALSE) {
   
+  require(cowplot)
+  
   analysis_type <- match.arg(analysis_type)
   
   if (analysis_type == "nondownsampled") {

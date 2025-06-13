@@ -661,7 +661,7 @@ if (!dir.exists(phylopath_output_dir)) dir.create(phylopath_output_dir, recursiv
 
 # 1. Phylopath with body mass
 cat("\nRunning phylopath with body mass...\n")
-result_bodymass <- run_CB_FS_Terr_phylopath(
+result_phylopath <- run_CB_FS_Terr_phylopath(
   dfIn = dfIn_phylo,
   tree = tree_phylo,
   female_song_var = "FemaleSong_Agg01",
@@ -673,7 +673,7 @@ result_bodymass <- run_CB_FS_Terr_phylopath(
 
 plots_bodymass <- create_all_phylopath_plots(
   analysis_type = "nondownsampled",
-  phylopath_output = result_bodymass,
+  phylopath_output = result_phylopath,
   output_dir = phylopath_output_dir,
   save_png = TRUE
 )
@@ -681,19 +681,19 @@ plots_bodymass <- create_all_phylopath_plots(
 # 2. Phylopath with sexual dichromatism
 if ("logMaleFemalePlumageDiffAbs" %in% colnames(dfIn_phylo)) {
   cat("\nRunning phylopath with sexual dichromatism...\n")
-  result_dichrom <- run_CB_FS_Terr_phylopath(
+  result_phylopath <- run_CB_FS_Terr_phylopath(
     dfIn = dfIn_phylo,
     tree = tree_phylo,
     female_song_var = "FemaleSong_Agg01",
     coop_breeding_var = "HighConfidence_Coop",
     territoriality_var = "TerritorialityWeakVsStrong",
     mass_var = "logMaleFemalePlumageDiffAbs",
-    plots2pdf = FALSE
+    plots2pdf = TRUE
   )
   
   plots_dichrom <- create_all_phylopath_plots(
     analysis_type = "nondownsampled",
-    phylopath_output = result_dichrom,
+    phylopath_output = result_phylopath,
     output_dir = phylopath_output_dir,
     save_png = TRUE
   )
@@ -702,19 +702,19 @@ if ("logMaleFemalePlumageDiffAbs" %in% colnames(dfIn_phylo)) {
 # 3. Phylopath with sexual dimorphism
 if ("PercentAbsLogWingDimorphism" %in% colnames(dfIn_phylo)) {
   cat("\nRunning phylopath with sexual dimorphism...\n")
-  result_dimorph <- run_CB_FS_Terr_phylopath(
+  result_phylopath <- run_CB_FS_Terr_phylopath(
     dfIn = dfIn_phylo,
     tree = tree_phylo,
     female_song_var = "FemaleSong_Agg01",
     coop_breeding_var = "HighConfidence_Coop",
     territoriality_var = "TerritorialityWeakVsStrong",
     mass_var = "PercentAbsLogWingDimorphism",
-    plots2pdf = FALSE
+    plots2pdf = TRUE
   )
   
   plots_dimorph <- create_all_phylopath_plots(
     analysis_type = "nondownsampled",
-    phylopath_output = result_dimorph,
+    phylopath_output = result_phylopath,
     output_dir = phylopath_output_dir,
     save_png = TRUE
   )
@@ -723,21 +723,21 @@ if ("PercentAbsLogWingDimorphism" %in% colnames(dfIn_phylo)) {
 # 4. Phylopath with alternative cooperative breeding classifications
 altCoops <- c("MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop", "AnyNoncoopEqualsNoncoop")
 for (tempCoop in altCoops) {
-  if ("PercentLogWingDimorphism_AVONET" %in% colnames(dfIn_phylo)) {
+  if ("logMass_AVONET" %in% colnames(dfIn_phylo)) {
     cat("\nRunning phylopath with sexual dimorphism...\n")
-    result_altCoops <- run_CB_FS_Terr_phylopath(
+    result_phylopath <- run_CB_FS_Terr_phylopath(
       dfIn = dfIn_phylo,
       tree = tree_phylo,
       female_song_var = "FemaleSong_Agg01",
-      coop_breeding_var = tempcoop,
+      coop_breeding_var = tempCoop,
       territoriality_var = "TerritorialityWeakVsStrong",
       mass_var = "logMass_AVONET",
-      plots2pdf = FALSE
+      plots2pdf = TRUE
     )
     
     plots_altCoops <- create_all_phylopath_plots(
       analysis_type = "nondownsampled",
-      phylopath_output = result_altCoops,
+      phylopath_output = result_phylopath,
       output_dir = phylopath_output_dir,
       save_png = TRUE
     )
@@ -745,8 +745,8 @@ for (tempCoop in altCoops) {
 }
 
 # 5. Phylopath with binarized territory from Tobias et al (2016) body mass
-cat("\nRunning phylopath with body mass...\n")
-result_bodymass <- run_CB_FS_Terr_phylopath(
+cat("\nRunning phylopath with Terr12vs3 from Tobias et al (2016)...\n")
+result_phylopath <- run_CB_FS_Terr_phylopath(
   dfIn = dfIn_phylo,
   tree = tree_phylo,
   female_song_var = "FemaleSong_Agg01",
@@ -755,6 +755,16 @@ result_bodymass <- run_CB_FS_Terr_phylopath(
   mass_var = "logMass_AVONET",
   plots2pdf = TRUE
 )
+
+plots_Terr12v3 <- create_all_phylopath_plots(
+  analysis_type = "nondownsampled",
+  phylopath_output = result_phylopath,
+  output_dir = phylopath_output_dir,
+  save_png = TRUE
+)
+
+
+
 
 #### Run brownie resampled min/max values ----
 source("browniefunction.R")
@@ -882,10 +892,10 @@ source("run_phylopath_fxns.R")
 
 dfIn_phylo = read.csv("Data_R_2025-06-09.csv")
 tree <- tree_phylo <- read.nexus("2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex")
-phylopath_output_dir = "Outputs"
+phylopath_output_dir = "Outputs/PhylopathDownsampled"
 
 if (!dir.exists(phylopath_output_dir)) {
-  dir.create(phylopath_output_dir)
+  dir.create(phylopath_output_dir, recursive = T)
 }
 
 # Set number of iterations (use 500 for publication, 50 for testing)
@@ -1125,22 +1135,23 @@ if (downsampling_results$downsampling$territory_12vs3_bias$n_to_remove > 0) {
 
 # 5. Process all detailed model files with enhanced plots
 cat("\n\nProcessing detailed model files for enhanced plots...\n")
-detailed_files <- list.files(pattern = paste0("detailed_models_.*n", n_iterations, ".*\\.csv$"), 
+detailed_files <- list.files(path = phylopath_output_dir, pattern = paste0("detailed_models_.*", ".*\\.csv$"), 
                              full.names = TRUE)
 
-for (file in detailed_files) {
-  cat("Processing:", basename(file), "\n")
-  
-  scenario <- gsub("detailed_models_", "", basename(file))
-  scenario <- gsub(paste0("", ".*\\.csv$"), "", scenario)
-  
-  enhanced_plots <- create_enhanced_phylopath_plots(
-    csv_file = file,
-    output_prefix = file.path(phylopath_output_dir, paste0("enhanced_", scenario)),
-    save_png = TRUE,
-    save_pdf = FALSE
-  )
-}
+## Obsolete due to no create_enhanced_phylopath_plots() anymore, but perhaps worth using this framework for plotting with create_all_phylopath_plots()
+# for (file in detailed_files) {
+#   cat("Processing:", basename(file), "\n")
+#   
+#   scenario <- gsub("detailed_models_", "", basename(file))
+#   scenario <- gsub(paste0("", ".*\\.csv$"), "", scenario)
+#   
+#   enhanced_plots <- create_enhanced_phylopath_plots( #OBSOLETE
+#     csv_file = file,
+#     output_prefix = file.path(phylopath_output_dir, paste0("enhanced_", scenario)),
+#     save_png = TRUE,
+#     save_pdf = FALSE
+#   )
+# }
 
 cat("\n\nAll phylopath analyses complete!\n")
 cat("Results saved to:", phylopath_output_dir, "\n")
