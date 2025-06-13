@@ -8,7 +8,7 @@ require(stringr)
 require(phytools)
 source("subsettreedata.R")
 
-BrownieMultistate(DiscreteTrait = "TerrCoop", ContinuousTrait = "Syllable.rep.final", newdata = newdata, treefile = treefile, nsim = 500, importSimmaps = TerrCoopsims)
+# Example: BrownieMultistate(DiscreteTrait = "TerrCoop", ContinuousTrait = "Syllable.rep.final", newdata = newdata, treefile = treefile, nsim = 500, importSimmaps = TerrCoopsims)
 
 BrownieMultistate <- function(DiscreteTrait, ContinuousTrait, newdata, treefile, nsim, plotsimmaps = F, plotResults = T, filename = NULL, otherlabel = "", importSimmaps = NULL)
 {

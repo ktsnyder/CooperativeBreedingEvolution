@@ -158,7 +158,15 @@ BrownieRelativeRates(BrownieOutputFolder = "BrownieJackknifeOutputs", otherlabel
 # Supplemental Figures 2 & 3; Supplemental Tables 6 & 7 - Brownie with multi-state categorical traits ----
 BrownieMultistate(DiscreteTrait = "grouping_Griesser2023", ContinuousTrait = "Song.rep.final", newdata = newdata, treefile = treefile, nsim = 5, plotsimmaps = F, plotResults = T, otherlabel = "test")
 BrownieMultistate(DiscreteTrait = "social_system_incl_nk_coop_Griesser2017", ContinuousTrait = "Song.rep.final", newdata = newdata, treefile = treefile, nsim = 10, plotsimmaps = F, plotResults = T, otherlabel = "test")
-
+df_brown = read.csv(newdata)
+df_brown$TerritorialityWeakVsStrong[which(df_brown$TerritorialityWeakVsStrong == 0)] <- "Weak"
+df_brown$TerritorialityWeakVsStrong[which(df_brown$TerritorialityWeakVsStrong == 1)] <- "Strong"
+df_brown$HighConfidence_Coop[which(df_brown$HighConfidence_Coop == 0)] <- "Noncooperative"
+df_brown$HighConfidence_Coop[which(df_brown$HighConfidence_Coop == 1)] <- "Cooperative"
+df_brown$TerrWeakStrongXHighConfCoop <- paste(df_brown$HighConfidence_Coop, df_brown$TerritorialityWeakVsStrong, sep = "_")
+require(stringr)
+df_brown$TerrWeakStrongXHighConfCoop[which(str_detect(df_brown$TerrWeakStrongXHighConfCoop, "NA"))] <- NA
+BrownieMultistate(DiscreteTrait = "TerrWeakStrongXHighConfCoop", ContinuousTrait = "Song.rep.final", newdata = df_brown, treefile = treefile, nsim = 1500, plotsimmaps = F, plotResults = T, otherlabel = "IntersectionTrait")
 
 
 
@@ -269,7 +277,7 @@ plotlist = list()
 plotlistGray = list()
 transitionList = list()
 outlist = list()
-socialityMetrics = c("HighConfidence_Coop", "Griesser2023.Asocial0VsSocial1", "Griesser2023.Colonial01" , "Griesser2023.MoreThanTwoCaretakers" ,"Griesser2023.LongSocialBonds","Griesser2023.GroupsLargerThanPair", "Griesser2023.TwoOrMoreCaretakers", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2017FamilialLiving","Final.polygyny" ,"MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop", "AnyNoncoopEqualsNoncoop")
+socialityMetrics = c("HighConfidence_Coop", "Griesser2023.Asocial0VsSocial1", "Griesser2023.Colonial01" , "Griesser2023.MoreThanTwoCaretakers" ,"Griesser2023.LongSocialBonds","Griesser2023.GroupsLargerThanPair", "Griesser2023.TwoOrMoreCaretakers", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2017FamilialLiving","Final.polygyny" ,"MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop", "AnyNoncoopEqualsNoncoop", "TerritorialityWeakVsStrong")
 for (i in 1:length(socialityMetrics)) {
   tempMetric = socialityMetrics[i]
   print(tempMetric)
