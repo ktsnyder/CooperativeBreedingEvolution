@@ -156,8 +156,10 @@ BrownieRelativeRates(BrownieOutputFolder = "BrownieJackknifeOutputs", otherlabel
 
 
 # Supplemental Figures 2 & 3; Supplemental Tables 6 & 7 - Brownie with multi-state categorical traits ----
+source("BrownieMultistate.R")
 BrownieMultistate(DiscreteTrait = "grouping_Griesser2023", ContinuousTrait = "Song.rep.final", newdata = newdata, treefile = treefile, nsim = 5, plotsimmaps = F, plotResults = T, otherlabel = "test")
 BrownieMultistate(DiscreteTrait = "social_system_incl_nk_coop_Griesser2017", ContinuousTrait = "Song.rep.final", newdata = newdata, treefile = treefile, nsim = 10, plotsimmaps = F, plotResults = T, otherlabel = "test")
+
 df_brown = read.csv(newdata)
 df_brown$TerritorialityWeakVsStrong[which(df_brown$TerritorialityWeakVsStrong == 0)] <- "Weak"
 df_brown$TerritorialityWeakVsStrong[which(df_brown$TerritorialityWeakVsStrong == 1)] <- "Strong"
@@ -166,7 +168,37 @@ df_brown$HighConfidence_Coop[which(df_brown$HighConfidence_Coop == 1)] <- "Coope
 df_brown$TerrWeakStrongXHighConfCoop <- paste(df_brown$HighConfidence_Coop, df_brown$TerritorialityWeakVsStrong, sep = "_")
 require(stringr)
 df_brown$TerrWeakStrongXHighConfCoop[which(str_detect(df_brown$TerrWeakStrongXHighConfCoop, "NA"))] <- NA
-BrownieMultistate(DiscreteTrait = "TerrWeakStrongXHighConfCoop", ContinuousTrait = "Song.rep.final", newdata = df_brown, treefile = treefile, nsim = 1500, plotsimmaps = F, plotResults = T, otherlabel = "IntersectionTrait")
+
+tree = read.nexus(treefile)
+TerrQout = findQrates(columns = "TerritorialityWeakVsStrong", plot = FALSE, newtree = treefile, newdata = df_brown)
+CoopQout = findQrates(columns = "HighConfidence_Coop", plot = FALSE, newtree = treefile, newdata = df_brown)
+TerrQ = TerrQout$qrates
+CoopQ = CoopQout$qrates
+
+nsims = 1000
+subsetdf = df_brown[complete.cases(df_brown[,c("TerritorialityWeakVsStrong", "HighConfidence_Coop")]),]
+# Find tips to drop (those not in the dataframe)
+tips_to_drop <- setdiff(tree$tip.label, subsetdf$species)
+# Drop tips using phytools function
+pruned_tree <- drop.tip(tree, tips_to_drop)
+
+Terrtraitvec = subsetdf[,"TerritorialityWeakVsStrong"]
+names(Terrtraitvec) = subsetdf$species
+
+Cooptraitvec = subsetdf[,"HighConfidence_Coop"]
+names(Cooptraitvec) = subsetdf$species
+
+simmapTerritoryWeakStrong = make.simmap(pruned_tree, Terrtraitvec, nsim = nsims, Q= TerrQ, type = "discrete") 
+
+simmapHCCoop = make.simmap(pruned_tree, Cooptraitvec, nsim = nsims, Q= CoopQ, type = "discrete")
+
+TerrCoopsims = list()
+for (i in 1:nsims) {
+  TerrCoopsims[[i]] <- merge_simmaps(simmap1 = simmapTerritoryWeakStrong[[i]], simmap2 = simmapHCCoop[[i]])
+}
+class(TerrCoopsims) <- c("multiSimmap", "multiPhylo")
+
+BrownieMultistate(DiscreteTrait = "TerrWeakStrongXHighConfCoop", ContinuousTrait = "Song.rep.final", newdata = df_brown, treefile = treefile, nsim = 1000, plotsimmaps = T, plotResults = T, otherlabel = "MergedSimmaps", importSimmaps = TerrCoopsims)
 
 
 
