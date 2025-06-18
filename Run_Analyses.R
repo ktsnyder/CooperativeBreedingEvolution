@@ -539,7 +539,7 @@ write.csv(allQout,"binary trait Qrates_rounded.csv")
 
 
 # Figure 3C; Supplemental Table 11 - Co-occurrence between female song and multistate traits ----
-multistateTraits = c("social_system_incl_nk_coop_Griesser2017", "social_system_Griesser2017", "grouping_Griesser2023")
+multistateTraits = c("social_system_incl_nk_coop_Griesser2017", "social_system_Griesser2017", "grouping_Griesser2023", "Territory")
 multistateTraits = c("Territory", "Social.bond", "Social.bond")
 othertraits = c("FemaleSong_Agg01", "HighConfidence_Coop", "FemaleSong_Agg01")
 nsims = 500
@@ -715,7 +715,8 @@ plots_bodymass <- create_all_phylopath_plots(
   analysis_type = "nondownsampled",
   phylopath_output = result_phylopath,
   output_dir = phylopath_output_dir,
-  save_png = TRUE
+  save_png = TRUE,
+  save_pdf = TRUE
 )
 
 # 2. Phylopath with sexual dichromatism
@@ -735,7 +736,8 @@ if ("logMaleFemalePlumageDiffAbs" %in% colnames(dfIn_phylo)) {
     analysis_type = "nondownsampled",
     phylopath_output = result_phylopath,
     output_dir = phylopath_output_dir,
-    save_png = TRUE
+    save_png = TRUE,
+    save_pdf = TRUE
   )
 }
 
@@ -756,7 +758,8 @@ if ("PercentAbsLogWingDimorphism" %in% colnames(dfIn_phylo)) {
     analysis_type = "nondownsampled",
     phylopath_output = result_phylopath,
     output_dir = phylopath_output_dir,
-    save_png = TRUE
+    save_png = TRUE,
+    save_pdf = TRUE
   )
 }
 
@@ -779,7 +782,8 @@ for (tempCoop in altCoops) {
       analysis_type = "nondownsampled",
       phylopath_output = result_phylopath,
       output_dir = phylopath_output_dir,
-      save_png = TRUE
+      save_png = TRUE,
+      save_pdf = TRUE
     )
   }
 }
@@ -800,7 +804,8 @@ plots_Terr12v3 <- create_all_phylopath_plots(
   analysis_type = "nondownsampled",
   phylopath_output = result_phylopath,
   output_dir = phylopath_output_dir,
-  save_png = TRUE
+  save_png = TRUE,
+  save_pdf = TRUE
 )
 
 
@@ -999,7 +1004,8 @@ plots_geo <- create_all_phylopath_plots(
   tree = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex",
   output_prefix = prefix_geo,
   output_dir = phylopath_output_dir,
-  save_png = TRUE
+  save_png = TRUE,
+  save_pdf = TRUE
 )
 
 ## 2. Geographic bias correction - TROPICAL COOPERATIVE
@@ -1044,7 +1050,8 @@ plots_trop <- create_all_phylopath_plots(
   tree = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex",
   output_prefix = prefix_trop,
   output_dir = phylopath_output_dir,
-  save_png = TRUE
+  save_png = TRUE,
+  save_pdf = TRUE
 )
 
 ## 3. GLOBAL COOPERATIVE bias correction
@@ -1089,7 +1096,8 @@ plots_global <- create_all_phylopath_plots(
   tree = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex",
   output_prefix = prefix_global,
   output_dir = phylopath_output_dir,
-  save_png = TRUE
+  save_png = TRUE,
+  save_pdf = TRUE
 )
 
 ## 4. TERRITORIALITY WEAK/STRONG bias correction
@@ -1128,7 +1136,8 @@ if (downsampling_results$downsampling$territoriality_bias$n_to_remove > 0) {
     tree = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex",
     output_prefix = prefix_terr,
     output_dir = phylopath_output_dir,
-    save_png = TRUE
+    save_png = TRUE,
+    save_pdf = TRUE
   )
 }
 
@@ -1169,7 +1178,8 @@ if (downsampling_results$downsampling$territory_12vs3_bias$n_to_remove > 0) {
     tree = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex",
     output_prefix = prefix_terr,
     output_dir = phylopath_output_dir,
-    save_png = TRUE
+    save_png = TRUE,
+    save_pdf = TRUE
   )
 }
 
@@ -1470,7 +1480,8 @@ for (dim_type in names(dimorphism_vars)) {
       full_data_phylopath_input = NULL,
       output_prefix = prefix_dimorphism,
       output_dir = file.path(phylopath_output_dir, dim_info$label),
-      save_png = TRUE
+      save_png = TRUE,
+      save_pdf = TRUE
     )
   }
 }
