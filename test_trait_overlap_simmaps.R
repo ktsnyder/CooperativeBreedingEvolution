@@ -194,7 +194,8 @@ CharacterSimmaps <- function(columns, df, tree, dummy, nsims, treelabel, datalab
   # Present 0.6247627 0.13119829
   # --> Map.Overlap(returned in rows, returned in columns)
   
-  dfout <- set.seed(10)
+  set.seed(6000)
+  dfout <- data.frame()
   for (i in 1:nsims) {
     
     FSsimtree1 <- FSsimtrees[[i]]
