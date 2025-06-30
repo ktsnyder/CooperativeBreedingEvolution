@@ -114,13 +114,18 @@ write.csv(phynovaDF, file = paste(Sys.Date(), "phylANOVA outputs Songs.csv"), ro
 # Figure 1, Supplemental Figure 1, Supplemental Table 4 - Brownie ----
 source("brownie relative rates.R")
 discreteCatLabels = c("Non-cooperative", "Cooperative")
-nsim = 50
-currentlabel = "test"
+nsim = 500
+currentlabel = "newBinaryTerrs"
 CBcolumn = "HighConfidence_Coop"
+songtraits = "Song.rep.final"
+socialtraits = c("TerritorialityWeakVsStrong", "Territory_12vs3")
 
+for (l in 1:length(socialtraits)) {
 for (k in 1:length(songtraits)) {
   print(Sys.time())
   feature <- songtraits[k]
+  CBcolumn <- socialtraits[l]
+  discreteCatLabels = getLabels(CBcolumn)
   print(feature)
   browniefunction(columns = c(CBcolumn, feature), newdata = newdata, newtree = treefile, nsim = nsim, islog = feature, plotsimmaps = TRUE, otherlabel = currentlabel)
   
@@ -135,6 +140,7 @@ for (k in 1:length(songtraits)) {
     print(paste0("OutputFiles/",Sys.Date()-1,CBcolumn,feature, currentlabel, "_brownie",nsim,"sim.csv"))
   }
 } # end for k
+} # end for l
 # compile results into one table
 BrownieRelativeRates(BrownieOutputFolder = "OutputFiles", otherlabel = currentlabel)
 
