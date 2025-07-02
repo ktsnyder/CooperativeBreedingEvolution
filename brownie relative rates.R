@@ -5,6 +5,7 @@
 # edited 2/1/2024 to include coop breed tie2noncoop, other song features
 # 6/14/2024 - MESSED AROUND ADDING COLUMNS. MIGHT BREAK (I think just the lower section ## summary table by filelist is iffy now)
 # 6/18/2024 - made into function
+# 7/1/2025 - source getLabels.R instead of test_trait_overlap_simmap.R; added pval calculation using median logliks
 
 
 
@@ -13,7 +14,8 @@ BrownieRelativeRates <- function(BrownieOutputFolder = "OutputFolder", otherlabe
   require(stringr)
   require(dplyr)
   
-  source("test_trait_overlap_simmaps.R") 
+  #source("test_trait_overlap_simmaps.R") 
+  source("getLabels.R")
   
   filelist = list.files(BrownieOutputFolder)
   filelist = filelist[which(str_detect(filelist, "rownie"))]
@@ -38,9 +40,14 @@ BrownieRelativeRates <- function(BrownieOutputFolder = "OutputFolder", otherlabe
       browniedf <- browniedf[!is.na(browniedf$convergence),]
       
       #calculate overall mean pval
-      ERloglikmean <- mean(browniedf$ERloglik)
-      ARDloglikmean <- mean(browniedf$ARDloglik)
-      ERARDPval = round(pchisq(2*(ARDloglikmean-ERloglikmean),1,lower.tail=FALSE), digits = 4) #testing whether the two rates of continuous trait evolution are significantly different
+      ERloglikmean <- mean(browniedf$ERloglik, na.rm = T)
+      ARDloglikmean <- mean(browniedf$ARDloglik, na.rm = T)
+      ERARDPval = round(pchisq(2*(ARDloglikmean-ERloglikmean),1,lower.tail=FALSE), digits = 3) #testing whether the two rates of continuous trait evolution are significantly different
+      ERARDPval_from_Mean_logliks = round(pchisq(2*(ARDloglikmean-ERloglikmean),1,lower.tail=FALSE), digits = 3) #testing whether the two rates of continuous trait evolution are significantly different
+      
+      ERloglikmedian <- median(browniedf$ERloglik, na.rm = T)
+      ARDloglikmedian <- median(browniedf$ARDloglik, na.rm = T)
+      ERARDPval_from_Median_logliks = round(pchisq(2*(ARDloglikmedian-ERloglikmedian),1,lower.tail=FALSE), digits = 3) 
       
       nsims = length(df[,1])
       n1greaterthan0 = sum(df$ARDRate0 < df$ARDRate1)
@@ -70,10 +77,10 @@ BrownieRelativeRates <- function(BrownieOutputFolder = "OutputFolder", otherlabe
         jackedfam = NA
       }
       
-      temprow = c(tempfile, temptrait, tempsongtrait, nsims, fasterRate, slowerRate, fractionGreater, nPvalUnder0.05, medianPval, Nspecies, jackedfam, ERloglikmean, ARDloglikmean, ERARDPval)
+      temprow = c(tempfile, temptrait, tempsongtrait, nsims, fasterRate, slowerRate, fractionGreater, nPvalUnder0.05, medianPval, numSpeciesInSubset, jackedfam, ERloglikmean, ARDloglikmean, ERARDPval, ERARDPval_from_Mean_logliks, ERloglikmedian, ARDloglikmedian, ERARDPval_from_Median_logliks)
       browniesummary = rbind(browniesummary, temprow)
       browniesummary = as.data.frame(browniesummary)
-      colnames(browniesummary) = c("File","DiscreteTrait", "ContinuousTrait", "Nsims", "HigherRate", "LowerRate", "FractionOfSims", "num_Significant_Pval", "median_Pval", "numSpeciesInSubset", "removedFamily", "ERloglikmean", "ARDloglikmean", "BrowniePvalFromMeanLogLiks")
+      colnames(browniesummary) = c("File","DiscreteTrait", "ContinuousTrait", "Nsims", "HigherRate", "LowerRate", "FractionOfSims", "num_Significant_Pval", "median_Pval", "numSpeciesInSubset", "removedFamily", "ERloglikmean", "ARDloglikmean", "BrowniePvalFromMeanLogLiks", "ERARDPval_from_Mean_logliks", "ERloglikmedian", "ARDloglikmedian", "ERARDPval_from_Median_logliks")
     } else {
       print("The file does not appear to contain all of the necessary columns, skipping.")
     }

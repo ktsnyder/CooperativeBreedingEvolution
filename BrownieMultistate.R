@@ -5,6 +5,7 @@
 # added requirements 2/8/2025
 # 3/18/2025 -  changed plotting to be more flexible for different numbers of states of the discrete trait
 # 6/15/2025 - added merge_simmaps() and getSimmapSegments() from merge_simmaps.R
+# 7/1/2025 - added calculation of overall p-value from median logliks to summary output
 require(stringr)
 require(phytools)
 source("subsettreedata.R")
@@ -343,17 +344,22 @@ BrownieMultistate <- function(DiscreteTrait, ContinuousTrait, newdata, treefile,
   browniedf <- browniedf[!is.na(browniedf$convergence),]
   
   #calculate overall mean pval
-  ERloglikmean <- mean(browniedf$ERloglik)
-  ARDloglikmean <- mean(browniedf$ARDloglik)
+  ERloglikmean <- mean(browniedf$ERloglik, na.rm = T)
+  ARDloglikmean <- mean(browniedf$ARDloglik, na.rm = T)
   ERARDPval = round(pchisq(2*(ARDloglikmean-ERloglikmean),1,lower.tail=FALSE), digits = 3) #testing whether the two rates of continuous trait evolution are significantly different
+  ERARDPval_from_Mean_logliks = round(pchisq(2*(ARDloglikmean-ERloglikmean),1,lower.tail=FALSE), digits = 3) #testing whether the two rates of continuous trait evolution are significantly different
+  
+  ERloglikmedian <- median(browniedf$ERloglik, na.rm = T)
+  ARDloglikmedian <- median(browniedf$ARDloglik, na.rm = T)
+  ERARDPval_from_Median_logliks = round(pchisq(2*(ARDloglikmedian-ERloglikmedian),1,lower.tail=FALSE), digits = 3) #testing whether the two rates of continuous trait evolution are significantly different
   
   nSig = sum(browniedf$Pval < 0.05, na.rm = T)
   medianPval = median(browniedf$Pval)
   fractionSig = nSig/nsim
-  temprow = c(brownieCSVname, DiscreteTrait, ContinuousTrait, nsim, nSig, fractionSig, medianPval, ERloglikmean, ARDloglikmean, ERARDPval)
+  temprow = c(brownieCSVname, DiscreteTrait, ContinuousTrait, nsim, nSig, fractionSig, medianPval, ERloglikmean, ARDloglikmean, ERARDPval, ERARDPval_from_Mean_logliks, ERloglikmedian, ARDloglikmedian, ERARDPval_from_Median_logliks)
   as.data.frame(temprow)
   summarydf = as.data.frame(rbind(summarydf, temprow))
-  colnames(summarydf) = c("filename", "DiscreteTrait", "ContinuousTrait", "nsims", "nSig", "fractionSig", "medianPval", "ERloglikmean", "ARDloglikmean", "ERARDPval")
+  colnames(summarydf) = c("filename", "DiscreteTrait", "ContinuousTrait", "nsims", "nSig", "fractionSig", "medianPval", "ERloglikmean", "ARDloglikmean", "ERARDPval", "ERARDPval_from_Mean_logliks", "ERloglikmedian", "ARDloglikmedian", "ERARDPval_from_Median_logliks")
   return(summarydf)
 }
 
