@@ -915,7 +915,7 @@ downsampling_results <- calculate_stratified_downsampling(
   df = df_bias,
   stratify_vars = c("GeographicRegion_Jetz", "HighConfidence_Coop"),
   data_col = "FemaleSong_Agg01",
-  output_file = file.path("Outputs", "PhylopathDownsampled", "Stratified_Downsampling_Calculations.md")
+  output_file = file.path("Outputs", "PhylopathDownsampled", "Stratified_Downsampling_Calculations2.md")
 )
 
 cat("Downsampling calculations saved to: Outputs/Stratified_Downsampling_Calculations.md\n")
@@ -1150,7 +1150,7 @@ if (downsampling_results$downsampling$territoriality_bias$n_to_remove > 0) {
   )
 }
 
-## 5. TERRITORIALITY 12 VS 3 bias correction
+## 5. TERRITORIALITY 12 VS 3 bias correction using Territory_12vs3 as TERR variable
 cat("\n\nRunning Territory_12vs3 bias correction...\n")
 
 # Convert territoriality to character for calculation
@@ -1158,8 +1158,8 @@ dfIn_phylo_char <- dfIn_phylo
 dfIn_phylo_char$Terr <- as.character(dfIn_phylo_char$Territory_12vs3)
 
 if (downsampling_results$downsampling$territory_12vs3_bias$n_to_remove > 0) {
-  cat("Need to remove", downsampling_results$downsampling$territory_12vs3_bias$n_to_remove, "species from",
-      terr_downsample_info$report$downsample_info$group_to_downsample, "\n")
+  cat("Need to remove", downsampling_results$downsampling$territory_12vs3_bias$n_to_remove, "species from", "Terr3\n")
+     # terr_downsample_info$report$downsample_info$group_to_downsample, "\n")
   
   result_terr <- run_multiple_phylopath(
     dfIn = dfIn_phylo,
@@ -1178,6 +1178,49 @@ if (downsampling_results$downsampling$territory_12vs3_bias$n_to_remove > 0) {
   
   # Create plots
   prefix_terr <- paste0("FemaleSong_Agg01 HighConfidence_Coop Territory_12vs3 logMass_AVONET Remove",
+                        downsampling_results$downsampling$territory_12vs3_bias$n_to_remove, "Terr3")
+  plots_terr <- create_all_phylopath_plots(
+    analysis_type = "downsampled",
+    phylopath_output = result_terr,
+    downsampling_info = NULL, #terr_downsample_info$report,
+    full_dataset = "Data_R_2025-06-09.csv",
+    tree = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex",
+    output_prefix = prefix_terr,
+    output_dir = phylopath_output_dir,
+    save_png = TRUE,
+    save_pdf = TRUE
+  )
+}
+
+
+## 6. TERRITORIALITY 12 VS 3 bias correction using TerritorialityWeakVsStrong as TERR variable
+cat("\n\nRunning Territory_12vs3 bias correction - uses TerritorialityWeakVsStrong as TERR var...\n")
+
+# Convert territoriality to character for calculation
+dfIn_phylo_char <- dfIn_phylo
+#dfIn_phylo_char$Terr <- as.character(dfIn_phylo_char$Territory_12vs3)
+dfIn_phylo_char$TerritorialityWeakVsStrong <- as.character(dfIn_phylo_char$TerritorialityWeakVsStrong)
+
+if (downsampling_results$downsampling$territory_12vs3_bias$n_to_remove > 0) {
+  cat("Need to remove", downsampling_results$downsampling$territory_12vs3_bias$n_to_remove, "species from Terr3", "\n")
+  
+  result_terr <- run_multiple_phylopath(
+    dfIn = dfIn_phylo,
+    tree = tree_phylo,
+    downsample_columns = c("Territory_12vs3", "HaveFSCBdata"),
+    downsample_values = c(1, TRUE),
+    numToRemove = downsampling_results$downsampling$territory_12vs3_bias$n_to_remove,
+    n_iterations = n_iterations,
+    female_song_var = "FemaleSong_Agg01",
+    coop_breeding_var = "HighConfidence_Coop",
+    territoriality_var = "TerritorialityWeakVsStrong",
+    mass_var = "logMass_AVONET",
+    save_conditional_plots = TRUE,
+    plotlabel = paste0("Remove", downsampling_results$downsampling$territory_12vs3_bias$n_to_remove, "Terr3-uses-TerritorialityWeakVsStrong-as-TERR")
+  )
+  
+  # Create plots
+  prefix_terr <- paste0("FemaleSong_Agg01 HighConfidence_Coop TerritorialityWeakVsStrong logMass_AVONET Remove",
                         downsampling_results$downsampling$territory_12vs3_bias$n_to_remove, "Terr3")
   plots_terr <- create_all_phylopath_plots(
     analysis_type = "downsampled",
