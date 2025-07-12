@@ -1,0 +1,24 @@
+PhyloGLM Analysis Metadata
+=========================
+Date: 2025-07-11
+Time: 03:13:03
+R Version: R version 4.3.1 (2023-06-16)
+
+Analysis Parameters:
+  Bootstrap iterations: 10
+  Number of analyses: 1
+  Parallel processing: FALSE
+
+Input Files:
+  Data file: data
+  Tree file: tree
+
+Package Versions:
+   phylolm : 2.6.5
+   ape : 5.8
+   ggplot2 : 3.5.1
+   dplyr : 1.1.4
+
+System Information:
+  Platform: Darwin
+  Machine: x86_64

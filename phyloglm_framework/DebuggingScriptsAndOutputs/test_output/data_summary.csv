@@ -1,0 +1,5 @@
+"Variable","Type","N","Missing","Summary"
+"FemaleSong_Agg01","binary",875,0,"0: 296 (33.8%); 1: 579 (66.2%)"
+"HighConfidence_Coop","binary",875,0,"0: 754 (86.2%); 1: 121 (13.8%)"
+"TerritorialityWeakVsStrong","categorical",875,0,"Weak: 170; Strong: 705"
+"logMass_AVONET","continuous",875,0,"Mean: 3.35 (SD: 0.86); Range: [1.61, 6.88]"

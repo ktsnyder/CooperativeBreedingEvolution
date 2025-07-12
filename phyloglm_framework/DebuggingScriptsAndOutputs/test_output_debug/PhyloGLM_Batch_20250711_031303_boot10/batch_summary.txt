@@ -1,0 +1,18 @@
+PhyloGLM Batch Analysis Summary
+Generated: 2025-07-11 03:13:08.032231
+
+Total analyses: 1
+Bootstrap iterations: 10
+Successful: 1
+Failed: 0
+
+
+Individual Analysis Summaries:
+------------------------------------------------------------
+
+Analysis: FS_vs_CB_TerrWS_Mass
+  Status: Success
+  N species: 875
+  N models: 15
+  Best model: MainPredxTerr_Mass
+  Best AIC: 894.11
