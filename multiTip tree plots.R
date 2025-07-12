@@ -4,6 +4,7 @@
 source("subsettreedata.R")
 #newdata = "2024-01-08_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_R.csv"
 newdata = "2024-02-24_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
+newdata = "Data_R_2025-06-09.csv"
 treefile = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
 
 specialspecies = c("Malurus_splendens", "Campylorhynchus_griseus",  "Prionops_plumatus", "Lamprotornis_superbus", "Turdoides_gymnogenys",  "Mohoua_ochrocephala", "Cisticola_robustus", "Agelaioides_badius",  "Myrmecocichla_formicivora", "Philetairus_socius", "Melanodryas_cucullata") #"Climacteris_affinis","Platysteira_peltata","Sericornis_frontalis", "Malurus_cyaneus", "Campylorhynchus_nuchalis",  "Sitta_pusilla", "Manorina_melanocephala",
@@ -218,19 +219,23 @@ AllColsToPlot = c("FemaleSong_Agg01", "HighConfidence_Coop", "MeanCoopTie2Coop",
 
 newdata = "2024-02-24_CoopBreed-FemaleSong-Song-Sociality01_PasseriformesData_HighConfCoopCol_R.csv"
 treefile = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
-offsetDenom = 1
-tipsize = 0.1
 
 AllColsToPlot = AllColsToPlot[1:2]
 
-columnSubsetTree = c("HighConfidence_Coop","FemaleSong_Agg01")
-subsetout <- subsettreedata(columns = columnSubsetTree, newdata = newdata, newtree = treefile)
+offsetDenom = 1
+tipsize = 0.1
+
+
+columnSubsetTree = c("HighConfidence_Coop","FemaleSong_Agg01", "logMass_AVONET")
+subsetout <- subsettreedata(columns = columnSubsetTree, newdata = jackbest, newtree = treefile)
 subsetdf = subsetout$subsetdf
-subsetdf$AnyNoncoopEqualsNoncoop = subsetdf$MeanCoopTie2Noncoop
-subsetdf$AnyNoncoopEqualsNoncoop[which(subsetdf$SourceDiscrepancy == 1)] = 0
+#subsetdf$AnyNoncoopEqualsNoncoop = subsetdf$MeanCoopTie2Noncoop
+#subsetdf$AnyNoncoopEqualsNoncoop[which(subsetdf$SourceDiscrepancy == 1)] = 0
 subsettree = subsetout$subsettree
 py = c("purple", "orange", "white")
 py2 = c("blue","red", "white")
+py3 = c("green","black", "white")
+py4 = c()
 py2nonsig = c("blue","red", "gray")
 
 
@@ -251,6 +256,8 @@ for (i in 1:length(AllColsToPlot)) {
     colorsToUse = py2
   } else if (tempCol %in% ToPlotColorSetNonsig) {
     colorsToUse = py2nonsig
+  } else if (tempCol %in% ToPlotColorSet3) {
+    colorsToUse = py3
   }
   
   tiplabels(pch=21,bg=colorsToUse[as.numeric(treetiplabels)+1], col = colorsToUse[as.numeric(treetiplabels)+1], cex=tipsize, offset = i/offsetDenom)
@@ -268,3 +275,239 @@ dev.off()
 
 # Add legend of all tip rows 
 legend("topleft", legend = AllColsToPlot, cex = 0.9, bty="n", title = "Tip states - innermost to outermost")
+
+
+#### jackknife phylopath models ----
+
+# Load required libraries
+library(ape)
+library(dplyr)
+
+newdata = "/Users/kate/Desktop/CooperativeBreedingEvolution/Outputs/PhylopathJackknife/JackknifedSpeciesData_detailed_models_JackknifeSpecies_n875_2025-07-08.csv"
+jackknife_data = read.csv(newdata)
+jackknife_data <- jackknife_data %>%
+  group_by(RemovedSpecies) %>%
+  mutate(
+    FullDatasetBestModelInTop = as.numeric(any(model == "X1_COOP→FS_TERR→FS_TERR→COOP_MASS→FS" & delta_CICc < 2)),
+    DownsampledDataBestModelInTop = as.numeric(any(model == "Y2_TERR→FS_FS→COOP_MASS→FS_MASS→COOP" & delta_CICc < 2))
+  ) %>%
+  ungroup()
+jackbest = jackknife_data[which(jackknife_data$delta_CICc == 0),]
+jackbest= jackbest[!duplicated(jackbest$RemovedSpecies),]
+jackbest$species = jackbest$RemovedSpecies
+class(jackbest)
+jackbest = as.data.frame(jackbest)
+
+columnSubsetTree = c("HighConfidence_Coop","FemaleSong_Agg01", "logMass_AVONET")
+subsetout <- subsettreedata(columns = columnSubsetTree, newdata = jackbest, newtree = treefile)
+subsetdf = subsetout$subsetdf
+subsettree = subsetout$subsettree
+
+Ntip <- length(subsettree$tip.label)
+
+# Define columns to plot
+ToPlotColorSet1 = "FemaleSong_Agg01"
+ToPlotColorSet2 = "HighConfidence_Coop"
+ToPlotColorSet3 = "TerritorialityWeakVsStrong"
+ToPlotColorSet4 = "model_labels"  # Using simplified model labels
+ToPlotColorSet5 = "FullDatasetBestModelInTop"
+ToPlotColorSet6 = "DownsampledDataBestModelInTop"
+AllColsToPlot = c("HighConfidence_Coop", "FemaleSong_Agg01", "TerritorialityWeakVsStrong", "FullDatasetBestModelInTop", "DownsampledDataBestModelInTop", "model_labels")
+
+subsetdf$model_labels <- gsub("→", "to", subsetdf$model)
+subsetdf$model_labels <- gsub("_TERRtoFS", "", subsetdf$model_labels)
+subsetdf$model_labels <- gsub("_MASStoFS", "", subsetdf$model_labels)
+subsetdf$model_labels <- gsub("X1_", "", subsetdf$model_labels)
+subsetdf$model_labels <- gsub("Y2_", "", subsetdf$model_labels)
+subsetdf$model_labels <- gsub("COOP", "CB", subsetdf$model_labels)
+
+
+# Define color schemes for each column
+py = c("purple", "orange", "white")  # FemaleSong_Agg01
+py2 = c("blue", "red", "white")      # HighConfidence_Coop
+py3 = c("green", "black", "white")   # TerritorialityWeakVsStrong
+
+# Define colors for the two main models (model column)
+py4 = c("darkcyan", "sienna", "white")  # Model 1 CBtoFS_TERRtoCB, Model 2 FStoCB_MASStoCB, NA
+py5 = c("gray", "darkcyan") # Model 1 in top models <2 CICc?
+py6 = c("gray", "sienna") # Model 2 in top models <2 CICc?
+# Model 1: CBtoFS_TERRtoCB (darkviolet) - corresponds to original X1 model
+# Model 2: FStoCB_MASStoCB (goldenrod) - corresponds to original Y2 model
+
+# Define the two main models that will be plotted as dots
+main_models = c("CBtoFS_TERRtoCB", "FStoCB_MASStoCB")
+
+# Define tip size and offset parameters
+tipsize = 0.2
+offsetDenom = 2  # Adjust this to control spacing between columns
+
+# Create PDF
+filename_base2 <- "phylo_HighConfidence_Coop_FemaleSong_Agg01_Territory_Model_TopModels_tips"
+pdf(paste0(filename_base2, ".pdf"), width = 12, height = 11)
+par(mar = c(6, 4, 4, 4), xpd = TRUE)  # Increase margins and allow plotting outside
+
+# Plot phylogeny
+plot.phylo(subsettree, type = "f", show.tip.label = TRUE, align.tip.label = TRUE, cex = 0.1)
+
+# Get the last tip positions for calculating angles
+lastPP <- get("last_plot.phylo", envir = .PlotPhyloEnv)
+xx <- lastPP$xx
+yy <- lastPP$yy
+
+# Track which tips need text labels for rare models
+tips_with_text_models = list()
+
+# Plot each column
+for (i in 1:length(AllColsToPlot)) {
+  tempCol = AllColsToPlot[i]
+  
+  if (tempCol == "model_labels") {
+    # Special handling for model column
+    # Create numeric vector for model states (like binary traits)
+    # 0 = CBtoFS_TERRtoCB, 1 = FStoCB_MASStoCB, 2 = rare models (no dot), 3 = NA
+    model_states = rep(3, length(subsettree$tip.label))  # Default to NA
+    
+    for (j in 1:length(subsettree$tip.label)) {
+      tip_species = subsettree$tip.label[j]
+      if (tip_species %in% subsetdf$species) {
+        idx = which(subsetdf$species == tip_species)
+        if (length(idx) > 0) {
+          model_val = subsetdf$model_labels[idx]
+          if (!is.na(model_val)) {
+            if (model_val == main_models[1]) {
+              model_states[j] = 0  # CBtoFS_TERRtoCB model
+            } else if (model_val == main_models[2]) {
+              model_states[j] = 1  # FStoCB_MASStoCB model
+            } else {
+              model_states[j] = 2  # Rare models (will be text)
+              # Store tip index and model name for text labeling
+              tips_with_text_models[[length(tips_with_text_models) + 1]] = 
+                list(index = j, model = model_val, offset = i/offsetDenom)
+            }
+          }
+        }
+      }
+    }
+    
+    # Create color vector based on states
+    # Use transparent color for rare models so no dot appears
+    py4_extended = c(py4[1:2], "transparent", py4[3])  # darkviolet, goldenrod, transparent, white
+    
+    # Plot all dots at once using the same method as binary traits
+    tiplabels(pch = 21, bg = py4_extended[model_states + 1], 
+              col = py4_extended[model_states + 1], 
+              cex = tipsize, offset = i/offsetDenom)
+    
+  } else {
+    # Standard binary trait handling
+    treetiplabels = subsettree$tip.label %in% subsetdf$species[which(subsetdf[, tempCol] == 1)]
+    treetiplabels[which(subsettree$tip.label %in% subsetdf$species[which(is.na(subsetdf[, tempCol]))])] = 2
+    
+    if (tempCol %in% ToPlotColorSet1) {
+      colorsToUse = py
+    } else if (tempCol %in% ToPlotColorSet2) {
+      colorsToUse = py2
+    } else if (tempCol %in% ToPlotColorSet3) {
+      colorsToUse = py3
+    } else if (tempCol %in% ToPlotColorSet5) {
+      colorsToUse = py5
+    } else if (tempCol %in% ToPlotColorSet6) {
+      colorsToUse = py6
+    }
+    
+    tiplabels(pch = 21, bg = colorsToUse[as.numeric(treetiplabels) + 1], 
+              col = colorsToUse[as.numeric(treetiplabels) + 1], 
+              cex = tipsize, offset = i/offsetDenom)
+  }
+}
+
+# Add text labels for rare models with proper angles
+if (length(tips_with_text_models) > 0) {
+  # Get the maximum x coordinate (where aligned tips are)
+  max_x <- max(xx[1:Ntip])
+  
+  for (item in tips_with_text_models) {
+    # Get x, y coordinate for this tip
+    tip_x_original <- xx[item$index]
+    tip_y <- yy[item$index]
+    
+    # Calculate angle from origin
+    angle_rad <- atan2(tip_y, tip_x_original)  # Angle from horizontal
+    angle_deg <- angle_rad * 180 / pi
+    
+    
+    # Adjust text angle so it reads outward
+    text_angle <- angle_deg
+    if (angle_deg > 90 || angle_deg < -90) {
+      text_angle <- angle_deg + 180
+      adj_val <- 1  # Right-align text on left side
+    } else {
+      adj_val <- 0  # Left-align text on right side
+    }
+    
+    # Calculate radial offset distance
+    # item$offset is i/offsetDenom where i=4 for the 4th column
+    # So offset_distance is how far beyond max_x to place the text
+    offset_distance = item$offset
+    extra_offset = 1  # Additional offset for text beyond dots
+    
+    # Calculate radius (distance from center)
+    radius = max_x + offset_distance + extra_offset
+    text_x <- radius * cos(angle_rad)
+    text_y <- radius * sin(angle_rad)
+    
+    # Add text label at the calculated position
+    text(text_x, text_y,
+         labels = item$model,
+         srt = text_angle,
+         adj = adj_val,
+         cex = 0.5,
+         xpd = TRUE)
+  }
+}
+
+# Create combined legend
+# Binary traits
+allpy_binary = c(py2[1:2], py[1:2], py3[1:2])
+alllabs_binary = c("Noncooperative", "Cooperative", 
+                   "Female Song Absent", "Female Song Present",
+                   "Weak/No Territory", "Strong Territory")
+
+# Model dots
+allpy_models = py4[1:2]
+alllabs_models = c("CBtoFS_TERRtoCB (best in full dataset, n=324)", 
+                   "FStoCB_MASStoCB (best in downsamples, n=507)")
+
+# Add legends
+legend("bottomleft", legend = alllabs_binary, cex = 0.8, 
+       fill = allpy_binary, bty = "n", title = "Binary Traits")
+
+legend("bottomright", legend = alllabs_models, cex = 0.8, 
+       fill = allpy_models, bty = "n", title = "Main Models (dots - also contain TERRtoFS and MASStoFS)")
+
+# Add note about text labels
+legend("topright", 
+       legend = c("CBtoFS_TERRtoCB_MASStoCB (n=1)",
+                  "CBtoFS_TERRtoCB_MASStoTERR (n=1)",
+                  "FStoCB (n=29)",
+                  "FStoCB_MASStoTERR (n=4)",
+                  "FStoCB_TERRtoCB (n=9)"),
+       cex = 0.7, bty = "n", 
+       title = "Other models shown as text\n(all models contain TERRtoFS and MASStoFS)")
+
+# Add column order legend
+legend("topleft", legend = paste(1:6, c("HighConfidence_Coop", "FemaleSong_Agg01", 
+                                        "TerritorialityWeakVsStrong", "BestFullDatasetModel_InTopModels", "BestModelFromDownsamples_InTopModels", "Model"), 
+                                 sep = ". "), 
+       cex = 0.8, bty = "n", title = "Column order (inner to outer)")
+
+dev.off()
+
+# Print summary of rare models for reference
+cat("\nRare models that appear as text labels:\n")
+rare_models = unique(subsetdf$model_labels[!subsetdf$model_labels %in% main_models])
+for (rm in rare_models) {
+  count = sum(subsetdf$model_labels == rm, na.rm = TRUE)
+  cat(sprintf("%s: %d species\n", rm, count))
+}
+
