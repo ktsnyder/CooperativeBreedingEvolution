@@ -8,6 +8,8 @@ library(cowplot)
 # Note: This function requires the extract_phylopath_results() function
 # from create_phylopath_bias_robustness_figure.R
 # Source that file first or ensure the function is available
+# 
+# 7/8/2025 - in extract_phylopath_results(), set results_dir = "Outputs/" which will work with new recursive searching in extract_phylopath_results()
 
 #' Create a model consistency heatmap across bias corrections
 #'
@@ -18,13 +20,13 @@ library(cowplot)
 #' @param full_dataset_best_models Character vector of best models from full dataset analysis
 create_bias_model_consistency_heatmap <- function(bias_results_list = NULL,
                                              top_n = 10,
-                                             output_file = "Outputs/Figures/model_consistency_heatmap_byrate4.pdf",
+                                             output_file = "Outputs/Figures/model_consistency_heatmap_byrate.pdf",
                                              title = "Model Consistency Across Bias Corrections",
                                              full_dataset_best_models = NULL) {
   
   # If no results provided, extract from default location
   if (is.null(bias_results_list)) {
-    bias_results_list <- extract_phylopath_results()
+    bias_results_list <- extract_phylopath_results(results_dir = "Outputs/")
   }
   
   # Load full dataset best models and delta CICc values if not provided
@@ -88,10 +90,14 @@ create_bias_model_consistency_heatmap <- function(bias_results_list = NULL,
                         ncol = length(model_data),
                         dimnames = list(all_models, names(model_data)))
   
+  # Create a vector to store total iterations for each bias correction
+  total_iterations_vec <- numeric()
+  
   # Fill in the matrices
   for (bias_name in names(model_data)) {
     freq_data <- model_data[[bias_name]]
     total_iterations <- length(unique(bias_results_list[[bias_name]]$detailed_models$seed))
+    total_iterations_vec[bias_name] <- total_iterations
     
     for (model in all_models) {
       if (model %in% freq_data$model) {
@@ -125,14 +131,25 @@ create_bias_model_consistency_heatmap <- function(bias_results_list = NULL,
   heatmap_matrix <- heatmap_matrix[model_order, , drop = FALSE]
   best_matrix <- best_matrix[model_order, , drop = FALSE]
   
-  # Prepare data for ggplot
-  heatmap_long <- as.data.frame(heatmap_matrix) %>%
-    mutate(Model = rownames(.)) %>%
-    pivot_longer(cols = -Model, names_to = "Bias_Correction", values_to = "N_Significant")
+  # Convert to proportions
+  heatmap_matrix_prop <- heatmap_matrix
+  best_matrix_prop <- best_matrix
   
-  best_long <- as.data.frame(best_matrix) %>%
+  for (bias_name in names(model_data)) {
+    if (bias_name %in% colnames(heatmap_matrix)) {
+      heatmap_matrix_prop[, bias_name] <- heatmap_matrix[, bias_name] / total_iterations_vec[bias_name]
+      best_matrix_prop[, bias_name] <- best_matrix[, bias_name] / total_iterations_vec[bias_name]
+    }
+  }
+  
+  # Prepare data for ggplot
+  heatmap_long <- as.data.frame(heatmap_matrix_prop) %>%
     mutate(Model = rownames(.)) %>%
-    pivot_longer(cols = -Model, names_to = "Bias_Correction", values_to = "N_Best")
+    pivot_longer(cols = -Model, names_to = "Bias_Correction", values_to = "Prop_Significant")
+  
+  best_long <- as.data.frame(best_matrix_prop) %>%
+    mutate(Model = rownames(.)) %>%
+    pivot_longer(cols = -Model, names_to = "Bias_Correction", values_to = "Prop_Best")
   
   # Merge the data
   plot_data <- heatmap_long %>%
@@ -144,7 +161,7 @@ create_bias_model_consistency_heatmap <- function(bias_results_list = NULL,
                            paste0(Model, " ★"), 
                            as.character(Model)),
       # Convert 0 values to NA so they appear white
-      N_Significant = ifelse(N_Significant == 0, NA, N_Significant)
+      Prop_Significant = ifelse(Prop_Significant == 0, NA, Prop_Significant)
     )
   
   # Create presence/absence matrix for rates
@@ -179,7 +196,7 @@ create_bias_model_consistency_heatmap <- function(bias_results_list = NULL,
     )
   
   # Create a factor for missing values to use in a dummy aesthetic
-  plot_data$is_missing <- factor(ifelse(is.na(plot_data$N_Significant), "0", "Present"))
+  plot_data$is_missing <- factor(ifelse(is.na(plot_data$Prop_Significant), "0", "Present"))
   
   # Create dummy data for all legend items
   legend_data <- data.frame(
@@ -191,9 +208,9 @@ create_bias_model_consistency_heatmap <- function(bias_results_list = NULL,
   
   # Create the main heatmap
   p_heatmap <- ggplot(plot_data, aes(x = Model, y = Bias_Correction)) +
-    geom_tile(aes(fill = N_Significant), color = "white", linewidth = 0.5) +
-    geom_text(aes(label = ifelse(N_Best > 0, N_Best, ""),
-                  color = N_Significant > 250), 
+    geom_tile(aes(fill = Prop_Significant), color = "white", linewidth = 0.5) +
+    geom_text(aes(label = ifelse(Prop_Best > 0, sprintf("%.2f", Prop_Best), ""),
+                  color = Prop_Significant > 0.5), 
               size = 3, fontface = "bold") +
     # Add invisible points for legend items
     geom_point(data = legend_data,
@@ -222,9 +239,9 @@ create_bias_model_consistency_heatmap <- function(bias_results_list = NULL,
     scale_fill_gradient(
       low = "#E5F5FC",  # light blue
       high = "#001233", # Darkest blue possible
-      limits = c(1, 500),
-      breaks = c(1, 100, 200, 300, 400, 500),
-      name = bquote(paste("# Iterations (", Delta, "CICc < 2)")),
+      limits = c(0.001, 1),
+      breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1),
+      name = bquote(paste("Proportion of Iterations (", Delta, "CICc < 2)")),
       na.value = "white",  # Cells with 0 iterations will be white
       guide = guide_colorbar(
         barwidth = 1.5,
@@ -239,7 +256,7 @@ create_bias_model_consistency_heatmap <- function(bias_results_list = NULL,
     scale_x_discrete(labels = NULL) +
     labs(
       title = title,
-      subtitle = paste("Numbers show count of iterations (out of 500) where model was best."),
+      subtitle = paste("Numbers show proportion of iterations where model was best."),
       x = NULL,
       y = "Downsampled Group"
     ) +

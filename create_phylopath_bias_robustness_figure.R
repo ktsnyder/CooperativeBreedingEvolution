@@ -1,5 +1,6 @@
 # create_bias_robustness_figure.R
 # Creates a multi-panel figure showing robustness of CB-FS association to various biases
+# 7/8/2025 - search for detailed_models csv outputs recursively in extract_phylopath_results - HOWEVER, create_bias_robustness_figure() is not the most up-to-date. In fact, this script might be mostly obsolete since the functions I actually use have been moved to their own script files (create_enhanced_DAG.R, create_bias_model_consistency_heatmap.R). Yes, it seems it might be obsolete except for extract_phylopath_results().
 
 library(ggplot2)
 library(dplyr)
@@ -20,7 +21,10 @@ extract_phylopath_results <- function(results_dir = "Outputs/PhylopathDownsample
     "Tropical Cooperative" = "Remove24TropicalCoop", 
     "Global Cooperative" = "Remove15GlobalCoop",
     "Strong Territoriality" = "Remove266StrongTerr",
-    "Year-round Territoriality" = "Remove155Terr3"
+    "Year-round Territoriality" = "Remove155Terr3",
+    "Jackknife by species" = "JackknifeSpecies",
+    "Wing Dimorphism" = "Remove71HighWingDimorphism",
+    "Plumage Dichromatism" = "Remove167HighPlumageDimorphism"
   )
   
   results_list <- list()
@@ -37,17 +41,18 @@ extract_phylopath_results <- function(results_dir = "Outputs/PhylopathDownsample
     
     # Find the detailed models file in main directory
     # Special handling for Year-round Territoriality to use the correct variable
-    if (bias_name == "Year-round Territoriality") {
-      detailed_file <- list.files(results_dir, 
-                                 pattern = paste0("detailed_models_", pattern, "-uses-TerritorialityWeakVsStrong-as-TERR.*\\.csv$"),
-                                 full.names = TRUE)
-    } else {
+    # if (bias_name == "Year-round Territoriality") { # no longer need special handling
+    #   detailed_file <- list.files(results_dir, 
+    #                              pattern = paste0("detailed_models_", pattern, "-uses-TerritorialityWeakVsStrong-as-TERR.*\\.csv$"),
+    #                              full.names = TRUE, recursive = T)
+    # } else {
       detailed_file <- list.files(results_dir, 
                                  pattern = paste0("detailed_models_", pattern, ".*\\.csv$"),
-                                 full.names = TRUE)
+                                 full.names = TRUE, recursive = T)
       # Exclude old Territoriality Level 3 files that used the wrong variable
-      detailed_file <- detailed_file[!grepl("uses-Territory_12vs3", detailed_file)]
-    }
+     #  detailed_file <- detailed_file[!grepl("uses-Territory_12vs3", detailed_file)]
+      print(detailed_file)
+    # }
     
     if (length(detailed_file) > 0) {
       # Read the most recent file if multiple exist
@@ -70,6 +75,7 @@ extract_phylopath_results <- function(results_dir = "Outputs/PhylopathDownsample
   
   for (dim_dir in dimorphism_dirs) {
     dim_path <- file.path(results_dir, dim_dir)
+    #dim_path = results_dir # 7/8/2025 to look in subdirectories
     if (dir.exists(dim_path)) {
       # Find all detailed_models files in subdirectory
       dim_files <- list.files(dim_path, 
@@ -330,9 +336,9 @@ create_bias_robustness_figure <- function(bias_results_list = NULL,
     dir.create(output_dir, recursive = TRUE)
   }
   
-  ggsave(output_file, combined_plot, width = 12, height = 9, dpi = 300)
+  ggsave(output_file, combined_plot, width = 12, height = 9, dpi = 600)
   ggsave(gsub(".pdf", ".png", output_file), combined_plot, 
-         width = 12, height = 9, dpi = 300)
+         width = 12, height = 9, dpi = 600)
   
   return(combined_plot)
 }
@@ -938,6 +944,8 @@ create_phylopath_dag <- function(phylopath_result = NULL,
 #### Moved: Create an enhanced DAG plot with better styling ----
 #'
 #' Function create_enhanced_dag() is now in create_enhanced_DAG.R
+
+
 
 #' Extract species counts from detailed models data
 #'

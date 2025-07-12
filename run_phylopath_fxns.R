@@ -4,6 +4,7 @@
 # Edited 6/9/2025 -  added downsample_dimorphism_bias()
 # Also edited 6/9/2025 - added functions per Update_Run_Analyses_Instructions.md
 # 6/10/2025 - new functions run_phylopath_dimorphism_correction(), create_downsampled_plots_flexible() per claude_code_sessions/phylopath_dimorphism_improvements.R
+# 7/11/2025 - run_phylopath_dimorphism_correction(): added args to change which vars used, output to folder with trait names in folder name; moved actual "output_dir" and "phylopath_output_dir" variable creation to inside run_multiple_phylopath() and run_phylopath_dimorphism_correction(), respectively - args will no longer do anything.
 
 library(phylopath)
 library(phytools)
@@ -22,11 +23,20 @@ run_multiple_phylopath <- function(dfIn, tree, downsample_columns, downsample_va
                                    save_path_coefficients = TRUE,
                                    save_downsampling_plots = TRUE,
                                    plotlabel = "",
-                                   output_dir = file.path("Outputs","PhylopathDownsampled")) {
+                                   output_dir = "obsolete" # now defaults to Outputs/PhylopathDownsampled/[trait names]
+                                   ) {
   
   require(dplyr)
   require(ggplot2)
   require(gridExtra)
+  
+  all_traits_phylopath_label <- paste(female_song_var, coop_breeding_var, territoriality_var, mass_var)
+  
+  output_dir = file.path("Outputs","PhylopathDownsampled", paste(all_traits_phylopath_label, "models"))
+  
+  if (!dir.exists(output_dir)) {
+    dir.create(output_dir, recursive = TRUE)
+  }
   
   # Create a data frame to store results
   results_df <- data.frame(
@@ -38,10 +48,6 @@ run_multiple_phylopath <- function(dfIn, tree, downsample_columns, downsample_va
     best_CICc = numeric(n_iterations),
     stringsAsFactors = FALSE
   )
-  
-  if (!dir.exists(output_dir)) {
-    dir.create(output_dir, recursive = TRUE)
-  }
   
   # Create lists to store additional results
   conditional_average_plots <- list()
@@ -762,10 +768,20 @@ run_phylopath_dimorphism_correction <- function(dfIn_phylo,
                                                 tree,
                                                 dim_info,
                                                 n_iterations = 500,
-                                                phylopath_output_dir = "Outputs/PhylopathDownsampled",
-                                                save_outputs = TRUE) {
+                                                save_outputs = TRUE,
+                                                female_song_var = "FemaleSong_Agg01",
+                                                coop_breeding_var = "HighConfidence_Coop",
+                                                territoriality_var = "TerritorialityWeakVsStrong",
+                                                mass_var = "logMass_AVONET",
+                                                phylopath_output_dir = "obsolete"
+                                                ) {
   
   require(gridExtra)
+  
+  
+  all_traits_phylopath_label <- paste(female_song_var, coop_breeding_var, territoriality_var, mass_var)
+  
+  phylopath_output_dir = file.path("Outputs","PhylopathDownsampled", paste(all_traits_phylopath_label, "models"))
   
   # Create output directory specific to this dimorphism type
   dim_output_dir <- file.path(phylopath_output_dir, dim_info$label)
@@ -798,7 +814,7 @@ run_phylopath_dimorphism_correction <- function(dfIn_phylo,
                                 "High", 
                                 dim_info$label)
     
-    dist_plot_result <- create_downsampled_dimorphism_distribution_plot(
+    dist_plot_result <- create_downsampled_dimorphism_distribution_plot( 
       dfIn_phylo = dfIn_phylo,
       dimorphism_downsample = dimorphism_downsample,
       dim_info = dim_info,
@@ -848,10 +864,10 @@ run_phylopath_dimorphism_correction <- function(dfIn_phylo,
     result_i <- run_CB_FS_Terr_phylopath(
       dfIn = df_downsampled,
       tree = tree,
-      female_song_var = "FemaleSong_Agg01",
-      coop_breeding_var = "HighConfidence_Coop",
-      territoriality_var = "TerritorialityWeakVsStrong",
-      mass_var = "logMass_AVONET",  
+      female_song_var = female_song_var,
+      coop_breeding_var = coop_breeding_var,
+      territoriality_var = territoriality_var,
+      mass_var = mass_var,  
       plots2pdf = FALSE
     )
     
@@ -1156,7 +1172,7 @@ downsample_dimorphism_bias <- function(df,
   
   # Save to Outputs folder
   ggsave(
-    filename = file.path("Outputs", weighted_probs_filename),
+    filename = file.path("Outputs", "PhylopathDownsampled", weighted_probs_filename),
     plot = combined_plot,
     width = 10,
     height = 12,

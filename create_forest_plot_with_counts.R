@@ -27,7 +27,7 @@ create_forest_plot_with_counts <- function(bias_results_list = NULL,
   
   # If no results provided, extract from default location
   if (is.null(bias_results_list)) {
-    bias_results_list <- extract_phylopath_results()
+    bias_results_list <- extract_phylopath_results(results_dir = "Outputs")
   }
   
   # Load full dataset reference value if not provided
@@ -172,7 +172,7 @@ create_forest_plot_with_counts <- function(bias_results_list = NULL,
   coef_summary$Bias_Label <- paste0(coef_summary$Bias_Correction, "\n(n ~ ", coef_summary$N_Species, " species)")
   
   # Define the desired order (from bottom to top in the plot)
-  bias_order <- c("Holarctic Non-cooperative", "Tropical Cooperative", "Global Cooperative",
+  bias_order <- c("Jackknife by species", "Holarctic Non-cooperative", "Tropical Cooperative", "Global Cooperative",
                   "Strong Territoriality", "Year-round Territoriality", 
                   "Wing Dimorphism", "Plumage Dichromatism")
   
