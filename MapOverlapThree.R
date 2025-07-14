@@ -144,6 +144,11 @@ calcHuelflex_three = function(overlapdf) {
   require(stringr)
   require(ggplot2)
   
+  # Source getLabels.R if it exists
+  if (file.exists("getLabels.R")) {
+    source("getLabels.R")
+  }
+  
   if("X" %in% colnames(overlapdf)) {
     overlapdf$X = NULL
   }
@@ -239,6 +244,18 @@ calcHuelflex_three = function(overlapdf) {
   trait2 = overlaplonger$trait2[1]
   trait3 = overlaplonger$trait3[1]
   
+  # Get trait labels if getLabels function exists
+  if (exists("getLabels")) {
+    trait1StateLabels <- getLabels(trait1)
+    trait2StateLabels <- getLabels(trait2)
+    trait3StateLabels <- getLabels(trait3)
+  } else {
+    # Default labels if getLabels not available
+    trait1StateLabels <- c("0", "1", "2", "3", "4")[1:length(unique(overlaplonger$state))]
+    trait2StateLabels <- c("0", "1")
+    trait3StateLabels <- c("0", "1")
+  }
+  
   plotlabel = paste(trait1, trait2, trait3)
   dummytitle = paste("Nsims =", nsims, "\nnum Dummy dsums > D_real:", numGreater, ", pval =", pval)
   
@@ -258,23 +275,55 @@ calcHuelflex_three = function(overlapdf) {
     labs(title = dummytitle, x = "D statistic from simulated independent data simmaps", y = "Frequency") +
     theme_minimal(base_size = 10)
   
-  boxplotStates <- ggplot(overlaplonger, aes(x = state, y = proportion, fill = Which)) +
+  # Create formatted labels for state combinations
+  if (exists("getLabels")) {
+    # Parse state combinations and create formatted labels
+    state_labels <- unique(overlaplonger$state)
+    formatted_labels <- sapply(state_labels, function(s) {
+      # Remove leading X if present
+      s <- gsub("^X", "", s)
+      states <- strsplit(s, "_")[[1]]
+      if (length(states) == 3) {
+        # Map numeric states to labels
+        trait1_label <- trait1StateLabels[as.numeric(states[1]) + 1]
+        trait2_label <- trait2StateLabels[as.numeric(states[2]) + 1]
+        trait3_label <- trait3StateLabels[as.numeric(states[3]) + 1]
+        paste(trait1_label, trait2_label, trait3_label, sep = "\n")
+      } else {
+        s
+      }
+    })
+    names(formatted_labels) <- state_labels
+    
+    overlaplonger$state_label <- formatted_labels[overlaplonger$state]
+  } else {
+    overlaplonger$state_label <- overlaplonger$state
+  }
+  
+  boxplotStates <- ggplot(overlaplonger, aes(x = state_label, y = proportion, fill = Which)) +
     geom_boxplot(outlier.shape = NA) +
     theme_minimal() +
     labs(y = "Observed State Proportion", x = "", fill = "Simulation Data") +
-    scale_fill_manual(values = c("Real" = "blue", "Dummy" = "red")) +
+    scale_fill_manual(values = c("Real" = "#762a83", "Dummy" = "#1b7837")) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    ggtitle(paste(trait1, trait2, trait3, "p =", pval))
+    ggtitle(paste(trait1, trait2, trait3, "p =", round(pval, 3)))
   
+  boxplotLogStates <- ggplot(overlaplonger, aes(x = state_label, y = log(proportion), fill = Which)) +
+    geom_boxplot(outlier.shape = NA) +
+    theme_minimal() +
+    labs(y = "Observed State Proportion (log-transformed)", x = "", fill = "Simulation Data") +
+    scale_fill_manual(values = c("Real" = "#762a83", "Dummy" = "#1b7837")) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    ggtitle(paste(trait1, trait2, trait3, "p =", round(pval, 3)))
   
-  boxplotStatesLowestProportions <- ggplot(overlaplonger, aes(x = state, y = proportion, fill = Which)) +
+  boxplotStatesLowestProportions <- ggplot(overlaplonger, aes(x = state_label, y = proportion, fill = Which)) +
     geom_boxplot(outlier.shape = NA) +
     theme_minimal() +
     labs(y = "Observed State Proportion - low range", x = "", fill = "Simulation Data") +
-    scale_fill_manual(values = c("Real" = "blue", "Dummy" = "red")) +
+    scale_fill_manual(values = c("Real" = "#762a83", "Dummy" = "#1b7837")) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     coord_cartesian(ylim = c(0, 0.10)) +
-    ggtitle(paste(trait1, trait2, trait3, "p =", pval))
+    ggtitle(paste(trait1, trait2, trait3, "p =", round(pval, 3)))
   
   # New faceted boxplot
   # First, extract the third trait state from the state column
@@ -294,7 +343,7 @@ calcHuelflex_three = function(overlapdf) {
     labs(y = "Observed State Proportion", 
          x = "", 
          fill = "Simulation Data") +
-    scale_fill_manual(values = c("Real" = "blue", "Dummy" = "red")) +
+    scale_fill_manual(values = c("Real" = "#762a83", "Dummy" = "#1b7837")) +
     theme(
       axis.text.x = element_text(angle = 45, hjust = 1),
       strip.text = element_text(size = 10),
@@ -321,7 +370,7 @@ calcHuelflex_three = function(overlapdf) {
     labs(y = "Observed State Proportion", 
          x = "", 
          fill = "Simulation Data") +
-    scale_fill_manual(values = c("Real" = "blue", "Dummy" = "red")) +
+    scale_fill_manual(values = c("Real" = "#762a83", "Dummy" = "#1b7837")) +
     theme(
       axis.text.x = element_text(angle = 45, hjust = 1),
       strip.text = element_text(size = 10),
@@ -334,6 +383,7 @@ calcHuelflex_three = function(overlapdf) {
     p2 = p2, 
     boxplotStates = boxplotStates, 
     boxplotStatesYcutoff = boxplotStatesLowestProportions,
+    boxplotLogStates = boxplotLogStates,
     boxplotStatesFaceted_second = boxplotStatesFaceted_second, 
     boxplotStatesFaceted_third = boxplotStatesFaceted_third, 
     fraction_dummy_less_than_median_real = fraction_dummy_less_than_median_real
