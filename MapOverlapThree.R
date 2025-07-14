@@ -174,6 +174,16 @@ calcHuelflex_three = function(overlapdf) {
   
   overlaplonger$state <- gsub("_DUMMY", "", overlaplonger$state)
   overlaplonger$state <- gsub("_REAL", "", overlaplonger$state)
+  overlaplonger$state <- gsub("^X", "", overlaplonger$state)
+  
+  # Get trait names for dynamic column naming
+  trait1_name <- unique(overlaplonger$trait1)[1]
+  trait2_name <- unique(overlaplonger$trait2)[1]
+  trait3_name <- unique(overlaplonger$trait3)[1]
+  
+  # Create dynamic column names
+  trait1_col <- paste0(trait1_name, "_state")
+  trait23_col <- paste0(trait2_name, "_", trait3_name)
   
   # Modified to handle three-way state combinations
   df_long <- overlaplonger %>%
@@ -182,17 +192,21 @@ calcHuelflex_three = function(overlapdf) {
       FS = paste(second_state, third_state, sep = "_")
     )
   
+  # Rename columns to use trait names
+  names(df_long)[names(df_long) == "trait_state"] <- trait1_col
+  names(df_long)[names(df_long) == "FS"] <- trait23_col
+  
   total_times_trait <- df_long %>%
-    group_by(tree, trait1, trait2, trait3, trait_state, Which) %>%
+    group_by(tree, trait1, trait2, trait3, !!sym(trait1_col), Which) %>%
     summarize(total_trait = sum(proportion), .groups = "drop")
   
   total_times_FS <- df_long %>%
-    group_by(tree, trait1, trait2, trait3, FS, Which) %>%
+    group_by(tree, trait1, trait2, trait3, !!sym(trait23_col), Which) %>%
     summarize(total_FS = sum(proportion), .groups = "drop")
   
   df_long <- df_long %>%
-    left_join(total_times_trait, by = c("tree", "trait1", "trait2", "trait3", "trait_state", "Which")) %>%
-    left_join(total_times_FS, by = c("tree", "trait1", "trait2", "trait3", "FS", "Which"))
+    left_join(total_times_trait, by = c("tree", "trait1", "trait2", "trait3", trait1_col, "Which")) %>%
+    left_join(total_times_FS, by = c("tree", "trait1", "trait2", "trait3", trait23_col, "Which"))
   
   df_long <- df_long %>%
     mutate(expected_proportion = total_trait * total_FS)
@@ -208,7 +222,7 @@ calcHuelflex_three = function(overlapdf) {
     pull(total_abs_diff) / nsims
   
   Real_dsims <- df_real %>%
-    select(tree, trait1, trait2, trait3, trait_state, FS, abs_diff) %>%
+    select(tree, trait1, trait2, trait3, !!sym(trait1_col), !!sym(trait23_col), abs_diff) %>%
     group_by(tree, trait1, trait2, trait3) %>%
     summarize(Real_dsim = sum(abs_diff), .groups = "drop")
   
@@ -229,15 +243,15 @@ calcHuelflex_three = function(overlapdf) {
   # Calculate medians for Real data
   medians_real <- df_long %>%
     filter(Which == "Real") %>%
-    group_by(trait_state, FS) %>%
+    group_by(!!sym(trait1_col), !!sym(trait23_col)) %>%
     summarize(median_real = median(proportion), .groups = "drop")
   
   # Join medians to Dummy data
   df_dummy <- df_dummy %>%
-    left_join(medians_real, by = c("trait_state", "FS"))
+    left_join(medians_real, by = c(trait1_col, trait23_col))
   
   fraction_dummy_less_than_median_real <- df_dummy %>%
-    group_by(trait_state, FS) %>%
+    group_by(!!sym(trait1_col), !!sym(trait23_col)) %>%
     summarize(fraction = sum(proportion <= median_real) / n(), .groups = "drop")
   
   trait1 = overlaplonger$trait1[1]
@@ -279,6 +293,9 @@ calcHuelflex_three = function(overlapdf) {
   if (exists("getLabels")) {
     # Parse state combinations and create formatted labels
     state_labels <- unique(overlaplonger$state)
+    # Sort state labels by their numeric values to preserve order
+    state_labels <- state_labels[order(state_labels)]
+    
     formatted_labels <- sapply(state_labels, function(s) {
       # Remove leading X if present
       s <- gsub("^X", "", s)
@@ -296,6 +313,9 @@ calcHuelflex_three = function(overlapdf) {
     names(formatted_labels) <- state_labels
     
     overlaplonger$state_label <- formatted_labels[overlaplonger$state]
+    # Convert to factor with levels in the original numeric order
+    overlaplonger$state_label <- factor(overlaplonger$state_label, 
+                                       levels = formatted_labels[order(state_labels)])
   } else {
     overlaplonger$state_label <- overlaplonger$state
   }
@@ -305,24 +325,29 @@ calcHuelflex_three = function(overlapdf) {
     theme_minimal() +
     labs(y = "Observed State Proportion", x = "", fill = "Simulation Data") +
     scale_fill_manual(values = c("Real" = "#762a83", "Dummy" = "#1b7837")) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    ggtitle(paste(trait1, trait2, trait3, "p =", round(pval, 3)))
+    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+          plot.margin = margin(t = 5, r = 5, b = 5, l = 10, unit = "mm")) +
+    ggtitle(paste(trait1, trait2, trait3, "p =", round(pval, 3))) +
+    coord_cartesian(clip = "off")
   
   boxplotLogStates <- ggplot(overlaplonger, aes(x = state_label, y = log(proportion), fill = Which)) +
     geom_boxplot(outlier.shape = NA) +
     theme_minimal() +
     labs(y = "Observed State Proportion (log-transformed)", x = "", fill = "Simulation Data") +
     scale_fill_manual(values = c("Real" = "#762a83", "Dummy" = "#1b7837")) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    ggtitle(paste(trait1, trait2, trait3, "p =", round(pval, 3)))
+    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+          plot.margin = margin(t = 5, r = 5, b = 5, l = 10, unit = "mm")) +
+    ggtitle(paste(trait1, trait2, trait3, "p =", round(pval, 3))) +
+    coord_cartesian(clip = "off")
   
   boxplotStatesLowestProportions <- ggplot(overlaplonger, aes(x = state_label, y = proportion, fill = Which)) +
     geom_boxplot(outlier.shape = NA) +
     theme_minimal() +
     labs(y = "Observed State Proportion - low range", x = "", fill = "Simulation Data") +
     scale_fill_manual(values = c("Real" = "#762a83", "Dummy" = "#1b7837")) +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    coord_cartesian(ylim = c(0, 0.10)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+          plot.margin = margin(t = 5, r = 5, b = 5, l = 10, unit = "mm")) +
+    coord_cartesian(ylim = c(0, 0.10), clip = "off") +
     ggtitle(paste(trait1, trait2, trait3, "p =", round(pval, 3)))
   
   # New faceted boxplot

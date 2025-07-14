@@ -6,15 +6,20 @@
 
 # setwd('/Users/kate/Library/CloudStorage/Box-Box/Kate_Nicole/CooperativeBreedingEvolutionOutputs/Nature Eco Evo - resubmission Code/')
 # 
-# Qdata = df = read.csv('/Users/kate/Library/CloudStorage/Box-Box/Kate_Nicole/CooperativeBreedingEvolutionOutputs/Nature Eco Evo - resubmission Code/Data_R_Passerine_withTobias_AVONET_JiayingDuet2025-03-04_WeakStrong2025-05-07.csv')
-# Qtree = tree = read.nexus('ConsensusPasserineTreeHackett4_1000_OscineSubset.nex')
+# newdata = "Data_R_2025-06-09.csv"
+# treefile = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
+
+require(phytools)
+
+# Qdata = df = read.csv(newdata)
+# Qtree = tree = read.nexus(treefile)
 # 
 # columns = c("HighConfidence_Coop", "FemaleSong_Agg01", "TerritorialityWeakVsStrong")
-# columns = c("HighConfidence_Coop", "FemaleSong_Agg01", "TerritorialityWeakVsStrongHighConf")
+# columns = c("HighConfidence_Coop", "FemaleSong_Agg01", "Territory_12vs3")
 # 
 # ## Examples 
 #### Run for first time
-# plot_transition_counts_3trait(Qdata = "Data_R_Passerine_withTobias_AVONET_JiayingDuet2025-03-04_WeakStrong2025-05-08.csv", Qtree = 'ConsensusPasserineTreeHackett4_1000_OscineSubset.nex', columns = columns, nsims = 10)
+# plot_transition_counts_3trait(Qdata = Qdata, Qtree = Qtree, columns = columns, nsims = 100)
 
 #### Just plot the output from the csv already outputted from this process
 # plot_transition_counts_3trait(Qdata = "Data_R_Passerine_withTobias_AVONET_JiayingDuet2025-03-04_WeakStrong2025-05-09-2.csv", Qtree = 'ConsensusPasserineTreeHackett4_1000_OscineSubset.nex', columns = columns, nsims = NULL, counts_csv = "2025-05-08_transition-countsHighConfidence_Coop FemaleSong_Agg01 TerritorialityWeakVsStrongHighConf_500sims.csv")
@@ -248,10 +253,10 @@ plot_transition_counts_3trait <- function(Qdata, Qtree, columns, nsims, counts_c
   filename_base <- paste0(Sys.Date(), "_", nsims, "sim_", columns[1], "_", columns[2], "_", columns[3], "_transition_grobs")
   
   # Save the arranged plot to PDF
-  ggsave(paste0(filename_base, ".pdf"), single_page_plot, width = 15, height = pdfHeight, units = "in")
+  ggsave(file.path("Simmap Overlap Outputs", paste0(filename_base, ".pdf")), single_page_plot, width = 15, height = pdfHeight, units = "in")
   
   # Save the arranged plot to PNG
-  ggsave(file.path("Outputs/Figures/PNG", paste0(filename_base, ".png")), 
+  ggsave(file.path("Simmap Overlap Outputs", paste0(filename_base, ".png")), 
          single_page_plot, width = 15, height = pdfHeight, units = "in", dpi = 150)
   
 }
@@ -931,7 +936,9 @@ getLabels <- function(trait) {
   } else if (str_detect(trait, "Exclusive")) {
     return(c("Permissive", "Exclusive"))
   } else if (str_detect(trait, "Weak")) {
-    return(c("Weak Territoriality", "Strong Territoriality"))
+    return(c("Weak or no territoriality", "Strong territoriality"))
+  } else if (trait == "Territory_12vs3") {
+    return(c("Weak, seasonal, or no territoriality", "Year-round territoriality"))
   } else {
     return(c(paste(trait, "0"), paste(trait, "1")))  # Return NA if no condition matches
   }
