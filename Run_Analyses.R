@@ -72,6 +72,24 @@ combined_df <- combined_df %>%
 print(combined_df, n = Inf)
 #write.csv(combined_df, "species counts comparison - FS vs CockburnInferred Coop Classifications.csv", row.names = F)
 
+
+# Add abs_Latitude, Migration_num, and logMass_normalized variables
+df <- read.csv("Data_R_2025-06-09.csv")
+df$Migration_num <- as.numeric(df$Migration_AVONET)-2
+df$abs_Latitude <- abs(df$Centroid.Latitude_AVONET)
+df$abs_Latitude_normalized <- scale(df$abs_Latitude, center = TRUE, scale = TRUE)
+df$logMass_normalized <- scale(df$logMass_AVONET, center = TRUE, scale = TRUE)
+df$PercentAbsLogWingDimorphism_normalized <- scale(df$PercentAbsLogWingDimorphism, center = TRUE, scale = TRUE)
+df$logMaleFemalePlumageDiffAbs_normalized <- scale(df$logMaleFemalePlumageDiffAbs, center = TRUE, scale = TRUE)
+#write.csv(df, "Data_R_2025-07-21.csv", row.names = FALSE)
+
+newdata = "Data_R_2025-07-21.csv"
+# Add DefaultToCockburnInferred variable
+df = read.csv(newdata)
+df$HighConf_Coop_DefaultToCockburnInferred <- df$HighConfidence_Coop
+df$HighConf_Coop_DefaultToCockburnInferred[which(!is.na(df$CockburnInferred))] <- df$CockburnInferred[which(!is.na(df$CockburnInferred))]
+#write.csv(df, "Data_R_2025-07-23.csv", row.names = FALSE)
+
 newdata = df
 
 # Supplemental Table 3 - phylANOVA ----
@@ -773,6 +791,7 @@ if ("PercentAbsLogWingDimorphism" %in% colnames(dfIn_phylo)) {
 }
 
 # 4. Phylopath with alternative cooperative breeding classifications
+# Redone in RunAnalyses_nondownsampled_Phylopaths.R 7/23/2025
 altCoops <- c("MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop", "AnyNoncoopEqualsNoncoop")
 for (tempCoop in altCoops) {
   if ("logMass_AVONET" %in% colnames(dfIn_phylo)) {
@@ -955,6 +974,8 @@ coop_breeding_var = "HighConfidence_Coop"
 territoriality_var = "Territory_12vs3" # "TerritorialityWeakVsStrong"
 mass_var = "logMass_AVONET"
 
+all_traits_phylopath_label = paste(female_song_var, coop_breeding_var, territoriality_var, mass_var)
+
 trait_set_output_dir = file.path("Outputs", "PhylopathDownsampled", paste0(all_traits_phylopath_label, " models"))
 
 if (!dir.exists(trait_set_output_dir)) {
@@ -1011,6 +1032,10 @@ geo_holarctic_info <- list(
 )
 
 prefix_geo <- paste(all_traits_phylopath_label, "Remove83HolarcticNoncoop")
+saveRDS(result_geo_holarctic,
+        file.path(trait_set_output_dir,
+                  paste0("result_", prefix_geo, "_n", n_iterations, "_", Sys.Date(), ".rds")))
+
 plots_geo <- create_all_phylopath_plots(
   analysis_type = "downsampled",
   phylopath_output = result_geo_holarctic,
@@ -1057,6 +1082,10 @@ trop_coop_info <- list(
 )
 
 prefix_trop <- paste(all_traits_phylopath_label, "Remove24TropicalCoop") 
+saveRDS(result_geo_tropical,
+        file.path(trait_set_output_dir,
+                  paste0("result_", prefix_trop, "_n", n_iterations, "_", Sys.Date(), ".rds")))
+
 plots_trop <- create_all_phylopath_plots(
   analysis_type = "downsampled",
   phylopath_output = result_geo_tropical,
@@ -1104,6 +1133,9 @@ global_coop_info <- list(
 
 # actual plot creation
 prefix_global <- paste(all_traits_phylopath_label, "Remove15GlobalCoop")
+saveRDS(result_global_coop,
+        file.path(trait_set_output_dir,
+                  paste0("result_", prefix_global, "_n", n_iterations, "_", Sys.Date(), ".rds")))
 plots_global <- create_all_phylopath_plots(
   analysis_type = "downsampled",
   phylopath_output = result_global_coop,
@@ -1532,6 +1564,9 @@ for (dim_type in names(dimorphism_vars)) {
                                 result_dimorphism$downsampling_info$n_to_remove, 
                                 "High", 
                                 dim_info$label,"ByPropensity")
+    saveRDS(result_dimorphism,
+            file.path(trait_set_output_dir,
+                      paste0("result_", prefix_dimorphism, "_n", n_iterations, "_", Sys.Date(), ".rds")))
     
     # Use the flexible plotting function
     plots_dimorphism <- create_downsampled_plots(

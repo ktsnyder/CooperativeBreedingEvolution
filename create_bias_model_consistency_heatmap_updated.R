@@ -11,6 +11,7 @@ library(cowplot)
 # Also source phylopath_helper_functions.R for helper functions
 # 
 # 7/8/2025 - in extract_phylopath_results(), set results_dir = "Outputs/" which will work with new recursive searching in extract_phylopath_results()
+# 7/23/2025 - reordered downsampled groups so Jackknife by species is in the last row of the matrix if it is present
 
 # Source helper functions if available
 if (file.exists("phylopath_helper_functions.R")) {
@@ -60,12 +61,12 @@ create_bias_model_consistency_heatmap <- function(bias_results_list = NULL,
     if (exists("find_or_create_full_dataset_result")) {
       full_result <- find_or_create_full_dataset_result(trait_set, run_if_missing = FALSE)
     } else {
-      # Fallback to old method
-      if (file.exists("phylopath_full_dataset_result.rds")) {
-        full_result <- readRDS("phylopath_full_dataset_result.rds")
-      } else {
+      # Fallback to old method # commented out because this is just asking for errors
+      # if (file.exists("phylopath_full_dataset_result.rds")) {
+      #   full_result <- readRDS("phylopath_full_dataset_result.rds")
+      # } else {
         full_result <- NULL
-      }
+      # }
     }
     
     if (!is.null(full_result)) {
@@ -112,6 +113,12 @@ create_bias_model_consistency_heatmap <- function(bias_results_list = NULL,
   # Also include full dataset best models if they're not already in the list
   if (!is.null(full_dataset_best_models)) {
     all_models <- unique(c(all_models, full_dataset_best_models))
+  }
+  
+  target <- "Jackknife by species"
+  if (target %in% names(model_data)) {
+    other_names <- names(model_data)[names(model_data) != target]
+    model_data <- model_data[c(target, other_names)]
   }
   
   # Create matrix for heatmap
@@ -324,9 +331,8 @@ create_bias_model_consistency_heatmap <- function(bias_results_list = NULL,
   # Create the rate presence/absence plot
   p_rates <- ggplot(rate_data, aes(x = Model, y = Rate)) +
     geom_point(data = filter(rate_data, Present), 
-               aes(shape = Model %in% full_dataset_best_models),
+               shape = 19,  # Use circle for all points
                size = 3) +
-    scale_shape_manual(values = c("FALSE" = 19, "TRUE" = 8), guide = "none") +  # 19 = circle, 8 = star
     scale_x_discrete(labels = NULL) +
     labs(x = "Model (defined by rates included in model)", y = "Rate") +
     theme_minimal() +

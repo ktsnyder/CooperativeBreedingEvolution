@@ -3,10 +3,11 @@
 # 5/8/2025
 # Split from TransitionCounts_3trait_flexTerr.R
 # 5/29/2025 - changed rate centers used in plots to median
+# 7/24/2025 - added to args in processTransitionStats3() usePairwisePosthocOfLogCounts = TRUE
 
 # setwd('/Users/kate/Library/CloudStorage/Box-Box/Kate_Nicole/CooperativeBreedingEvolutionOutputs/Nature Eco Evo - resubmission Code/')
 # 
-# newdata = "Data_R_2025-06-09.csv"
+# newdata = "Data_R_2025-07-23.csv"
 # treefile = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
 
 require(phytools)
@@ -16,18 +17,19 @@ require(phytools)
 # 
 # columns = c("HighConfidence_Coop", "FemaleSong_Agg01", "TerritorialityWeakVsStrong")
 # columns = c("HighConfidence_Coop", "FemaleSong_Agg01", "Territory_12vs3")
+# columns = c("HighConfidence_Coop", "FemaleSong_Agg01", "Territory")
 # 
 # ## Examples 
 #### Run for first time
 # plot_transition_counts_3trait(Qdata = Qdata, Qtree = Qtree, columns = columns, nsims = 100)
 
 #### Just plot the output from the csv already outputted from this process
-# plot_transition_counts_3trait(Qdata = "Data_R_Passerine_withTobias_AVONET_JiayingDuet2025-03-04_WeakStrong2025-05-09-2.csv", Qtree = 'ConsensusPasserineTreeHackett4_1000_OscineSubset.nex', columns = columns, nsims = NULL, counts_csv = "2025-05-08_transition-countsHighConfidence_Coop FemaleSong_Agg01 TerritorialityWeakVsStrongHighConf_500sims.csv")
+# plot_transition_counts_3trait(Qdata = Qdata, Qtree = 'ConsensusPasserineTreeHackett4_1000_OscineSubset.nex', columns = c("HighConfidence_Coop", "FemaleSong_Agg01", "Territory_12vs3"), nsims = NULL, counts_csv = "Simmap Overlap Outputs/2025-07-14_transition-counts HighConfidence_Coop FemaleSong_Agg01 Territory_12vs3_500sims.csv", scale_countDiff_by_Expected = FALSE, usePairwisePosthocOfLogCounts = FALSE)
 
 #### Use 3-state territory results
-# plot_transition_counts_3trait(Qdata = "Data_R_Passerine_withTobias_AVONET_JiayingDuet2025-03-04_WeakStrong2025-05-09-2.csv", Qtree = 'ConsensusPasserineTreeHackett4_1000_OscineSubset.nex', columns = c("HighConfidence_Coop", "FemaleSong_Agg01", "TerritorialityPermissiveColonialCoopVsExclusive"), nsims = NULL, counts_csv = "Simmap Overlap Outputs/2025-05-09_transition-counts HighConfidence_Coop FemaleSong_Agg01 TerritorialityPermissiveColonialCoopVsExclusive_500sims.csv")
+# plot_transition_counts_3trait(Qdata = Qdata, Qtree = 'ConsensusPasserineTreeHackett4_1000_OscineSubset.nex', columns = c("HighConfidence_Coop", "FemaleSong_Agg01", "Territory"), nsims = NULL, counts_csv = 'Simmap Overlap Outputs/2025-07-11_transition-counts HighConfidence_Coop FemaleSong_Agg01 Territory_500sims.csv', scale_countDiff_by_Expected = TRUE, usePairwisePosthocOfLogCounts = FALSE)
 
-plot_transition_counts_3trait <- function(Qdata, Qtree, columns, nsims, counts_csv = NULL) {
+plot_transition_counts_3trait <- function(Qdata, Qtree, columns, nsims, counts_csv = NULL, scale_countDiff_by_Expected = FALSE, usePairwisePosthocOfLogCounts = TRUE) {
   library(phytools)
   library(dplyr)
   library(tidyr)
@@ -126,7 +128,7 @@ plot_transition_counts_3trait <- function(Qdata, Qtree, columns, nsims, counts_c
     print("counts_csv must be NULL (default) or a character vector to a csv file")
   }
   
-  outlist = processTransitionStats3(dfout = dfout)
+  outlist = processTransitionStats3(dfout = dfout, scale_countDiff_by_Expected = scale_countDiff_by_Expected, usePairwisePosthocOfLogCounts = usePairwisePosthocOfLogCounts)
   
   require(gridExtra)
   require(grid)
@@ -251,6 +253,14 @@ plot_transition_counts_3trait <- function(Qdata, Qtree, columns, nsims, counts_c
   
   # Generate filename base for both PDF and PNG
   filename_base <- paste0(Sys.Date(), "_", nsims, "sim_", columns[1], "_", columns[2], "_", columns[3], "_transition_grobs")
+  
+  # Add scaling indicator to filename if TRUE
+  if (scale_countDiff_by_Expected) {
+    filename_base <- paste0(filename_base, "_ColsScaledByExpected")
+  }
+  if (!usePairwisePosthocOfLogCounts) {
+    filename_base <- paste0(filename_base, "_PosthocLinear")
+  }
   
   # Save the arranged plot to PDF
   ggsave(file.path("Simmap Overlap Outputs", paste0(filename_base, ".pdf")), single_page_plot, width = 15, height = pdfHeight, units = "in")
@@ -625,7 +635,7 @@ getTransitionStateCounts3 <- function(Coopsimtrees, FSsimtrees, Terrsimtrees) {
   return(results_df)
 }
 
-processTransitionStats3 <- function(dfout) {
+processTransitionStats3 <- function(dfout, scale_countDiff_by_Expected = FALSE, usePairwisePosthocOfLogCounts = TRUE) {
   trait1 = "HighConfidence_Coop"
   trait2 = "FemaleSong_Agg01"
   trait1StateLabels = getLabels(trait1)
@@ -661,9 +671,9 @@ processTransitionStats3 <- function(dfout) {
   dfMeltCounts$ObservedVsExpected <- ifelse(grepl("Expected", dfMeltCounts$Transition),
                                             "Expected", "Observed")
   
-  # Convert Count to numeric and replace any 0 with a small nonzero value (0.001)
+  # Convert Count to numeric and replace any 0 with a small nonzero value (0.5)
   dfMeltCounts$Count <- as.numeric(dfMeltCounts$Count)
-  dfMeltCounts$Count[dfMeltCounts$Count == 0] <- 0.001
+  dfMeltCounts$Count[dfMeltCounts$Count == 0] <- 0.5
   
   # Save the original column name as a label.
   dfMeltCounts$Label <- dfMeltCounts$Transition
@@ -756,8 +766,12 @@ processTransitionStats3 <- function(dfout) {
   
   # Additional processing for transition plots: make a data frame of p-values.
   # Here we use the log-transformed pairwise post-hoc results.
-  # (This part may need tweaking depending on the exact structure of your contrast output.)
-  pvaldf <- as.data.frame(logPairwisePostHoc)
+  if (usePairwisePosthocOfLogCounts == TRUE) {
+    pvaldf <- as.data.frame(logPairwisePostHoc)  
+  } else {
+    pvaldf <- as.data.frame(PairwisePostHoc)  
+  }
+  
   
   # Set significance labels based on p.value thresholds.
   pvaldf$SignificanceLabel <- "n.s."
@@ -820,7 +834,8 @@ processTransitionStats3 <- function(dfout) {
         trait1StateLabels = trait1StateLabels, 
         trait2StateLabels = trait2StateLabels, 
         plottitle = plot_title,
-        center = "median"
+        center = "median",
+        scale_countDiff_by_Expected = scale_countDiff_by_Expected
       )
     }
   }
@@ -951,7 +966,8 @@ make_transition_plot_for_terr <- function(
     trait1StateLabels = c("0","1"),   # e.g. c("0","1") for Coop
     trait2StateLabels = c("0","1"),   # e.g. c("0","1") for FS
     plottitle,            # title for the resulting plot
-    center = "median"    # in plots, use either mean or median for arrow colors
+    center = "median",    # in plots, use either mean or median for arrow colors
+    scale_countDiff_by_Expected = FALSE  # whether to scale difference by expected value
 ) {
   source("transition_plot.R")
   
@@ -964,6 +980,19 @@ make_transition_plot_for_terr <- function(
   RateRefTerr[["FullTransitions"]] <- paste0(RateRefTerr[["FullTransitions"]], terrSuffix)
   
   ratePvalsTerr = merge(RateRefTerr, pvaldf, by.x = "FullTransitions", by.y = "Transition")
+  
+  # Calculate TransitionCountMedian from the original transition count columns BEFORE renaming
+  if (!"TransitionCountMedian" %in% names(ratePvalsTerr)) {
+    # Calculate median of the original transition count columns
+    transition_count_cols <- ratePvalsTerr$FullTransitions
+    if (all(transition_count_cols %in% names(dfout))) {
+      transition_medians <- apply(dfout[, transition_count_cols], 2, median)
+      ratePvalsTerr$TransitionCountMedian <- transition_medians[ratePvalsTerr$FullTransitions]
+    } else {
+      warning("Could not calculate TransitionCountMedian from original data")
+      #ratePvalsTerr$TransitionCountMedian <- 5  # fallback value
+    }
+  }
   
   # remove these lines if want to use ANOVA pval labels instead
   ratePvalsTerr$PercentTrendingLabel = "<80%"
@@ -1002,9 +1031,20 @@ make_transition_plot_for_terr <- function(
   dfTerr <- dfTerr[, c(other_cols, desired_order)]
   
   
-  dfTerr[,paste0(ratePvalsTerr$FullTransitions,"DifferenceFromExpected")] = dfTerr[,ratePvalsTerr$FullTransitions] - dfTerr[,paste0(ratePvalsTerr$FullTransitions,"Expected")]
-  
-  old_names <- paste0(ratePvalsTerr$FullTransitions,"DifferenceFromExpected")
+  if (scale_countDiff_by_Expected) {
+    # Calculate scaled difference: (Observed - Expected) / Expected
+    dfTerr[,paste0(ratePvalsTerr$FullTransitions,"DifferenceFromExpectedOverExpected")] = 
+      (dfTerr[,ratePvalsTerr$FullTransitions] - dfTerr[,paste0(ratePvalsTerr$FullTransitions,"Expected")]) / 
+      dfTerr[,paste0(ratePvalsTerr$FullTransitions,"Expected")]
+    
+    old_names <- paste0(ratePvalsTerr$FullTransitions,"DifferenceFromExpectedOverExpected")
+  } else {
+    # Original calculation: Observed - Expected
+    dfTerr[,paste0(ratePvalsTerr$FullTransitions,"DifferenceFromExpected")] = 
+      dfTerr[,ratePvalsTerr$FullTransitions] - dfTerr[,paste0(ratePvalsTerr$FullTransitions,"Expected")]
+    
+    old_names <- paste0(ratePvalsTerr$FullTransitions,"DifferenceFromExpected")
+  }
   new_names <- ratePvalsTerr$Transitions
   rename_map <- setNames(new_names, old_names)
   rename_map
@@ -1028,7 +1068,8 @@ make_transition_plot_for_terr <- function(
     lengthen = 0.2,
     ratePvals = ratePvalsTerr,
     plottitle = plottitle,
-    center = center
+    center = center,
+    scale_countDiff_by_Expected = scale_countDiff_by_Expected
   )
   
   return(plot_out)

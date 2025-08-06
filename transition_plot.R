@@ -18,13 +18,24 @@ library(ggplot2)
 
 
 
-transition_plot <- function(df, trait1StateLabels = c("0","1"), trait2StateLabels = c("0","1"), scale_area_by = 0.5, offset = 0.15, lengthen = 0.4, ratePvals = NULL, plottitle = NULL, center = "mean") {
+transition_plot <- function(df, trait1StateLabels = c("0","1"), trait2StateLabels = c("0","1"), scale_area_by = 0.5, offset = 0.15, lengthen = 0.4, ratePvals = NULL, plottitle = NULL, center = "mean", scale_countDiff_by_Expected = FALSE) {
   # Calculate the mean of each q__ column
   transition_means <- colMeans(df[, grepl("^q[0-9]{2}$", names(df))])
   transition_medians <- apply(df[, grepl("^q[0-9]{2}$", names(df))], 2, FUN = median)
   if (!is.null(ratePvals)) {
-    transition_counts_medians <- apply(df[,ratePvals$Transitions], 2, FUN = median)
-    transition_counts_medians = data.frame(Transitions = names(transition_counts_medians), TransitionCountMedian = transition_counts_medians)
+    # TransitionCountMedian should already be calculated in three-trait analysis
+    if ("TransitionCountMedian" %in% names(ratePvals)) {
+      # Use pre-calculated medians from ratePvals
+      transition_counts_medians <- ratePvals[, c("Transitions", "TransitionCountMedian")]
+      print("Used pre-calculated TransitionCountMedian from ratePvals for transition_counts_medians")
+    } else if (all(ratePvals$Transitions %in% names(df))) {
+      # Fallback: calculate from data if columns exist
+      transition_counts_medians <- apply(df[,ratePvals$Transitions], 2, FUN = median)
+      transition_counts_medians = data.frame(Transitions = names(transition_counts_medians), TransitionCountMedian = transition_counts_medians)
+      print(paste("Fallback: calculated transition_counts_medians from input df using reference ratePvals$Transitions", paste(ratePvals$Transitions, collapse = " ")))
+    } else {
+      warning("TransitionCountMedian not found in ratePvals and cannot calculate from df")
+    }
   }
   
   
@@ -94,7 +105,13 @@ transition_plot <- function(df, trait1StateLabels = c("0","1"), trait2StateLabel
     } else {
       nonsigGray = FALSE
     }
-    transitions2= merge(transitions2, transition_counts_medians, by = "Transitions")
+    # Only merge transition_counts_medians if TransitionCountMedian is not already present
+    if (!"TransitionCountMedian" %in% names(transitions2)) {
+      print("TransitionCountMedian is NOT in transitions2, merging")
+      transitions2= merge(transitions2, transition_counts_medians, by = "Transitions")
+    } else {
+      print("TransitionCountMedian is in transitions2")
+    }
     # transitions2$logMedianTransitionCount = log(transitions2$TransitionCountMedian)
   }
   
@@ -110,7 +127,11 @@ transition_plot <- function(df, trait1StateLabels = c("0","1"), trait2StateLabel
                    arrow = arrow(type = "closed", length = unit(0.01, "inches")), linejoin = "mitre") +    
       my_color_gradient +
       scale_size_continuous(range = c(4,9)) +
-      labs(y = "Transition Counts", x = "", color = "Mean Difference \nFrom Expected \nNumber of \nTransitions") +
+      labs(y = "Transition Counts", x = "", color = if(scale_countDiff_by_Expected) {
+        "Mean Difference \nFrom Expected \nScaled by Expected"
+      } else {
+        "Mean Difference \nFrom Expected \nNumber of \nTransitions"
+      }) +
       guides(size = FALSE) +
       geom_text(aes(label = stateLabel, x = x, y = y), size = 4, vjust = 0.5) +
       geom_text(aes(label = StateTimeLabel, x = x, y = y), size = 3, vjust = 4) +
@@ -131,11 +152,18 @@ transition_plot <- function(df, trait1StateLabels = c("0","1"), trait2StateLabel
         legend.position = "right"
       )
   } else {
+    # FIXED: Now using TransitionCountMedian for size instead of fixed size = 7
     transitionplot <- ggplot(data = transitions2) +
-      geom_segment(aes(x = from_x, y = from_y, xend = to_x, yend = to_y, color = transition_medians), 
-                   arrow = arrow(type = "closed", length = unit(0.01, "inches")), size = 7, linejoin = "mitre") +
+      geom_segment(aes(x = from_x, y = from_y, xend = to_x, yend = to_y, color = transition_medians, size = TransitionCountMedian), 
+                   arrow = arrow(type = "closed", length = unit(0.01, "inches")), linejoin = "mitre") +
       my_color_gradient +
-      labs(y = "Transition Counts", x = "", color = "Median Difference \nFrom Expected \nNumber of \nTransitions") +
+      scale_size_continuous(range = c(4,9)) +  # ADDED: Scale size by TransitionCountMedian
+      labs(y = "Transition Counts", x = "", color = if(scale_countDiff_by_Expected) {
+        "Median Difference \nFrom Expected \nScaled by Expected"
+      } else {
+        "Median Difference \nFrom Expected \nNumber of \nTransitions"
+      }) +
+      guides(size = FALSE) +  # ADDED: Hide size legend
       geom_text(aes(label = stateLabel, x = x, y = y), size = 4, vjust = 0.5) +
       geom_text(aes(label = StateTimeLabel, x = x, y = y), size = 3, vjust = 4) +
       #geom_text(aes(label = stateLabel, x = x, y = y), size = 4) +
@@ -156,6 +184,12 @@ transition_plot <- function(df, trait1StateLabels = c("0","1"), trait2StateLabel
   transitionplot
   
   if (nonsigGray) {
+    # Debug: Check if TransitionCountMedian exists
+    if (!"TransitionCountMedian" %in% names(transitions2)) {
+      warning("TransitionCountMedian not found in transitions2 for gray plot")
+      transitions2$TransitionCountMedian <- 5  # Set default
+    }
+    
     transitionplotGray <- ggplot() +
       # gray/non-significant arrows
       geom_segment(data = subset(transitions2, p.value >= 0.05), aes(x = from_x, y = from_y, xend = to_x, yend = to_y, size = TransitionCountMedian), arrow = arrow(type = "closed", length = unit(0.01, "inches")), arrow.fill=NULL, color = "gray", linejoin = "mitre") +
@@ -163,7 +197,11 @@ transition_plot <- function(df, trait1StateLabels = c("0","1"), trait2StateLabel
       geom_segment(data = subset(transitions2, p.value < 0.05), aes(x = from_x, y = from_y, xend = to_x, yend = to_y, color = transition_medians, size = TransitionCountMedian), arrow = arrow(type = "closed", length = unit(0.01, "inches")), arrow.fill = NULL, linejoin = "mitre") +
       my_color_gradient +
       scale_size_continuous(range = c(4,9)) +
-      labs(y = "Transition Counts", x = "", color = "Median Difference \nFrom Expected \nNumber of \nTransitions") +
+      labs(y = "Transition Counts", x = "", color = if(scale_countDiff_by_Expected) {
+        "Median Difference \nFrom Expected \nScaled by Expected"
+      } else {
+        "Median Difference \nFrom Expected \nNumber of \nTransitions"
+      }) +
       geom_text(data = transitions2, aes(label = stateLabel, x = x, y = y), size = 4, vjust = 0.5) +
       geom_text(data = transitions2, aes(label = StateTimeLabel, x = x, y = y), size = 3, vjust = 4) +
       geom_text(data = transitions2, aes(label = PercentTrendingLabel, x = to_x, y = to_y), size = 3) +

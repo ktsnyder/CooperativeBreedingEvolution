@@ -218,6 +218,7 @@ simplify_var_name <- function(var_name) {
     "Territory" = "Terr3",
     "Migration_AVONET" = "Migr",
     "logMass_AVONET" = "Mass",
+    "logMass_normalized" = "Mass",
     "PercentAbsLogWingDimorphism" = "WingDim",
     "logMaleFemalePlumageDiffAbs" = "PlumDim",
     "Centroid.Latitude_AVONET" = "Lat",
@@ -275,7 +276,8 @@ build_model_set_from_config <- function(config, data) {
   # Check if we should use the comprehensive 15-model set
   # This applies when we have 2 predictors and 1 control (standard analysis)
   if (length(config$predictors) == 2 && length(config$controls) == 1 && 
-      config$controls[1] %in% c("logMass_AVONET", "PercentAbsLogWingDimorphism", 
+      config$controls[1] %in% c("logMass_AVONET", "logMass_normalized", 
+                                "PercentAbsLogWingDimorphism", 
                                 "logMaleFemalePlumageDiffAbs")) {
     
     # Use the comprehensive 15-model formula builder

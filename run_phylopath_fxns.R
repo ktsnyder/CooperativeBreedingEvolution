@@ -405,6 +405,7 @@ run_CB_FS_Terr_phylopath <- function(dfIn, tree, female_song_var, coop_breeding_
     "MASS" = mass_var
   )
   
+  trait_set = paste(female_song_var, coop_breeding_var, territoriality_var, mass_var)
   
   #### Model sets ----
   model_patterns <- list(
@@ -673,6 +674,7 @@ run_CB_FS_Terr_phylopath <- function(dfIn, tree, female_song_var, coop_breeding_
   
   
   outlist <- list(
+    trait_set = trait_set,
     var_map = var_map,
     result = result,
     summary_plot = s_plot,

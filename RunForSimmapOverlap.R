@@ -123,3 +123,40 @@ result <- runSimmapOverlapAnalysis(
   other_label = ""
 )
 
+
+#### Terr12vs3 with coop & FS - no randomization of Terr simmaps 8/5/2025 ----
+result <- runSimmapOverlapAnalysis(
+  trait1 = "Territory_12vs3",
+  trait2 = "HighConfidence_Coop",
+  nsims_real = 500,
+  nsims_dummy = 500,
+  tree_file = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex",
+  data_file = "Data_R_2025-07-23.csv",
+  calculate_transitions = FALSE,
+  plot_transitions = FALSE,
+  save_outputs = TRUE,
+  use_pregenerated_simmaps = TRUE,  # Added - tells it to use existing files
+  trait1_real_simmaps_file = "Simmap_Overlap_Outputs/Territory_12vs3_vs_HighConfidence_Coop_500_500_20250701_121109/simmaps/Territory_12vs3_HighConfidence_Coop_simmaps_REAL_500.rds",
+  trait2_real_simmaps_file = "Simmap_Overlap_Outputs/Territory_12vs3_vs_HighConfidence_Coop_500_500_20250701_121109/simmaps/HighConfidence_Coop_Territory_12vs3_simmaps_REAL_500.rds",
+  trait1_dummy_simmaps_file = "Simmap_Overlap_Outputs/Territory_12vs3_vs_HighConfidence_Coop_500_500_20250701_121109/simmaps/Territory_12vs3_HighConfidence_Coop_simmaps_REAL_500.rds",
+  trait2_dummy_simmaps_file = "Simmap_Overlap_Outputs/Territory_12vs3_vs_HighConfidence_Coop_500_500_20250701_121109/simmaps/HighConfidence_Coop_Territory_12vs3_simmaps_DUMMY_500.rds",
+  other_label = "OnlyCBDummy_pregeneratedSimmaps_NoTransitions" 
+)
+
+result <- runSimmapOverlapAnalysis(
+  trait1 = "Territory_12vs3",
+  trait2 = "FemaleSong_Agg01",
+  nsims_real = 500,
+  nsims_dummy = 500,
+  tree_file = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex",
+  data_file = "Data_R_2025-07-23.csv",
+  calculate_transitions = FALSE,
+  plot_transitions = FALSE,
+  save_outputs = TRUE,
+  use_pregenerated_simmaps = TRUE,  # Added - tells it to use existing files
+  trait1_real_simmaps_file = "Simmap_Overlap_Outputs/Territory_12vs3_vs_FemaleSong_Agg01_500_500_20250701_203938/simmaps/Territory_12vs3_FemaleSong_Agg01_simmaps_REAL_500.rds",
+  trait2_real_simmaps_file = "Simmap_Overlap_Outputs/Territory_12vs3_vs_FemaleSong_Agg01_500_500_20250701_203938/simmaps/FemaleSong_Agg01_Territory_12vs3_simmaps_REAL_500.rds",
+  trait1_dummy_simmaps_file = "Simmap_Overlap_Outputs/Territory_12vs3_vs_FemaleSong_Agg01_500_500_20250701_203938/simmaps/Territory_12vs3_FemaleSong_Agg01_simmaps_REAL_500.rds",
+  trait2_dummy_simmaps_file = "Simmap_Overlap_Outputs/Territory_12vs3_vs_FemaleSong_Agg01_500_500_20250701_203938/simmaps/FemaleSong_Agg01_Territory_12vs3_simmaps_DUMMY_500.rds",
+  other_label = "OnlyFSDummy_pregeneratedSimmaps_NoTransitions" 
+)

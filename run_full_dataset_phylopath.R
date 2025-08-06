@@ -10,6 +10,13 @@ library(ggplot2)
 # Source the core phylopath functions
 source("run_phylopath_fxns.R")
 
+female_song_var = "FemaleSong_Agg01"
+coop_breeding_var = "HighConfidence_Coop"
+territoriality_var = "Territory_12vs3"
+mass_var = "logMass_AVONET"
+
+all_traits_phylopath_label <- paste(female_song_var, coop_breeding_var, territoriality_var, mass_var, sep = "_")
+
 # Load data
 cat("Loading data...\n")
 data <- read.csv("Data_R_2025-06-09.csv", stringsAsFactors = FALSE)
@@ -20,18 +27,18 @@ cat("Running phylopath analysis on full dataset...\n")
 result <- run_CB_FS_Terr_phylopath(
   dfIn = data,
   tree = tree,
-  female_song_var = "FemaleSong_Agg01",
-  coop_breeding_var = "HighConfidence_Coop",
-  territoriality_var = "TerritorialityWeakVsStrong",
-  mass_var = "logMass_AVONET",
+  female_song_var = female_song_var,
+  coop_breeding_var = coop_breeding_var,
+  territoriality_var = territoriality_var,
+  mass_var = mass_var,
   plots2pdf = TRUE,
   plots2png = TRUE,
-  output_dir = "Outputs/PhylopathPlots"
+  output_dir = file.path("Outputs","PhylopathPlots", all_traits_phylopath_label)
 )
 
 # Save the result object
 cat("Saving phylopath result object...\n")
-saveRDS(result, "phylopath_full_dataset_result.rds")
+saveRDS(result, file.path("Outputs","PhylopathPlots",paste0("phylopath_full_dataset_result_", all_traits_phylopath_label, ".rds")))
 
 # Create plots
 cat("Creating plots...\n")
@@ -41,8 +48,7 @@ cond_avg <- phylopath::average(result$result, cut_off = 2, avg_method = "conditi
 
 # Create DAG plot
 phylopath_map_positions <- data.frame(
-  name = c("FemaleSong_Agg01", "HighConfidence_Coop", 
-           "TerritorialityWeakVsStrong", "logMass_AVONET"),
+  name = c(female_song_var, coop_breeding_var, territoriality_var, mass_var),
   x = c(8, 2, 5, 5),
   y = c(9, 9, 5, 1),
   stringsAsFactors = FALSE
@@ -58,7 +64,7 @@ dag_plot <- plot(cond_avg,
         plot.margin = margin(30, 30, 30, 30)) +
   coord_cartesian(xlim = c(-1, 11), ylim = c(-1, 11), expand = TRUE)
 
-ggsave("phylopath_full_dataset_dag.png", dag_plot, width = 8, height = 8, dpi = 300)
+ggsave(file.path("Outputs","PhylopathPlots",paste0("phylopath_full_dataset_dag_", all_traits_phylopath_label, ".png")), dag_plot, width = 8, height = 8, dpi = 300)
 
 # Extract path coefficients for reference
 cat("\nConditional averaged path coefficients:\n")
@@ -69,7 +75,7 @@ print(coef_matrix)
 coef_df <- as.data.frame(as.table(coef_matrix))
 names(coef_df) <- c("From", "To", "Coefficient")
 coef_df <- coef_df[!is.na(coef_df$Coefficient), ]
-write.csv(coef_df, "phylopath_full_dataset_coefficients.csv", row.names = FALSE)
+write.csv(coef_df, file.path("Outputs","PhylopathPlots",paste0("phylopath_full_dataset_coefficients_", all_traits_phylopath_label,".csv")), row.names = FALSE)
 
 cat("\nFull dataset phylopath analysis complete!\n")
 cat("Results saved to:\n")

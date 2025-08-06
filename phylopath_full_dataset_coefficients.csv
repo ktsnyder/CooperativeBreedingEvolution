@@ -1,0 +1,17 @@
+"From","To","Coefficient"
+"logMass_AVONET","logMass_AVONET",0
+"TerritorialityWeakVsStrong","logMass_AVONET",0
+"HighConfidence_Coop","logMass_AVONET",0
+"FemaleSong_Agg01","logMass_AVONET",0
+"logMass_AVONET","TerritorialityWeakVsStrong",0.0697172970871699
+"TerritorialityWeakVsStrong","TerritorialityWeakVsStrong",0
+"HighConfidence_Coop","TerritorialityWeakVsStrong",0
+"FemaleSong_Agg01","TerritorialityWeakVsStrong",0
+"logMass_AVONET","HighConfidence_Coop",0.0522664289378485
+"TerritorialityWeakVsStrong","HighConfidence_Coop",0.354173287970722
+"HighConfidence_Coop","HighConfidence_Coop",0
+"FemaleSong_Agg01","HighConfidence_Coop",0.391037857038106
+"logMass_AVONET","FemaleSong_Agg01",0.287704368316732
+"TerritorialityWeakVsStrong","FemaleSong_Agg01",1.21476305891789
+"HighConfidence_Coop","FemaleSong_Agg01",0.555414311028037
+"FemaleSong_Agg01","FemaleSong_Agg01",0

@@ -25,12 +25,20 @@ find_or_create_full_dataset_result <- function(trait_set, run_if_missing = FALSE
   # Get label for filename (full trait set with underscores)
   trait_label <- get_trait_set_label(trait_set)
   
-  # Define possible RDS filenames
+  # Define possible RDS filenames and locations
   rds_files <- c(
-    # New format with full trait set in filename
-    paste0("phylopath_full_dataset_", trait_label, "_result.rds"),
-    # Legacy format for backward compatibility
-    "phylopath_full_dataset_result.rds"
+    # New format with full trait set in filename in Outputs/PhylopathPlots
+    file.path("Outputs", "PhylopathPlots", paste0("phylopath_full_dataset_result_", trait_label, ".rds")),
+    # Also check without "_result" suffix
+    file.path("Outputs", "PhylopathPlots", paste0("phylopath_full_dataset_", trait_label, ".rds")),
+    # New format with full trait set in filename in Outputs/PhylopathPlots, trait_set possibly with spaces
+    file.path("Outputs", "PhylopathPlots", paste0("phylopath_full_dataset_result_", trait_set, ".rds")),
+    # Also check without "_result" suffix, trait_set possibly with spaces
+    file.path("Outputs", "PhylopathPlots", paste0("phylopath_full_dataset_", trait_set, ".rds")),
+    # Legacy format in current directory
+    "phylopath_full_dataset_result.rds",
+    # Legacy format with trait set in current directory
+    paste0("phylopath_full_dataset_", trait_label, "_result.rds")
   )
   
   # Check for existing RDS files

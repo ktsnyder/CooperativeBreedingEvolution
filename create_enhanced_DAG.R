@@ -1,11 +1,13 @@
 #' Create an enhanced DAG plot with better styling
+#' 7/23/2025 - added ability to set different variables, use those variable names throughout fxn
 #'
 #' @param phylopath_result Result from phylopath analysis or path to RDS file
 #' @param output_file Path for saving the figure
 #' @param title Title for the plot
 create_enhanced_dag <- function(phylopath_result = NULL,
-                                output_file = "Outputs/Figures/enhanced_dag.pdf",
-                                title = "Phylogenetic Path Analysis") {
+                                output_file = "Outputs/PhylopathPlots/enhanced_dag.pdf",
+                                title = "Phylogenetic Path Analysis",
+                                female_song_var = "FemaleSong_Agg01", coop_breeding_var = "HighConfidence_Coop", territoriality_var = "TerritorialityWeakVsStrong", mass_var = "logMass_AVONET") {
   
   library(ggplot2)
   library(ggrepel)
@@ -26,8 +28,8 @@ create_enhanced_dag <- function(phylopath_result = NULL,
   
   # Define node positions and labels - spread out top nodes more
   nodes <- data.frame(
-    name = c("logMass_AVONET", "TerritorialityWeakVsStrong", 
-             "HighConfidence_Coop", "FemaleSong_Agg01"),
+    name = c(mass_var, territoriality_var, 
+             coop_breeding_var, female_song_var),
     label = c("Body Mass", "Territoriality", 
               "Cooperative\nBreeding", "Female Song"),
     x = c(5, 5, 1, 9),  # Moved CB left and FS right
@@ -93,7 +95,7 @@ create_enhanced_dag <- function(phylopath_result = NULL,
         # Horizontal bidirectional edge (CB <-> FS)
         # The CB->FS arrow curves upward, so put its label on the upper curve
         # The FS->CB arrow curves downward, so put its label on the lower curve
-        if (edges$from[idx[1]] == "HighConfidence_Coop") {
+        if (edges$from[idx[1]] == coop_breeding_var) {
           edges$label_offset[idx[1]] <- 0.6   # On upper curve for CB->FS (0.56)
           edges$label_offset[idx[2]] <- -0.6  # On lower curve for FS->CB (0.39)
         } else {
@@ -156,8 +158,8 @@ create_enhanced_dag <- function(phylopath_result = NULL,
       pair_edges <- bidirectional_edges[bidirectional_edges$edge_id == edge_id, ]
       if (nrow(pair_edges) == 2) {
         # Find which edge is CB->FS and which is FS->CB
-        cb_to_fs_idx <- which(pair_edges$from == "HighConfidence_Coop")
-        fs_to_cb_idx <- which(pair_edges$from == "FemaleSong_Agg01")
+        cb_to_fs_idx <- which(pair_edges$from == coop_breeding_var)
+        fs_to_cb_idx <- which(pair_edges$from == female_song_var)
         
         # Draw CB->FS arrow curving upward
         if (length(cb_to_fs_idx) > 0) {
@@ -199,27 +201,27 @@ create_enhanced_dag <- function(phylopath_result = NULL,
     geom_label(data = edges[!edges$is_bidirectional, ],
                aes(x = mid_x, y = mid_y, 
                    label = sprintf("%.2f", coefficient)),
-               size = 3,
+               size = 5,
                fill = "white",
                label.padding = unit(0.12, "lines"),
-               label.size = 0.1) +
+               label.size = 0.4) +
     # Then add labels for bidirectional edges with proper offset
     geom_label(data = edges[edges$is_bidirectional, ],
                aes(x = label_x, y = label_y, 
                    label = sprintf("%.2f", coefficient)),
-               size = 3,
+               size = 5,
                fill = "white",
                label.padding = unit(0.12, "lines"),
-               label.size = 0.1) +
+               label.size = 0.4) +
     # Draw nodes - larger circles
     geom_point(data = nodes,
                aes(x = x, y = y),
-               size = 30,  # Increased from 25
+               size = 40,  # Increased from 25
                color = "#2E86AB") +
     # Add node labels - smaller text
     geom_text(data = nodes,
               aes(x = x, y = y, label = label),
-              size = 3.5,  # Reduced from 4
+              size = 4.9,  # Reduced from 4
               color = "white"#, fontface = "bold"
               ) +
     # Styling
@@ -228,11 +230,11 @@ create_enhanced_dag <- function(phylopath_result = NULL,
     scale_color_manual(values = c("FALSE" = "#E74C3C", "TRUE" = "#2E86AB"),
                        guide = "none") +
     labs(title = title,
-         subtitle = bquote(paste("n = ", .(phylopath_result$nSpecies), " species | Conditional averaging (", Delta, "CICc < 2)"))) +
+         subtitle = bquote(paste("     n = ", .(phylopath_result$nSpecies), " species | Conditional averaging (", Delta, "CICc < 2)"))) +
     theme_void() +
-    theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
-          plot.subtitle = element_text(size = 12, hjust = 0.5),
-          plot.margin = margin(20, 20, 20, 20)) +
+    theme(plot.title = element_text(size = 19, face = "bold", hjust = 0), #hjust was 0.5
+          plot.subtitle = element_text(size = 18, hjust = 0), #hjust was 0.5
+          plot.margin = margin(20, 10, 20, 10)) +
     coord_fixed(ratio = 1, xlim = c(0, 10), ylim = c(0, 10))
   
   # Save the plot
@@ -243,8 +245,8 @@ create_enhanced_dag <- function(phylopath_result = NULL,
     }
     
     ggsave(output_file, p, width = 8, height = 8, dpi = 600)
-    ggsave(gsub(".pdf", ".png", output_file), p, 
-           width = 8, height = 8, dpi = 300)
+    #ggsave(gsub(".pdf", ".png", output_file), p, 
+    #       width = 8, height = 8, dpi = 300)
   }
   
   return(p)

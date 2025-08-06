@@ -1,5 +1,6 @@
 # Generate phylopath bias robustness figures for both trait combinations
-# This script creates publication-ready figures for your analysis
+# Uses already-generated "detailed_models" results files
+# This script creates publication-ready figures for the phylopath analysis with downsampling
 
 # Load required libraries
 library(ggplot2)
@@ -57,6 +58,7 @@ for (trait_name in names(trait_sets)) {
     cat("\nCreating model consistency heatmap...\n")
     heatmap <- create_bias_model_consistency_heatmap(
       bias_results_list = results,
+      top_n = 20,
       trait_set = trait_set,
       title = paste0("Model Consistency Across Bias Corrections\n", 
                      "(", trait_name, ", n=", n_iterations_to_use, " iterations)")
@@ -64,7 +66,7 @@ for (trait_name in names(trait_sets)) {
     cat("✓ Heatmap saved\n")
     
     # 2. Create forest plots for important rates
-    rates_to_plot <- c("COOP->FS", "TERR->FS", "TERR->COOP")
+    rates_to_plot <- c("COOP->FS", "FS->COOP", "TERR->FS", "TERR->COOP", "MASS->COOP", "MASS->FS", "MASS->TERR")
     
     cat("\nCreating forest plots...\n")
     for (rate in rates_to_plot) {

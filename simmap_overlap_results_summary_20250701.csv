@@ -1,0 +1,5 @@
+"FolderName","trait1","trait2","nsims_real","nsims_dummy","NumberOfSpecies","Empirical_pval","FractionDummyLessThanMedianReal_0_0","FractionDummyLessThanMedianReal_0_1","FractionDummyLessThanMedianReal_1_0","FractionDummyLessThanMedianReal_1_1"
+"TerritorialityWeakVsStrong_vs_FemaleSong_Agg01_500_500_BothDummy_20250701_015401","TerritorialityWeakVsStrong","FemaleSong_Agg01",500,500,919,NA,NA,NA,NA,NA
+"TerritorialityWeakVsStrong_vs_FemaleSong_Agg01_500_500_OnlyFSDummy_pregeneratedSimmaps_NoTransitions_20250701_030248","TerritorialityWeakVsStrong","FemaleSong_Agg01",500,500,919,NA,NA,NA,NA,NA
+"TerritorialityWeakVsStrong_vs_HighConfidence_Coop_500_500_BothDummy_20250701_030906","TerritorialityWeakVsStrong","HighConfidence_Coop",500,500,2012,NA,NA,NA,NA,NA
+"TerritorialityWeakVsStrong_vs_HighConfidence_Coop_500_500_OnlyCBDummy_pregeneratedSimmaps_NoTransitions_20250701_111824","TerritorialityWeakVsStrong","HighConfidence_Coop",500,500,2012,NA,NA,NA,NA,NA

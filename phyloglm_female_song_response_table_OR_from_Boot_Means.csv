@@ -1,0 +1,15 @@
+Cooperative_Breeding_Classifier,Response_Variable,n_species,Intercept,Cooperative_Breeding,TerritorialityWeakVsStrong,logMass_normalized,CBxTerrWS
+MeanCoopTie2Noncoop,Female Song,902,0.653^,4.370*,3.683***,1.411***,0.289*
+MeanCoopTie2Coop,Female Song,902,0.654^,5.371***,3.567***,1.474*,0.222**
+MeanCoopOmitTies,Female Song,895,0.631*,4.655*,3.642***,1.466***,0.272*
+AnyCoopEqualsCoop,Female Song,902,0.534*,9.486***,4.477***,1.454***,0.110***
+AnyNoncoopEqualsNoncoop,Female Song,902,0.663*,3.612*,3.637***,1.387*,0.379^
+BiagoliniCoop,Female Song,112,1.556,2001.560,1.544,1.506,0.001
+DowningCoop,Female Song,103,0.405,0.883,0.503,1.103,1976443.470*
+CockburnCoop,Female Song,650,0.597*,4.334**,4.952***,1.220^,0.290*
+CockburnInferred,Female Song,864,0.648^,4.251***,3.868***,1.491**,0.256**
+HighConf_Coop_DefaultToCockburnInferred,Female Song,904,0.630*,4.941***,3.787***,1.490***,0.219**
+Griesser2017Coop,Female Song,424,0.744,2.534,3.812***,1.776**,0.541
+DaleCoop,Female Song,681,0.664^,6.738***,4.095***,1.198,0.136***
+CornwallisCoop,Female Song,634,0.707,2.112^,3.978***,1.190,1.356
+JetzCoopInclCockburn,Female Song,888,0.640*,4.706***,3.906***,1.477***,0.225*

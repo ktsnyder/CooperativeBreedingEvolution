@@ -14,15 +14,19 @@ library(tidyr)
 #' @param trait_set Character string specifying which trait combination to extract
 #'   Default is "FemaleSong_Agg01 HighConfidence_Coop TerritorialityWeakVsStrong logMass_AVONET"
 #' @param n_iterations Optional filter for number of iterations (e.g., 500, 10)
+#' @param verbose Logical - whether to print debug information about file searches
 #' @return List of data frames with processed results for each bias correction
 extract_phylopath_results <- function(results_dir = "Outputs", 
                                       trait_set = NULL,
-                                      n_iterations = NULL) {
+                                      n_iterations = NULL,
+                                      verbose = FALSE) {
   
   # Set default trait set for backward compatibility
   if (is.null(trait_set)) {
     trait_set <- "FemaleSong_Agg01 HighConfidence_Coop TerritorialityWeakVsStrong logMass_AVONET"
   }
+  
+  n_iterations_input = n_iterations # because we need to have n_iterations be NULL for JackknifeSpecies but then reset n_iterations back to the input for all the other ones
   
   # Define the bias corrections we're looking for
   bias_types <- list(
@@ -43,6 +47,8 @@ extract_phylopath_results <- function(results_dir = "Outputs",
   for (bias_name in names(bias_types)) {
     pattern <- bias_types[[bias_name]]
     
+    n_iterations = n_iterations_input # resets n_iterations to the input value if JackknifeSpecies was the previous bias_type
+    
     if (is.null(pattern)) {
       # Handle full dataset case - look for non-downsampled results
       # For now, we'll skip this and handle it separately
@@ -51,32 +57,79 @@ extract_phylopath_results <- function(results_dir = "Outputs",
     
     # Determine search directories based on bias type
     if (pattern == "JackknifeSpecies") {
-      # JackknifeSpecies results are in PhylopathJackknife
-      search_dirs <- file.path(results_dir, "PhylopathJackknife", paste0(trait_set, " models"))
+      # JackknifeSpecies results are in PhylopathJackknife subdirectories
+      search_dirs <- c(
+        file.path(results_dir, "PhylopathJackknife", paste0(trait_set, " models")),
+        # Also check without "models" suffix in case directory structure varies
+        file.path(results_dir, "PhylopathJackknife", trait_set),
+        # Check with underscores instead of spaces
+        file.path(results_dir, "PhylopathJackknife", paste0(gsub(" ", "_", trait_set), " models")),
+        file.path(results_dir, "PhylopathJackknife", gsub(" ", "_", trait_set))
+      )
+      n_iterations = NULL
     } else {
       # Regular downsampling results are in PhylopathDownsampled
-      search_dirs <- file.path(results_dir, "PhylopathDownsampled", paste0(trait_set, " models"))
+      search_dirs <- c(
+        file.path(results_dir, "PhylopathDownsampled", paste0(trait_set, " models")),
+        # Also check without "models" suffix
+        file.path(results_dir, "PhylopathDownsampled", trait_set),
+        # Check with underscores instead of spaces
+        file.path(results_dir, "PhylopathDownsampled", paste0(gsub(" ", "_", trait_set), " models")),
+        file.path(results_dir, "PhylopathDownsampled", gsub(" ", "_", trait_set))
+      )
     }
     
     # Find the detailed models file
     detailed_file <- NULL
+    if (verbose) {
+      cat("\nSearching for", bias_name, "(", pattern, ")\n")
+    }
+    
     for (search_dir in search_dirs) {
+      if (verbose) {
+        cat("  Checking directory:", search_dir, "\n")
+      }
+      
       if (dir.exists(search_dir)) {
         # Create pattern for finding files
         file_pattern <- paste0("detailed_models_", pattern, ".*\\.csv$")
         
         # Add n_iterations filter if specified
         if (!is.null(n_iterations)) {
-          file_pattern <- paste0("detailed_models_", pattern, "_", n_iterations, "_.*\\.csv$")
+          # Try multiple patterns for iteration specification
+          file_patterns <- c(
+            paste0("detailed_models_", pattern, "_", n_iterations, "_.*\\.csv$"),
+            paste0("detailed_models_", pattern, "_n", n_iterations, "_.*\\.csv$")
+          )
+        } else {
+          file_patterns <- file_pattern
         }
         
-        found_files <- list.files(search_dir, 
-                                  pattern = file_pattern,
-                                  full.names = TRUE, recursive = FALSE)
+        # Try each pattern
+        for (fp in file_patterns) {
+          if (verbose) {
+            cat("    Looking for pattern:", fp, "\n")
+          }
+          
+          found_files <- list.files(search_dir, 
+                                    pattern = fp,
+                                    full.names = TRUE, recursive = FALSE)
+          
+          if (length(found_files) > 0) {
+            detailed_file <- found_files
+            if (verbose) {
+              cat("    Found", length(found_files), "file(s)\n")
+            }
+            break
+          }
+        }
         
-        if (length(found_files) > 0) {
-          detailed_file <- found_files
+        if (!is.null(detailed_file) && length(detailed_file) > 0) {
           break
+        }
+      } else {
+        if (verbose) {
+          cat("    Directory does not exist\n")
         }
       }
     }
@@ -102,12 +155,26 @@ extract_phylopath_results <- function(results_dir = "Outputs",
   
   for (dim_dir in dimorphism_dirs) {
     dim_path <- file.path(results_dir, "PhylopathDownsampled", paste0(trait_set, " models"), dim_dir)
+    
+    if (verbose) {
+      cat("\nChecking for", dim_dir, "in:", dim_path, "\n")
+    }
+    
     if (dir.exists(dim_path)) {
       # Find all detailed_models files in subdirectory
       dim_files <- list.files(dim_path, 
                              pattern = "detailed_models.*\\.csv$",
                              full.names = TRUE,
                              recursive = FALSE)
+      
+      if (verbose && length(dim_files) > 0) {
+        cat("  Found", length(dim_files), "file(s)\n")
+      }
+      
+      # Filter files based on n_iterations if specified
+      if (!is.null(n_iterations)) {
+        dim_files <- dim_files[grepl(paste0("_", n_iterations, "_|_n", n_iterations, "_"), dim_files)]
+      }
       
       for (dim_file in dim_files) {
         # Extract bias type from filename more cleanly
@@ -147,7 +214,7 @@ extract_phylopath_results <- function(results_dir = "Outputs",
 #' @param bias_results_list List containing results from different bias corrections
 #' @param output_file Path for saving the figure
 create_bias_robustness_figure <- function(bias_results_list = NULL, 
-                                          output_file = "Outputs/Figures/bias_robustness_figure.pdf") {
+                                          output_file = "Outputs/PhylopathFigures/bias_robustness_figure.pdf") {
   
   # If no results provided, extract from default location
   if (is.null(bias_results_list)) {
@@ -993,7 +1060,7 @@ get_species_count <- function(detailed_models) {
 #' @param output_file Path for saving the figure  
 create_all_paths_coefficient_plot <- function(bias_results_list = NULL,
                                             paths_to_show = c("CB_to_FS", "TERR_to_FS", 
-                                                            "TERR_to_CB", "FS_to_CB"),
+                                                            "TERR_to_CB", "FS_to_CB", "MASS_to_FS", "MASS_to_CB", "MASS_to_TERR"),
                                             output_file = "Outputs/Figures/all_paths_coefficients.pdf") {
   
   # If no results provided, extract from default location
@@ -1161,118 +1228,12 @@ create_model_selection_plot <- function(detailed_models,
   return(model_plot)
 }
 
-#' Create an improved forest plot with species counts
+
+#### Moved: Create an improved forest plot with species counts ----
 #'
-#' @param bias_results_list List containing results from different bias corrections
-#' @param reference_value Reference coefficient value from full dataset
-#' @param output_file Path for saving the figure
-create_forest_plot_with_counts <- function(bias_results_list = NULL,
-                                         reference_value = 0.56,
-                                         output_file = "Outputs/Figures/forest_plot_with_counts.pdf") {
-  
-  # If no results provided, extract from default location
-  if (is.null(bias_results_list)) {
-    bias_results_list <- extract_phylopath_results()
-  }
-  
-  # Extract coefficients and species counts
-  coef_summary <- data.frame(
-    Bias_Correction = character(),
-    Mean_Coefficient = numeric(),
-    CI_Lower = numeric(),
-    CI_Upper = numeric(),
-    N_Iterations = integer(),
-    N_Species = integer(),
-    stringsAsFactors = FALSE
-  )
-  
-  for (bias_name in names(bias_results_list)) {
-    result <- bias_results_list[[bias_name]]
-    
-    if (!is.null(result$detailed_models)) {
-      # Find CB→FS coefficient column
-      cb_fs_columns <- c(
-        grep("Coop.*to.*FemaleSong.*est", names(result$detailed_models), value = TRUE),
-        grep("FemaleSong.*to.*Coop.*est", names(result$detailed_models), value = TRUE)
-      )
-      cb_fs_columns <- cb_fs_columns[grepl("Coop.*to.*FemaleSong", cb_fs_columns)]
-      
-      if (length(cb_fs_columns) > 0) {
-        cb_fs_col <- cb_fs_columns[1]
-        
-        # Extract coefficients
-        cb_fs_coef <- result$detailed_models %>%
-          filter(!is.na(.data[[cb_fs_col]])) %>%
-          group_by(seed) %>%
-          summarise(
-            coef = mean(.data[[cb_fs_col]], na.rm = TRUE),
-            n_species = first(nSpecies),
-            .groups = "drop"
-          )
-        
-        if (nrow(cb_fs_coef) > 0) {
-          coef_summary <- rbind(coef_summary, data.frame(
-            Bias_Correction = bias_name,
-            Mean_Coefficient = mean(cb_fs_coef$coef),
-            CI_Lower = quantile(cb_fs_coef$coef, 0.025),
-            CI_Upper = quantile(cb_fs_coef$coef, 0.975),
-            N_Iterations = length(unique(cb_fs_coef$seed)),
-            N_Species = round(mean(cb_fs_coef$n_species, na.rm = TRUE)),
-            stringsAsFactors = FALSE
-          ))
-        }
-      }
-    }
-  }
-  
-  # Create the forest plot
-  forest_plot <- ggplot(coef_summary, 
-                       aes(x = Mean_Coefficient, 
-                           y = reorder(Bias_Correction, Mean_Coefficient))) +
-    geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
-    geom_vline(xintercept = reference_value, linetype = "dotted", 
-               color = "#2E86AB", linewidth = 1.2) +
-    geom_errorbarh(aes(xmin = CI_Lower, xmax = CI_Upper), 
-                   height = 0.2, linewidth = 1) +
-    geom_point(size = 4, color = "#2E86AB") +
-    geom_text(aes(label = sprintf("%.3f", Mean_Coefficient)), 
-              vjust = -1.2, size = 3.5) +
-    geom_text(aes(label = paste0("n = ", N_Species)), 
-              vjust = 2.5, size = 3, color = "gray40") +
-    scale_x_continuous(limits = c(0, 0.8), breaks = seq(0, 0.8, 0.2)) +
-    labs(
-      title = "Cooperative Breeding → Female Song Path Coefficients",
-      subtitle = "Mean and 95% CI across downsampling iterations",
-      x = "Path Coefficient",
-      y = NULL
-    ) +
-    annotate("text", x = reference_value + 0.02, y = 0.5, 
-             label = "Full dataset", 
-             color = "#2E86AB", size = 3, hjust = 0) +
-    theme_minimal() +
-    theme(
-      plot.title = element_text(size = 14, face = "bold"),
-      plot.subtitle = element_text(size = 11),
-      axis.text = element_text(size = 10),
-      axis.title = element_text(size = 11),
-      panel.grid.major.y = element_blank(),
-      plot.margin = margin(10, 20, 10, 10)
-    )
-  
-  # Save the plot
-  if (!is.null(output_file)) {
-    output_dir <- dirname(output_file)
-    if (!dir.exists(output_dir)) {
-      dir.create(output_dir, recursive = TRUE)
-    }
-    
-    ggsave(output_file, forest_plot, width = 8, height = 6, dpi = 300)
-    ggsave(gsub(".pdf", ".png", output_file), forest_plot, 
-           width = 8, height = 6, dpi = 300)
-  }
-  
-  return(forest_plot)
-}
+#' Function create_forest_plot_with_counts() is now in create_forest_plot_with_counts_updated.R
+
+
 
 #' Create final publication-ready robustness figure
 #'

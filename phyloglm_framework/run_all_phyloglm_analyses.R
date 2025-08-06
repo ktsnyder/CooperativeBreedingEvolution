@@ -17,9 +17,9 @@ source("phyloglm_framework/config_builder.R")
 source("phyloglm_framework/visualization_framework.R")
 
 # Set paths
-data_file <- "Data_R_2025-06-09.csv"
+data_file <- "Data_R_2025-07-23.csv"
 tree_file <- "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
-output_dir <- "Outputs/PhyloglmResults"
+output_dir <- "Outputs/PhyloglmResults/CompareMassNorm2"
 
 # Load data and tree
 cat("Loading data and tree...\n")
@@ -32,20 +32,70 @@ cat("\nCreating comprehensive analysis configurations...\n")
 configs <- list()
 
 # 1. BASIC ANALYSES (with logMass control)
-# FS vs CB with territoriality
-configs$fs_cb_terr_mass <- create_analysis_config(
+# FS vs CB with territoriality weak strong
+configs$fs_cb_terrws_mass <- create_analysis_config(
   response = "FemaleSong_Agg01",
   predictors = c("HighConfidence_Coop", "TerritorialityWeakVsStrong"),
   controls = c("logMass_AVONET"),
   name = "FS_CB_TerrWS_Mass"
 )
 
-# CB vs FS with territoriality (reverse)
-configs$cb_fs_terr_mass <- create_analysis_config(
+# CB vs FS with territoriality weak strong (reverse)
+configs$cb_fs_terrws_mass <- create_analysis_config(
   response = "HighConfidence_Coop",
   predictors = c("FemaleSong_Agg01", "TerritorialityWeakVsStrong"),
   controls = c("logMass_AVONET"),
   name = "CB_FS_TerrWS_Mass"
+)
+
+# FS vs CB with territoriality year round
+configs$fs_cb_terr3_mass <- create_analysis_config(
+  response = "FemaleSong_Agg01",
+  predictors = c("HighConfidence_Coop", "Territory_12vs3"),
+  controls = c("logMass_AVONET"),
+  name = "FS_CB_Terr3_Mass"
+)
+
+# CB vs FS with territoriality year round (reverse)
+configs$cb_fs_terr3_mass <- create_analysis_config(
+  response = "HighConfidence_Coop",
+  predictors = c("FemaleSong_Agg01", "Territory_12vs3"),
+  controls = c("logMass_AVONET"),
+  name = "CB_FS_Terr3_Mass"
+)
+
+
+# 1B. BASIC ANALYSES (with logMass_normalized control)
+# FS vs CB with territoriality weak strong
+configs$fs_cb_terrws_massnorm <- create_analysis_config(
+  response = "FemaleSong_Agg01",
+  predictors = c("HighConfidence_Coop", "TerritorialityWeakVsStrong"),
+  controls = c("logMass_normalized"),
+  name = "FS_CB_TerrWS_MassNorm"
+)
+
+# CB vs FS with territoriality weak strong (reverse)
+configs$cb_fs_terrws_massnorm <- create_analysis_config(
+  response = "HighConfidence_Coop",
+  predictors = c("FemaleSong_Agg01", "TerritorialityWeakVsStrong"),
+  controls = c("logMass_normalized"),
+  name = "CB_FS_TerrWS_MassNorm"
+)
+
+# FS vs CB with territoriality year round
+configs$fs_cb_terr3_massnorm <- create_analysis_config(
+  response = "FemaleSong_Agg01",
+  predictors = c("HighConfidence_Coop", "Territory_12vs3"),
+  controls = c("logMass_normalized"),
+  name = "FS_CB_Terr3_MassNorm"
+)
+
+# CB vs FS with territoriality year round (reverse)
+configs$cb_fs_terr3_massnorm <- create_analysis_config(
+  response = "HighConfidence_Coop",
+  predictors = c("FemaleSong_Agg01", "Territory_12vs3"),
+  controls = c("logMass_normalized"),
+  name = "CB_FS_Terr3_MassNorm"
 )
 
 # REMOVED 3-state territory analysis as requested
@@ -127,8 +177,7 @@ for (name in names(configs)) {
 # Ask for confirmation
 cat("\nThis will run", length(configs), "analyses, each with 15 models.\n")
 cat("Total models to fit:", length(configs) * 15, "\n")
-cat("Proceed? (y/n): ")
-response <- readline()
+response <- "y"
 
 if (tolower(response) == "y") {
   # Run batch analysis
@@ -139,7 +188,7 @@ if (tolower(response) == "y") {
     data = data,
     tree = tree,
     output_dir = output_dir,
-    bootstrap_n = 100,  # Adjust as needed
+    bootstrap_n = 500,  # Adjust as needed
     parallel = FALSE,   # Set to TRUE for faster processing
     save_intermediate = TRUE
   )

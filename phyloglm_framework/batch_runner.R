@@ -552,6 +552,7 @@ simplify_var_name <- function(var_name) {
   simple <- gsub("_Agg01|_AVONET|_Jetz|2017", "", var_name)
   simple <- gsub("HighConfidence_", "", simple)
   simple <- gsub("TerritorialityWeakVsStrong", "TerrWS", simple)
+  simple <- gsub("logMass_normalized", "Mass", simple)
   simple <- gsub("logMass", "Mass", simple)
   simple <- gsub("PercentAbsLog", "", simple)
   simple <- gsub("Dimorphism", "Dim", simple)

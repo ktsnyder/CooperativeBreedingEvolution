@@ -49,12 +49,13 @@ create_forest_plot_with_counts <- function(bias_results_list = NULL,
     if (exists("find_or_create_full_dataset_result")) {
       full_result <- find_or_create_full_dataset_result(trait_set, run_if_missing = FALSE)
     } else {
-      # Fallback to old method
-      if (file.exists("phylopath_full_dataset_result.rds")) {
-        full_result <- readRDS("phylopath_full_dataset_result.rds")
-      } else {
+      # Fallback to old method # commenting out to prevent errors
+     # if (file.exists("phylopath_full_dataset_result.rds")) {
+     #    full_result <- readRDS("phylopath_full_dataset_result.rds")
+     # } else {
         full_result <- NULL
-      }
+        print("Not loaded: function find_or_create_full_dataset_result()")
+     # }
     }
     
     if (!is.null(full_result)) {
@@ -96,18 +97,21 @@ create_forest_plot_with_counts <- function(bias_results_list = NULL,
           # Also get the sample size if not provided
           if (is.null(full_dataset_n) && !is.null(full_result$n_species)) {
             full_dataset_n <- full_result$n_species
+          } else if (is.null(full_dataset_n) && !is.null(full_result$nSpecies)) {
+            full_dataset_n <- full_result$nSpecies
           }
         }
       }
     } else {
-      warning("phylopath_full_dataset_result.rds not found. Using default reference value.")
-      reference_value <- 0.556  # Default fallback
+      warning("phylopath_full_dataset_result RDS not found. Setting default reference value to NULL.")
+      # reference_value <- 0.556  # Default fallback
+      reference_value = NULL
     }
   }
   
   # Set default full_dataset_n if still NULL
   if (is.null(full_dataset_n)) {
-    full_dataset_n <- 875  # Default fallback
+    # full_dataset_n <- 875  # Default fallback # commented out to prevent mislabeled figures
   }
   
   # Generate output file path if not provided
