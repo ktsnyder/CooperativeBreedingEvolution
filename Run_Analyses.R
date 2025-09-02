@@ -103,7 +103,7 @@ for (j in 1:length(songtraits)) {
     discvec = subsetdf[,tempgrouptrait]
     names(discvec) = subsetdf$species
     contvec = subsetdf[,songtrait]
-    contvec = log(contvec)
+    #contvec = log(contvec)
     names(contvec) = subsetdf$species
     subsettree = subsets$subsettree
     Nspecies = length(subsettree$tip.label)

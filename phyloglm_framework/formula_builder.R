@@ -1,5 +1,6 @@
 # Automated Formula Building System for PhyloGLM Framework
 # Handles different variable types and creates appropriate model sets
+# 8/26/2025 - KTS commented out auto-building the 15 standard formulas whenever 2 predictors plus 1 control are present, so it should build just based on the complexity_levels now in build_model_set_from_config.
 
 source("phyloglm_framework/variable_classification.R")
 
@@ -275,21 +276,21 @@ build_model_set_from_config <- function(config, data) {
   
   # Check if we should use the comprehensive 15-model set
   # This applies when we have 2 predictors and 1 control (standard analysis)
-  if (length(config$predictors) == 2 && length(config$controls) == 1 && 
-      config$controls[1] %in% c("logMass_AVONET", "logMass_normalized", 
-                                "PercentAbsLogWingDimorphism", 
-                                "logMaleFemalePlumageDiffAbs")) {
-    
-    # Use the comprehensive 15-model formula builder
-    formulas <- build_comprehensive_15_models(
-      response_var = config$response,
-      pred_var = config$predictors[1],
-      terr_var = config$predictors[2],
-      control_var = config$controls[1]
-    )
-    
-    return(formulas)
-  }
+  # if (length(config$predictors) == 2 && length(config$controls) == 1 && 
+  #     config$controls[1] %in% c("logMass_AVONET", "logMass_normalized", 
+  #                               "PercentAbsLogWingDimorphism", 
+  #                               "logMaleFemalePlumageDiffAbs")) {
+  #   
+  #   # Use the comprehensive 15-model formula builder
+  #   formulas <- build_comprehensive_15_models(
+  #     response_var = config$response,
+  #     pred_var = config$predictors[1],
+  #     terr_var = config$predictors[2],
+  #     control_var = config$controls[1]
+  #   )
+  #   
+  #   return(formulas)
+  # }
   
   # Otherwise use the standard formula builder
   # Detect variable types

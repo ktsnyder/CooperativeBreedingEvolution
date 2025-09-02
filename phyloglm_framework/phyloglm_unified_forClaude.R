@@ -571,11 +571,47 @@ define_available_predictors <- function() {
       values_func = function(data) data$Final.polygyny,
       skip_conditions = "Polygyny"
     ),
+    LongSocialBonds = list(
+      name = "LongSocialBonds",
+      var = "Griesser2023.LongSocialBonds",
+      values_func = function(data) data$Griesser2023.LongSocialBonds,
+      skip_conditions = "LongSocialBonds"
+    ),
     Colonial = list(
       name = "Colonial",
       var = "colonial_Griesser2023",
       values_func = function(data) data$colonial_Griesser2023,
       skip_conditions = "colonial|Colonial"
+    ),
+    GroupsLargerThanPair = list(
+      name = "GroupsLargerThanPair",
+      var = "Griesser2023.GroupsLargerThanPair",
+      values_func = function(data) data$Griesser2023.GroupsLargerThanPair,
+      skip_conditions = "GroupsLargerThanPair"
+    ),
+    LargestGroupSizes = list(
+      name = "LargestGroupSizes",
+      var = "Griesser2023.LargestGroupSizes",
+      values_func = function(data) data$Griesser2023.LargestGroupSizes,
+      skip_conditions = "LargestGroupSizes"
+    ),
+    # NormCaretakers = list(
+    #   name = "CaretakersNorm",
+    #   var = "caretakers_normalized",
+    #   values_func = function(data) data$caretakers_normalized,
+    #   skip_conditions = "caretakers_normalized"
+    # ),
+    NormSocialBonds = list(
+      name = "SocialBondNorm",
+      var = "social_bonds_normalized",
+      values_func = function(data) data$social_bonds_normalized,
+      skip_conditions = "social_bonds_normalized"
+    ),
+    NormGrouping = list(
+      name = "GroupingNorm",
+      var = "grouping_normalized",
+      values_func = function(data) data$grouping_normalized,
+      skip_conditions = "grouping_normalized"
     )
   )
 }
@@ -1457,21 +1493,21 @@ calculate_predictor_importance <- function(all_expansion_paths) {
 #   output_base_dir = "Outputs/PhyloglmResults/StepwiseIterative_Top2Models_boot500_aicThresh0.5",save_boot_matrices = T, save_coefficient_csv = T,verbose = T, data_path = "Data_R_2025-07-23.csv", tree_path = "ConsensusPasserineTreeHackett4_1000_OscineSubset.nex", detailed_logging = TRUE, aic_threshold = 0.5
 # )
 
-# Using formula input:
+#Using formula input:
 formulas <- list(
-  FemaleSong_Agg01 ~ HighConfidence_Coop * TerritorialityWeakVsStrong + logMass_normalized,
-  FemaleSong_Agg01 ~ HighConfidence_Coop + Territory_12vs3 + logMass_normalized,
-  HighConfidence_Coop ~ FemaleSong_Agg01 * Territory_12vs3,
-  HighConfidence_Coop ~ FemaleSong_Agg01 * TerritorialityWeakVsStrong
+  FemaleSong_Agg01 ~ HighConfidence_Coop * TerritorialityWeakVsStrong + logMass_normalized + PercentAbsLogWingDimorphism_normalized + logMaleFemalePlumageDiffAbs_normalized,
+  FemaleSong_Agg01 ~ HighConfidence_Coop + Territory_12vs3 + logMass_normalized + abs_Latitude_normalized + PercentAbsLogWingDimorphism_normalized,
+  HighConfidence_Coop ~ FemaleSong_Agg01 * Territory_12vs3 + Griesser2017FamilialLiving,
+  HighConfidence_Coop ~ FemaleSong_Agg01 * TerritorialityWeakVsStrong + Griesser2017FamilialLiving
 )
 results <- run_unified_stepwise_expansion(
   input_source = formulas,
-  data_path = "Data_R_2025-07-23.csv",
+  data_path = "Data_R_2025-07-23_wNormCaretakers_SocBonds_GroupNorm.csv",
   tree_path = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex",
   n_bootstrap = 500,
   save_coefficient_csv = TRUE,
   use_bootstrap_pvalues = TRUE,  # Use parametric p-values
   bias_threshold_sd = 1,         # More lenient bias threshold
-  use_normalized_mass = TRUE, top_n_models =  1, output_base_dir = "Outputs/PhyloglmResults/StepwiseIterative_Top1Model_MassNorm_AddPolygyny_boot500_aicThresh2.0", aic_threshold = 2.0, save_boot_matrices = T, verbose = T
+  use_normalized_mass = TRUE, top_n_models =  1, output_base_dir = "Outputs/PhyloglmResults/StepwiseIterative_Top1Model_MassNorm_SocNormNoCare_StartWithBestPreSoc_boot500_aicThresh2.0", aic_threshold = 2.0, save_boot_matrices = T, verbose = T
 )
 

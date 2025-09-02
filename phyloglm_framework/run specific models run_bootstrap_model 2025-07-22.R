@@ -108,7 +108,6 @@ FS_vs_CBxTerrWS_All <- run_bootstrap_model(formula = as.formula("FemaleSong_Agg0
                                            method = "logistic_MPLE", save_prefix = "FS_vs_CBxTerrWS_AllExceptFamLiv",
                                            save_matrices = TRUE, matrix_dir = "Outputs/PhyloglmResults/Single_Model_Runs3", save_coefficient_csv = TRUE, use_bootstrap_pvalues = TRUE)
 
-
 # Terr 12vs3
 subsetout <- subsettreedata(columns = c("HighConfidence_Coop", "FemaleSong_Agg01", "logMass_normalized", "Territory_12vs3", "Migration_num", "abs_Latitude_normalized", "PercentAbsLogWingDimorphism_normalized", "logMaleFemalePlumageDiffAbs_normalized", "GeographicRegion_Jetz"), newdata = "Data_R_2025-07-21.csv", newtree = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex")
 subsetdf = subsetout$subsetdf
@@ -116,6 +115,23 @@ rownames(subsetdf) <- subsetdf$species
 subsettree = subsetout$subsettree
 
 FS_vs_CB_Terr3_All <- run_bootstrap_model(formula = as.formula("FemaleSong_Agg01 ~ HighConfidence_Coop + Territory_12vs3 + logMass_normalized + logMass_normalized + Migration_num + abs_Latitude_normalized + PercentAbsLogWingDimorphism_normalized + logMaleFemalePlumageDiffAbs_normalized + GeographicRegion_Jetz"), data = subsetdf, tree = subsettree, n_boot = 500, method = "logistic_MPLE", save_prefix = "FS_vs_CB_Terr3_AllExceptFamLiv", save_matrices = TRUE, matrix_dir = "Outputs/PhyloglmResults/Single_Model_Runs3", save_coefficient_csv = TRUE, use_bootstrap_pvalues = TRUE)
+
+#### just grouping_normalized with best model from each TerrWS and TerrYR ----
+subsetout <- subsettreedata(columns = c("FemaleSong_Agg01", "logMass_normalized", "TerritorialityWeakVsStrong", "grouping_normalized"), newdata = "Data_R_2025-07-23_wNormCaretakers_SocBonds_GroupNorm.csv", newtree = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex")
+subsetdf = subsetout$subsetdf
+rownames(subsetdf) <- subsetdf$species
+subsettree = subsetout$subsettree
+FS_vs_xTerrWS <- run_bootstrap_model(formula = as.formula("FemaleSong_Agg01 ~ grouping_normalized + TerritorialityWeakVsStrong + logMass_normalized"), data = subsetdf, tree = subsettree, n_boot = 500, 
+                                     method = "logistic_MPLE", save_prefix = "FS_vs_GroupNorm_TerrWS_Mass",
+                                     save_matrices = TRUE, matrix_dir = "Outputs/PhyloglmResults/Single_Model_Runs3", save_coefficient_csv = TRUE, use_bootstrap_pvalues = TRUE)
+
+subsetout <- subsettreedata(columns = c("FemaleSong_Agg01", "logMass_normalized", "Territory_12vs3", "grouping_normalized"), newdata = "Data_R_2025-07-23_wNormCaretakers_SocBonds_GroupNorm.csv", newtree = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex")
+subsetdf = subsetout$subsetdf
+rownames(subsetdf) <- subsetdf$species
+subsettree = subsetout$subsettree
+FS_vs_xTerrYR <- run_bootstrap_model(formula = as.formula("FemaleSong_Agg01 ~ grouping_normalized + Territory_12vs3 + logMass_normalized"), data = subsetdf, tree = subsettree, n_boot = 500, 
+                                     method = "logistic_MPLE", save_prefix = "FS_vs_GroupNorm_TerrYR_MassNorm",
+                                     save_matrices = TRUE, matrix_dir = "Outputs/PhyloglmResults/Single_Model_Runs3", save_coefficient_csv = TRUE, use_bootstrap_pvalues = TRUE)
 
 #### Previous best models from stepwise ----
 # Terr Weak/Strong, FS response
@@ -188,3 +204,20 @@ rownames(subsetdf) <- subsetdf$species
 subsettree = subsetout$subsettree
 
 FS_vs_CB_Terr13_Step2 <- run_bootstrap_model(formula = as.formula("FemaleSong_Agg01 ~ HighConfidence_Coop + Territory + logMass_normalized + PercentAbsLogWingDimorphism_normalized + GeographicRegion_Jetz"), data = subsetdf, tree = subsettree, n_boot = 500, method = "logistic_MPLE", save_prefix = "FS_vs_CB_Terr13_Step2", save_matrices = TRUE, matrix_dir = "Outputs/PhyloglmResults/Single_Model_Runs3", save_coefficient_csv = TRUE, use_bootstrap_pvalues = TRUE)
+
+
+# Test why caretakers_normalized is breaking the model run
+subsetout <- subsettreedata(columns = c("HighConfidence_Coop", "FemaleSong_Agg01"), newdata = "Data_R_2025-07-23_wNormCaretakers.csv", newtree = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex")
+subsetdf = subsetout$subsetdf
+rownames(subsetdf) <- subsetdf$species
+subsettree = subsetout$subsettree
+run_bootstrap_model(formula = as.formula(FemaleSong_Agg01 ~ HighConfidence_Coop*TerritorialityWeakVsStrong +      logMass_normalized + caretakers_normalized), data = subsetdf, tree =  subsettree, n_boot = 500, method = "logistic_MPLE", save_prefix = "FS_vs_CB_TerrWS_caretakers", save_matrices = TRUE, matrix_dir = "Outputs/PhyloglmResults/Single_Model_Runs3", save_coefficient_csv = TRUE, use_bootstrap_pvalues = TRUE, bias_threshold_sd = 50)
+                    
+
+#### familial living * coop breed interaction ----
+subsetout <- subsettreedata(columns = c("HighConfidence_Coop", "FemaleSong_Agg01", "logMass_normalized", "Territory_12vs3", "Griesser2017FamilialLiving"), newdata = "Data_R_2025-07-23_wNormCaretakers_SocBonds_GroupNorm.csv", newtree = "2022-03-16ConsensusPasserineTreeHackett4_1000_OscineSubset.nex")
+subsetdf = subsetout$subsetdf
+rownames(subsetdf) <- subsetdf$species
+subsettree = subsetout$subsettree
+
+FS_vs_CB_Terr13_Step2 <- run_bootstrap_model(formula = as.formula("FemaleSong_Agg01 ~ HighConfidence_Coop * Griesser2017FamilialLiving + Territory_12vs3"), data = subsetdf, tree = subsettree, n_boot = 500, method = "logistic_MPLE", save_prefix = "FS_vs_CBxFam_Terr13", save_matrices = TRUE, matrix_dir = "Outputs/PhyloglmResults/Single_Model_Runs3", save_coefficient_csv = TRUE, use_bootstrap_pvalues = TRUE)
