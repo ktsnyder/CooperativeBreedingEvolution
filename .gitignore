@@ -1,0 +1,270 @@
+# R-specific files
+.Rhistory
+.Rhistory*
+.RData
+.Rdata
+.rdata
+.Ruserdata
+.Rproj.user/
+*.Rproj
+
+# R package files
+*.tar.gz
+*.Rcheck/
+vignettes/*.html
+vignettes/*.pdf
+
+# macOS system files
+.DS_Store
+*.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# iCloud files
+*.icloud
+
+# Windows system files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+*.lnk
+
+# Linux system files
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
+*.backup
+~$*
+.~lock.*#
+
+# Excel temporary files
+~$*.xlsx
+~$*.xls
+~$*.xlsm
+
+# Analysis outputs with dates (project-specific)
+*brownie multitree*.csv
+*phylANOVA outputs*.csv
+*simmap overlap*.csv
+*Brownie summary table*.csv
+*brownie output summary*.csv
+# More specific date patterns
+202[0-9]-[0-9][0-9]-[0-9][0-9]*.csv
+202[0-9]-[0-9][0-9]-[0-9][0-9]*.xlsx
+
+# Log files
+*.log
+*.out
+*.err
+
+# Plot outputs (optional - uncomment if you want to exclude)
+# *.png
+# *.pdf
+# *.eps
+# *.ps
+# *.svg
+# *.jpeg
+# *.jpg
+
+# LaTeX auxiliary files
+*.aux
+*.lof
+*.lot
+*.fls
+*.out
+*.toc
+*.fmt
+*.fot
+*.cb
+*.cb2
+.*.lb
+
+# BibTeX auxiliary files
+*.bbl
+*.bcf
+*.blg
+*-blx.aux
+*-blx.bib
+*.run.xml
+
+# Bayesian analysis outputs
+*.mcmc
+*.mcmcchain
+*.chain
+BayesTraits*.txt
+BayesTraits*.log
+
+# Phylogenetic software outputs
+*.trees
+*.p
+*.t
+*.con.tre
+PAUP*.log
+RAxML*
+*.phy.reduced
+
+# Directory for large/temporary outputs (create these if needed)
+temp/
+cache/
+output_temp/
+scratch_outputs/
+
+# Session info files
+sessionInfo*.txt
+session_info*.txt
+
+# Core dumps
+core
+
+# Compiled code
+*.so
+*.dll
+*.o
+*.dylib
+
+# Package documentation
+man/*.Rd
+
+# OAuth2 token
+.httr-oauth
+
+# knitr and R markdown
+*.utf8.md
+*.knit.md
+*_cache/
+*_files/
+*.nb.html
+
+# Shiny
+rsconnect/
+shiny_bookmarks/
+
+# RStudio Connect
+rsconnect/
+
+# pkgdown site
+docs/
+pkgdown/
+
+# translation temp files
+po/*~
+
+# RStudio project files (optional - uncomment if desired)
+# .Rproj.user
+
+# Claude Code session notes (private)
+claude_code_sessions/
+README_private.md
+
+# Publication materials (pre-publication/sensitive)
+Publication_Materials/
+
+# Generated outputs (can be regenerated from code)
+Outputs/
+
+# Code review documents (internal)
+Independent Codebase Review/
+
+# Sandbox/experimental code (optional - see note below)
+# Sandbox/
+
+############################################
+# Project-specific patterns from existing .gitignore
+############################################
+
+# Ignore OutputFiles
+OutputFiles
+Simmap*Overlap*Outputs/
+BayesTraitsDiscreteML_MeanCoopTie2Coop-FemaleSong_Agg01*Jackknife*Outputs/
+BayesTraitsDiscreteML_MeanCoopTie2Noncoop-FemaleSong_Agg01*Jackknife*Outputs/
+BayesTraitsDiscreteML_MeanCoopTie2Noncoop-FemaleSong_Agg01*SingleFamily*Outputs/
+BrownieJackknifeOutputs/
+Misc*Song*Features*BayesTraits/
+Simmap*Overlap*Multistate/
+Misc*Tree*Plots/
+
+# Ignore giant .tre file
+BirdzillaHackett3.tre
+*.pdf
+
+# Specific BayesTraits output files
+2023-07-21BayesMeanCoopTie2NoncoopSong.rep.final100reps.csv
+2023-07-21BayesMeanCoopTie2NoncoopSong.rep.max100reps.csv
+2023-07-22BayesMeanCoopTie2CoopSong.rep.final100reps.csv
+2023-07-22BayesMeanCoopTie2CoopSong.rep.max100reps.csv
+2023-07-22BayesMeanCoopTie2CoopSong.rep.min100reps.csv
+2023-07-22BayesMeanCoopTie2NoncoopSong.rep.min100reps.csv
+2023-07-25BayesHighConfidence_FemaleSongDuration.final100reps.csv
+2023-07-25BayesHighConfidence_FemaleSongInterval.final100reps.csv
+2023-07-25BayesHighConfidence_FemaleSongSong.rate100reps.csv
+2023-07-25BayesHighConfidence_FemaleSongSyll.song.final100reps.csv
+2023-07-25BayesHighConfidence_FemaleSongSyll.song.max100reps.csv
+2023-07-25BayesHighConfidence_FemaleSongSyll.song.min100reps.csv
+2023-07-26BayesAnyCoopEqualsCoopDuration.final100reps.csv
+2023-07-26BayesAnyCoopEqualsCoopInterval.final100reps.csv
+2023-07-26BayesAnyCoopEqualsCoopSong.rate100reps.csv
+2023-07-26BayesAnyCoopEqualsCoopSong.rep.final100reps.csv
+2023-07-26BayesAnyCoopEqualsCoopSong.rep.max100reps.csv
+2023-07-26BayesAnyCoopEqualsCoopSong.rep.min100reps.csv
+2023-07-30BayesMeanCoopOmitTiesDuration.final100reps.csv
+2023-07-30BayesMeanCoopOmitTiesInterval.final100reps.csv
+2023-07-30BayesMeanCoopOmitTiesSong.rate100reps.csv
+2023-07-30BayesMeanCoopOmitTiesSong.rep.final100reps.csv
+2023-07-30BayesMeanCoopOmitTiesSong.rep.max100reps.csv
+2023-07-30BayesMeanCoopOmitTiesSong.rep.min100reps.csv
+
+# Other BayesTraits files
+BayesTraitsDiscrete_Hackett-OmitTies-FSHighConf mlt100_noRes.csv
+BayesTraitsDiscrete_Hackett-Tie2Coop-FSHighConf mlt100_noRes.csv
+BayesTraitsDiscrete_Hackett-Tie2Noncoop-FSHighConf mlt100_noRes.csv
+
+# Simmap overlap files
+Familial FSAgg DUMMYResampledCoopFS simmap overlap output nsim 5000 Hackett .csv
+Familial FSAgg simmap overlap output nsim 1000 Hackett .csv
+Kin_NK FSAgg DUMMYResampledCoopFS simmap overlap output nsim 1000 Hackett .csv
+Kin_NK FSAgg simmap overlap output nsim 1000 Hackett .csv
+Tie2NonCoop FSHighConf DUMMYResampledCoopFS simmap overlap output nsim 1000 Hackett .csv
+
+# MeanCoop analysis files
+MeanCoopTie2Coop Song.rep.final BayesDependent MCMC Ace Hackett*.csv
+MeanCoopTie2Coop Song.rep.final BayesIndependent MCMC Ace Hackett*.csv
+MeanCoopTie2Noncoop Song.rep.final BayesDependent MCMC Ace*.csv
+MeanCoopTie2Noncoop Song.rep.final BayesIndependent MCMC Ace*.csv
+
+# Analysis directories
+MaxLikelihood-Defaults/
+NoPriors_Stones*/
+PriorAll-Exp-*/
+Priors-exp-*/
+Outputs_preJun10/
+
+# Test files
+test.csv
