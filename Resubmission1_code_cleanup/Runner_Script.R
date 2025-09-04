@@ -1,5 +1,5 @@
 #### Full Runner Script ----
-### Submitted with first revision, 9/1/2025
+### First revision, 9/1/2025
 
 # Generates Supplemental Table 3 - phylANOVA
 source("run_01_phylANOVA.R")
@@ -21,11 +21,15 @@ source("RunAnalyses_nondownsampled_Phylopaths.R")
 # Generates Supplemental Table 13, 14 and calculates number of species to downsample in next script
 source("run_05_bias_analyses.R")
 
+# Generates Figure 4A, Extended Data Figure 7A
+source("run_06_phylopath_main.R")
+
 # Generates Figure 4B-C, Extended Data Figure 7B-D
 # Performs analyses used and calls script to make figures
-source("run_06_phylopath_downsampling.R")
+# Must run "run_05_bias_analyses.R" and "run_06_phylopath_main.R" before running
+source("run_07_phylopath_downsampling.R")
 
 # Generates Supplemental Table 15; Extended Data Figure 6
-source("run_07_phylopath_altCoop.R")
+source("run_08_phylopath_altCoop.R")
 
 
