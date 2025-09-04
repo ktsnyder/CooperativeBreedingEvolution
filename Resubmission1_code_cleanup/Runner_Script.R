@@ -15,3 +15,17 @@ source("run_03_binary_transition_rates.R")
 # Generates components of: Supplemental Tables 7, 8, 10, 11; Extended Data Figure 5A&B; Extended Data Table 1 ----
 source("run_04_simmap_overlap.R")
 
+# Generates Figure 4A; Extended Data Figures 7A
+source("RunAnalyses_nondownsampled_Phylopaths.R")
+
+# Generates Supplemental Table 13, 14 and calculates number of species to downsample in next script
+source("run_05_bias_analyses.R")
+
+# Generates Figure 4B-C, Extended Data Figure 7B-D
+# Performs analyses used and calls script to make figures
+source("run_06_phylopath_downsampling.R")
+
+# Generates Supplemental Table 15; Extended Data Figure 6
+source("run_07_phylopath_altCoop.R")
+
+
