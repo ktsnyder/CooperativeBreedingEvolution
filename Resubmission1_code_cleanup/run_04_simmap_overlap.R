@@ -7,7 +7,11 @@ treefile = "ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
 # treefile = "ConsensusPasserineTreeHackett4_1000_mean-edge_ignore-absent.nex
 
 # Figure 3A; Supplemental Table 9 - Co-occurrance of cooperative breeding and female song  ----
-source("test_trait_overlap_simmaps.R")
+#source(file.path("test_trait_overlap_simmaps.R"))
+source(file.path())
+source("Simmap_Overlap_functions/CharacterSimmaps_modified.R")
+source("Simmap_Overlap_functions/simmap_overlap_runner_helpers.R")
+
 nsims_real = 10
 nsims_dummy = 10
 
@@ -17,8 +21,9 @@ for (i in 1: length(targetMetrics)) {
   tempMetric = targetMetrics[i]
   print(i)
   print(tempMetric)
-  dfout <- CharacterSimmaps(columns = c(tempMetric,temptrait2), df = newdata, tree =  treefile, dummy = FALSE, nsims = nsims_real, treelabel = "HackettOscine", datalabel = NULL, plotSampleSimmaps = TRUE)
-  dfDummy <- CharacterSimmaps(columns = c(tempMetric,temptrait2), df = newdata, tree =  treefile, dummy = TRUE, nsims = nsims_dummy, treelabel = "HackettOscine", datalabel = NULL, dummyMethod = "makeSimmap")
+  # dfout <- CharacterSimmaps_modified(columns = c(tempMetric,temptrait2), df = newdata, tree =  treefile, dummy = FALSE, nsims = nsims_real, treelabel = "HackettOscine", datalabel = NULL, plotSampleSimmaps = TRUE)
+  # dfDummy <- CharacterSimmaps_modified(columns = c(tempMetric,temptrait2), df = newdata, tree =  treefile, dummy = TRUE, nsims = nsims_dummy, treelabel = "HackettOscine", datalabel = NULL, dummyMethod = "makeSimmap")
+  runSimmapOverlapAnalysis(trait1 = tempMetric, trait2 = temptrait2, nsims_real = 10, nsims_dummy = 10, tree_file = treefile, data_file = newdata, save_outputs = T)
   
   calcHuelout = calcHuel(dfout, dfDummy)
   require(gridExtra)
