@@ -1,6 +1,12 @@
 ### Overlapping stochastic character maps to assess co-occurrence of discrete trait states in evolutionary history ----
 
-# Figure 3A; Supplemental Table 9 - Co-occurrance of cooperative breeding/familial living and female song  ----
+newdata = "Data_R.csv"
+treefile = "ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
+
+# For the alternative tree, uncomment this line:
+# treefile = "ConsensusPasserineTreeHackett4_1000_mean-edge_ignore-absent.nex
+
+# Figure 3A; Supplemental Table 9 - Co-occurrance of cooperative breeding and female song  ----
 source("test_trait_overlap_simmaps.R")
 nsims_real = 10
 nsims_dummy = 10
