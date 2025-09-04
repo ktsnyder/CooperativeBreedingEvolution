@@ -11,6 +11,5 @@ source("run_02_brownie.R")
 # Generates Supplemental Table 19 - ARD vs ER rates for binary traits
 source("run_03_binary_transition_rates.R")
 
-# Generates components of: Supplemental Tables 7, 8, 10; Extended Data Figure 5A; Extended Data Table 1 ----
+# Generates components of: Supplemental Tables 7, 8, 10, 11; Extended Data Figure 5A&B; Extended Data Table 1 ----
 source("run_04_simmap_overlap.R")
-
