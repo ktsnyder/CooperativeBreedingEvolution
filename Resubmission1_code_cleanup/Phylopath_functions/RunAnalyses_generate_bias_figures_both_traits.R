@@ -9,7 +9,7 @@ library(dplyr)
 library(tidyr)
 library(patchwork)
 
-setwd("Phylopath_functions/")
+setwd("Phylopath_functions")
 # Source the updated functions
 source("phylopath_helper_functions.R")
 source("create_phylopath_bias_robustness_figure_updated.R")
@@ -17,8 +17,15 @@ source("create_bias_model_consistency_heatmap_updated.R")
 source("create_forest_plot_with_counts_updated.R")
 setwd("..")
 
-# Specify which iteration count to use (change this as needed)
-n_iterations_to_use <- 10  # Use 500 for final figures, 10 for testing
+if (!exists("n_iterations_to_use")) {
+  filelist <- list.files(file.path("Outputs", "PhylopathDownsampled"), recursive = TRUE, pattern = "_[0-9]+_")
+  nums <- str_extract(filelist, "(?<=_)\\d+(?=_)")
+  nums <- na.omit(nums)
+  nums <- as.integer(nums)
+  tab <- table(nums)
+  n_iterations_to_use <- as.integer(names(tab)[which.max(tab)])
+}
+
 
 # Define your trait sets
 trait_sets <- list(
@@ -77,7 +84,8 @@ for (trait_name in names(trait_sets)) {
       forest <- create_forest_plot_with_counts(
         bias_results_list = results,
         rate_to_plot = rate,
-        trait_set = trait_set
+        trait_set = trait_set,
+        n_iterations = n_iterations_to_use
       )
       cat(" ✓\n")
     }

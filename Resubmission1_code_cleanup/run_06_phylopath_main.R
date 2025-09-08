@@ -10,6 +10,10 @@ tree <- read.nexus("ConsensusPasserineTreeHackett4_1000_OscineSubset.nex")
 
 #### Extended Data Figure 7A - FemaleSong_Agg01_HighConfidence_Coop_Territory_12vs3_logMass_AVONET DAG ----
 phylopath_output_dir <- file.path("Outputs", "PhylopathFigures", "FemaleSong_Agg01_HighConfidence_Coop_Territory_12vs3_logMass_AVONET")
+# Create output directory if it doesn't exist
+if (!dir.exists(phylopath_output_dir)) {
+  dir.create(phylopath_output_dir, recursive = TRUE)
+}
 
 female_song_var = "FemaleSong_Agg01"
 coop_breeding_var = "HighConfidence_Coop"
@@ -43,6 +47,10 @@ create_enhanced_dag(phylopath_result = result_phylopath, output_file = dag_file_
 
 #### Figure 4A - FemaleSong_Agg01_HighConfidence_Coop_TerritorialityWeakVsStrong_logMass_AVONET DAG ----
 phylopath_output_dir <- file.path("Outputs", "PhylopathFigures", "FemaleSong_Agg01_HighConfidence_Coop_TerritorialityWeakVsStrong_logMass_AVONET")
+# Create output directory if it doesn't exist
+if (!dir.exists(phylopath_output_dir)) {
+  dir.create(phylopath_output_dir, recursive = TRUE)
+}
 
 female_song_var = "FemaleSong_Agg01"
 coop_breeding_var = "HighConfidence_Coop"

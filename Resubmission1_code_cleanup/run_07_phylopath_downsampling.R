@@ -6,8 +6,13 @@
 female_song_var = "FemaleSong_Agg01"
 coop_breeding_var = "HighConfidence_Coop"
 territoriality_var =  "TerritorialityWeakVsStrong" 
-#territoriality_var =  "Territory_12vs3" 
+#territoriality_var =  "Territory_12vs3" # uncomment to test using year-round territoriality as the territoriality feature
 mass_var = "logMass_AVONET"
+
+if(!exists("n_iterations")) {n_iterations = 5}
+
+dfIn_phylo = read.csv("Data_R.csv")
+tree_phylo = read.nexus("ConsensusPasserineTreeHackett4_1000_OscineSubset.nex")
 
 all_traits_phylopath_label = paste(female_song_var, coop_breeding_var, territoriality_var, mass_var)
 
@@ -375,5 +380,27 @@ for (dim_type in names(dimorphism_vars)) {
   }
 }
 
-cat("\n\nAll phylopath bias downsampling complete; generating plots using RunAnalyses_generate_bias_figures_bothtraits.R \n")
-source(file.path("Phylopath_functions", "RunAnalyses_generate_bias_figures_bothtraits.R"))
+cat("\n\nAll phylopath bias downsampling complete, beginning jackknifing by species \n")
+
+
+#### Jackknife by species ----
+source(file.path("Phylopath_functions", "run_jackknife_species_phylopath.R"))
+
+jackknife_results <- run_jackknife_species_phylopath(
+  dfIn = dfIn_phylo,
+  tree = tree,
+  female_song_var = "FemaleSong_Agg01",
+  coop_breeding_var = "HighConfidence_Coop", 
+  territoriality_var = territoriality_var,
+  mass_var = "logMass_AVONET",
+  save_conditional_plots = FALSE,  # Set to TRUE if you want plots (will create large PDF)
+  save_path_coefficients = TRUE,
+  output_dir = file.path("Outputs", "PhylopathJackknife")
+)
+
+#### Generate summary figures - forest plots, heat map ----
+cat("\n\ngenerating plots using RunAnalyses_generate_bias_figures_both_traits.R \n")
+n_iterations_to_use = n_iterations
+source(file.path("Phylopath_functions", "RunAnalyses_generate_bias_figures_both_traits.R"))
+
+

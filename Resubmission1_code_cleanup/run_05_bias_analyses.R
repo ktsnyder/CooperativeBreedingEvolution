@@ -11,8 +11,6 @@ newdata = "Data_R.csv"
 treefile = "ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
 df_bias <- dfIn_phylo <- read.csv("Data_R.csv")
 tree <- tree_phylo <- read.nexus("ConsensusPasserineTreeHackett4_1000_OscineSubset.nex")
-phylopath_output_dir = file.path("Outputs","PhylopathDownsampled", paste(all_traits_phylopath_label, "models"))
-n_iterations = 10 # Set number of iterations (use 500 for publication-level results, 10 for testing)
 
 # 1. Generate comprehensive bias report (all 6 tests)
 cat("\nGenerating comprehensive bias report...\n")

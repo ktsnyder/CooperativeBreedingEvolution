@@ -31,7 +31,8 @@ create_forest_plot_with_counts <- function(bias_results_list = NULL,
                                            reference_value = NULL,
                                            full_dataset_n = NULL,
                                            output_file = NULL,
-                                           trait_set = NULL) {
+                                           trait_set = NULL,
+                                           n_iterations = NULL) {
   
   # Set default trait set for backward compatibility
   if (is.null(trait_set)) {
@@ -125,7 +126,7 @@ create_forest_plot_with_counts <- function(bias_results_list = NULL,
     # Convert rate_to_plot to safe filename format
     safe_rate_name <- gsub("->", "_", rate_to_plot)
     output_file <- file.path("Outputs", "PhylopathFigures", trait_label, 
-                             paste0("forest_plot_", safe_rate_name, "_with_counts.pdf"))
+                             paste0("forest_plot_", safe_rate_name, "_with_counts_n", n_iterations,".pdf"))
   }
   
   # Extract coefficients and species counts
@@ -250,7 +251,7 @@ create_forest_plot_with_counts <- function(bias_results_list = NULL,
     ) +
     labs(
       title = paste0(gsub("->", " → ", rate_to_plot), " Path Coefficients"),
-      subtitle = "Mean and 95% CI of conditional averages from 500 downsampling iterations",
+      subtitle = paste("Mean and 95% CI of conditional averages from", n_iterations, "downsampling iterations"),
       x = "Path Coefficient",
       y = NULL
     ) +
