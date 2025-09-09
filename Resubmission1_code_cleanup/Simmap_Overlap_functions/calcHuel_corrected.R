@@ -73,7 +73,7 @@ calcHuel_corrected <- function(dfout, dfDummy, nsims_real = NULL, nsims_dummy = 
   # Using generic column names
   if ("prop_trait1_state0" %in% names(dfout)) {
     # New format with generic names
-    # Note: Expected proportions follow original order (trait2 * trait1) to match Map.Overlap output # this is ok here, but otherwise will be fixing this
+    # Note: Expected proportions follow original order (trait2 * trait1) to match Map.Overlap output 
     ExpProp_0_0 <- as.numeric(dfout$prop_trait2_state0) * as.numeric(dfout$prop_trait1_state0)
     ExpProp_1_0 <- as.numeric(dfout$prop_trait2_state0) * as.numeric(dfout$prop_trait1_state1)
     ExpProp_0_1 <- as.numeric(dfout$prop_trait2_state1) * as.numeric(dfout$prop_trait1_state0)
@@ -205,7 +205,7 @@ calcHuel_corrected <- function(dfout, dfDummy, nsims_real = NULL, nsims_dummy = 
   
   # Plot setup
   plotlabel = paste(trait1, "vs", trait2, "\nN species =", Nspecies, otherlabel)
-  dummytitle = paste("Nsims =", nsims_dummy, otherlabel, "\nnum Dummy D > D_real:", sum(Dummy_dsums > D_real), ", pval =", pval)
+  dummytitle = paste("Nsims =", nsims_dummy, otherlabel, "\nnum Dummy D > D_real:", sum(Dummy_dsums > D_real), ", pval =", pval, otherlabel)
   
   xmax = max(c(Real_dsims, Dummy_dsums)) * 1.1
   
@@ -314,7 +314,7 @@ calcHuel_corrected <- function(dfout, dfDummy, nsims_real = NULL, nsims_dummy = 
       labs(y = "Observed State Proportion", x = "", fill = "Simulation Data") +
       scale_fill_manual(values = c("Real" = "#762a83", "Dummy" = "#1b7837")) +
       theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-      ggtitle(paste(trait1, trait2, "p =", round(pval, 3)))
+      ggtitle(paste(trait1, trait2, "p =", round(pval, 3)), otherlabel)
   } else {
     # Create a placeholder if columns don't exist
     p3 <- ggplot() + 
@@ -802,7 +802,8 @@ calcHuel_corrected <- function(dfout, dfDummy, nsims_real = NULL, nsims_dummy = 
     Dummy_dsums = Dummy_dsums,
     D_real = D_real,
     pval = pval,
-    mediansRow = mediansRow
+    mediansRow = mediansRow,
+    otherlabel = otherlabel
   )
   
   # Add plots

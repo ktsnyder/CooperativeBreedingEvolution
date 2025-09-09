@@ -1,38 +1,60 @@
-### Overlapping stochastic character maps to assess co-occurrence of discrete trait states in evolutionary history ----
+### Overlapping stochastic character maps to assess co-occurrence of discrete trait states in evolutionary history -
 
 newdata = "Data_R.csv"
-treefile = "ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
 
-# For the alternative tree, uncomment this line:
-# treefile = "ConsensusPasserineTreeHackett4_1000_mean-edge_ignore-absent.nex
+if (!exists(treefile)) {
+  treefile = "ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"  
+  print("Defaulting to treefile = ConsensusPasserineTreeHackett4_1000_OscineSubset.nex. Define treefile = ConsensusPasserineTreeHackett4_1000_mean-edge_ignore-absent.nex to use the alternative consensus tree.")
+}
 
-# Figure 3A; Supplemental Table 9 - Co-occurrance of cooperative breeding and female song  ----
-#source(file.path("test_trait_overlap_simmaps.R"))
-source(file.path())
-source("Simmap_Overlap_functions/CharacterSimmaps_modified.R")
-source("Simmap_Overlap_functions/simmap_overlap_runner_helpers.R")
+if (!exists("count_transitions")) {
+  count_transitions = FALSE 
+  print("Defaulting to count_transitions = FALSE. Define count_transitions = TRUE to count transitions between binary states.")
+}
 
-nsims_real = 10
-nsims_dummy = 10
+if (!exists("run_all_sociality_traits")) {
+  run_all_sociality_traits = FALSE
+  print("Defaulting to run_all_sociality_traits = FALSE. Define run_all_sociality_traits = TRUE to perform analyses for all sociality traits and alternative cooperative breeding classification methods.")
+}
 
-targetMetrics = c("HighConfidence_Coop", "Griesser2017FamilialLiving", "MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop", "AnyNoncoopEqualsNoncoop", "BiagoliniCoop", "DowningCoop", "JetzCoopInclCockburn", "CockburnCoop" , "Griesser2017Coop" , "DaleCoop", "CornwallisCoop", "HighConf_Coop_DefaultToCockburnInferred", "CockburnInferred")
+if (!exists("jackknife_families_above")) {
+  jackknife_families_above = 65
+  print("Defaulting to jackknifing only families with at least 65 species present in our dataset. Define jackknife_families_above = 3 to perform analyses jackknifing all families we tested removal of in the publication.")
+}
+
+# Figure 3A; Supplemental Table 9 - Co-occurrance of cooperative breeding, sociality traits, and female song  ----
+source(file.path("Simmap_Overlap_functions", "CharacterSimmaps_modified.R"))
+source(file.path("Simmap_Overlap_functions", "simmap_overlap_runner_helpers.R"))
+
+if (!exists("nsims_real")) {
+  nsims_real = 20 
+  print("Defaulting to nsims_real = 20; to perform the analysis as in the publication, define nsims_real = 500.")
+}
+if (!exists("nsims_dummy")) {
+  nsims_dummy = 20 
+  print("Defaulting to nsims_dummy = 20; to perform the analysis as in the publication, define nsims_dummy = 500.")
+}
+if (!exists("nsims_real_jackknife")){
+  nsims_real_jackknife = 10
+  print("Defaulting to nsims_real_jackknife = 10; to perform the analysis as in the publication, define nsims_real_jackknife = 50.")
+}
+if (!exists("nsims_dummy_jackknife")){
+  nsims_dummy_jackknife = 20
+  print("Defaulting to nsims_dummy_jackknife = 20; to perform the analysis as in the publication, define nsims_real_jackknife = 200.")
+}
+
+if (run_all_sociality_traits) {
+  targetMetrics = c("HighConfidence_Coop", "MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop", "AnyNoncoopEqualsNoncoop", "BiagoliniCoop", "DowningCoop", "JetzCoopInclCockburn", "CockburnCoop" , "Griesser2017Coop" , "DaleCoop", "CornwallisCoop", "HighConf_Coop_DefaultToCockburnInferred", "CockburnInferred")
+} else {
+  targetMetrics = c("HighConfidence_Coop") 
+}
+
 temptrait2 = "FemaleSong_Agg01" 
 for (i in 1: length(targetMetrics)) {
   tempMetric = targetMetrics[i]
   print(i)
   print(tempMetric)
-  # dfout <- CharacterSimmaps_modified(columns = c(tempMetric,temptrait2), df = newdata, tree =  treefile, dummy = FALSE, nsims = nsims_real, treelabel = "HackettOscine", datalabel = NULL, plotSampleSimmaps = TRUE)
-  # dfDummy <- CharacterSimmaps_modified(columns = c(tempMetric,temptrait2), df = newdata, tree =  treefile, dummy = TRUE, nsims = nsims_dummy, treelabel = "HackettOscine", datalabel = NULL, dummyMethod = "makeSimmap")
-  runSimmapOverlapAnalysis(trait1 = tempMetric, trait2 = temptrait2, nsims_real = 10, nsims_dummy = 10, tree_file = treefile, data_file = newdata, save_outputs = T)
-  
-  calcHuelout = calcHuel(dfout, dfDummy)
-  require(gridExtra)
-  plotname = file.path("Simmap Overlap Outputs", paste(tempMetric, temptrait2, nsims_real, nsims_dummy, treelabel, "withTransCounts.pdf"))
-  
-  calcHuelout2 = calcHuelout[c("p1", "p2", "p3", "p4","p5","p6")]
-  nPlots = 6
-  m3 <- marrangeGrob(calcHuelout2, ncol = 1, nrow = nPlots)
-  ggsave(plotname, m3, width = 7.5, height = 3.8*nPlots, units = "in")
+  runSimmapOverlapAnalysis(trait1 = tempMetric, trait2 = temptrait2, nsims_real = nsims_real, nsims_dummy = nsims_dummy, tree_file = treefile, data_file = newdata, save_outputs = T, calculate_transitions = count_transitions, plot_transitions = count_transitions)
 }
 
 # Supplemental Table 7 - Co-occurrance jackknife  ----
@@ -40,9 +62,6 @@ trait1 = "HighConfidence_Coop"
 trait2 = "FemaleSong_Agg01"
 templabel = ""
 columns = c(trait1, trait2)
-
-nsims_real = 5
-nsims_dummy = 10
 
 source("findQrates.R")
 Qout = findQrates(columns = "HighConfidence_Coop", newdata = newdata, newtree = treefile)
@@ -53,14 +72,15 @@ subsettree1 <- subset1$subsettree
 subsetdf1 <- subset1$subsetdf
 
 familycounts = subsetdf1 %>% group_by(Family3_BirdtreeMatchSpecies2_AVONET) %>% count
-familyvec = familycounts$Family3_BirdtreeMatchSpecies2_AVONET[which(familycounts$n > 65)]
+# For sake of example, default to only doing families with at least 65 species
+
+familyvec = familycounts$Family3_BirdtreeMatchSpecies2_AVONET[which(familycounts$n >= jackknife_families_above)]
 familyvec = c("None", familyvec)
 
-plotlist = list()
 for (j in 1:length(familyvec)) {
   
   familyToRemove = familyvec[j]
-  templabel = paste0(columns[1], " ", columns[2], " ", "removed",familyToRemove)
+  templabel = paste0("removed",familyToRemove)
   tempdfIn = subsetdf1[which(subsetdf1$Family3_BirdtreeMatchSpecies2_AVONET != familyToRemove),]
   
   subsetbtw <- subsettreedata(columns = columns, newdata = tempdfIn, newtree = subsettree1, skinnydata = TRUE)
@@ -72,60 +92,34 @@ for (j in 1:length(familyvec)) {
   
   print(paste("Simmap Overlap", trait1, trait2, familyToRemove, j, "out of", length(familyvec), "jacks. ", numSpecies, "species in this jackknifed tree."))
   
-  dfout4 <- CharacterSimmaps(columns = columns, df = subsetdf, tree =  subsettree, dummy = FALSE, nsims = nsims_real, treelabel = "HackettOscine", datalabel = templabel, dummyMethod = "makeSimmap", columnForGlobalQ = 1, columnGlobalQrates = qrates)
-  dfDummy4 <- CharacterSimmaps(columns = columns, df = subsetdf, tree =  subsettree, dummy = TRUE, nsims = nsims_dummy, treelabel = "HackettOscine", datalabel = templabel, dummyMethod = "makeSimmap", columnForGlobalQ = 1, columnGlobalQrates = qrates)
+  HuelOut <- runSimmapOverlapAnalysis(trait1 = trait1, trait2 = trait2, nsims_real = nsims_real_jackknife, nsims_dummy = nsims_dummy_jackknife, tree_file = treefile, data_file = subsetdf, save_outputs = F, calculate_transitions = FALSE, plot_transitions = FALSE, other_label = templabel, setQratesTree = treefile, setQratesData = newdata)
   
-  HuelOut = calcHuel(dfout = dfout4, dfDummy = dfDummy4, newplot = FALSE, otherlabel = templabel)
-  plotlist[[j]] <- HuelOut
 } # end cycle through families for jackknife
 
-# Plot jackknife output
-require(gridExtra)
-index = 0
-plotlist2 = list()
-for (i in 1:length(plotlist)) {
-  tempplots = plotlist[[i]]
-  for (k in 1:3) {
-    index = index+1
-    plotlist2[[index]] = tempplots[[k]]
-  }
+
+# Extended Data Figure 5A, Extended Data Table 1 and Supplemental Table 10 - Co-occurrance of female song (or cooperative breeding) with sociality traits; if count_transitions = TRUE, also performs analyses for Supplemental Figure 2, Extended Data Figure 5A,B, ----
+if (run_all_sociality_traits) {
+  socialityMetrics = c("Griesser2017FamilialLiving", "Griesser2023.MoreThanTwoCaretakers", "Griesser2023.Asocial0VsSocial1", "Territory_12vs3", "TerritorialityWeakVsStrong","Griesser2023.LongSocialBonds","Griesser2023.GroupsLargerThanPair", "Griesser2023.TwoOrMoreCaretakers", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2023.Colonial01","Final.polygyny")
+} else {
+  socialityMetrics = c("Griesser2017FamilialLiving", "Griesser2023.MoreThanTwoCaretakers")
 }
-m1 <- marrangeGrob(plotlist2, ncol = 1, nrow = 3)
-ggsave(paste(Sys.Date(), "jackknifed Simmap Overlaps Coop FemaleSong_Agg01.pdf"), m1, width = 8, height = 9, units = "in")
-
-
-# Extended Data Figure 5A, Extended Data Table 1 and Supplemental Table 10 - Co-occurrance of female song (or cooperative breeding) with sociality traits ----
-source("test_trait_overlap_simmaps.R")
-nsims_real = 20
-nsims_dummy = 20
-
-socialityMetrics = c("Griesser2023.Asocial0VsSocial1", "Griesser2023.Colonial01" , "Griesser2023.MoreThanTwoCaretakers" ,"Griesser2023.LongSocialBonds","Griesser2023.GroupsLargerThanPair", "Griesser2023.TwoOrMoreCaretakers", "Griesser2023.LargestGroupSizes", "Griesser2023.SeasonOrLongerSocialBonds", "Griesser2017FamilialLiving","Final.polygyny" ,"MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop", "AnyNoncoopEqualsNoncoop", "Territory_12vs3", "TerritorialityWeakVsStrong")
 
 temptrait2 = "FemaleSong_Agg01"
 #temptrait2 = "HighConfidence_Coop"  # uncomment to run analyses found in Supplemental Table 10
 
 for (i in 1: length(socialityMetrics)) {
   tempMetric = socialityMetrics[i]
-  print(i)
   print(tempMetric)
-  dfout <- CharacterSimmaps(columns = c(tempMetric,temptrait2), df = newdata, tree =  treefile, dummy = FALSE, nsims = nsims_real, treelabel = "HackettOscine", datalabel = NULL, plotSampleSimmaps = TRUE)
-  dfDummy <- CharacterSimmaps(columns = c(tempMetric,temptrait2), df = newdata, tree =  treefile, dummy = TRUE, nsims = nsims_dummy, treelabel = "HackettOscine", datalabel = NULL, dummyMethod = "makeSimmap")
-  
-  calcHuelout = calcHuel(dfout, dfDummy)
-  require(gridExtra)
-  plotname = file.path("Simmap Overlap Outputs", paste(tempMetric, temptrait2, nsims_real, nsims_dummy, treelabel, "withTransCounts.pdf"))
-  
-  calcHuelout2 = calcHuelout[c("p1", "p2", "p3", "p4","p5","p6")]
-  nPlots = 6
-  m3 <- marrangeGrob(calcHuelout2, ncol = 1, nrow = nPlots)
-  ggsave(plotname, m3, width = 7.5, height = 3.8*nPlots, units = "in")
+  runSimmapOverlapAnalysis(trait1 = tempMetric, trait2 = temptrait2, nsims_real = nsims_real, nsims_dummy = nsims_dummy, tree_file = treefile, data_file = newdata, save_outputs = T, calculate_transitions = count_transitions, plot_transitions = count_transitions)
 }
 
+# Make summary table of all analyses examining two binary traits ----
+source(file.path("Simmap_Overlap_functions", "extract_simmap_overlap_results.R"))
 
 # Extended Data Figure 5B; Supplemental Table 11 - Co-occurrence between female song and multistate traits ----
 multistateTraits = c("social_system_incl_nk_coop_Griesser2017", "grouping_Griesser2023")
 othertraits = c("FemaleSong_Agg01", "FemaleSong_Agg01")
-nsims = nsim
+nsims = nsims_real
 for (i in 1:length(multistateTraits)) {
   trait1 = multistateTrait = multistateTraits[i]
   trait2 = othertrait = othertraits[i]
@@ -249,13 +243,28 @@ for (i in 1:length(multistateTraits)) {
     overlapdf = as.data.frame(overlapdf)
     colnames(overlapdf) = c("tree", "trait1", "trait2", names(overlapVec), names(overlapVecDummy))
   }
-  write.csv(overlapdf, file = paste("simmap overlap", multistateTrait, othertrait, nsims, "sims.csv"), row.names = F)
+  write.csv(overlapdf, file = file.path("Simmap_Overlap_Outputs", paste("simmap overlap", multistateTrait, othertrait, nsims, "sims.csv")), row.names = F)
   
   calcHuelout = calcHuelflex(overlapdf)
-  pdfname = paste("simmap overlap", multistateTrait, othertrait, nsims, "sims.pdf")
+  pdfname = file.path("Simmap_Overlap_Outputs", paste("simmap overlap", multistateTrait, othertrait, nsims, "sims.pdf"))
   require(gridExtra)
   single_page_plotBox <- grid.arrange(grobs = calcHuelout[1:3], ncol = 1)
   ggsave(pdfname, single_page_plotBox, width = 8, height = 12, units = "in", limitsize = FALSE)
   
-  write.csv(calcHuelout$fraction_dummy_less_than_median_real, file = paste("simmap overlap FractionDummyLessThanMedianReal", multistateTrait, othertrait, nsims,"sims.csv"))
+  write.csv(calcHuelout$fraction_dummy_less_than_median_real, file = file.path("Simmap_Overlap_Outputs", paste("simmap overlap FractionDummyLessThanMedianReal", multistateTrait, othertrait, nsims,"sims.csv")))
 }
+
+
+# Figures 3C, 3D; Extended Data Figures 4A, 4B - Transition rates split by territoriality ----
+source(file.path("Simmap_Overlap_functions", "TransitionCounts_3trait_flexTerr_fxns.R"))
+
+if (count_transitions) {
+  
+  print(paste("Beginning transition-counts analysis for Cooperative breeding, Female song, and strength of territoriality for", nsims_real, "simulations. If nsims_real is large, this will take up to a few hours. Change nsims_real at the top of run_04_simmap_overlap.R to run for more or fewer simulations."))
+  plot_transition_counts_3trait(Qdata = newdata, Qtree = treefile, columns = c("HighConfidence_Coop","FemaleSong_Agg01", "TerritorialityWeakVsStrong"), nsims = nsims_real)
+  
+  print(paste("Beginning transition-counts analysis for Cooperative breeding, Female song, and year-round territoriality for", nsims_real, "simulations. If nsims_real is large, this will take up to a few hours. Change nsims_real at the top of run_04_simmap_overlap.R to run for more or fewer simulations."))
+  plot_transition_counts_3trait(Qdata = newdata, Qtree = treefile, columns = c("HighConfidence_Coop","FemaleSong_Agg01", "Territory_12vs3"), nsims = nsims_real)
+  
+}
+

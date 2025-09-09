@@ -12,7 +12,10 @@ source("run_02_brownie.R")
 # Generates Supplemental Table 19 - ARD vs ER rates for binary traits
 source("run_03_binary_transition_rates.R")
 
-# Generates components of: Supplemental Tables 7, 8, 10, 11; Extended Data Figure 5A&B; Extended Data Table 1 ----
+# Generates plots and components of: Figures 3B-D; Supplemental Tables 7, 8, 10, 11; Extended Data Figures 4A&B, 5; Extended Data Table 1 ----
+count_transitions = FALSE # change to TRUE if you want transition counts and arrow plot outputs; note: takes longer, especially if the number of simulations (nsims_real) is high
+jackknife_families_above = 65 # Jackknife analysis: Defaults to only testing removal of families with at least 65 species present, for the sake of example. For the publication, we performed jackknife analyses iteratively removing each family with at least 3 species in our dataset; change this value to "3" to perform the full jackknifing analysis
+run_all_sociality_traits = FALSE # if FALSE, will run only binary traits HighConfidence_Coop, MeanCoopTie2Noncoop, Griesser2017FamilialLiving, Griesser2023.MoreThanTwoCaretakers versus FemaleSong_Agg01; if TRUE, will run all sociality traits and alternative cooperative breeding classifications
 source("run_04_simmap_overlap.R")
 
 # Generates Supplemental Table 13, 14 and calculates number of species to downsample in next script
@@ -24,10 +27,10 @@ source("run_05_bias_analyses.R")
 # Generates Figure 4A, Extended Data Figure 7A:
 source("run_06_phylopath_main.R")
 
-# Generates Figure 4B-C, Extended Data Figure 7B-D:
+# Generates Figure 4B-D, Extended Data Figure 7B-D:
 # Performs analyses used and calls script to make figures
 # Must run "run_05_bias_analyses.R" and "run_06_phylopath_main.R" before running
-n_iterations = 2
+n_iterations = 2 
 source("run_07_phylopath_downsampling.R")
 
 # Generates Supplemental Table 15; Extended Data Figure 6:

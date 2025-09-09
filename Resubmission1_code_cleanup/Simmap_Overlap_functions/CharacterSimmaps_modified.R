@@ -12,7 +12,7 @@ library(phytools)
 library(stringr)
 library(tidyverse)
 
-CharacterSimmaps_modified <- function(columns, df, tree, dummy, nsims, treelabel, 
+CharacterSimmaps_modified <- function(columns, df, tree, dummy, nsims, treelabel, # dummy is set to TRUE and then FALSE in successive runs of this function to get both sets of simmaps
                                     datalabel = NULL, 
                                     dummyMethod = c("simHistory", "makeSimmap"), 
                                     plotSampleSimmaps = FALSE, 
@@ -23,7 +23,7 @@ CharacterSimmaps_modified <- function(columns, df, tree, dummy, nsims, treelabel
                                     columnGlobalQrates = NULL,
                                     calculate_transitions = TRUE,
                                     save_simmaps = TRUE,
-                                    output_dir = "Simmap Overlap Outputs",
+                                    output_dir = "Simmap_Overlap_Outputs",
                                     trait1_real_multisimmapRDS = NULL,
                                     trait2_real_multisimmapRDS = NULL,
                                     trait1_dummy_multisimmapRDS = NULL,

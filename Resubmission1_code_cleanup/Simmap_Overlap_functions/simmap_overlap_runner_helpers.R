@@ -182,6 +182,8 @@ prepareRatePvals <- function(TransitionStats, nsims) {
 runSimmapOverlapAnalysis <- function(trait1, trait2, 
                                    nsims_real = 500, nsims_dummy = 500,
                                    tree_file = NULL, data_file = NULL,
+                                   setQratesTree = NULL, 
+                                   setQratesData = NULL, 
                                    calculate_transitions = TRUE,
                                    plot_transitions = TRUE,
                                    save_outputs = TRUE,
@@ -242,7 +244,7 @@ runSimmapOverlapAnalysis <- function(trait1, trait2,
     dfout_result <- CharacterSimmaps_modified(
       columns = columns, df = df, tree = tree,
       dummy = FALSE, nsims = nsims_real,
-      treelabel = "tree", datalabel = NULL,
+      treelabel = "tree", datalabel = NULL, 
       output_dir = output_dir,
       calculate_transitions = calculate_transitions,
       return_simmaps = calculate_transitions,
@@ -257,6 +259,8 @@ runSimmapOverlapAnalysis <- function(trait1, trait2,
       dummy = FALSE, nsims = nsims_real,
       treelabel = "tree", datalabel = NULL,
       output_dir = output_dir,
+      setQratesTree = setQratesTree, 
+      setQratesData = setQratesData, 
       calculate_transitions = calculate_transitions,
       return_simmaps = calculate_transitions,
       other_label = other_label,
@@ -299,6 +303,8 @@ runSimmapOverlapAnalysis <- function(trait1, trait2,
       output_dir = output_dir,
       calculate_transitions = FALSE,  # Never calculate transitions for dummy
       return_simmaps = FALSE,
+      setQratesTree = setQratesTree, 
+      setQratesData = setQratesData, 
       other_label = other_label,
       dirs = dirs
     )
@@ -481,4 +487,137 @@ extractTraitLabels <- function(trait1, trait2) {
     trait1_labels = trait1_labels,
     trait2_labels = trait2_labels
   ))
+}
+
+
+
+#### calcHuelflex fxn for multistate categorical traits ----
+# only works with output csvs that have the state combinations with DUMMY and REAL in the column names
+calcHuelflex = function(overlapdf) { # 
+  require(dplyr)
+  overlapdf$X=NULL
+  colnames(overlapdf)
+  
+  nsims = length(overlapdf[,1])
+  
+  overlapdf[,4:length(colnames(overlapdf))] = apply(overlapdf[,4:length(colnames(overlapdf))], MARGIN = 2, FUN = as.numeric) 
+  overlaplonger = overlapdf %>%   pivot_longer(
+    cols = !c(tree, trait1, trait2),  # may need to be c(tree, trait1, trait2) for some old files?
+    names_to = "state",  
+    values_to = "proportion"          # The name of the new column for the values
+  )
+  overlaplonger$Which = NA
+  overlaplonger$Which[which(str_detect(overlaplonger$state, "DUMMY"))] = "Dummy"
+  overlaplonger$Which[which(str_detect(overlaplonger$state, "REAL"))] = "Real"
+  overlaplonger$state <- gsub( "_DUMMY", "", overlaplonger$state)
+  overlaplonger$state <- gsub( "_REAL", "", overlaplonger$state)
+  
+  df_long <- overlaplonger %>%
+    separate(state, into = c("trait_state", "FS"), sep = "_FS") 
+  
+  total_times_trait <- df_long %>%
+    group_by(tree, trait1, trait2, trait_state, Which) %>%
+    summarize(total_trait = sum(proportion), .groups = "drop")
+  
+  total_times_FS <- df_long %>%
+    group_by(tree, trait1, trait2, FS, Which) %>%
+    summarize(total_FS = sum(proportion), .groups = "drop")
+  
+  df_long <- df_long %>%
+    left_join(total_times_trait, by = c("tree", "trait1", "trait2", "trait_state", "Which")) %>%
+    left_join(total_times_FS, by = c("tree", "trait1", "trait2", "FS", "Which"))
+  
+  df_long <- df_long %>%
+    mutate(expected_proportion = total_trait * total_FS)
+  
+  df_real <- df_long %>%
+    filter(Which == "Real")
+  df_real <- df_real %>%
+    mutate(abs_diff = abs(proportion - expected_proportion))
+  
+  D_real <- df_real %>%
+    summarize(total_abs_diff = sum(abs_diff)) %>%
+    pull(total_abs_diff) / nsims
+  
+  Real_dsims <- df_real %>%
+    select(tree, trait1, trait2, trait_state, FS, abs_diff) %>%
+    group_by(tree, trait1, trait2) %>%
+    summarize(Real_dsim = sum(abs_diff), .groups = "drop")
+  
+  # Dummy data
+  # Step 1: Filter for "Dummy" data
+  df_dummy <- df_long %>%
+    filter(Which == "Dummy")
+  
+  # Step 2: Calculate the absolute differences
+  df_dummy <- df_dummy %>%
+    mutate(abs_diff = abs(proportion - expected_proportion))
+  
+  # Step 3: Calculate Dummy_dsums (row-wise sums of the absolute differences)
+  Dummy_dsums <- df_dummy %>%
+    group_by(tree, trait1, trait2) %>%
+    summarize(Dummy_dsum = sum(abs_diff), .groups = "drop")
+  
+  #hist(Real_dsims$Real_dsim)
+  #hist(Dummy_dsums$Dummy_dsum)
+  #abline(v = D_real)
+  numGreater = sum(Dummy_dsums$Dummy_dsum > D_real)
+  pval = sum(Dummy_dsums$Dummy_dsum > D_real)/nsims
+  
+  ## Get num Dummy greater than median real
+  # Calculate medians for "Real" data
+  medians_real <- df_long %>%
+    filter(Which == "Real") %>%
+    group_by(trait_state, FS) %>%
+    summarize(median_real = median(proportion), .groups = "drop")
+  
+  # Filter for "Dummy" data
+  df_dummy <- df_long %>%
+    filter(Which == "Dummy")
+  
+  # Join the medians back to the "Dummy" data
+  df_dummy <- df_dummy %>%
+    left_join(medians_real, by = c("trait_state", "FS"))
+  
+  # Calculate the fraction for each state in "Dummy" data
+  fraction_dummy_less_than_median_real <- df_dummy %>%
+    group_by(trait_state, FS) %>%
+    summarize(fraction = sum(proportion <= median_real) / n(), .groups = "drop")
+  
+  
+  trait1 = overlaplonger$trait1[1]
+  trait2 = overlaplonger$trait2[1]
+  
+  plotlabel = paste(trait1, trait2)
+  dummytitle = paste("Nsims =", nsims, "\nnum Dummy dsums > D_real:", numGreater, ", pval =", pval)
+  
+  xmax = max(c(Real_dsims$Real_dsim, Dummy_dsums$Dummy_dsum))*1.1
+  
+  # ggplot histograms to return
+  p1 <- ggplot(Real_dsims, aes(x = Real_dsim)) +
+    geom_histogram(binwidth = xmax/20, fill = rgb(0.2, 0.5, 0.7, 0.5), color = "white") +
+    geom_vline(xintercept = D_real, color = "red") +
+    xlim(c(0, xmax)) +
+    labs(title = plotlabel, x = "D statistic from real data simmaps", y = "Frequency") +
+    theme_minimal(base_size = 10)
+  
+  # Create the histogram for Dummy_dsums
+  p2 <- ggplot(Dummy_dsums, aes(x = Dummy_dsum)) +
+    geom_histogram(binwidth = xmax/20, fill = rgb(0.7, 0.5, 0.2, 0.5), color = "white") +
+    xlim(c(0, xmax)) +
+    labs(title = dummytitle, x = "D statistic from simulated independent data simmaps", y = "Frequency") +
+    theme_minimal(base_size = 10)
+  
+  #pdf(paste("simmap overlap Real Dummy multiState Proportions Boxplot -", trait1, trait2, nsims, "sims.pdf"))
+  boxplotStates <- ggplot(overlaplonger, aes(x = state, y = proportion, fill = Which)) +
+    geom_boxplot(outlier.shape = NA) + # Exclude outliers
+    theme_minimal() +
+    labs(y = "Observed State Proportion", x = "", fill = "Simulation Data") +
+    scale_fill_manual(values = c("Real" = "blue", "Dummy" = "red")) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    ggtitle(paste(trait1, trait2, "p =", pval))
+  #dev.off()
+  
+  return(list(p1=p1, p2=p2, boxplotStates = boxplotStates, fraction_dummy_less_than_median_real = fraction_dummy_less_than_median_real))
+  
 }
