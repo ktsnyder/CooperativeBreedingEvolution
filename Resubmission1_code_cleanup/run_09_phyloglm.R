@@ -8,8 +8,13 @@ tree = read.nexus(treefile)
 source(file.path("PhyloGLM_functions", "batch_runner.R"))
 source(file.path("PhyloGLM_functions", "config_builder.R"))
 
+if (!exists("nBoot")) {
+  nBoot = 100
+  print("Defaulting to nBoot = 100. To run the tests as performed in the manuscript, set nBoot = 500.")
+}
+
 ## Base analyses ----
-## Results akin to Table 2 are in Outputs/PhyloGLM_outputs/PhyloGLM_Batch_[Date]_[Time]_boot100/individual_analyses/[analysis name]/best_model_effects.csv
+## Results akin to Table 1 are in Outputs/PhyloGLM_outputs/PhyloGLM_Batch_[Date]_[Time]_boot100/individual_analyses/[analysis name]/best_model_effects.csv
 configs <- list()
 # 1. BASIC ANALYSES (with logMass_normalized control)
 # FS vs CB with territoriality weak strong
@@ -44,17 +49,58 @@ configs$cb_fs_terr3_massnorm <- create_analysis_config(
   name = "CB_FS_Terr3_MassNorm"
 )
 
+
 batch_results <- run_phyloglm_batch(
   analysis_configs = configs,
   data = data,
   tree = tree,
   output_dir = file.path("Outputs", "PhyloGLM_outputs"),
-  bootstrap_n = 100,  
+  bootstrap_n = nBoot,  
   save_intermediate = TRUE
 )
 
-## Direct-comparison of cooperative breeding versus other sociality variables ----
+## Base analyses using alternative cooperative breeding classifications ----
+# Generates results akin to Supplemental Tables 15 & 16
+if (!exists("run_alt_coop")) {
+  run_alt_coop = FALSE
+  print("Defaulting to not running base phyloglm analyses with each alternative cooperative breeding classification method. To run these analyses, define run_alt_coop = TRUE")
+}
 
+if (run_alt_coop) {
+  source("subsettreedata.R")
+  
+  AltCoops = c("MeanCoopTie2Noncoop", "MeanCoopTie2Coop", "MeanCoopOmitTies", "AnyCoopEqualsCoop", "AnyNoncoopEqualsNoncoop", "HighConf_Coop_DefaultToCockburnInferred", "CockburnCoop", "CockburnInferred", "JetzCoopInclCockburn", "Griesser2017Coop", "DaleCoop", "CornwallisCoop")
+  
+  output_dir = file.path("Outputs", "PhyloGLM_outputs", "AltCoops")
+  
+  for (i in 1:length(AltCoops)) {
+    tempcoop = AltCoops[i]
+    
+    subsetout <- subsettreedata(columns = c(tempcoop, "FemaleSong_Agg01", "logMass_normalized", "TerritorialityWeakVsStrong"), newdata = "Data_R.csv", newtree = "ConsensusPasserineTreeHackett4_1000_OscineSubset.nex")
+    subsetdf = subsetout$subsetdf
+    rownames(subsetdf) <- subsetdf$species
+    subsettree = subsetout$subsettree
+    
+    FS_response_formula = paste("FemaleSong_Agg01 ~", tempcoop ,"* TerritorialityWeakVsStrong + logMass_normalized")
+    print(FS_response_formula)
+    
+    FS_vs_CBxTerrWS_Mass <- run_bootstrap_model(formula = as.formula(FS_response_formula), data = subsetdf, tree = subsettree, n_boot = nBoot, method = "logistic_MPLE", save_prefix = paste0("FS_vs_", tempcoop, "xTerrWS_Mass"), save_matrices = TRUE, matrix_dir = output_dir, save_coefficient_csv = TRUE, use_bootstrap_pvalues = TRUE)
+    
+    CB_response_formula = paste(tempcoop, "~ FemaleSong_Agg01 * TerritorialityWeakVsStrong")
+    print(CB_response_formula)
+    
+    CB_vs_FSxTerrWS <- run_bootstrap_model(formula = as.formula(CB_response_formula), data = subsetdf, tree = subsettree, n_boot = nBoot, method = "logistic_MPLE", save_prefix = paste0(tempcoop,"_vs_FSxTerrWS"), save_matrices = TRUE, matrix_dir = output_dir, save_coefficient_csv = TRUE, use_bootstrap_pvalues = TRUE)
+  }
+  
+  source(file.path("PhyloGLM_functions", "compile_phyloglm_altcoops_tables.R"))
+} else {
+  print("Not running base phyloglm analyses with each alternative cooperative breeding classification method. To run these analyses, define run_alt_coop = TRUE")
+}
+
+## Direct-comparison of the effect of cooperative breeding versus other sociality variables on prediction of female song  ----
+# Performs analyses and generates tables with results akin to those in Table 2, Supplemental Table 18
+# Results located in Outputs/PhyloGLM_outputs/Replace_Coop_With_Soc/Replace_Coop_Additive/Replace_Coop_Summary_Table_boot[nBoot].csv 
+source(file.path("PhyloGLM_functions", "replace_Coop_phyloglms.R"))
 
 
 ## Stepwise iterative model expansion ----

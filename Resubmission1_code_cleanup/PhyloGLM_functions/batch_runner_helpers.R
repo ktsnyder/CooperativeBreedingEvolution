@@ -204,10 +204,314 @@ create_best_model_effects <- function(effects, comparison, boot_results = NULL) 
   return(best_summary)
 }
 
-
-# Removed model_average_effects()
-
-# Removed create_analysis_plots()
+# Function to run bootstrap model
+run_bootstrap_model <- function(formula, data, tree, n_boot = 500, 
+                                method = "logistic_MPLE", save_prefix = NULL,
+                                save_matrices = TRUE, matrix_dir = NULL,
+                                save_coefficient_csv = TRUE,
+                                use_bootstrap_pvalues = FALSE,
+                                bias_threshold_sd = 1.0) {
+  
+  # Fit original model
+  original_fit <- phyloglm(
+    formula = formula,
+    data = data,
+    phy = tree,
+    method = method,
+    btol = 50,
+    log.alpha.bound = 4
+  )
+  
+  # Get bootstrap results
+  boot_fit <- phyloglm(
+    formula = formula,
+    data = data,
+    phy = tree,
+    method = method,
+    btol = 50,
+    log.alpha.bound = 4,
+    boot = n_boot
+  )
+  
+  # Get coefficient information with GUARANTEED alignment
+  original_coef <- coef(original_fit)
+  coef_names <- names(original_coef)
+  n_coef <- length(coef_names)
+  
+  # Get summary information - extract by name to ensure alignment
+  fit_summary <- summary(original_fit)$coefficients
+  
+  # CRITICAL: Extract p-values and SEs by matching names
+  param_pvals <- numeric(n_coef)
+  std_errors <- numeric(n_coef)
+  
+  for (i in 1:n_coef) {
+    param_name <- coef_names[i]
+    if (param_name %in% rownames(fit_summary)) {
+      param_pvals[i] <- fit_summary[param_name, "p.value"]
+      std_errors[i] <- fit_summary[param_name, "StdErr"]
+    } else {
+      warning(paste("Parameter", param_name, "not found in summary output"))
+      param_pvals[i] <- NA
+      std_errors[i] <- NA
+    }
+  }
+  
+  # Initialize bootstrap p-values as NA
+  boot_pvals <- rep(NA, n_coef)
+  
+  # Extract bootstrap results
+  if (!is.null(boot_fit$bootstrap)) {
+    boot_matrix <- boot_fit$bootstrap
+    
+    # CRITICAL: Check if bootstrap matrix has column names
+    # If not, we need to be very careful about order
+    if (!is.null(colnames(boot_matrix))) {
+      # Reorder bootstrap matrix to match coefficient order
+      boot_matrix_ordered <- matrix(NA, nrow = nrow(boot_matrix), ncol = n_coef)
+      colnames(boot_matrix_ordered) <- coef_names
+      
+      for (i in 1:n_coef) {
+        param_name <- coef_names[i]
+        if (param_name %in% colnames(boot_matrix)) {
+          boot_matrix_ordered[, i] <- boot_matrix[, param_name]
+        } else {
+          # Try to match by position if names don't match
+          if (i <= ncol(boot_matrix)) {
+            boot_matrix_ordered[, i] <- boot_matrix[, i]
+            warning(paste("Parameter", param_name, 
+                          "not found in bootstrap matrix by name, using position", i))
+          }
+        }
+      }
+      boot_matrix_coef <- boot_matrix_ordered
+    } else {
+      # No column names - assume order matches (but warn)
+      if (ncol(boot_matrix) >= n_coef) {
+        boot_matrix_coef <- boot_matrix[, 1:n_coef, drop = FALSE]
+        warning("Bootstrap matrix has no column names - assuming parameter order matches coefficient order")
+      } else {
+        stop("Bootstrap matrix has fewer columns than coefficients")
+      }
+    }
+    
+    # Save matrix if requested
+    matrix_file <- NULL
+    if (save_matrices && !is.null(save_prefix) && !is.null(matrix_dir)) {
+      dir.create(matrix_dir, recursive = TRUE, showWarnings = FALSE)
+      matrix_file <- file.path(matrix_dir, paste0(save_prefix, "_boot", n_boot, "_matrix.rds"))
+      # Save with column names for future reference
+      colnames(boot_matrix_coef) <- coef_names
+      saveRDS(boot_matrix_coef, matrix_file, compress = TRUE)
+    }
+    
+    # Calculate bootstrap statistics
+    boot_means <- colMeans(boot_matrix_coef, na.rm = TRUE)
+    boot_sds <- apply(boot_matrix_coef, 2, sd, na.rm = TRUE)
+    boot_lower <- apply(boot_matrix_coef, 2, quantile, probs = 0.025, na.rm = TRUE)
+    boot_upper <- apply(boot_matrix_coef, 2, quantile, probs = 0.975, na.rm = TRUE)
+    
+    # ALWAYS calculate bootstrap-based p-values (for comparison)
+    for (i in 1:n_coef) {
+      boot_samples <- boot_matrix_coef[, i]
+      boot_samples <- boot_samples[!is.na(boot_samples)]
+      if (length(boot_samples) > 0) {
+        if (original_coef[i] > 0) {
+          boot_pvals[i] <- 2 * min(mean(boot_samples <= 0), mean(boot_samples >= 0))
+        } else if (original_coef[i] < 0) {
+          boot_pvals[i] <- 2 * min(mean(boot_samples >= 0), mean(boot_samples <= 0))
+        } else {
+          boot_pvals[i] <- 1
+        }
+      } else {
+        boot_pvals[i] <- NA
+      }
+    }
+    
+    # Decide which p-values to use for significance stars
+    if (use_bootstrap_pvalues) {
+      pvals_for_sig <- boot_pvals
+    } else {
+      pvals_for_sig <- param_pvals
+    }
+    
+    # Add significance stars based on selected p-values
+    Significance <- character(n_coef)
+    for (i in 1:n_coef) {
+      if (is.na(pvals_for_sig[i])) {
+        Significance[i] <- ""
+      } else if (pvals_for_sig[i] < 0.001) {
+        Significance[i] <- "***"
+      } else if (pvals_for_sig[i] < 0.01) {
+        Significance[i] <- "**"
+      } else if (pvals_for_sig[i] < 0.05) {
+        Significance[i] <- "*"
+      } else if (pvals_for_sig[i] < 0.1) {
+        Significance[i] <- "."
+      } else {
+        Significance[i] <- ""
+      }
+    }
+    
+    # Calculate odds ratios - these are aligned with coefficients
+    Odds_Ratio_OG <- exp(original_coef)
+    Odds_Ratio_Boot <- exp(boot_means)
+    OR_CI_Lower <- exp(boot_lower)
+    OR_CI_Upper <- exp(boot_upper)
+    
+    # Calculate bias metrics
+    Bias <- boot_means - original_coef
+    Bias_SE_Units <- Bias / boot_sds
+    Relative_Bias <- Bias / abs(original_coef)
+    Relative_Bias[is.infinite(Relative_Bias)] <- NA  # Handle division by zero
+    
+    # Create coefficient summary with all information
+    coef_summary <- data.frame(
+      Parameter = coef_names,
+      Estimate = original_coef,
+      Boot_Mean = boot_means,
+      Boot_SD = boot_sds,
+      Bias = Bias,
+      Bias_SE_Units = Bias_SE_Units,
+      Relative_Bias = Relative_Bias,
+      CI_Lower = boot_lower,
+      CI_Upper = boot_upper,
+      Odds_Ratio_OG = Odds_Ratio_OG,
+      Odds_Ratio = Odds_Ratio_Boot,
+      OR_CI_Lower = OR_CI_Lower,
+      OR_CI_Upper = OR_CI_Upper,
+      p_value_param = param_pvals,
+      p_value_boot = boot_pvals,
+      p_value = pvals_for_sig,  # The one used for significance
+      Significance = Significance,
+      row.names = NULL,  # Avoid row names to prevent confusion
+      stringsAsFactors = FALSE
+    )
+    
+    n_successful <- sum(complete.cases(boot_matrix_coef))
+    n_converged <- sum(!is.na(boot_matrix_coef[,1]))
+    convergence_rate <- n_converged / n_boot
+    
+  } else {
+    # Fallback when bootstrap fails
+    message("Note: boot_fit$bootstrap was NULL; using parametric standard errors for CIs")
+    
+    # Add significance stars
+    Significance <- character(n_coef)
+    for (i in 1:n_coef) {
+      if (is.na(param_pvals[i])) {
+        Significance[i] <- ""
+      } else if (param_pvals[i] < 0.001) {
+        Significance[i] <- "***"
+      } else if (param_pvals[i] < 0.01) {
+        Significance[i] <- "**"
+      } else if (param_pvals[i] < 0.05) {
+        Significance[i] <- "*"
+      } else if (param_pvals[i] < 0.1) {
+        Significance[i] <- "."
+      } else {
+        Significance[i] <- ""
+      }
+    }
+    
+    # Calculate CIs and odds ratios using parametric estimates
+    param_ci_lower <- original_coef - 1.96 * std_errors
+    param_ci_upper <- original_coef + 1.96 * std_errors
+    
+    coef_summary <- data.frame(
+      Parameter = coef_names,
+      Estimate = original_coef,
+      Boot_Mean = original_coef,
+      Boot_SD = std_errors,
+      Bias = 0,  # No bias if no bootstrap
+      Bias_SE_Units = 0,
+      Relative_Bias = 0,
+      CI_Lower = param_ci_lower,
+      CI_Upper = param_ci_upper,
+      Odds_Ratio_OG = exp(original_coef),
+      Odds_Ratio = exp(original_coef),
+      OR_CI_Lower = exp(param_ci_lower),
+      OR_CI_Upper = exp(param_ci_upper),
+      p_value_param = param_pvals,
+      p_value_boot = boot_pvals,  # Will be NA
+      p_value = param_pvals,
+      Significance = Significance,
+      row.names = NULL,
+      stringsAsFactors = FALSE
+    )
+    matrix_file <- NULL
+    n_successful <- 1
+    n_converged <- 1
+    convergence_rate <- 1
+  }
+  
+  # Check for bias issues
+  if (!is.null(boot_fit$bootstrap)) {
+    bias_issues <- abs(coef_summary$Bias_SE_Units) > bias_threshold_sd & !is.na(coef_summary$Bias_SE_Units)
+    if (any(bias_issues)) {
+      message("\nWARNING: Large bootstrap bias detected:")
+      for (i in which(bias_issues)) {
+        message(sprintf("  %s: Estimate = %.3f, Boot_Mean = %.3f (bias = %.1f SDs)",
+                        coef_summary$Parameter[i],
+                        coef_summary$Estimate[i],
+                        coef_summary$Boot_Mean[i],
+                        coef_summary$Bias_SE_Units[i]))
+      }
+    }
+  }
+  
+  # Diagnostic check: Print warning if p-value and CI disagree substantially
+  for (i in 1:nrow(coef_summary)) {
+    param <- coef_summary$Parameter[i]
+    p_val <- coef_summary$p_value[i]
+    or_lower <- coef_summary$OR_CI_Lower[i]
+    or_upper <- coef_summary$OR_CI_Upper[i]
+    
+    if (!is.na(p_val) && !is.na(or_lower) && !is.na(or_upper)) {
+      ci_excludes_1 <- (or_lower > 1) || (or_upper < 1)
+      p_significant <- p_val < 0.05
+      
+      if (ci_excludes_1 != p_significant) {
+        # Also check if parametric and bootstrap p-values disagree
+        param_sig <- coef_summary$p_value_param[i] < 0.05
+        boot_sig <- !is.na(coef_summary$p_value_boot[i]) && coef_summary$p_value_boot[i] < 0.05
+        
+        message(paste("\nWARNING: Parameter", param, "has inconsistent inference:"))
+        message(sprintf("  Parametric p-value: %.4f %s", 
+                        coef_summary$p_value_param[i],
+                        ifelse(param_sig, "(significant)", "(not significant)")))
+        if (!is.na(coef_summary$p_value_boot[i])) {
+          message(sprintf("  Bootstrap p-value: %.4f %s", 
+                          coef_summary$p_value_boot[i],
+                          ifelse(boot_sig, "(significant)", "(not significant)")))
+        }
+        message(sprintf("  OR 95%% CI: [%.3f, %.3f] %s",
+                        or_lower, or_upper,
+                        ifelse(ci_excludes_1, "(excludes 1)", "(includes 1)")))
+      }
+    }
+  }
+  
+  # Save coefficient summary if requested
+  if (save_coefficient_csv && !is.null(save_prefix) && !is.null(matrix_dir)) {
+    csv_filename <- paste0("coefficients_OddsRatios_", save_prefix, "_boot", n_boot, ".csv")
+    write.csv(coef_summary, 
+              file.path(matrix_dir, csv_filename), 
+              row.names = FALSE)
+  }
+  
+  return(list(
+    fit = original_fit,
+    bootstrap_fit = boot_fit,
+    coefficients = coef_summary,
+    bootstrap_matrix_file = matrix_file,
+    n_successful_boots = n_successful,
+    n_converged = n_converged,
+    convergence_rate = convergence_rate,
+    bias_threshold_sd = bias_threshold_sd,
+    inference_method = ifelse(use_bootstrap_pvalues, "bootstrap", "parametric")
+  ))
+}
 
 #' Integrate results across batch analyses
 #' 

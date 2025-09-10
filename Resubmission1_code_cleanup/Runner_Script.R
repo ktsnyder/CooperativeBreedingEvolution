@@ -45,14 +45,18 @@ source("run_08_phylopath_altCoop.R")
 
 
 ### PhyloGLM ---
-# Generates Tables 1-2, Supplemental Tables 15-18, 21-24
+## Generates Tables 1-2, Supplemental Tables 15-18, 21-24
+# 
 # Base phyloglm (Table 1, Supplemental Table 17) and with alt Coops (Supplemental Tables 15-16)
-# 
-# 
+# # Results output to Outputs/PhyloGLM_outputs/PhyloGLM_Batch_[Date]_[Time]_boot100/individual_analyses/[analysis name]/best_model_effects.csv
 # 
 # Direct-comparison Coop vs Sociality factors (Table 2, Supplemental Table 18)
+# # Results output to Outputs/PhyloGLM_outputs/Replace_Coop_With_Soc/Replace_Coop_Additive/Replace_Coop_Summary_Table_boot[nBoot].csv 
 # 
 # Stepwise iterative (Supplemental Tables 21-24)
 # 
+nBoot = 100 # number of bootstrap iterations for test run. Set to 500 to replicate analyses performed for the manuscript
+run_alt_coop = FALSE # set to TRUE to run base phyloglm analyses for alternative cooperative breeding classifications
+source("run_09_phyloglm.R")
 
 
