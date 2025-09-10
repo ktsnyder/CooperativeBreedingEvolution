@@ -1,6 +1,13 @@
 #### Full Runner Script ----
 ### First revision, 9/1/2025
 
+## To run:
+# Set working directory to the main folder in this codebase.
+
+
+# Re-generate consensus tree (optional - all analyses use a consensus tree previously calculated using this method)
+
+
 # Generates Supplemental Table 3 - phylANOVA
 source("run_01_phylANOVA.R")
 
@@ -30,10 +37,22 @@ source("run_06_phylopath_main.R")
 # Generates Figure 4B-D, Extended Data Figure 7B-D:
 # Performs analyses used and calls script to make figures
 # Must run "run_05_bias_analyses.R" and "run_06_phylopath_main.R" before running
-n_iterations = 2 
+n_iterations = 2 # Change to 500 to perform analyses as in publication
 source("run_07_phylopath_downsampling.R")
 
 # Generates Supplemental Table 15; Extended Data Figure 6:
 source("run_08_phylopath_altCoop.R")
+
+
+### PhyloGLM ---
+# Generates Tables 1-2, Supplemental Tables 15-18, 21-24
+# Base phyloglm (Table 1, Supplemental Table 17) and with alt Coops (Supplemental Tables 15-16)
+# 
+# 
+# 
+# Direct-comparison Coop vs Sociality factors (Table 2, Supplemental Table 18)
+# 
+# Stepwise iterative (Supplemental Tables 21-24)
+# 
 
 
