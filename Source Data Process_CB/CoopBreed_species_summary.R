@@ -15,15 +15,14 @@
 ## 5/13/2024 - added AnyNoncoopEqualsNoncoop, require dplyr
 ## 6/6/2024 - fixed AnyNoncoopEqualsNoncoop (had assigned anything containing "0" as "1" *facepalm*); made new output column "JetzCoopInclCockburn" to enable single-source testing of Jetz data; integrated code from end of merge_data_allcolumns.R that added the HighConfidence_Coop column to the database and associated HighConfCoopFile = "2024-05-13_CoopClassesWSourceColumns_HighConfCoopColumn.csv" arg
 ## 6/7/2024 - AnyNoncoopEqualsNoncoop - made it be NA if meanclass is NA 
-
-#setwd("~/Desktop/CooperativeBreedingEvolution/Source Data Process_CB")
+## 9/11/2025 - made HighConfCoopFile default NULL
 
 #coopbreedfile = "2024-02-24_Aggregate_CBSource_Data_AllColumns.csv"
 #coopbreedfile = "2024-05-13_Aggregate_CBSource_Data_AllColumns.csv"
 #CoopBreed_species_summary(coopbreedfile = coopbreedfile)
 
 
-CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Update.csv", HighConfCoopFile = "2024-05-13_CoopClassesWSourceColumns_HighConfCoopColumn.csv") {
+CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Update.csv", HighConfCoopFile = NULL) {
   require(dplyr)
   ourdf <- read.csv(file = coopbreedfile)
   
@@ -266,7 +265,7 @@ CoopBreed_species_summary <- function(coopbreedfile, songfile = "SongData_R_Upda
 
   write.csv(summaryNoDups, file = paste0(Sys.Date(), "_working_coop_breed.csv"), row.names = FALSE)
   
-  CoopSourcesdf = merge(summaryNoDups, ourdf[,c("BirdtreeSpecies", "FemaleSong_Agg01", "HighConfidence_FemaleSong", "O.C", "System_Jetz2011", "Source_Jetz2011", "breeding.system_Downing2015", "justification_Downing2015", "cooperation.references_Downing2015", "KnownParentalCare_Cockburn2006", "InferredParentalCare_Cockburn2006", "Source_Cockburn2006", "MateSys5_Dunn2015", "BS_Biagolini2017", "O.F_Riehl2013", "Kin_Riehl2013", "Frequency_Riehl2013", "Social_breeding_system_when_cooperative_Riehl2013", "Social_System_RubensteinLovette2007", "engage.in.misdirected.parental.care_Griesser2016", "parental.care.mode_Griesser2016", "number.of.Zoological.Record.entries_Griesser2016","Griesser2017_speciesnames_Griesser2017", "social_system_Griesser2017", "social_system_incl_nk_coop_Griesser2017", "social_system_assessment_Griesser2017", "zoological_record_hits_Griesser2017", "Cooperative.BOW", "BOW.Quote", "Cooperative_breeding_ppca_Dale2015", "Cooperation_Remes2015", "Breeding.system_Cornwallis2017", "Reference.for.Breeding.System.1_Cornwallis2017", "Reference.for.Breeding.System.2_Cornwallis2017", "Reference.for.Breeding.System.3_Cornwallis2017", "Family3_BirdtreeMatchSpecies2_AVONET", "Order_AVONET", "EPP.10..threshold","EPP.source.s.",  "EPP.Source.data", "promiscuity...._Downing2015", "promiscuity.reference_Downing2015", "EPP1_Biagolini2017", "EPB1_Biagolini2017", "EPP2_Biagolini2017", "EPB2_Biagolini2017", "Ref._Biagolini2017", "EPP_Remes2015", "EPY_Remes2015", "Refs_Paternity_Remes2015", "Percentage.of.extra.group.paternity_Cornwallis2017", "Reference.for.Parentage_Cornwallis2017", colnames(ourdf)[which(str_detect(colnames(ourdf), "Griesser2023"))] )], by.x = "species", by.y = "BirdtreeSpecies", all = T)
+  CoopSourcesdf = merge(summaryNoDups, ourdf[,c("BirdtreeSpecies", "FemaleSong_Agg01", "HighConfidence_FemaleSong", "O.C", "System_Jetz2011", "Source_Jetz2011", "breeding.system_Downing2015", "justification_Downing2015", "cooperation.references_Downing2015", "KnownParentalCare_Cockburn2006", "InferredParentalCare_Cockburn2006", "Source_Cockburn2006", "MateSys5_Dunn2015", "BS_Biagolini2017", "O.F_Riehl2013", "Kin_Riehl2013", "Frequency_Riehl2013", "Social_breeding_system_when_cooperative_Riehl2013", "Social_System_RubensteinLovette2007", "engage.in.misdirected.parental.care_Griesser2016", "parental.care.mode_Griesser2016", "number.of.Zoological.Record.entries_Griesser2016","Griesser2017_speciesnames_Griesser2017", "social_system_Griesser2017", "social_system_incl_nk_coop_Griesser2017", "social_system_assessment_Griesser2017", "zoological_record_hits_Griesser2017", "Cooperative.BOW", "BOW.Quote", "Cooperative_breeding_ppca_Dale2015", "Breeding.system_Cornwallis2017", "Reference.for.Breeding.System.1_Cornwallis2017", "Reference.for.Breeding.System.2_Cornwallis2017", "Reference.for.Breeding.System.3_Cornwallis2017", "Family3_BirdtreeMatchSpecies2_AVONET", "Order_AVONET", "EPP.10..threshold","EPP.source.s.",  "EPP.Source.data", "promiscuity...._Downing2015", "promiscuity.reference_Downing2015", "EPP1_Biagolini2017", "EPB1_Biagolini2017", "EPP2_Biagolini2017", "EPB2_Biagolini2017", "Ref._Biagolini2017", "Percentage.of.extra.group.paternity_Cornwallis2017", "Reference.for.Parentage_Cornwallis2017", colnames(ourdf)[which(str_detect(colnames(ourdf), "Griesser2023"))] )], by.x = "species", by.y = "BirdtreeSpecies", all = T)
   print(CoopSourcesdf$species[which(duplicated(CoopSourcesdf$species))])
   write.csv(CoopSourcesdf, file = paste0(Sys.Date(),"_CoopClassesWSourceColumns.csv"), row.names = FALSE)
   
