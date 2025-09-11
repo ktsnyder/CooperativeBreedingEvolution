@@ -104,5 +104,40 @@ source(file.path("PhyloGLM_functions", "replace_Coop_phyloglms.R"))
 
 
 ## Stepwise iterative model expansion ----
+# Performs forward stepwise expansion starting from the best base models
+# Results located in Outputs/PhyloGLM_outputs/Stepwise/stepwise_[timestamp]/stepwise_summary_boot[nBoot].csv
+if (!exists("run_stepwise")) {
+  run_stepwise = FALSE
+  print("Defaulting to not running stepwise expansion. To run stepwise expansion, define run_stepwise = TRUE")
+}
+
+if (run_stepwise) {
+  source(file.path("PhyloGLM_functions", "stepwise_expansion.R"))
+  
+  # Define starting formulas based on the best base models
+  starting_formulas <- list(
+    # Female song as response with territoriality weak/strong
+    FemaleSong_Agg01 ~ HighConfidence_Coop * TerritorialityWeakVsStrong + logMass_normalized,
+    # Female song as response with territoriality year-round  
+    FemaleSong_Agg01 ~ HighConfidence_Coop + Territory_12vs3 + logMass_normalized,
+    # Cooperative breeding as response with territoriality weak/strong
+    HighConfidence_Coop ~ FemaleSong_Agg01 * TerritorialityWeakVsStrong,
+    # Cooperative breeding as response with territoriality year-round
+    HighConfidence_Coop ~ FemaleSong_Agg01 * Territory_12vs3
+  )
+  
+  stepwise_results <- run_stepwise_expansion(
+    formulas = starting_formulas,
+    data_path = "Data_R.csv",
+    tree_path = treefile,
+    aic_threshold = 2,
+    n_bootstrap = nBoot,
+    max_iterations = 100,
+    output_dir = file.path("Outputs", "PhyloGLM_outputs"),
+    verbose = TRUE
+  )
+} else {
+  print("Not running stepwise expansion. To run stepwise expansion, define run_stepwise = TRUE")
+}
 
 

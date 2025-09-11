@@ -54,9 +54,10 @@ source("run_08_phylopath_altCoop.R")
 # # Results output to Outputs/PhyloGLM_outputs/Replace_Coop_With_Soc/Replace_Coop_Additive/Replace_Coop_Summary_Table_boot[nBoot].csv 
 # 
 # Stepwise iterative (Supplemental Tables 21-24)
-# 
+# # Results output to Outputs/PhyloGLM_outputs/stepwise_[date]_[time]
 nBoot = 100 # number of bootstrap iterations for test run. Set to 500 to replicate analyses performed for the manuscript
 run_alt_coop = FALSE # set to TRUE to run base phyloglm analyses for alternative cooperative breeding classifications
+run_stepwise = TRUE
 source("run_09_phyloglm.R")
 
 
