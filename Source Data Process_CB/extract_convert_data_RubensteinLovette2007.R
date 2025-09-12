@@ -8,7 +8,13 @@
 library(pdftools)
 library(tidyverse)
 
-cbtext0 <- pdf_text("Rubenstein supp data.pdf") %>% readr::read_lines() #read the pdf. %>% is part of the tidyverse I think, and basically "pipes" something into something else, i.e. a function. This line is thus basically the same as "cbtext0 <- readr::read_lines(pdf_text("Prevalence of...")).
+# Check for required PDF file
+pdf_file <- "Rubenstein supp data.pdf"
+if (!file.exists(pdf_file)) {
+  stop("Required file '", pdf_file, "' not found")
+}
+
+cbtext0 <- pdf_text(pdf_file) %>% readr::read_lines() # Read PDF and convert to character vector
 
 cbtext1 <- cbtext0[8:52] # take out the first 7 rows (not data) and lines 53:65 (not data)
 

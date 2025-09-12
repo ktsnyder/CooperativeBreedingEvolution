@@ -6,14 +6,23 @@
 # Last Update: 8/17/2021 - added post-check to ensure all duplicates successfully removed for those sources that had 2+ entries for some species
 # Updated: 3/7/2022 - add Odom et al 2014
 
-setwd("Source Data Process_CB")
+# Set working directory to script location if not already there
+if (!grepl("Source Data Process_CB", getwd()) & dir.exists("Source Data Process_CB")) {
+  setwd("Source Data Process_CB") 
+}
 
 library(phytools)
+
+# Check for required tree file and load it
+if (!file.exists("birdzillatreeForTipNames.nex")) {
+  stop("Required file 'birdzillatreeForTipNames.nex' not found in current directory")
+}
 birdtree <- read.nexus("birdzillatreeForTipNames.nex")
-thousandtrees <- read.tree("~/Desktop/CooperativeBreedingEvolution/BirdzillaHackett3.tre")
-birdtree <- thousandtrees[[1]]
 AllBirdtreeSpecies <- birdtree$tip.label
 
+if (!file.exists("inconsistent_species_names_BirdTree.csv")) {
+  stop("Required file 'inconsistent_species_names_BirdTree.csv' not found in current directory")
+}
 misspelledbirds <- read.csv("inconsistent_species_names_BirdTree.csv") 
 duplicatemisspellings <- misspelledbirds$in_database[duplicated(misspelledbirds$in_database)]
 

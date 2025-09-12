@@ -10,8 +10,19 @@ df$logMaleFemalePlumageDiffAbs_normalized <- scale(df$logMaleFemalePlumageDiffAb
 data <- df
 
 data = read.csv("Data_R_2025-07-21.csv")
-data = read.csv('/Users/kate/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/Data_R_2025-09-12.csv')
+# Look for the most recent Data_R file
+data_files <- list.files(pattern = "^Data_R_.*\\.csv$", full.names = TRUE)
+if (length(data_files) == 0) {
+  stop("No Data_R_*.csv files found in current directory")
+}
+# Use the most recently modified file
+latest_file <- data_files[which.max(file.mtime(data_files))]
+cat("Using data file:", latest_file, "\n")
+data <- read.csv(latest_file)
 
+if (!file.exists("Data_R.csv")) {
+  stop("Required file 'Data_R.csv' not found in current directory")
+}
 data_official <- read.csv("Data_R.csv")
 
 #### Compare data ----## 

@@ -7,10 +7,16 @@
 library(pdftools)
 library(tidyverse)
 
-cbtext0 <- pdf_text("Riehl supp data table.pdf") %>% readr::read_lines() #read the pdf. %>% is part of the tidyverse I think, and basically "pipes" something into something else, i.e. a function. This line is thus basically the same as "cbtext0 <- readr::read_lines(pdf_text("Prevalence of...")).
+# Check for required PDF file
+pdf_file <- "Riehl supp data table.pdf"
+if (!file.exists(pdf_file)) {
+  stop("Required file '", pdf_file, "' not found")
+}
+
+cbtext0 <- pdf_text(pdf_file) %>% readr::read_lines() # Read PDF and convert to character vector
 
 
-#all of the functions that begin with "str_" are part of the "stringr" package (part of the tidyverse), which is for working with character objects using RegEx (Regular Expression) format
+# String manipulation functions for text processing
 removelines <- str_detect(cbtext0, ":") # make a logical vector of all lines that contain a space (i.e. all those with species names)
 cbtext1 <- cbtext0[!removelines] # subset to only those for which the above is FALSE
 cbtext1 <- cbtext1[19:length(cbtext1)] # take out the first 10 rows (not data)

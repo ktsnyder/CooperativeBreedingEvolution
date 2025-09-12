@@ -5,6 +5,7 @@
 # Set working directory to the main folder in this codebase.
 
 # Compile data (optional - all analyses use a data csv already compiled using this method)
+# See PDF "Source Data Process_CB/Unaltered from publication/Source Data Processes.pdf" for detailed notes on how files containing cooperative breeding classification data were processed and standardized for use in merge_data_allcolumns.R
 source("merge_data_allcolumns.R")
 
 # Re-generate consensus tree (optional - all analyses use a consensus tree previously calculated using this method)
