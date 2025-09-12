@@ -4,9 +4,11 @@
 ## To run:
 # Set working directory to the main folder in this codebase.
 
+# Compile data (optional - all analyses use a data csv already compiled using this method)
+source("merge_data_allcolumns.R")
 
 # Re-generate consensus tree (optional - all analyses use a consensus tree previously calculated using this method)
-
+# 
 
 # Generates Supplemental Table 3 - phylANOVA
 source("run_01_phylANOVA.R")

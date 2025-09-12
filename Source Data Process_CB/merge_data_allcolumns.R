@@ -18,7 +18,9 @@ require(ape)
 require(phytools)
 library(readxl)
 
-setwd("Source Data Process_CB")
+if (!grepl("Source Data Process_CB", getwd()) & dir.exists("Source Data Process_CB")) {
+  setwd("Source Data Process_CB") 
+} 
 
 birdtree = read.nexus("birdzillatreeForTipNames.nex")
 
@@ -369,40 +371,40 @@ dimorphism_data$PercentLogWingDimorphism = dimorphism_data$DiffMaleFemaleLogWing
 
 dimorphism_data$PercentAbsLogWingDimorphism = dimorphism_data$DiffMaleFemaleLogWingAbs / dimorphism_data$log_Wing.Length_mean_F_AVONET * 100
 
-dimorphism_data$PercentAbsLogWingDimorphism_normalized <- scale(dimorphism_data$PercentAbsLogWingDimorphism, center = T, scale = T)
-
 dfOs2 = merge(dfOs2, dimorphism_data, by.x = "species", by.y = "SpeciesUnderscored_AVONET", all.x = T)
 
 #### Normalized values of certain vectors ----
 data <- dfOs2
 
-data$logMaleFemalePlumageDiffAbs_normalized <- scale(data$logMaleFemalePlumageDiffAbs, center = T, scale = T)
+data$PercentAbsLogWingDimorphism_normalized <- as.numeric(scale(data$PercentAbsLogWingDimorphism, center = T, scale = T))
 
-data$caretakers_normalized <- scale(data$caretakers_Griesser2023, center = T, scale = T)
+data$logMaleFemalePlumageDiffAbs_normalized <- as.numeric(scale(data$logMaleFemalePlumageDiffAbs, center = T, scale = T))
+
+data$caretakers_normalized <- as.numeric(scale(data$caretakers_Griesser2023, center = T, scale = T))
 
 data$social_bonds_ordinal <- NA
 data$social_bonds_ordinal[which(data$social_bonds_Griesser2023 == "a-short")] <- 1
 data$social_bonds_ordinal[which(data$social_bonds_Griesser2023 == "b-season")] <- 2
 data$social_bonds_ordinal[which(data$social_bonds_Griesser2023 == "c-long")] <- 3
-data$social_bonds_normalized <- scale(data$social_bonds_ordinal, center = T, scale = T)
+data$social_bonds_normalized <- as.numeric(scale(data$social_bonds_ordinal, center = T, scale = T))
 
 data$grouping_ordinal = NA
 data$grouping_ordinal[which(data$grouping_Griesser2023 == "asocial")] <- 1
 data$grouping_ordinal[which(data$grouping_Griesser2023 == "pair")] <- 2
 data$grouping_ordinal[which(data$grouping_Griesser2023 == "small_groups")] <- 3
 data$grouping_ordinal[which(data$grouping_Griesser2023 == "large_groups")] <- 4
-data$grouping_normalized = scale(data$grouping_ordinal, center = T, scale = T)
+data$grouping_normalized = as.numeric(scale(data$grouping_ordinal, center = T, scale = T))
 
-data$logMass_normalized <- scale(data$logMass_AVONET, center = T, scale = T)
+data$logMass_normalized <- as.numeric(scale(data$logMass_AVONET, center = T, scale = T))
 
 data$abs_Latitude <- abs(as.numeric(data$Centroid.Latitude_AVONET))
-data$abs_Latitude_normalized <- scale(data$abs_Latitude, center = T, scale = T)
+data$abs_Latitude_normalized <- as.numeric(scale(data$abs_Latitude, center = T, scale = T))
 
-data$Migration_num <- as.numeric(data$Migration_AVONET)
+data$Migration_num <- as.numeric(data$Migration_AVONET)-2
 
 data$CockburnInferred <- NA
-data$CockburnInferred[which(data$InferredParentalCare_Cockburn2006 %in% c("Pair", "Female_only", "Brood_parasite"))] <- 0
-data$CockburnInferred[which(data$KnownParentalCare_Cockburn2006 == "Cooperation" | data$InferredParentalCare_Cockburn2006 == "Cooperation")] <- 1
+data$CockburnInferred[which(data$InferredParentalCare_Cockburn2006 %in% c("Pair", "Female_only"))] <- 0
+data$CockburnInferred[which(data$InferredParentalCare_Cockburn2006 == "Cooperation")] <- 1
 
 data$HighConf_Coop_DefaultToCockburnInferred <- data$HighConfidence_Coop
 data$HighConf_Coop_DefaultToCockburnInferred[which(!is.na(data$CockburnInferred))] <- data$CockburnInferred[which(!is.na(data$CockburnInferred))]
