@@ -97,7 +97,7 @@ source(file.path("Simmap_Overlap_functions","calcHuel_corrected.R"))
 Huelout = calcHuel_corrected(alldfout, alldummy, otherlabel = otherlabel)
 
 
-pdf(file = file.path("Simmap_Overlap_Outputs", paste("Simmap Overlap Outputs/simmap overlap states", trait1, trait2, otherlabel, nTreesToSample, "trees", nSimsPerTree, "simsPerTree", ".pdf")))
+pdf(file = file.path("Simmap_Overlap_Outputs", paste("simmap overlap states", trait1, trait2, otherlabel, nTreesToSample, "trees", nSimsPerTree, "simsPerTree", ".pdf")))
 Huelout$plots$p3
 dev.off()
 
