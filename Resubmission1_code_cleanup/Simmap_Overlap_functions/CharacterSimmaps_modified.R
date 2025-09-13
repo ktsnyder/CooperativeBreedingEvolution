@@ -34,7 +34,11 @@ CharacterSimmaps_modified <- function(columns, df, tree, dummy, nsims, treelabel
   
   # Source file output helpers if not already loaded
   if (!exists("createStandardizedFilename")) {
-    source("file_output_helpers.R")
+    if (file.exists("file_output_helpers.R")) {
+      source("file_output_helpers.R")
+    } else if (file.exists(file.path("Simmap_Overlap_functions", "file_output_helpers.R") )) {
+      source(file.path("Simmap_Overlap_functions", "file_output_helpers.R") )
+    }
   }
   
   # Use provided dirs or create output directory if not provided

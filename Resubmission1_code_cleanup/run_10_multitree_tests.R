@@ -1,20 +1,23 @@
 # Multitree analyses
 # Kate Snyder
 # 4/26/2024
-# Edited 9/13/2025 - streamlined, made cross-platform functionality
+# Edited 9/13/2025 - streamlined, made cross-platform functionality, split from "multitree tests.R"
+
+# Note: "BirdzillaHackett4_Stage2_1000trees.tre" is too large to be indexed on GitHub. If you obtained this repository from GitHub, this script cannot be run.
 
 require(phytools)
 
 source("subsettreedata.R")
 
-multitree = read.tree("/Users/kate/Library/CloudStorage/Box-Box/Kate_Nicole/Birdsong - Life History Evolution/BirdzillaHackett4_Stage2_1000trees.tre")
+if (!exists("multitree")) {
+  multitree = read.tree("BirdzillaHackett4_Stage2_1000trees.tre")
+}
 OscineTree = read.nexus("ConsensusPasserineTreeHackett4_1000_OscineSubset.nex")
 newdata = "Data_R.csv"
 dfIn = read.csv(newdata)
 
 
 #### Brownie ----
-#otherlabel = "_Hackett4Oscine_fulltreeQ_UpdatedSongData_"
 otherlabel = "_Hackett4Oscine_consensustreeQ_"
 # nTreesToSample = 200
 # nSimsPerTree = 20

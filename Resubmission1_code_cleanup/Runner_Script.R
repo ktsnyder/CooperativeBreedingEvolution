@@ -2,7 +2,7 @@
 ### First revision, 9/1/2025
 
 ## To run:
-# Set working directory to the main folder in this codebase.
+# Set working directory to the main folder in this codebase - the folder should contain subdirectory "Source Data Process_CB".
 
 # Compile data (optional - all analyses use a data csv already compiled using this method)
 # See PDF "Source Data Process_CB/Unaltered from publication/Source Data Processes.pdf" for detailed notes on how files containing cooperative breeding classification data were processed and standardized for use in merge_data_allcolumns.R
@@ -63,4 +63,11 @@ run_alt_coop = FALSE # set to TRUE to run base phyloglm analyses for alternative
 run_stepwise = TRUE
 source("run_09_phyloglm.R")
 
+### Multitree tests ---
+## Performs Brownie and Simmap Overlap tests across many randomly sampled individual trees taken from BirdTree.org
+nTreesToSample = 10 # set to 200 to run the full analyses performed for the manuscript
+nSimsPerTree = 5 # set to 20 to run the full analyses performed for the manuscript
+# Load multitree. Note: This file must be in your working directory. It is too large to be indexed on GitHub, so if you obtained the repo from GitHub, you will need to download trees directly from BirdTree.org.
+multitree = read.tree("BirdzillaHackett4_Stage2_1000trees.tre")
+source("run_10_multitree_tests.R")
 

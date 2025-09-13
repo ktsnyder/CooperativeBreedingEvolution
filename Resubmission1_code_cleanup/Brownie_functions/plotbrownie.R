@@ -24,7 +24,7 @@ if (is.data.frame(data)) {
   brownied <- data
   browniefile <- NULL
 } else {
-  datafile <- paste0(getwd(), "/OutputFiles/", data)
+  datafile <- paste0(file.path("OutputFiles", data))
   brownied <- as.data.frame(read.csv(datafile, stringsAsFactors = FALSE))
   browniefile <- data
 }
@@ -52,8 +52,10 @@ if (is.data.frame(data)) {
     # Generate filename base for both PDF and PNG
     filename_base <- paste0(Sys.Date(), "_", columns[1], "_", loglabel, columns[2], "_brownie", otherlabel)
     
+    dir.create(file.path("Outputs", "Brownie_outputs"), recursive = T)
+    
     # Create PDF output
-    pdf(file = paste0(getwd(),"/OutputFiles/", filename_base, ".pdf"), width = 10, height = 5)
+    pdf(file = file.path("Outputs", "Brownie_outputs", paste0(filename_base, ".pdf")), width = 10, height = 5)
     par(mar = c(4,4,2,1))
     par(mfrow = c(1,2)) 
   } else {
@@ -107,7 +109,7 @@ if (is.data.frame(data)) {
     dev.off()
     
     # Now create PNG output with same content
-    png(file = paste0(getwd(),"/Outputs/Figures/PNG/", filename_base, ".png"), 
+    png(file = file.path(getwd(), "Outputs", "Brownie_outputs", paste0(filename_base, ".png")), 
         width = 10*150, height = 5*150, res = 150)
     par(mar = c(4,4,2,1))
     par(mfrow = c(1,2))
