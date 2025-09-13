@@ -14,9 +14,19 @@
 ## 6/6/2025 - added Tobias Territoriality data with code originally written/performed in "scratch MCMCglmm 2.R"; AVONET data was originally the main thing added in this version compared to the version of "merge_data_allcolumns.R" in the Git repo - changed it here to reflect that the species data files made were the Oscine subset, not Passerine; 
 ## 6/9/2025 - added +0.1 pre-log-transformation of plumage dimorphism to avoid log issues; exporting additional relevant columns that show the process of transforming the wing length dimorphism variable; added HaveFSCBData as a column in the output file; added "_AVONET" to morphometric columns calculated from AVONET data.
 
-require(ape)
-require(phytools)
-library(readxl)
+required_packages <- c("ape", "phytools", "readxl", "stringr", "dplyr")
+missing_packages <- required_packages[!sapply(required_packages,
+                                              requireNamespace, quietly = TRUE)]
+
+if (length(missing_packages) > 0) {
+  stop("The following required packages are not installed: ",
+       paste(missing_packages, collapse = ", "),
+       "\nPlease run: install.packages(c(",
+       paste0("'", paste(missing_packages, collapse = "', '"), "'"), "))")
+}
+
+invisible(sapply(required_packages, library, character.only = TRUE,
+                 quietly = TRUE))
 
 if (!grepl("Source Data Process_CB", getwd()) & dir.exists("Source Data Process_CB")) {
   setwd("Source Data Process_CB") 

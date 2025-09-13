@@ -4,6 +4,15 @@
 
 #setwd("Unaltered from publication")  #you want to set your working directory to whichever folder has the pdf in it
 
+if (!requireNamespace("pdftools", quietly = TRUE)) {
+  stop("Package 'pdftools' is required but not installed. Please run: 
+  install.packages('pdftools')")
+}
+if (!requireNamespace("tidyverse", quietly = TRUE)) {
+  stop("Package 'tidyverse' is required but not installed. Please run: 
+  install.packages('tidyverse')")
+}
+
 library(pdftools)
 library(tidyverse)
 
