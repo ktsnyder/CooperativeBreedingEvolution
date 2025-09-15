@@ -385,7 +385,7 @@ fit_all_models <- function(formulas, data, tree, config) {
         data = data,
         phy = tree,
         method = "logistic_MPLE",
-        btol = 30,  # Increased tolerance
+        btol = 50,  # Increased tolerance
         log.alpha.bound = 4,
         start.beta = NULL,
         start.alpha = NULL,
@@ -403,7 +403,7 @@ fit_all_models <- function(formulas, data, tree, config) {
         data = data,
         phy = tree,
         method = "logistic_MPLE",
-        btol = 30,
+        btol = 50,
         log.alpha.bound = 4,
         boot = 0
       )

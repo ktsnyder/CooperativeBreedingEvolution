@@ -1,7 +1,7 @@
 # Configuration Builder for PhyloGLM Framework
 # Creates and manages analysis configurations
 
-library(yaml)
+#library(yaml)
 
 #' Create a single analysis configuration
 #' 
@@ -278,129 +278,129 @@ create_standard_configs <- function(include_sets = "all") {
 #' 
 #' @param configs List of configurations
 #' @param file Path to output YAML file
-save_configs_to_yaml <- function(configs, file) {
-  # Convert to simpler structure for YAML
-  yaml_list <- list(
-    created = Sys.time(),
-    n_analyses = length(configs),
-    analyses = lapply(configs, function(c) {
-      list(
-        name = ifelse(is.null(c$name), "Unnamed", c$name),
-        response = c$response,
-        predictors = c$predictors,
-        controls = c$controls,
-        transformations = c$transformations,
-        complexity_levels = c$complexity_levels,
-        max_interactions = c$max_interactions
-      )
-    })
-  )
-  
-  write_yaml(yaml_list, file)
-}
+# save_configs_to_yaml <- function(configs, file) {
+#   # Convert to simpler structure for YAML
+#   yaml_list <- list(
+#     created = Sys.time(),
+#     n_analyses = length(configs),
+#     analyses = lapply(configs, function(c) {
+#       list(
+#         name = ifelse(is.null(c$name), "Unnamed", c$name),
+#         response = c$response,
+#         predictors = c$predictors,
+#         controls = c$controls,
+#         transformations = c$transformations,
+#         complexity_levels = c$complexity_levels,
+#         max_interactions = c$max_interactions
+#       )
+#     })
+#   )
+#   
+#   write_yaml(yaml_list, file)
+# }
 
 #' Load configurations from YAML file
 #' 
 #' @param file Path to YAML file
 #' @return List of configurations
-load_configs_from_yaml <- function(file) {
-  yaml_data <- read_yaml(file)
-  
-  configs <- list()
-  for (i in seq_along(yaml_data$analyses)) {
-    analysis <- yaml_data$analyses[[i]]
-    config <- create_analysis_config(
-      response = analysis$response,
-      predictors = analysis$predictors,
-      controls = analysis$controls,
-      transformations = analysis$transformations,
-      complexity_levels = analysis$complexity_levels,
-      max_interactions = analysis$max_interactions,
-      name = analysis$name
-    )
-    configs[[length(configs) + 1]] <- config
-  }
-  
-  return(configs)
-}
+# load_configs_from_yaml <- function(file) {
+#   yaml_data <- read_yaml(file)
+#   
+#   configs <- list()
+#   for (i in seq_along(yaml_data$analyses)) {
+#     analysis <- yaml_data$analyses[[i]]
+#     config <- create_analysis_config(
+#       response = analysis$response,
+#       predictors = analysis$predictors,
+#       controls = analysis$controls,
+#       transformations = analysis$transformations,
+#       complexity_levels = analysis$complexity_levels,
+#       max_interactions = analysis$max_interactions,
+#       name = analysis$name
+#     )
+#     configs[[length(configs) + 1]] <- config
+#   }
+#   
+#   return(configs)
+# }
 
 #' Create a configuration template file
 #' 
 #' @param file Path to output file
-create_config_template <- function(file = "phyloglm_config_template.yaml") {
-  
-  template <- '# PhyloGLM Analysis Configuration Template
-# Edit this file to specify your analyses
-
-# Analysis specifications
-analyses:
-  # Example 1: Basic analysis
-  - name: "FemaleSong_vs_CoopBreeding_Basic"
-    response: "FemaleSong_Agg01"
-    predictors: 
-      - "HighConfidence_Coop"
-    controls:
-      - "logMass_AVONET"
-    complexity_levels:
-      - "null"
-      - "main"
-      - "additive"
-    max_interactions: 2
-    
-  # Example 2: Analysis with territorial moderation
-  - name: "FemaleSong_vs_CoopBreeding_Territorial"
-    response: "FemaleSong_Agg01"
-    predictors:
-      - "HighConfidence_Coop"
-      - "TerritorialityWeakVsStrong"
-    controls:
-      - "logMass_AVONET"
-    complexity_levels:
-      - "null"
-      - "main"
-      - "additive"
-      - "twoway"
-      - "threeway"
-    max_interactions: 3
-    
-  # Example 3: Analysis with transformations
-  - name: "FemaleSong_vs_CoopBreeding_Latitude"
-    response: "FemaleSong_Agg01"
-    predictors:
-      - "HighConfidence_Coop"
-    controls:
-      - "logMass_AVONET"
-      - "Centroid.Latitude_AVONET"
-    transformations:
-      Centroid.Latitude_AVONET: "abs"  # Use absolute latitude
-    complexity_levels:
-      - "main"
-      - "additive"
-      - "twoway"
-    max_interactions: 2
-
-# Available variables by type:
-# Binary: HighConfidence_Coop, FemaleSong_Agg01, Griesser2017FamilialLiving, GeographicRegion_Jetz
-# Categorical: Territory, Migration_AVONET, TerritorialityWeakVsStrong
-# Continuous: logMass_AVONET, PercentAbsLogWingDimorphism, logMaleFemalePlumageDiffAbs, Centroid.Latitude_AVONET
-
-# Available transformations:
-# abs: absolute value
-# log: logarithm
-# sqrt: square root
-# scale: standardize (center and scale)
-
-# Complexity levels:
-# null: intercept only
-# main: single predictor models
-# additive: multiple predictors without interactions
-# twoway: two-way interactions
-# threeway: three-way interactions
-'
-  
-  writeLines(template, file)
-  message("Configuration template saved to:", file)
-}
+# create_config_template <- function(file = "phyloglm_config_template.yaml") {
+#   
+#   template <- '# PhyloGLM Analysis Configuration Template
+# # Edit this file to specify your analyses
+# 
+# # Analysis specifications
+# analyses:
+#   # Example 1: Basic analysis
+#   - name: "FemaleSong_vs_CoopBreeding_Basic"
+#     response: "FemaleSong_Agg01"
+#     predictors: 
+#       - "HighConfidence_Coop"
+#     controls:
+#       - "logMass_AVONET"
+#     complexity_levels:
+#       - "null"
+#       - "main"
+#       - "additive"
+#     max_interactions: 2
+#     
+#   # Example 2: Analysis with territorial moderation
+#   - name: "FemaleSong_vs_CoopBreeding_Territorial"
+#     response: "FemaleSong_Agg01"
+#     predictors:
+#       - "HighConfidence_Coop"
+#       - "TerritorialityWeakVsStrong"
+#     controls:
+#       - "logMass_AVONET"
+#     complexity_levels:
+#       - "null"
+#       - "main"
+#       - "additive"
+#       - "twoway"
+#       - "threeway"
+#     max_interactions: 3
+#     
+#   # Example 3: Analysis with transformations
+#   - name: "FemaleSong_vs_CoopBreeding_Latitude"
+#     response: "FemaleSong_Agg01"
+#     predictors:
+#       - "HighConfidence_Coop"
+#     controls:
+#       - "logMass_AVONET"
+#       - "Centroid.Latitude_AVONET"
+#     transformations:
+#       Centroid.Latitude_AVONET: "abs"  # Use absolute latitude
+#     complexity_levels:
+#       - "main"
+#       - "additive"
+#       - "twoway"
+#     max_interactions: 2
+# 
+# # Available variables by type:
+# # Binary: HighConfidence_Coop, FemaleSong_Agg01, Griesser2017FamilialLiving, GeographicRegion_Jetz
+# # Categorical: Territory, Migration_AVONET, TerritorialityWeakVsStrong
+# # Continuous: logMass_AVONET, PercentAbsLogWingDimorphism, logMaleFemalePlumageDiffAbs, Centroid.Latitude_AVONET
+# 
+# # Available transformations:
+# # abs: absolute value
+# # log: logarithm
+# # sqrt: square root
+# # scale: standardize (center and scale)
+# 
+# # Complexity levels:
+# # null: intercept only
+# # main: single predictor models
+# # additive: multiple predictors without interactions
+# # twoway: two-way interactions
+# # threeway: three-way interactions
+# '
+#   
+#   writeLines(template, file)
+#   message("Configuration template saved to:", file)
+# }
 
 #' Validate a configuration
 #' 

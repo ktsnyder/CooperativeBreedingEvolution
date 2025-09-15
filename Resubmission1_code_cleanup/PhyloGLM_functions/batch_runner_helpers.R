@@ -23,7 +23,7 @@ bootstrap_top_models <- function(top_models, data, tree, n_boot = 100) {
         data = data,
         phy = tree,
         method = "logistic_MPLE",
-        btol = 30,
+        btol = 50,
         log.alpha.bound = 4,
         boot = n_boot
       )
