@@ -76,7 +76,7 @@ BrownieMultistate <- function(DiscreteTrait, ContinuousTrait, newdata, treefile,
     plotSimmap(simmappy[[1]])
     
     if (plotsimmaps) { 
-      simmapFileName = paste0(DiscreteTrait, " multistate simmap plots ", ContinuousTrait, " subset ", otherlabel,  Sys.Date(),".pdf")
+      simmapFileName = file.path("Outputs", "Brownie_outputs", paste0(DiscreteTrait, " multistate simmap plots ", ContinuousTrait, " subset ", otherlabel,  Sys.Date(),".pdf"))
       pdf(simmapFileName, height = 9, width = 12)
       par(mfrow = c(2,3))
       par(mar = c(3.8,3.8,3,1))
@@ -202,7 +202,7 @@ BrownieMultistate <- function(DiscreteTrait, ContinuousTrait, newdata, treefile,
       }
     }
   }
-  brownieCSVname = paste(Sys.Date(), DiscreteTrait, ContinuousTrait, "multistate aceARD Brownie", otherlabel, nsim, "sims.csv")
+  brownieCSVname = file.path("Outputs", "Brownie_outputs", paste(Sys.Date(), DiscreteTrait, ContinuousTrait, "multistate aceARD Brownie", otherlabel, nsim, "sims.csv"))
   write.csv(browniedata, brownieCSVname, row.names = F)
   
   # make compare rates csv
@@ -227,7 +227,7 @@ BrownieMultistate <- function(DiscreteTrait, ContinuousTrait, newdata, treefile,
       CompareColSums$Fraction[i] = 1-CompareColSums$Fraction1[i]
     }
   }
-  compareCSVname = paste(Sys.Date(), DiscreteTrait, ContinuousTrait, "multistate aceARD Brownie", otherlabel, nsim, "sims COMPARE RATES.csv")
+  compareCSVname = file.path("Outputs", "Brownie_outputs",paste(Sys.Date(), DiscreteTrait, ContinuousTrait, "multistate aceARD Brownie", otherlabel, nsim, "sims COMPARE RATES.csv"))
   write.csv(CompareColSums, compareCSVname, row.names = F)
   
   
@@ -241,7 +241,7 @@ BrownieMultistate <- function(DiscreteTrait, ContinuousTrait, newdata, treefile,
   
   ## make rate distribution plots ----
   if (plotResults == TRUE) {
-    pdfname = paste0(DiscreteTrait, " ", ContinuousTrait, " multistate aceARD Brownie ", otherlabel," ", nsim, " sims ", Sys.Date(), ".pdf")
+    pdfname = file.path("Outputs", "Brownie_outputs", paste0(DiscreteTrait, " ", ContinuousTrait, " multistate aceARD Brownie ", otherlabel," ", nsim, " sims ", Sys.Date(), ".pdf"))
     pdf(pdfname, width = 8, height = 7)
     par(mar = c(3.8,3.8,3,1))
     par(mfrow = c(2,1))

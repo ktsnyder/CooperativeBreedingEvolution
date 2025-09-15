@@ -27,7 +27,7 @@ for (j in 1:length(songtraits)) {
     Ngroups = length(unique(discvec))
     
     tryCatch({
-      phylANOVAout = phylANOVA(subsettree, x = discvec, y = contvec, nsim = 50000, posthoc = TRUE)
+      phylANOVAout = phylANOVA(subsettree, x = discvec, y = contvec, nsim = 5000, posthoc = TRUE)
       phylANOVAp = phylANOVAout$Pf
       temprow = c(tempgrouptrait, Ngroups, songtrait, Nspecies, phylANOVAp)
     }, error = function(e) {

@@ -24,7 +24,7 @@ if (is.data.frame(data)) {
   brownied <- data
   browniefile <- NULL
 } else {
-  datafile <- paste0(file.path("OutputFiles", data))
+  datafile <- file.path("Outputs", "Brownie_outputs", data)
   brownied <- as.data.frame(read.csv(datafile, stringsAsFactors = FALSE))
   browniefile <- data
 }
@@ -148,70 +148,5 @@ if (is.data.frame(data)) {
     dev.off()
   }
   
-  # writeLines(paste0("OneRate=", round(ERloglikmean, digits = 4)))
-  # writeLines(paste0("TwoRates=", round(ARDloglikmean, digits = 4)))
-  # writeLines(paste0("pVal", ERARDPval))
-  # writeLines(paste("",sep="\n\n"))
-  # writeLines(paste("",sep="\n\n"))  
-
   
 }  #end plotbrownie function
-
-
-####Cristina's
-##
-
-# browniedata <- data.frame(Pval=numeric(nsim), ERRate=numeric(nsim), ERloglik=numeric(nsim),
-#                           ERace=numeric(nsim), ARDloglik=numeric(nsim),ARDace=numeric(nsim),
-#                           stringsAsFactors = FALSE)
-# 
-# 
-# 
-# BrowniePlotRates <- function(dataset, title="BrowniePlot", col=c("blue","red"), Groups=c("Rate0", "Rate1"),
-#                              Xlim =c(min(XMins),
-#                                      max(XMaxes)) ){
-#   #data cleaning
-#   dataset<- dataset[!is.na(dataset$Pval),]
-#   dataset<- dataset[dataset$convergence == "Optimization has converged.",]
-#   
-#   #plots
-#   ARDs <- length(grep("ARDRate", colnames(dataset)))
-#   D <- list()
-#   YMaxes <- numeric(length=ARDs)
-#   YMins <- numeric(length=ARDs)
-#   XMaxes <- numeric(length=ARDs)
-#   XMins <- numeric(length=ARDs)
-#   for(i in 1:ARDs){
-#     D[[i]] <- density(dataset[,paste0('ARDRate', i-1)])
-#     YMaxes[i] <- max(D[[i]]$y)
-#     YMins[i] <- min(D[[i]]$y)
-#     XMaxes[i] <- max(D[[i]]$x)
-#     XMins[i] <- min(D[[i]]$x)
-#   }
-#   plot(D[[1]],col=col[1],
-#        xlim=Xlim,
-#        ylim=c(min(YMins),
-#               max(YMaxes)),
-#        main=title, xlab="Rates", font.lab=2,
-#        ylab="Number of Observations",
-#        cex.main=1, lwd=2)
-#   for(i in 2:ARDs){
-#     lines(D[[i]], col=col[i], lwd=2)
-#   }
-#   abline(v=dataset$ERRate[1])
-#   legend("topright", legend=Groups, col=col, lty=1, lwd=2)
-#   #stats
-#   MeanArd <- mean(dataset$ARDloglik)
-#   MeanER <- mean(dataset$ERloglik)
-#   pval <- round(pchisq(2*(MeanArd - MeanER),1,lower.tail=FALSE),digits=3)
-#   
-# 
-#   
-#   ifelse(pval == 0,pval <- "<0.001", pval <- paste0("=",pval))
-#   writeLines(title)
-#   writeLines(paste0("OneRate=", round(MeanER, digits = 4)))
-#   writeLines(paste0("TwoRates=", round(MeanArd, digits = 4)))
-#   writeLines(paste0("pVal", pval))
-#   writeLines(paste("",sep="\n\n"))
-#   writeLines(paste("",sep="\n\n"))
-# }

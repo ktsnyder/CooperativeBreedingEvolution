@@ -14,7 +14,6 @@ BrownieRelativeRates <- function(BrownieOutputFolder = "OutputFolder", otherlabe
   require(stringr)
   require(dplyr)
   
-  #source("test_trait_overlap_simmaps.R") 
   source("getLabels.R")
   
   filelist = list.files(BrownieOutputFolder)
@@ -85,5 +84,5 @@ BrownieRelativeRates <- function(BrownieOutputFolder = "OutputFolder", otherlabe
       print("The file does not appear to contain all of the necessary columns, skipping.")
     }
   } 
-  write.csv(browniesummary, paste0(Sys.Date()," Brownie summary table_", otherlabel, ".csv"), row.names = FALSE)
+  write.csv(browniesummary, file.path("Outputs", "Brownie_outputs", paste0(Sys.Date()," Brownie summary table_", otherlabel, ".csv")), row.names = FALSE)
 }

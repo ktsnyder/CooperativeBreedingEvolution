@@ -47,15 +47,13 @@ browniefunction <- function(columns, newtree = FALSE, newdata = FALSE, cladesubs
   qrates <- Qoutput$qrates
   print(qrates)
   
-  # make OutputFiles folder if not present
-  mainDir <- getwd()
-  subDir <- "OutputFiles"
-  if (!dir.exists(file.path(mainDir,subDir))) {
-    dir.create(file.path(mainDir, subDir))
+  # make Outputs folder if not present
+  if (!dir.exists(file.path("Outputs","Brownie_outputs"))) {
+    dir.create(file.path("Outputs","Brownie_outputs"))
   }
   
   simmappy <- make.simmap(tree,discretetraitvec,nsim=nsim,Q=qrates) 
-  write.simmap(simmappy, file=paste(getwd(),"/OutputFiles/",Sys.Date(),columns[1], columns[2], otherlabel, nsim,"simmaps",".txt",sep=""))
+  write.simmap(simmappy, file=file.path("Outputs", "Brownie_outputs", paste(Sys.Date(),columns[1], columns[2], otherlabel, nsim,"simmaps",".txt",sep="")))
   simmapsdone <- Sys.time()
   simmaptime <- simmapsdone - starttimebrownie
   
@@ -98,7 +96,7 @@ browniefunction <- function(columns, newtree = FALSE, newdata = FALSE, cladesubs
     browniedata[i,14] <- phylanovaP
     
     if (i %in% c(50,100,160,200,400,600,800,1000,1200,1400)) {
-      write.csv(browniedata, file = paste(getwd(),"/OutputFiles/",Sys.Date(),columns[1], columns[2],otherlabel, "_brownie",nsim,"sim", cladesubsetvalue,".csv",sep=""), row.names = F) #cumulative brownie data results, saved during long process
+      write.csv(browniedata, file = file.path("Outputs", "Brownie_outputs", paste(Sys.Date(),columns[1], columns[2],otherlabel, "_brownie",nsim,"sim", cladesubsetvalue,".csv",sep="")), row.names = F) #cumulative brownie data results, saved during long process
       print(paste("Saved data - Loop", i))
     }
     if (i %in% seq(0,2000,by=50)) {
@@ -117,7 +115,7 @@ browniefunction <- function(columns, newtree = FALSE, newdata = FALSE, cladesubs
   browniedata$ARDsimmapQ.LogLik = Qoutput$anovaERARD$`Log lik.`[2]
   browniedata$ARDvERsimmapQ.LRtestPval = Qoutput$anovaERARD$`Pr(>|Chi|)`[2]
   
-  write.csv(browniedata, file = paste(getwd(),"/OutputFiles/",Sys.Date(),columns[1], columns[2],otherlabel,"_brownie",nsim,"sim",cladesubsetvalue,".csv",sep=""), row.names = F)
+  write.csv(browniedata, file = file.path("Outputs", "Brownie_outputs",paste(Sys.Date(),columns[1], columns[2],otherlabel,"_brownie",nsim,"sim",cladesubsetvalue,".csv",sep="")), row.names = F)
   
   return(browniedata)
 }

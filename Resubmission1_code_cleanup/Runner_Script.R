@@ -3,19 +3,21 @@
 
 ## To run:
 # Set working directory to the main folder in this codebase - the folder should contain subdirectory "Source Data Process_CB".
+newdata = "Data_R.csv"
+treefile = "ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
 
 ### Compile data ----
-# (OPTIONAL - all analyses use a data csv already compiled using this method)
+# (OPTIONAL - all analyses use a data csv already compiled using this method - newdata="Data_R.csv")
 # See PDF "Source Data Process_CB/Unaltered from publication/Source Data Processes.pdf" for detailed notes on how files containing cooperative breeding classification data were processed and standardized for use in merge_data_allcolumns.R
 source(file.path("Source Data Process_CB","merge_data_allcolumns.R"))
 
 ### Re-generate consensus trees ----
-## (OPTIONAL - all analyses use a consensus tree previously calculated using this method)
+## (OPTIONAL - all analyses use a consensus tree previously calculated using this method - treefile="ConsensusPasserineTreeHackett4_1000_OscineSubset.nex")
 ## Commented out due to it being one of the more computationally intensive and lengthy processes. 
 
 ## Load multitree. Note: This file must be in your working directory. It is too large to be indexed on GitHub, so if you obtained the repo from GitHub, you will need to download trees directly from BirdTree.org.
 #passermultitree = read.nexus("PasserineMultiphy1000Hackett4_nondicho.nex")
-#nTrees = 10 # set to 1000 to calculate consensus tree as in the manuscript. NOTE: 10 trees, across two consensus methods, may take 15min-1hour. 1000 trees may take multiple days, depending on your system computing capabilities.
+#nTrees = 10 # set to 1000 to calculate consensus trees as in the manuscript. NOTE: 10 trees, across two consensus methods, may take 15min-1hour. 1000 trees may take multiple days, depending on your system computing capabilities.
 #source("run_00_make various consensus trees.R")
 
 ### PhylANOVA ----
@@ -25,7 +27,7 @@ source("run_01_phylANOVA.R")
 ### Brownie ----
 # Generates components used in: Figure 1; Extended Data Figures 1, 2; Supplemental Tables 4, 5, 6
 # Performs only 20 simulations per analysis by default for the purpose of example. Change "nsim" in script to run for a different number of simulations
-# Will produce many CSV files and PDF plots in subfolder "OutputFiles"
+# Will produce many CSV files and PDF plots in subfolder "Outputs/Brownie_outputs"
 source("run_02_brownie.R")
 
 ### Estimating binary state transition rates ----
@@ -53,6 +55,9 @@ source("run_06_phylopath_main.R")
 # Performs analyses used and calls script to make figures
 # Must run "run_05_bias_analyses.R" and "run_06_phylopath_main.R" before running
 n_iterations = 2 # Change to 500 to perform analyses as in publication
+territoriality_var = "TerritorialityWeakVsStrong"
+source("run_07_phylopath_downsampling.R")
+territoriality_var = "Territory_12vs3"
 source("run_07_phylopath_downsampling.R")
 
 # Generates Supplemental Table 15; Extended Data Figure 6:

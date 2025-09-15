@@ -144,10 +144,10 @@ jackbrowniefunction <- function(columns, islog = FALSE, matemodel = "ARD", maten
       }
     }  #end for loop 1:matensim
     if (allcsvs == TRUE) {
-      if (!dir.exists("BrownieJackknifeOutputs")) {
-        dir.create("BrownieJackknifeOutputs")
+      if (!dir.exists(file.path("Outputs", "BrownieJackknifeOutputs"))) {
+        dir.create(file.path("Outputs", "BrownieJackknifeOutputs"))
       }
-      outfile = paste0("BrownieJackknifeOutputs/", Sys.Date(), otherlabel, " Brownie", matensim, "sims ", MateParam, " ", loglabel, SongParam, " jacked", familyvec[k], ".csv")
+      outfile = file.path("Outputs", "BrownieJackknifeOutputs", paste0(Sys.Date(), otherlabel, " Brownie", matensim, "sims ", MateParam, " ", loglabel, SongParam, " jacked", familyvec[k], ".csv"))
       write.csv(file = outfile, x = browniedata, row.names = FALSE)
     }
     brownielist[[k]] <- browniedata
