@@ -5,11 +5,19 @@
 
 female_song_var = "FemaleSong_Agg01"
 coop_breeding_var = "HighConfidence_Coop"
-territoriality_var =  "TerritorialityWeakVsStrong" 
+if (!exists("territoriality_var")) {
+  territoriality_var =  "TerritorialityWeakVsStrong" 
+  print("Defaulting to TerritorialityWeakVsStrong as the territoriality variable in phylopath models. To run using year-round territoriality, set territoriality_var = Territory_12vs3.")
+}
 #territoriality_var =  "Territory_12vs3" # uncomment to test using year-round territoriality as the territoriality feature
 mass_var = "logMass_AVONET"
 
 if(!exists("n_iterations")) {n_iterations = 5}
+
+if (!exists("include_species_jackknife")) {
+  include_species_jackknife = FALSE
+  print("Defaulting to only running data-availability bias downsampling, and not running phylopath jackknife by species. To also run phylopath jackknife by species, define include_species_jackknife = TRUE")
+}
 
 dfIn_phylo = read.csv("Data_R.csv")
 tree_phylo = read.nexus("ConsensusPasserineTreeHackett4_1000_OscineSubset.nex")
@@ -384,19 +392,22 @@ cat("\n\nAll phylopath bias downsampling complete, beginning jackknifing by spec
 
 
 #### Jackknife by species ----
-source(file.path("Phylopath_functions", "run_jackknife_species_phylopath.R"))
 
-jackknife_results <- run_jackknife_species_phylopath(
-  dfIn = dfIn_phylo,
-  tree = tree,
-  female_song_var = "FemaleSong_Agg01",
-  coop_breeding_var = "HighConfidence_Coop", 
-  territoriality_var = territoriality_var,
-  mass_var = "logMass_AVONET",
-  save_conditional_plots = FALSE,  # Set to TRUE if you want plots (will create large PDF)
-  save_path_coefficients = TRUE,
-  output_dir = file.path("Outputs", "PhylopathJackknife")
-)
+if (include_species_jackknife) {
+  source(file.path("Phylopath_functions", "run_jackknife_species_phylopath.R"))
+  
+  jackknife_results <- run_jackknife_species_phylopath(
+    dfIn = dfIn_phylo,
+    tree = tree,
+    female_song_var = "FemaleSong_Agg01",
+    coop_breeding_var = "HighConfidence_Coop", 
+    territoriality_var = territoriality_var,
+    mass_var = "logMass_AVONET",
+    save_conditional_plots = FALSE,  # Set to TRUE if you want plots (will create large PDF)
+    save_path_coefficients = TRUE,
+    output_dir = file.path("Outputs", "PhylopathJackknife")
+  )
+}
 
 #### Generate summary figures - forest plots, heat map ----
 cat("\n\ngenerating plots using RunAnalyses_generate_bias_figures_both_traits.R \n")

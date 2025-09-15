@@ -378,7 +378,7 @@ run_multiple_phylopath <- function(dfIn, tree, downsample_columns, downsample_va
 ## example usage run_CB_FS_Terr_phylopath():
 #output <- run_CB_FS_Terr_phylopath(dfIn = df_subset, female_song_var = "FemaleSong_Agg01", coop_breeding_var = "HighConfidence_Coop", territoriality_var = "TerritorialityWeakVsStrong", mass_var = "logMass_AVONET", plots2pdf = TRUE)
 
-run_CB_FS_Terr_phylopath <- function(dfIn, tree, female_song_var, coop_breeding_var, territoriality_var, mass_var = "none", include_terr_response = FALSE, plots2pdf = FALSE,                                      plots2png = FALSE, output_dir = "Outputs/PhylopathPlots") {
+run_CB_FS_Terr_phylopath <- function(dfIn, tree, female_song_var, coop_breeding_var, territoriality_var, mass_var = "none", include_terr_response = FALSE, plots2pdf = FALSE,                                      plots2png = FALSE, output_dir = file.path("Outputs","PhylopathPlots")) {
   require(phylopath)
   require(dplyr)
   require(ggplot2)
@@ -1422,7 +1422,7 @@ save_phylopath_plots_png <- function(plots, file_base, output_dir = "Outputs/Phy
 library(dplyr)
 library(ggplot2)
 library(tidyr)
-library(forcats)
+#library(forcats)
 
 # Function 1: Create path summary statistics
 create_path_summary <- function(detailed_models_df) {

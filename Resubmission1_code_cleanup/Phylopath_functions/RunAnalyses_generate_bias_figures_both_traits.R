@@ -32,16 +32,22 @@ trait_sets <- list(
   weak_vs_strong = "FemaleSong_Agg01 HighConfidence_Coop TerritorialityWeakVsStrong logMass_AVONET",
   terr_12vs3 = "FemaleSong_Agg01 HighConfidence_Coop Territory_12vs3 logMass_AVONET"
 )
+n_trait_sets = 0
 
 # Process each trait set
 for (trait_name in names(trait_sets)) {
   trait_set <- trait_sets[[trait_name]]
   
-  cat("\n========================================\n")
-  cat("Processing:", trait_name, "\n")
-  cat("Trait set:", trait_set, "\n")
-  cat("Using", n_iterations_to_use, "iterations\n")
-  cat("========================================\n")
+  if (!dir.exists(file.path("Outputs", "PhylopathDownsampled", paste(trait_set, "models")))) {
+    next
+  } else{
+    n_trait_sets = n_trait_sets + 1
+    cat("\n========================================\n")
+    cat("Processing:", trait_name, "\n")
+    cat("Trait set:", trait_set, "\n")
+    cat("Using", n_iterations_to_use, "iterations\n")
+    cat("========================================\n")
+  }
   
   # Extract results for specified iteration count
   results <- extract_phylopath_results(
@@ -103,7 +109,7 @@ for (trait_name in names(trait_sets)) {
 cat("\n\n========================================\n")
 cat("SUMMARY\n")
 cat("========================================\n")
-cat("Processed", length(trait_sets), "trait combinations\n")
+cat("Processed", n_trait_sets, "trait combinations\n")
 cat("Used", n_iterations_to_use, "iterations for each\n")
 cat("\nTo use different iteration counts:\n")
 cat("  - Change 'n_iterations_to_use' at the top of this script\n")

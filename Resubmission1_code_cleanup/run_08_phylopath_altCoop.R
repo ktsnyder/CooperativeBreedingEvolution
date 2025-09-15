@@ -21,7 +21,7 @@ for (i in 1:length(AltCoops)) {
     coop_breeding_var = coop_breeding_var,
     territoriality_var = territoriality_var,
     mass_var = mass_var,
-    plots2pdf = TRUE, 
+    plots2pdf = FALSE, 
     output_dir = phylopath_output_dir
   )
   
