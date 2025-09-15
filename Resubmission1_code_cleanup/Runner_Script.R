@@ -6,6 +6,9 @@
 newdata = "Data_R.csv"
 treefile = "ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
 
+## Check for and load required packages
+source("check_required_packages.R")
+
 ### Compile data ----
 # (OPTIONAL - all analyses use a data csv already compiled using this method - newdata="Data_R.csv")
 # See PDF "Source Data Process_CB/Unaltered from publication/Source Data Processes.pdf" for detailed notes on how files containing cooperative breeding classification data were processed and standardized for use in merge_data_allcolumns.R
