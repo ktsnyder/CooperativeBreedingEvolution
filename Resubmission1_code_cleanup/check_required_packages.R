@@ -11,11 +11,9 @@ required_packages <- c(
   "dplyr",
   "emmeans",
   "flextable",
-  # "forcats",
   "ggplot2",
   "ggpubr",
   "ggrepel", 
-  # "ggridges",
   "grid",
   "gridExtra",
   "mnormt",
@@ -24,12 +22,12 @@ required_packages <- c(
   "phylopath",
   "phytools",
   "R.utils",
-  # "scales",
   "stringr",
   "tidyr",
-  "tidyverse"#,
-  #"yaml"
+  "tidyverse"
 )
+
+bioconductor_packages <- c("graph", "RBGL")
 
 # Function to check if packages are installed and get their versions
 check_packages <- function(packages) {
@@ -87,19 +85,52 @@ install_missing_packages <- function(missing_packages) {
   
   for (pkg in missing_packages) {
     cat("Installing", pkg, "...\n")
-    tryCatch({
-      install.packages(pkg, dependencies = TRUE, quiet = TRUE)
-      if (requireNamespace(pkg, quietly = TRUE)) {
-        cat("✓", pkg, "installed successfully\n")
-        success_count <- success_count + 1
-      } else {
-        cat("✗", pkg, "installation failed (package not loadable)\n")
-        failed_packages <- c(failed_packages, pkg)
+    
+    # Check if this is a Bioconductor package
+    if (pkg %in% bioconductor_packages) {
+      # Install BiocManager if needed
+      if (!requireNamespace("BiocManager", quietly = TRUE)) {
+        cat("Installing BiocManager first...\n")
+        install.packages("BiocManager", quiet = TRUE)
       }
-    }, error = function(e) {
-      cat("✗", pkg, "installation failed:", e$message, "\n")
-      failed_packages <- c(failed_packages, pkg)
-    })
+      
+      # Install the Bioconductor package
+      tryCatch({
+        BiocManager::install(pkg, update = FALSE, ask = FALSE, quiet = TRUE)
+        if (requireNamespace(pkg, quietly = TRUE)) {
+          cat("✓", pkg, "installed successfully from Bioconductor\n")
+          success_count <- success_count + 1
+        } else {
+          cat("✗", pkg, "installation failed (package not loadable)\n")
+          failed_packages <- c(failed_packages, pkg)
+        }
+      }, error = function(e) {
+        cat("✗", pkg, "installation failed:", e$message, "\n")
+        
+        # OS-specific advice for Bioconductor packages
+        if (Sys.info()["sysname"] == "Windows") {
+          cat("  Note: On Windows, you may need Rtools installed.\n")
+          cat("  Download from: https://cran.r-project.org/bin/windows/Rtools/\n")
+        }
+        failed_packages <- c(failed_packages, pkg)
+      })
+      
+    } else {
+      # Regular CRAN package installation
+      tryCatch({
+        install.packages(pkg, dependencies = TRUE, quiet = TRUE)
+        if (requireNamespace(pkg, quietly = TRUE)) {
+          cat("✓", pkg, "installed successfully\n")
+          success_count <- success_count + 1
+        } else {
+          cat("✗", pkg, "installation failed (package not loadable)\n")
+          failed_packages <- c(failed_packages, pkg)
+        }
+      }, error = function(e) {
+        cat("✗", pkg, "installation failed:", e$message, "\n")
+        failed_packages <- c(failed_packages, pkg)
+      })
+    }
   }
   
   cat("\nInstallation Summary:\n")
@@ -113,10 +144,15 @@ install_missing_packages <- function(missing_packages) {
 
 # Main execution
 cat("=== PACKAGE DEPENDENCY CHECKER ===\n")
-cat("Checking", length(required_packages), "required packages...\n\n")
+
+# Combine all packages for checking (but they'll be installed differently)
+all_packages <- c(required_packages, bioconductor_packages)
+
+cat("Checking", length(all_packages), "required packages...\n")
+cat("(Including", length(bioconductor_packages), "Bioconductor packages)\n\n")
 
 # Check package status
-result <- check_packages(required_packages)
+result <- check_packages(all_packages)
 
 # Display installed packages
 if (length(result$installed) > 0) {
@@ -139,10 +175,10 @@ if (length(result$missing) > 0) {
   cat("\n")
   
   # Ask user if they want to install missing packages
-  cat("Would you like to install the missing packages? (y/n): ")
-  user_input <- readLines("stdin", n = 1)
+  user_input <- readline("Would you like to install the missing packages? (y/n): ")
   
   if (tolower(trimws(user_input)) %in% c("y", "yes")) {
+    print("User responded yes, attempting installation.")
     install_missing_packages(result$missing)
     
     # Re-check packages after installation

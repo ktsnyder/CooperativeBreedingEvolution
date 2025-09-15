@@ -79,7 +79,7 @@ geo_holarctic_info <- list(
   )
 )
 
-prefix_geo <- paste(all_traits_phylopath_label, "Remove83HolarcticNoncoop")
+prefix_geo <- paste("Remove83HolarcticNoncoop")
 saveRDS(result_geo_holarctic,
         file.path(trait_set_output_dir,
                   paste0("result_", prefix_geo, "_n", n_iterations, "_", Sys.Date(), ".rds")))
@@ -129,7 +129,7 @@ trop_coop_info <- list(
   )
 )
 
-prefix_trop <- paste(all_traits_phylopath_label, "Remove24TropicalCoop") 
+prefix_trop <- paste("Remove24TropicalCoop") 
 saveRDS(result_geo_tropical,
         file.path(trait_set_output_dir,
                   paste0("result_", prefix_trop, "_n", n_iterations, "_", Sys.Date(), ".rds")))
@@ -180,7 +180,7 @@ global_coop_info <- list(
 )
 
 # actual plot creation
-prefix_global <- paste(all_traits_phylopath_label, "Remove15GlobalCoop")
+prefix_global <- paste("Remove15GlobalCoop")
 saveRDS(result_global_coop,
         file.path(trait_set_output_dir,
                   paste0("result_", prefix_global, "_n", n_iterations, "_", Sys.Date(), ".rds")))
@@ -223,7 +223,7 @@ if (downsampling_results$downsampling$territoriality_bias$n_to_remove > 0) {
   )
   
   # Create plots
-  prefix_terr <- paste0(all_traits_phylopath_label, "Remove",
+  prefix_terr <- paste0("Remove",
                         downsampling_results$downsampling$territoriality_bias$n_to_remove, "StrongTerr")
   plots_terr <- create_all_phylopath_plots(
     analysis_type = "downsampled",
@@ -265,7 +265,7 @@ if (downsampling_results$downsampling$territory_12vs3_bias$n_to_remove > 0) {
   )
   
   # Create plots
-  prefix_terr <- paste0("FemaleSong_Agg01 HighConfidence_Coop Territory_12vs3 logMass_AVONET Remove", downsampling_results$downsampling$territory_12vs3_bias$n_to_remove, "Terr3")
+  prefix_terr <- paste0("Remove", downsampling_results$downsampling$territory_12vs3_bias$n_to_remove, "Terr3")
   plots_terr <- create_all_phylopath_plots(
     analysis_type = "downsampled",
     phylopath_output = result_terr,
@@ -307,7 +307,7 @@ if (downsampling_results$downsampling$territory_12vs3_bias$n_to_remove > 0) {
   )
   
   # Create plots
-  prefix_terr <- paste0("FemaleSong_Agg01 HighConfidence_Coop TerritorialityWeakVsStrong logMass_AVONET Remove",
+  prefix_terr <- paste0("Remove",
                         downsampling_results$downsampling$territory_12vs3_bias$n_to_remove, "Terr3")
   plots_terr <- create_all_phylopath_plots(
     analysis_type = "downsampled",
