@@ -38,9 +38,12 @@ for (j in 1:length(songtraits)) {
     phynovaDF = rbind(phynovaDF, temprow)
     phynovaDF = as.data.frame(phynovaDF)
     colnames(phynovaDF) <- c("DiscreteTrait", "DiscreteNumGroups", "ContinuousTrait", "n_Species", "PhylANOVApval")
-    print(paste(tempgrouptrait, songtrait))
-    print(phylANOVAout)
+    #print(paste(tempgrouptrait, songtrait))
+    #print(phylANOVAout)
   }
 }
-write.csv(phynovaDF, file = paste(Sys.Date(), "phylANOVA outputs Songs.csv"), row.names = F)
+if (!dir.exists("Outputs")) {
+  dir.create("Outputs")
+}
+write.csv(phynovaDF, file = file.path("Outputs", paste(Sys.Date(), "phylANOVA outputs Songs.csv")), row.names = F)
 

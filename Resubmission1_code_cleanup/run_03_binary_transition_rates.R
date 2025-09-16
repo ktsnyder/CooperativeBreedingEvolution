@@ -26,4 +26,4 @@ for ( i in 1:length(SocialColumns)) {
 allQout$ARDvERsimmapQ.LRtestPval.abbr = as.numeric(allQout$ARDvERsimmapQ.LRtestPval)
 allQout$ARDvERsimmapQ.LRtestPval.abbr = round(allQout$ARDvERsimmapQ.LRtestPval.abbr, digits = 3)
 allQout$ARDvERsimmapQ.LRtestPval.abbr[which(allQout$ARDvERsimmapQ.LRtestPval.abbr < 0.001)] <- "<0.001"
-write.csv(allQout,"binary trait Qrates_rounded.csv")
+write.csv(allQout, file.path("Outputs","binary trait Qrates_rounded.csv"))
