@@ -1,2 +1,2 @@
-Resubmission1_code_cleanup/BirdzillaHackett4_Stage2_1000trees.tre filter=lfs diff=lfs merge=lfs -text
-Resubmission1_code_cleanup/PasserineMultiphy1000Hackett4_nondicho.nex filter=lfs diff=lfs merge=lfs -text
+BirdzillaHackett4_Stage2_1000trees.tre filter=lfs diff=lfs merge=lfs -text
+PasserineMultiphy1000Hackett4_nondicho.nex filter=lfs diff=lfs merge=lfs -text

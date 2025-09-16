@@ -12,7 +12,7 @@
 #V2.0 --> v2.1 - change "passeriformesonly" input to be able to do oscine, suboscine, or passeriformes  
 #1/28/2020 (v2.2): #ACTUALLY change to cladesubsetcolumn, cladesubsetvalue; also remove "matemodel" arg
 #5/12/2020 - remove matensim arg, change subset source from subsetbirddata2.2.R, added subdirectory to pdf output
-#6/4/2021 - if plotting, checks for or makes OutputFiles subdirectory; made all text in titles of subplots be on 2nd line because margin weirdness
+#6/4/2021 - if plotting, checks for or makes Outputs subdirectory; made all text in titles of subplots be on 2nd line because margin weirdness
 #8/27/2021 - add otherlabel arg to file name if plotting simmaps; added tip labels (points); added named colors for plotting simmap
 #8/27/2021 - findQrates seems to calculate Q for the data subsetted by both columns, rather than just the discrete column... it should be computing Q based on whole set of discrete data! Granted, this is the case if columns input is only the discrete column... but we still want to plot simmaps of double-subsetted trees probably. Solution: add another subset within the plotting statement, make original subset only subset based on columns[1]. Done.
 # 3/8/2022 - this version does not contain the setmodel parameter added in ~/Desktop/Phylobiology/findQrates.R
@@ -80,15 +80,14 @@ subsetoutput <- subsettreedata(columns[1], cladesubsetcolumn = cladesubsetcolumn
       df <- subsetoutput$subsetdf
       tree <- subsetoutput$subsettree
       # make OutputFiles folder if not present
-      mainDir <- getwd()
-      subDir <- "OutputFiles"
-      if (!dir.exists(file.path(mainDir,subDir))) {
-        dir.create(file.path(mainDir, subDir))
+      subDir <- "Outputs"
+      if (!dir.exists(subDir)) {
+        dir.create(subDir)
       }
       
       discretetraitsimmap <- make.simmap(tree,discretetraitvec,model = qratesModel, nsim = 3) #makes 3 simmaps for viewing purposes
       discretetraitsimmapQset <- make.simmap(tree,discretetraitvec,model = qratesModel, nsim = 3, Q = qrates)
-      pdf(file = paste0(mainDir,"/OutputFiles/",Sys.Date(),columns[1], columns[2],cladesubsetvalue, otherlabel, qratesModel, " egSimmaps.pdf"),height=12,width=6)
+      pdf(file = file.path(subDir, paste0(Sys.Date(),columns[1], columns[2],cladesubsetvalue, otherlabel, qratesModel, " egSimmaps.pdf")),height=12,width=6)
       layout(matrix(1:6,nrow = 2,ncol=3))
       for (i in 1:3) {
         simmap <- discretetraitsimmap[[i]]
