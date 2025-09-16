@@ -18,7 +18,7 @@ source(file.path("Source Data Process_CB","merge_data_allcolumns.R"))
 ## (OPTIONAL - all analyses use a consensus tree previously calculated using this method - treefile="ConsensusPasserineTreeHackett4_1000_OscineSubset.nex")
 ## Commented out due to it being one of the more computationally intensive and lengthy processes. 
 
-## Load multitree. Note: This file must be in your working directory. It is too large to be indexed on GitHub, so if you obtained the repo from GitHub, you will need to download trees directly from BirdTree.org.
+## Load multitree. 
 #passermultitree = read.nexus("PasserineMultiphy1000Hackett4_nondicho.nex")
 #nTrees = 10 # set to 1000 to calculate consensus trees as in the manuscript. NOTE: 10 trees, across two consensus methods, may take 15min-1hour. 1000 trees may take multiple days, depending on your system computing capabilities.
 #source("run_00_make various consensus trees.R")
