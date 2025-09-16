@@ -2,13 +2,28 @@
 #Started: 7/7/2020
 #Last Edited: 8/12/2021
 
-#setwd("~/Desktop/CooperativeBreedingEvolution/Source Data Process_CB/Unaltered from publication")  #you want to set your working directory to whichever folder has the pdf in it
+#setwd("Unaltered from publication")  #you want to set your working directory to whichever folder has the pdf in it
+
+if (!requireNamespace("pdftools", quietly = TRUE)) {
+  stop("Package 'pdftools' is required but not installed. Please run: 
+  install.packages('pdftools')")
+}
+if (!requireNamespace("tidyverse", quietly = TRUE)) {
+  stop("Package 'tidyverse' is required but not installed. Please run: 
+  install.packages('tidyverse')")
+}
 
 #you may need to install these, but they might not work on the older version of R you have
 library(pdftools)
 library(tidyverse)
 
-cbtext0 <- pdf_text("Rubenstein supp data.pdf") %>% readr::read_lines() #read the pdf. %>% is part of the tidyverse I think, and basically "pipes" something into something else, i.e. a function. This line is thus basically the same as "cbtext0 <- readr::read_lines(pdf_text("Prevalence of...")).
+# Check for required PDF file
+pdf_file <- "Rubenstein supp data.pdf"
+if (!file.exists(pdf_file)) {
+  stop("Required file '", pdf_file, "' not found")
+}
+
+cbtext0 <- pdf_text(pdf_file) %>% readr::read_lines() # Read PDF and convert to character vector
 
 cbtext1 <- cbtext0[8:52] # take out the first 7 rows (not data) and lines 53:65 (not data)
 

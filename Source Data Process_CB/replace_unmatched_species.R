@@ -4,15 +4,25 @@
 #  Updated 8/12/2021 - updated misspelled species reference doc; ran all segments to give output files
 #   Next: Check individual source files for duplicated species (or write code to reduce to just one entry per species)
 # Last Update: 8/17/2021 - added post-check to ensure all duplicates successfully removed for those sources that had 2+ entries for some species
+# Updated: 3/7/2022 - add Odom et al 2014
 
-setwd("~/Desktop/CooperativeBreedingEvolution/Source Data Process_CB")
+# Set working directory to script location if not already there
+if (!grepl("Source Data Process_CB", getwd()) & dir.exists("Source Data Process_CB")) {
+  setwd("Source Data Process_CB") 
+}
 
 library(phytools)
-birdtree <- read.nexus("birdzillatreeMaybeConsensus.nex")
-thousandtrees <- read.tree("~/Desktop/CooperativeBreedingEvolution/BirdzillaHackett3.tre")
-birdtree <- thousandtrees[[1]]
+
+# Check for required tree file and load it
+if (!file.exists("birdzillatreeForTipNames.nex")) {
+  stop("Required file 'birdzillatreeForTipNames.nex' not found in current directory")
+}
+birdtree <- read.nexus("birdzillatreeForTipNames.nex")
 AllBirdtreeSpecies <- birdtree$tip.label
 
+if (!file.exists("inconsistent_species_names_BirdTree.csv")) {
+  stop("Required file 'inconsistent_species_names_BirdTree.csv' not found in current directory")
+}
 misspelledbirds <- read.csv("inconsistent_species_names_BirdTree.csv") 
 duplicatemisspellings <- misspelledbirds$in_database[duplicated(misspelledbirds$in_database)]
 
@@ -182,3 +192,40 @@ df$BirdtreeSpecies[duplicated(df$BirdtreeSpecies)]
 sum(df$BirdtreeSpecies %in% AllBirdtreeSpecies)
 length(df$BirdtreeSpecies)
 
+
+
+# Odom et al 2014 - female song
+df <- read.csv("Source Data Process_CB/FemaleSongData_OdomEtal2014_PresentAbsentSubset.csv")
+df$Latin_binomial[which(df$Latin_binomial == "Chlorophoneus_sulfureopectus")] <- "Telophorus_sulfureopectus"
+df$Latin_binomial[which(df$Latin_binomial == "Phylidonyris_nigra")] <- "Phylidonyris_niger"
+df$Latin_binomial[which(df$Latin_binomial == "Phylidonyris_pyrrhoptera")] <- "Phylidonyris_pyrrhopterus"
+df$Latin_binomial[which(df$Latin_binomial == "Sugomel_niger")] <- "Certhionyx_niger"
+df$Latin_binomial[which(df$Latin_binomial == "Carterornis_chrysomela" )] <- "Monarcha_chrysomela"
+df$Latin_binomial[which(df$Latin_binomial == "Diphyllodes_respublica")] <- "Cicinnurus_respublica"
+df$Latin_binomial[which(df$Latin_binomial == "Drepanornis_albertisi")] <- "Epimachus albertisi"
+df$Latin_binomial[which(df$Latin_binomial == "Drepanornis_bruijnii")] <- "Epimachus bruijnii"
+df$Latin_binomial[which(df$Latin_binomial ==  "Manucodia_atra")] <- "Manucodia_ater"
+df$Latin_binomial[which(df$Latin_binomial == "Phonygammus_keraudrenii")] <- "Manucodia_keraudrenii"
+df$Latin_binomial[which(df$Latin_binomial == "Seleucidis_melanoleuca")] <- "Seleucidis_melanoleucus"
+df$Latin_binomial[which(df$Latin_binomial == "Amblyornis_inornatus")] <- "Amblyornis_inornata"
+df$Latin_binomial[which(df$Latin_binomial == "Vireo_atricapillus")] <- "Vireo_atricapilla"
+df$Latin_binomial[which(df$Latin_binomial == "Calamanthus_pyrrhopygius")] <- "Hylacola_pyrrhopygia"
+df$Latin_binomial[which(df$Latin_binomial == "Pyrrholaemus_sagittatus")] <- "Chthonicola_sagittatus"
+df$Latin_binomial[which(df$Latin_binomial == "Callaeas_cinerea")] <- "Callaeas_cinereus"
+df$Latin_binomial[which(df$Latin_binomial == "Climacteris_melanura")] <- "Climacteris_melanurus"
+df$Latin_binomial[which(df$Latin_binomial == "Climacteris_rufa")] <- "Climacteris_rufus"
+df$Latin_binomial[which(df$Latin_binomial == "Coloeus_monedula")] <- "Corvus_monedula"
+df$Latin_binomial[which(df$Latin_binomial == "Finschia_novaeseelandiae")] <- "Mohoua_novaeseelandiae"
+df$Latin_binomial[which(df$Latin_binomial == "Bocagia_minuta")] <- "Tchagra_minutus"
+df$Latin_binomial[which(df$Latin_binomial == "Chlorophoneus_bocagei")] <- "Telophorus_bocagei"
+df$Latin_binomial[which(df$Latin_binomial == "Chlorophoneus_nigrifrons")] <- "Telophorus_nigrifrons"
+df$Latin_binomial[which(df$Latin_binomial == "Tchagra_senegala")] <- "Tchagra_senegalus"
+df$Latin_binomial[which(df$Latin_binomial == "Cissomela_pectoralis")] <- "Certhionyx_pectoralis"
+df$Latin_binomial[which(df$Latin_binomial == "Foulehaio_carunculata")] <- "Foulehaio_carunculatus"
+#df$Latin_binomial[which(df$Latin_binomial == "Philemon_plumigenis")] <- "Philemon_moluccensis" - already have this species in this data
+df$Latin_binomial[which(df$Latin_binomial == "Diphyllodes_magnificus")] <- "Cicinnurus_magnificus"
+df$Latin_binomial[which(df$Latin_binomial == "Petroica_boodang")] <- "Petroica_multicolor"
+#df$Latin_binomial[which(df$Latin_binomial == "Rhipidura_albiscapa")] <- "Rhipidura_fuliginosa" - already have this species in this data
+
+df$Latin_binomial[duplicated(df$Latin_binomial)]
+write.csv(df, file = "FemaleSongData_OdomEtal2014_PresentAbsentSubset_BirdTreeNames.csv", row.names = FALSE)

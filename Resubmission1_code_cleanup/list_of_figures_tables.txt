@@ -1,0 +1,62 @@
+Main Text Figures:
+
+Figure 1: Testing whether the rate of evolution of (A) song repertoire and (B) syllable repertoire (both natural-log-transformed) differs based on cooperative breeding. (Brownie)
+Figure 2: Phylogeny showing the classifications of cooperative breeding (outer circle) and female song (inner circle) for 1041 Oscine species. 
+Figure 3: Coevolution and correlated evolution of female song presence and cooperative breeding. (A: Simmap overlap; B-D: Transition Counts)
+Figure 4: The links between cooperative breeding and female song in phylogenetic path analyses are robust to correcting for data availability biases. 
+
+Main Text Tables:
+
+Table 1: Best base phylogenetic generalized linear models (phyloglm in R package ‘phylolm’) including only territoriality, body mass, and female song or cooperative breeding as predictors.
+Table 2: Phylogenetic generalized linear model comparisons of cooperative breeding versus alternative social predictors of female song. 
+
+Extended Data and Supplemental Tables:
+
+Extended Data Table 1: Results of overlapping simulations of ancestral character history for binary social variables and female song.
+
+Supp Table 1: Binary states of each sociality metric. 
+Supp Table 2: Species counts for each combination of female song presence and breeding system and sociality metrics
+Supp Table 3: Results of phylANOVA testing whether song features differ between states of different sociality traits.
+Supp Table 4: Results assessing whether rates of song-feature evolution differ based on the predicted ancestral state of multiple sociality metrics. (Brownie)
+Supp Table 5: Results assessing whether the rate of song repertoire size evolution differs based on the predicted ancestral state of cooperative breeding status across subsets of species, iteratively removing each family with more than 2 species in the analysis. (Brownie jackknife)
+Supp Table 6: Brownie multistate (A) group size, (B) territoriality, (C) combined territoriality strength and cooperative breeding, (D) 3-state social system, (E) 4-state social system 
+Supp Table 7: Overlap of stochastic character map simulations of cooperative breeding and female song (data in HighConfidence_Coop and FemaleSong_Agg01 columns in Supplemental Datasets 2 and 3) using a jackknife analysis in which each family was removed from the datasets in turn. 
+Supp Table 8: Results of overlapping simulations of ancestral character history for cooperative breeding and female song using alternative phylogenies, alternative methods of determining cooperative breeding, and cooperative breeding classifications based on individual sources, with transition rates determined based on either our full set of species versus just the species present in that source
+Supp Table 9: Species counts for each combination of the social system classification from the current study and individual sources used to generate the database, separated by female song presence or absence based on the classification in the current study.
+Supp Table 10: Results of overlapping simulated ancestral character histories for binary social variables with those of cooperative breeding.
+Supp Table 11: Overlap of stochastic character map simulations of female song and four-state social traits. 
+Supp Table 12: Distribution of species across cooperative breeding and female song states within different territorial contexts. The table shows raw species counts in our dataset for each combination of traits using two territorial classification schemes
+Supp Table 13: Tests for sampling biases in female song and cooperative breeding data availability. 
+Supp Table 14: Stratified downsampling calculations to correct for sampling biases in the comparative dataset.
+Supp Table 15: Results of phylogenetic generalized linear models using alternative cooperative breeding classifications with female song as the response variable.
+Supp Table 16: Results of phylogenetic generalized linear models using alternative cooperative breeding classifications with cooperative breeding as the response variable. 
+Supp Table 17: Best-fit models from a phylogenetic generalized linear modeling analysis that included female song, cooperative breeding, year-round territoriality, and body mass. 
+Supp Table 18: Phylogenetic generalized linear model comparisons of cooperative breeding versus alternative social predictors of female song (year-round only – weak/strong in main text)
+Supp Table 19: Rates of transition between states of binary traits obtained using Ancestral Character Estimation (R Package 'ape', function 'ace') with the Equal Rates (ER) and All Rates Different (ARD) models, calculated using Oscine species only.
+Supp Table 20: Comparing values of continuous and ordinal variables, scaled and centered across female song and cooperative breeding groups using phylANOVA (cited in methods)
+Supp Table 21: Best phylogenetic generalized linear model predicting female song after stepwise predictor addition, using territory strength as the territorial categorization. 
+Supp Table 22: Best phylogenetic generalized linear model predicting cooperative breeding after stepwise predictor addition, using territory strength as the territorial categorization. 
+Supp Table 23: Best phylogenetic generalized linear model predicting female song after stepwise predictor addition, using year-round territoriality as the territorial categorization.
+Supp Table 24: Best phylogenetic generalized linear model predicting cooperative breeding after stepwise predictor addition, using year-round territoriality as the territorial categorization.
+Supp Table 25: Species counts with each combination of trait states for traits geographic region (based on Jetz and Rubenstein 2011), cooperative breeding, and female song.  
+
+
+Extended Data and Supplemental Figures:
+
+Extended Data Fig 1: Rates of evolution of song repertoire size relative to cooperative breeding state using alternative methods to account for phylogenetic uncertainty (Brownie)
+Extended Data Fig 2: Brownie multistate plots (A) group size, (B) territoriality, (C) combined territoriality strength and cooperative breeding, (D) social system, (E) social system incl nonkin coop
+Extended Data Fig 3: Overlap of stochastic character map simulations of female song and cooperative breeding, measured as the proportion of the tree occupied by each state combination. (alt trees)
+Extended Data Fig 4: Female song and cooperative breeding transition likelihoods based on the median difference from expected transition counts, calculated using alternative phylogenies to account for phylogenetic uncertainty or alternative cooperative breeding classification methods. (and also territory)
+Extended Data Fig 5: Simmap overlap (A) familial living, (B) social system incl nk coop
+Extended Data Fig 6: Directed acyclic graphs showing outputs of phylopath analyses with different methods of cooperative breeding classification (A-F) and cooperative breeding classifications based on single sources (G-N). 
+Extended Data Fig 7: Robustness of the cooperative breeding-female song association to data availability biases using phylogenetic path analysis, with year-round territoriality and body mass as additional factors.
+
+Supplemental Figure 1: Directed acyclic graph plots of all model structures tested in all phylopath analyses.
+Supplemental Figure 2: Transition plots comparing evolution of female song with other sociality metrics
+
+
+Supplemental Datasets:
+S1 Dataset: Song Feature Data
+S2 Dataset: Cooperative Breeding and Sociality Data
+S3 Dataset: Female song data
+S4 Dataset: TerritoryWeakVsStrong Classification Notes and Citations

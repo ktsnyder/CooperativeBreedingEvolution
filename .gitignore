@@ -1,6 +1,5 @@
 # R-specific files
 .Rhistory
-.Rhistory*
 .RData
 .Rdata
 .rdata
@@ -64,11 +63,6 @@ $RECYCLE.BIN/
 *.backup
 ~$*
 .~lock.*#
-
-# Excel temporary files
-~$*.xlsx
-~$*.xls
-~$*.xlsm
 
 # Analysis outputs with dates (project-specific)
 *brownie multitree*.csv
@@ -180,15 +174,8 @@ po/*~
 # RStudio project files (optional - uncomment if desired)
 # .Rproj.user
 
-# Claude Code session notes (private)
-claude_code_sessions/
-README_private.md
-
 # Publication materials (pre-publication/sensitive)
 Publication_Materials/
-
-# Generated outputs (can be regenerated from code)
-Outputs/
 
 # Code review documents (internal)
 Independent Codebase Review/
@@ -203,61 +190,11 @@ Independent Codebase Review/
 # Ignore OutputFiles
 OutputFiles
 Simmap*Overlap*Outputs/
-BayesTraitsDiscreteML_MeanCoopTie2Coop-FemaleSong_Agg01*Jackknife*Outputs/
-BayesTraitsDiscreteML_MeanCoopTie2Noncoop-FemaleSong_Agg01*Jackknife*Outputs/
-BayesTraitsDiscreteML_MeanCoopTie2Noncoop-FemaleSong_Agg01*SingleFamily*Outputs/
+Outputs/
 BrownieJackknifeOutputs/
 Misc*Song*Features*BayesTraits/
 Simmap*Overlap*Multistate/
 Misc*Tree*Plots/
-
-# Ignore giant .tre file
-BirdzillaHackett3.tre
-*.pdf
-
-# Specific BayesTraits output files
-2023-07-21BayesMeanCoopTie2NoncoopSong.rep.final100reps.csv
-2023-07-21BayesMeanCoopTie2NoncoopSong.rep.max100reps.csv
-2023-07-22BayesMeanCoopTie2CoopSong.rep.final100reps.csv
-2023-07-22BayesMeanCoopTie2CoopSong.rep.max100reps.csv
-2023-07-22BayesMeanCoopTie2CoopSong.rep.min100reps.csv
-2023-07-22BayesMeanCoopTie2NoncoopSong.rep.min100reps.csv
-2023-07-25BayesHighConfidence_FemaleSongDuration.final100reps.csv
-2023-07-25BayesHighConfidence_FemaleSongInterval.final100reps.csv
-2023-07-25BayesHighConfidence_FemaleSongSong.rate100reps.csv
-2023-07-25BayesHighConfidence_FemaleSongSyll.song.final100reps.csv
-2023-07-25BayesHighConfidence_FemaleSongSyll.song.max100reps.csv
-2023-07-25BayesHighConfidence_FemaleSongSyll.song.min100reps.csv
-2023-07-26BayesAnyCoopEqualsCoopDuration.final100reps.csv
-2023-07-26BayesAnyCoopEqualsCoopInterval.final100reps.csv
-2023-07-26BayesAnyCoopEqualsCoopSong.rate100reps.csv
-2023-07-26BayesAnyCoopEqualsCoopSong.rep.final100reps.csv
-2023-07-26BayesAnyCoopEqualsCoopSong.rep.max100reps.csv
-2023-07-26BayesAnyCoopEqualsCoopSong.rep.min100reps.csv
-2023-07-30BayesMeanCoopOmitTiesDuration.final100reps.csv
-2023-07-30BayesMeanCoopOmitTiesInterval.final100reps.csv
-2023-07-30BayesMeanCoopOmitTiesSong.rate100reps.csv
-2023-07-30BayesMeanCoopOmitTiesSong.rep.final100reps.csv
-2023-07-30BayesMeanCoopOmitTiesSong.rep.max100reps.csv
-2023-07-30BayesMeanCoopOmitTiesSong.rep.min100reps.csv
-
-# Other BayesTraits files
-BayesTraitsDiscrete_Hackett-OmitTies-FSHighConf mlt100_noRes.csv
-BayesTraitsDiscrete_Hackett-Tie2Coop-FSHighConf mlt100_noRes.csv
-BayesTraitsDiscrete_Hackett-Tie2Noncoop-FSHighConf mlt100_noRes.csv
-
-# Simmap overlap files
-Familial FSAgg DUMMYResampledCoopFS simmap overlap output nsim 5000 Hackett .csv
-Familial FSAgg simmap overlap output nsim 1000 Hackett .csv
-Kin_NK FSAgg DUMMYResampledCoopFS simmap overlap output nsim 1000 Hackett .csv
-Kin_NK FSAgg simmap overlap output nsim 1000 Hackett .csv
-Tie2NonCoop FSHighConf DUMMYResampledCoopFS simmap overlap output nsim 1000 Hackett .csv
-
-# MeanCoop analysis files
-MeanCoopTie2Coop Song.rep.final BayesDependent MCMC Ace Hackett*.csv
-MeanCoopTie2Coop Song.rep.final BayesIndependent MCMC Ace Hackett*.csv
-MeanCoopTie2Noncoop Song.rep.final BayesDependent MCMC Ace*.csv
-MeanCoopTie2Noncoop Song.rep.final BayesIndependent MCMC Ace*.csv
 
 # Analysis directories
 MaxLikelihood-Defaults/

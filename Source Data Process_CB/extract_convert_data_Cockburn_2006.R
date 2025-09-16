@@ -2,16 +2,30 @@
 #Started: 7/7/2020
 #Last Edited: 8/12/2021 - make "Brood parasite" "Brood_parasite"
 
-#setwd("~/Documents/Creanza Lab/Comparative Evolution/Cooperative Breeding")  #you want to set your working directory to whichever folder has the pdf in it
+#setwd("Unaltered from publication")  #you want to set your working directory to whichever folder has the pdf in it
 
-#you may need to install these, but they might not work on the older version of R you have
+if (!requireNamespace("pdftools", quietly = TRUE)) {
+  stop("Package 'pdftools' is required but not installed. Please run: 
+  install.packages('pdftools')")
+}
+if (!requireNamespace("tidyverse", quietly = TRUE)) {
+  stop("Package 'tidyverse' is required but not installed. Please run: 
+  install.packages('tidyverse')")
+}
+
 library(pdftools)
 library(tidyverse)
 
-cbtext0 <- pdf_text("Unaltered from publication/Cockburn supp table.pdf") %>% readr::read_lines() #read the pdf. %>% is part of the tidyverse I think, and basically "pipes" something into something else, i.e. a function. This line is thus basically the same as "cbtext0 <- readr::read_lines(pdf_text("Prevalence of...")).
+# Check for required PDF file
+pdf_file <- file.path("Unaltered from publication", "Cockburn supp table.pdf")
+if (!file.exists(pdf_file)) {
+  stop("Required file '", pdf_file, "' not found")
+}
+
+cbtext0 <- pdf_text(pdf_file) %>% readr::read_lines() # Read PDF and convert to character vector
 
 
-#all of the functions that begin with "str_" are part of the "stringr" package (part of the tidyverse), which is for working with character objects using RegEx (Regular Expression) format
+# String manipulation functions for text processing
 removelines <- str_detect(cbtext0, ":") # make a logical vector of all lines that contain a colon (i.e. the family headers AND the footer of each page that says the page number, etc)
 cbtext1 <- cbtext0[!removelines] # subset to only those for which the above is FALSE
 

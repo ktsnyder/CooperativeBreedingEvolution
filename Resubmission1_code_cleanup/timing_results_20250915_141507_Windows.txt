@@ -1,0 +1,65 @@
+=== COOPERATIVE BREEDING EVOLUTION ANALYSIS TIMING RESULTS ===
+Generated: 2025-09-15 14:15:07.693988 
+
+Total elapsed time: 1704.31 seconds ( 28.41 minutes)
+
+DETAILED TIMING SUMMARY:
+                   Script Elapsed_Seconds User_Time System_Time Elapsed_Minutes Percent_Total
+                phylANOVA          449.61    389.17       58.42            7.49          26.4
+           simmap_overlap          320.38    281.22       38.06            5.34          18.8
+                 phyloglm          277.17    275.22        1.52            4.62          16.3
+                  brownie          217.47    189.39       27.27            3.62          12.8
+ phylopath_downsampling_1          161.35    159.57        1.42            2.69           9.5
+ phylopath_downsampling_2          153.24    152.03        1.05            2.55           9.0
+        phylopath_altCoop           72.58     72.21        0.23            1.21           4.3
+  binary_transition_rates           32.95     31.19        1.78            0.55           1.9
+           phylopath_main           13.83     12.75        0.82            0.23           0.8
+            bias_analyses            5.41      4.84        0.13            0.09           0.3
+           species_counts            0.32      0.28        0.01            0.01           0.0
+
+
+RAW TIMING DATA:
+
+ phylANOVA :
+   user  system elapsed 
+ 389.17   58.42  449.61 
+
+ brownie :
+   user  system elapsed 
+ 189.39   27.27  217.47 
+
+ binary_transition_rates :
+   user  system elapsed 
+  31.19    1.78   32.95 
+
+ simmap_overlap :
+   user  system elapsed 
+ 281.22   38.06  320.38 
+
+ bias_analyses :
+   user  system elapsed 
+   4.84    0.13    5.41 
+
+ phylopath_main :
+   user  system elapsed 
+  12.75    0.82   13.83 
+
+ phylopath_downsampling_1 :
+   user  system elapsed 
+ 159.57    1.42  161.35 
+
+ phylopath_downsampling_2 :
+   user  system elapsed 
+ 152.03    1.05  153.24 
+
+ phylopath_altCoop :
+   user  system elapsed 
+  72.21    0.23   72.58 
+
+ phyloglm :
+   user  system elapsed 
+ 275.22    1.52  277.17 
+
+ species_counts :
+   user  system elapsed 
+   0.28    0.01    0.32 
