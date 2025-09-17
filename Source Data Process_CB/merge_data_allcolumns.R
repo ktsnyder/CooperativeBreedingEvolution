@@ -422,3 +422,5 @@ data$HighConf_Coop_DefaultToCockburnInferred[which(!is.na(data$CockburnInferred)
 write.csv(data, paste0("Data_R_", Sys.Date(), ".csv"), row.names = F)
 
 print(paste("Data written to", paste0("Data_R_", Sys.Date(), ".csv")))
+
+setwd("..")
