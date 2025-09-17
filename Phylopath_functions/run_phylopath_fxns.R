@@ -584,7 +584,10 @@ run_CB_FS_Terr_phylopath <- function(dfIn, tree, female_song_var, coop_breeding_
   
   
   if (plots2pdf) {
-    pdfname = paste("phylopath plots", female_song_var, coop_breeding_var, territoriality_var, mass_var, Sys.Date(), ".pdf")
+    if (!dir.exists(file.path("Outputs", "PhylopathFigures"))) {
+        dir.create(file.path("Outputs", "PhylopathFigures"), recursive = T)
+    } 
+    pdfname = file.path("Outputs", "PhylopathFigures", paste("phylopath plots", female_song_var, coop_breeding_var, territoriality_var, mass_var, Sys.Date(), ".pdf"))
     
     # Required library
     require(gridExtra)

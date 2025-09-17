@@ -12,6 +12,15 @@ source("subsettreedata.R")
 if (!exists("multitree")) {
   multitree = read.tree("BirdzillaHackett4_Stage2_1000trees.tre")
 }
+if (!exists("nSimsPerTree")) {
+  nSimsPerTree = 10
+  print("Defaulting to 10 sims per tree. To run full analysis, set nSimsPerTree = 20")
+}
+if (!exists("nTreesToSample")) {
+  nTreesToSample = 10
+  print("Defaulting to 10 sampled trees. To run full analysis, set nTreesToSample = 200")
+}
+
 OscineTree = read.nexus("ConsensusPasserineTreeHackett4_1000_OscineSubset.nex")
 newdata = "Data_R.csv"
 dfIn = read.csv(newdata)
@@ -19,8 +28,7 @@ dfIn = read.csv(newdata)
 
 #### Brownie ----
 otherlabel = "_Hackett4Oscine_consensustreeQ_"
-# nTreesToSample = 200
-# nSimsPerTree = 20
+
 df = read.csv(newdata)
 df = df[which(df$species %in% OscineTree$tip.label),]
 
@@ -52,20 +60,36 @@ for (f in 1:length(trait1vec)) {
     allbrownie = rbind(allbrownie, brownieout)
   }
   colnames(allbrownie)[which(colnames(allbrownie) == "phylanovaP")] <- "TreeNum"
-  write.csv(allbrownie, file = paste0(Sys.Date(), " brownie multitree ", nTreesToSample, "trees ", nSimsPerTree, "simsPerTree ", otherlabel, " ", trait1, " ", trait2, ".csv"), row.names = F)
+  write.csv(allbrownie, file = file.path("Outputs", "Brownie_outputs", paste0(Sys.Date(), " brownie multitree ", nTreesToSample, "trees ", nSimsPerTree, "simsPerTree ", otherlabel, " ", trait1, " ", trait2, ".csv")), row.names = F)
   
 } # end brownie cycle through traits
 
 source(file.path("Brownie_functions", "plotbrownie.R"))
 plotbrownie(data = allbrownie, columns = c("HighConfidence_Coop", "Syllable.rep.final"), discreteCategoryLabels = c("Non-cooperative", "Cooperative"), islog = T, newpdf = T, otherlabel = "_MultitreeHackett4Oscine_fulltreeQ")
 
+
+
 #### Simmap overlap ----
 source(file.path("Simmap_Overlap_functions", "CharacterSimmaps_modified.R"))
-otherlabel = "_multitree_setQtree"
+otherlabel = "multitree"
 trait1 = "HighConfidence_Coop"
 trait2 = "FemaleSong_Agg01"
 df = read.csv(newdata)
 df = df[which(df$species %in% OscineTree$tip.label),]
+nsims_real = nSimsPerTree
+nsims_dummy = nSimsPerTree
+output_directory = file.path("Simmap_Overlap_Outputs", "Multitrees")
+
+# Create output directory structure
+dirs <- createOutputDirectory(
+  base_dir = output_directory,
+  trait1 = trait1,
+  trait2 = trait2,
+  nsims_real = nsims_real,
+  nsims_dummy = nsims_dummy,
+  other_label = otherlabel,
+  create_subdirs = TRUE
+)
 
 multitrees = multitree[1:nTreesToSample]
 
@@ -74,8 +98,8 @@ alldummy = set.seed(10)
 for (i in 1:(nTreesToSample)) {
   temptree = multitrees[[i]]
   print(paste(Sys.time(), "tree #", i))
-  dfout4 <- CharacterSimmaps_modified(columns = c(trait1,trait2), df = df, tree =  temptree, dummy = FALSE, nsims = nSimsPerTree, treelabel = otherlabel, datalabel = NULL, setQratesTree = OscineTree, save_simmaps = F, return_simmaps = F)
-  dfDummy4 <- CharacterSimmaps_modified(columns = c(trait1,trait2), df = df, tree =  temptree, dummy = TRUE, nsims = nSimsPerTree, treelabel = otherlabel, datalabel = NULL, dummyMethod = "makeSimmap", setQratesTree = OscineTree, save_simmaps = F, return_simmaps = F)
+  dfout4 <- CharacterSimmaps_modified(columns = c(trait1,trait2), df = df, tree =  temptree, dummy = FALSE, nsims = nSimsPerTree, treelabel = otherlabel, datalabel = NULL, setQratesTree = OscineTree, save_simmaps = F, return_simmaps = F, dirs = dirs, calculate_transitions = F)
+  dfDummy4 <- CharacterSimmaps_modified(columns = c(trait1,trait2), df = df, tree =  temptree, dummy = TRUE, nsims = nSimsPerTree, treelabel = otherlabel, datalabel = NULL, dummyMethod = "makeSimmap", setQratesTree = OscineTree, save_simmaps = F, return_simmaps = F, dirs = dirs, calculate_transitions = F)
   colnames(dfout4)[which(colnames(dfout4) == "treenum")] <- "simmapNum"
   dfout4$treenum = i
   colnames(dfDummy4)[which(colnames(dfDummy4) == "treenum")] <- "simmapNum"
@@ -90,14 +114,12 @@ for (i in 1:(nTreesToSample)) {
   #   print(paste("Wrote csvs at tree number", i, "--- Simmap Overlap Outputs/", trait1, " ", trait2, " ", nTreesToSample, "trees ", nSimsPerTree, "simsPerTree", otherlabel, "_All REAL.csv"))
   # }
 }
-write.csv(alldfout, file.path("Simmap_Overlap_Outputs", paste0(trait1, " ", trait2, " ", nTreesToSample, "trees ", nSimsPerTree, "simsPerTree", otherlabel, "_All REAL.csv")), row.names = FALSE)
-write.csv(alldummy, file.path("Simmap_Overlap_Outputs", paste0(trait1, " ", trait2, " ", nTreesToSample, "trees ", nSimsPerTree, "simsPerTree", otherlabel, "_All DUMMY.csv")), row.names = FALSE)
-print(Sys.time())
+write.csv(alldfout, file.path(dirs$data, paste0(trait1, " ", trait2, " ", nTreesToSample, "trees ", nSimsPerTree, "simsPerTree", otherlabel, "_All REAL.csv")), row.names = FALSE)
+write.csv(alldummy, file.path(dirs$data, paste0(trait1, " ", trait2, " ", nTreesToSample, "trees ", nSimsPerTree, "simsPerTree", otherlabel, "_All DUMMY.csv")), row.names = FALSE)
 source(file.path("Simmap_Overlap_functions","calcHuel_corrected.R"))
-Huelout = calcHuel_corrected(alldfout, alldummy, otherlabel = otherlabel)
+Huelout = calcHuel_corrected(alldfout, alldummy, otherlabel = otherlabel, calculate_transitions = F, plot_transitions = F, dirs = dirs)
 
-
-pdf(file = file.path("Simmap_Overlap_Outputs", paste("simmap overlap states", trait1, trait2, otherlabel, nTreesToSample, "trees", nSimsPerTree, "simsPerTree", ".pdf")))
+pdf(file = file.path(dirs$plots, paste("simmap overlap states", trait1, trait2, otherlabel, nTreesToSample, "trees", nSimsPerTree, "simsPerTree", ".pdf")))
 Huelout$plots$p3
 dev.off()
 

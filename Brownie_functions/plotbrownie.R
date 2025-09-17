@@ -1,19 +1,13 @@
 #Coded by Kate T. Snyder
 #Last Modified 8-18-2021
 #Built using RStudio Version 1.1.453
-#R Version 3.5.2?
+#R Version 4.3.1
 #
 #mnormt_1.5-5    plyr_1.8.4   geiger_2.0.6   btw_0.1
 #phytools_0.6-44   R.utils_2.6.0   nortest_1.0-4
 #maps_3.3.0        ape_5.1      nlme_3.1-137   nortest_1.0-4
 #
-#
-#5/12/2020- copied bulk of below from browniefunction.R. Some plotting issues, not sure what to do about Pvals
-#5/14/2020 - add mean log likelihood-based pval calculation, added to title. Next: fix axes
-#8/20/2020 - figured out
-#10/9/2020 - reordered loglabel 
-#8/18/2021 - commented out example, added otherlabel arg
-#8/25/2021 - add otherlabel to y axis
+
 
 #plotbrownie(data = "2020-10-10CoopBreedSyllable.rep.finalbrownie500sim.csv", columns = c("Final.polygyny","Syllable.rep.final"), discreteCategoryLabels = c("Monogamy","Polygyny"), newpdf = FALSE)  #discrete category labels will be e.g. c("Monogamy","Polygyny") # default is to make a new PDF
 
@@ -109,7 +103,7 @@ if (is.data.frame(data)) {
     dev.off()
     
     # Now create PNG output with same content
-    png(file = file.path(getwd(), "Outputs", "Brownie_outputs", paste0(filename_base, ".png")), 
+    png(file = file.path("Outputs", "Brownie_outputs", paste0(filename_base, ".png")), 
         width = 10*150, height = 5*150, res = 150)
     par(mar = c(4,4,2,1))
     par(mfrow = c(1,2))
