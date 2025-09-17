@@ -10,7 +10,7 @@ This repository contains the complete computational pipeline used in the manuscr
 - **RStudio** (recommended for interactive use)
 
 ### Required R Packages
-The analysis requires 29 R packages from CRAN and Bioconductor:
+The analysis requires 19 R packages from CRAN and Bioconductor:
 
 **CRAN packages:**
 - ape, cowplot, dplyr, emmeans, flextable, ggplot2, ggpubr, ggrepel
@@ -87,7 +87,31 @@ The demo will generate:
 source("Runner_Script.R")
 ```
 
+## Data Files and Git LFS
+
+This repository uses Git Large File Storage (LFS) for two large phylogenetic tree files that are used in two sections of the analysis pipeline:
+- `PasserineMultiphy1000Hackett4_nondicho.nex` (~186 MB) (used in "Re-generate consensus trees", "run_00_make various consensus trees.R")
+- `BirdzillaHackett4_Stage2_1000trees.tre` (~464 MB) (used in "Multitree tests", run_10_multitree_tests.R)
+
+**Important:** If you download this repository as a ZIP file from GitHub, you will need to separately download the large tree files:
+
+1. **Option A - Direct Download (Simplest):**
+   - Download the repository as ZIP
+   - Manually download the tree files:
+     - [`BirdzillaHackett4_Stage2_1000trees.tre`](https://github.com/ktsnyder/CooperativeBreedingEvolution/raw/main/BirdzillaHackett4_Stage2_1000trees.tre)
+     - [`PasserineMultiphy1000Hackett4_nondicho.nex`](https://github.com/ktsnyder/CooperativeBreedingEvolution/raw/main/PasserineMultiphy1000Hackett4_nondicho.nex)
+   - Place these files in the root directory of the repository
+
+2. **Option B - Git Clone with LFS:**
+
 ### Key Analysis Components
+
+#### Dataset:
+- Data_R.csv
+
+#### Trees:
+- ConsensusPasserineTreeHackett4_1000_OscineSubset.nex (default)
+- ConsensusPasserineTreeHackett4_1000_mean-edge_ignore-absent.nex (alternative)
 
 #### Core Analyses (always run):
 - **PhylANOVA** (`run_01_phylANOVA.R`): Tests for differences in male song features between non-cooperative and cooperative species
@@ -139,6 +163,7 @@ count_transitions = TRUE           # Transition count analyses
 - `Runner_Script.R`: Complete analysis pipeline
 - `Runner_Script_timed.R`: Pipeline with timing measurements
 - `check_required_packages.R`: Automated dependency management
+- `check_lfs_files.R`: Checks whether large multiphylo files were downloaded correctly
 
 ### Analysis Functions
 - `Brownie_functions/`: Character evolution rate analysis functions

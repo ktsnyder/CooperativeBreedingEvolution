@@ -6,6 +6,12 @@
 newdata = "Data_R.csv"
 treefile = "ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
 
+## Check whether large files (stored via Git LFS) are present and the correct size were downloaded
+source("check_lfs_files.R")
+
+## Check for and load required packages
+source("check_required_packages.R")
+
 # Initialize timing results
 timing_results <- list()
 cat("=== SCRIPT TIMING RESULTS ===\n")

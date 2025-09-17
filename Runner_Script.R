@@ -6,6 +6,9 @@
 newdata = "Data_R.csv"
 treefile = "ConsensusPasserineTreeHackett4_1000_OscineSubset.nex"
 
+## Check whether large files (stored via Git LFS) are present and the correct size were downloaded
+source("check_lfs_files.R")
+
 ## Check for and load required packages
 source("check_required_packages.R")
 
@@ -16,12 +19,10 @@ source(file.path("Source Data Process_CB","merge_data_allcolumns.R"))
 
 ### Re-generate consensus trees ----
 ## (OPTIONAL - all analyses use a consensus tree previously calculated using this method - treefile="ConsensusPasserineTreeHackett4_1000_OscineSubset.nex")
-## Commented out due to it being one of the more computationally intensive and lengthy processes. 
-
 ## Load multitree. 
-#passermultitree = read.nexus("PasserineMultiphy1000Hackett4_nondicho.nex")
-#nTrees = 10 # set to 1000 to calculate consensus trees as in the manuscript. NOTE: 10 trees, across two consensus methods, may take 15min-1hour. 1000 trees may take multiple days, depending on your system computing capabilities.
-#source("run_00_make various consensus trees.R")
+passermultitree = read.nexus("PasserineMultiphy1000Hackett4_nondicho.nex")
+nTrees = 10 # set to 1000 to calculate consensus trees as in the manuscript. NOTE: 10 trees, across two consensus methods, may take 15min-1hour. 1000 trees may take multiple days, depending on your system computing capabilities.
+source("run_00_make various consensus trees.R")
 
 ### PhylANOVA ----
 # Generates Supplemental Table 3 - phylANOVA
