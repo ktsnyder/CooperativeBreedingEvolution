@@ -70,9 +70,6 @@ $RECYCLE.BIN/
 *simmap overlap*.csv
 *Brownie summary table*.csv
 *brownie output summary*.csv
-# More specific date patterns
-202[0-9]-[0-9][0-9]-[0-9][0-9]*.csv
-202[0-9]-[0-9][0-9]-[0-9][0-9]*.xlsx
 
 # Log files
 *.log
