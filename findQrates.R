@@ -1,6 +1,6 @@
 ########
 #Coded by Kate T. Snyder
-#Last Modified 6-8-2021
+#Last Modified 5-4-2025
 #Built using RStudio Version 1.1.453
 #R Version 3.5.1
 #
@@ -8,20 +8,9 @@
 #maps_3.3.0        ape_5.1 
 ########
 #
-#Jan2020 update: make compatible with new subsetbirddata function taking column vector rather than SongParam/MateParam
-#V2.0 --> v2.1 - change "passeriformesonly" input to be able to do oscine, suboscine, or passeriformes  
-#1/28/2020 (v2.2): #ACTUALLY change to cladesubsetcolumn, cladesubsetvalue; also remove "matemodel" arg
-#5/12/2020 - remove matensim arg, change subset source from subsetbirddata2.2.R, added subdirectory to pdf output
-#6/4/2021 - if plotting, checks for or makes Outputs subdirectory; made all text in titles of subplots be on 2nd line because margin weirdness
-#8/27/2021 - add otherlabel arg to file name if plotting simmaps; added tip labels (points); added named colors for plotting simmap
-#8/27/2021 - findQrates seems to calculate Q for the data subsetted by both columns, rather than just the discrete column... it should be computing Q based on whole set of discrete data! Granted, this is the case if columns input is only the discrete column... but we still want to plot simmaps of double-subsetted trees probably. Solution: add another subset within the plotting statement, make original subset only subset based on columns[1]. Done.
-# 3/8/2022 - this version does not contain the setmodel parameter added in ~/Desktop/Phylobiology/findQrates.R
-# 3/11/2022 - add GlobalQrates - import qrates from elsewhere, for use in jackknifing brownie
-# 5/4/2024 - now chooses ER or ARD for output based on anova
 
-
-#findQrates - to be used within matingfunction to set the rates of transition between states for the building of simmaps for brownie
-#Can also be used to generate simmaps with the computed rates with plot = TRUE
+#findQrates - to be used to set the rates of transition between states for the building of simmaps for brownie
+#Can also be used to generate simmap plots output to a PDF with the computed rates with plot = TRUE
 
 #Example:
 #qoutputpass <- findQrates(columns = c("MonogamyOrNot"), plot = TRUE, cladesubsetcolumn = "oscine", cladesubsetvalue = "nonpasserine", newdata = FALSE, newtree = "2019-10-22matezilla2treeHack_nondicho.nex")

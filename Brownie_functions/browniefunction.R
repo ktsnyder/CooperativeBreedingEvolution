@@ -1,30 +1,12 @@
 #Coded by Kate T. Snyder
-#Last Modified 8-18-2020
-#Built using RStudio Version 1.1.453
-#R Version 3.5.2?
-#
-#mnormt_1.5-5    plyr_1.8.4   geiger_2.0.6   btw_0.1
-#phytools_0.6-44   R.utils_2.6.0   nortest_1.0-4
-#maps_3.3.0        ape_5.1      nlme_3.1-137   nortest_1.0-4
-#BayesTraitsV2
-########
-# 
-# Jan2020 update: make compatible with findQratesNewTree2.0.R and subsetbirddata2.0.R
-# 5/12/2020: matensim--> nsim, remove plot arg, added args
-# 8/18/2021: add arg plotsimmaps (TRUE/FALSE) to go into findQrates; add to tryCatch ability to accommadate compute error; changed default arg "cladesubsetcolumn = FALSE" to "= NULL"
-# 8/26/2021: added otherlabel arg - for csv output and to feed into findQrates
-# 4/26/2024: changed object returned from browniedf (no longer used) to browniedata
-# 4/27/2024: added findQrates outputs to browniedata columns
-# 5/23/2024: added setQrates to args
-# 
+#R Version 4.3.1
+
 # e.g.
 # brownieout <- browniefunction(c("Final.polygyny", "Syllable.rep.final"), islog = "Syllable.rep.final", nsim = 500)
 
 browniefunction <- function(columns, newtree = FALSE, newdata = FALSE, cladesubsetcolumn = NULL, cladesubsetvalue = NULL, nsim = 500, islog = FALSE, phylanovaP = "not evaluated", plotsimmaps = FALSE, otherlabel = NULL, setQrates = NULL) {
   require(R.utils)
   require(phytools)
- # require(ape)
-#  require(base)
   
   source(file = "findQrates.R")
  
@@ -39,9 +21,6 @@ browniefunction <- function(columns, newtree = FALSE, newdata = FALSE, cladesubs
   names(discretetraitvec) <- df[,1]
   continuoustraitvec <- df[,columns[2]]
   names(continuoustraitvec) <- df[,1]  #species names 
-  
-  #phylanova <- phylANOVA(tree,discretetraitvec,continuoustraitvec, nsim=nsim)
-  #phylanovaP = phylanova[[2]] #pval 
   
   Qoutput <- findQrates(columns, plot=plotsimmaps, newtree = newtree, newdata = newdata, cladesubsetcolumn = cladesubsetcolumn, cladesubsetvalue = cladesubsetvalue, otherlabel = otherlabel, GlobalQrates = setQrates)
   qrates <- Qoutput$qrates

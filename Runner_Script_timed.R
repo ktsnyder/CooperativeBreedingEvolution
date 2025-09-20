@@ -33,7 +33,7 @@ cat("Data compilation completed in", timing_results$data_compilation["elapsed"],
 #nTrees = 10 # set to 1000 to calculate consensus trees as in the manuscript. NOTE: 10 trees, across two consensus methods, may take 15min-1hour. 1000 trees may take multiple days, depending on your system computing capabilities.
 cat("Generating consensus trees...\n")
 timing_results$consensus <- system.time(source("run_00_make various consensus trees.R"))
-cat("PhylANOVA completed in", timing_results$consensus["elapsed"], "seconds\n\n")
+cat("Consensus trees completed in", timing_results$consensus["elapsed"], "seconds\n\n")
 
 ### PhylANOVA ----
 # Generates Supplemental Table 3 - phylANOVA

@@ -19,7 +19,11 @@ if (!exists("include_species_jackknife")) {
   print("Defaulting to only running data-availability bias downsampling, and not running phylopath jackknife by species. To also run phylopath jackknife by species, define include_species_jackknife = TRUE")
 }
 
-dfIn_phylo = read.csv("Data_R.csv")
+if (!exists("newdata")) {
+  newdata = "Data_R.csv"
+}
+
+dfIn_phylo = read.csv(newdata)
 tree_phylo = read.nexus("ConsensusPasserineTreeHackett4_1000_OscineSubset.nex")
 
 all_traits_phylopath_label = paste(female_song_var, coop_breeding_var, territoriality_var, mass_var)

@@ -13,7 +13,7 @@ if (!exists("nTrees")) {
   print("performing consensus phylogeny computation for 10 trees for the sake of example. To use another number of trees (at least 2, up to 1000), define nTrees = #.")
 }
 
-## script used to subset trees to just passerine species - commented out
+## script used to subset trees to just Passerine species - commented out but provided for posterity
 #thousandtrees = read.tree("BirdzillaHackett4_Stage2_1000trees.tre")
 #onepassertree <- read.nexus("2021-08-31ConsensusPasserineTreeEricson10_1000.nex")
 #datanames <- onepassertree$tip.label
@@ -37,8 +37,6 @@ matezillaconsensus <- consensus.edges(multitree, method = "mean.edge", if.absent
 endconsense <- Sys.time()
 endconsense
 endconsense-startconsense
-#matezilladicho <- multi2di(matezillaconsensus)
-#matezilladicho$edge.length[matezilladicho$edge.length == 0] <- 0.000000000000001
 write.nexus(matezillaconsensus,file=paste(Sys.Date(),"ConsensusPasserineTreeHackett4_", nTrees,"_mean-edge_absent-zero.nex",sep=""))
 
 # consensus using mean.edge, ignore absent edges in edge means
@@ -48,7 +46,5 @@ matezillaconsensus <- consensus.edges(multitree, method = "mean.edge", if.absent
 endconsense <- Sys.time()
 endconsense
 endconsense-startconsense
-#matezilladicho <- multi2di(matezillaconsensus)
-#matezilladicho$edge.length[matezilladicho$edge.length == 0] <- 0.000000000000001
 write.nexus(matezillaconsensus,file=paste(Sys.Date(),"ConsensusPasserineTreeHackett4_", nTrees,"_mean-edge_ignore-absent.nex",sep=""))
 
